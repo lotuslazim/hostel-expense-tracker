@@ -1,10 +1,7 @@
 import type { Meal, Expense, Item } from './types';
 
 // Mock data for demonstration purposes
-export const MOCK_MEALS: Meal[] = [
-  { id: '1', type: 'breakfast', description: 'Oatmeal with berries and nuts', calories: 350, loggedAt: new Date() },
-  { id: '2', type: 'lunch', description: 'Grilled chicken salad', calories: 450, loggedAt: new Date() },
-];
+export const MOCK_MEALS: Meal[] = [];
 
 export const MOCK_EXPENSES: Expense[] = [
   { id: '1', description: 'Groceries', amount: 75.50, category: 'Food', date: new Date() },
