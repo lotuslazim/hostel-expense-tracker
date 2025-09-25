@@ -9,9 +9,10 @@ interface DailyTrackerProps {
   meals: Meal[];
   expenses: Expense[];
   items: Item[];
+  onSetItems: (items: Item[]) => void;
 }
 
-export function DailyTracker({ meals, expenses, items }: DailyTrackerProps) {
+export function DailyTracker({ meals, expenses, items, onSetItems }: DailyTrackerProps) {
   return (
     <Tabs defaultValue="meals" className="w-full">
       <TabsList className="grid w-full grid-cols-3">
@@ -23,7 +24,7 @@ export function DailyTracker({ meals, expenses, items }: DailyTrackerProps) {
         <MealLog meals={meals} />
       </TabsContent>
       <TabsContent value="items">
-        <ItemLog items={items} />
+        <ItemLog items={items} onSetItems={onSetItems} />
       </TabsContent>
       <TabsContent value="expenses">
         <ExpenseLog expenses={expenses} />

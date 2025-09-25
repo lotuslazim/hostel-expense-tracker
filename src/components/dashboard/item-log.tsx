@@ -1,13 +1,39 @@
+"use client";
+
 import type { Item } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useState } from "react";
 
-export function ItemLog({ items }: { items: Item[] }) {
+export function ItemLog({ items, onSetItems }: { items: Item[]; onSetItems: (items: Item[]) => void; }) {
+  const [open, setOpen] = useState(false);
+  const [itemName, setItemName] = useState('');
+  const [quantity, setQuantity] = useState('');
+  const [unit, setUnit] = useState('');
+  const [cost, setCost] = useState('');
+
+  const handleSaveItem = () => {
+    const newItem: Item = {
+      id: new Date().toISOString(),
+      name: itemName,
+      quantity: Number(quantity),
+      unit: unit,
+      cost: Number(cost),
+      date: new Date(),
+    };
+    onSetItems([...items, newItem]);
+    setItemName('');
+    setQuantity('');
+    setUnit('');
+    setCost('');
+    setOpen(false);
+  };
+  
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -15,7 +41,7 @@ export function ItemLog({ items }: { items: Item[] }) {
           <CardTitle>Purchased Items</CardTitle>
           <CardDescription>Log items you've bought, like groceries.</CardDescription>
         </div>
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
            <DialogTrigger asChild>
               <Button>
                 <PlusCircle className="mr-2 h-4 w-4" /> Add Item
@@ -28,23 +54,23 @@ export function ItemLog({ items }: { items: Item[] }) {
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
                    <Label htmlFor="name">Item Name</Label>
-                   <Input id="name" placeholder="e.g., Organic Bananas" />
+                   <Input id="name" placeholder="e.g., Organic Bananas" value={itemName} onChange={(e) => setItemName(e.target.value)} />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="quantity">Quantity</Label>
-                    <Input id="quantity" type="number" placeholder="e.g., 1" />
+                    <Input id="quantity" type="number" placeholder="e.g., 1" value={quantity} onChange={(e) => setQuantity(e.target.value)} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="unit">Unit</Label>
-                    <Input id="unit" placeholder="e.g., bunch" />
+                    <Input id="unit" placeholder="e.g., bunch" value={unit} onChange={(e) => setUnit(e.target.value)} />
                   </div>
                 </div>
                  <div className="space-y-2">
                    <Label htmlFor="cost">Total Cost</Label>
-                   <Input id="cost" type="number" placeholder="e.g., 1.29" />
+                   <Input id="cost" type="number" placeholder="e.g., 1.29" value={cost} onChange={(e) => setCost(e.target.value)} />
                 </div>
-                <Button className="w-full">Save Item</Button>
+                <Button className="w-full" onClick={handleSaveItem}>Save Item</Button>
               </div>
            </DialogContent>
          </Dialog>
