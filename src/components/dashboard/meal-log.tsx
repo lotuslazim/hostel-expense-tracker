@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-const mealTypes: MealType[] = ['lunch', 'dinner', 'snack'];
+const mealTypes: MealType[] = ['lunch', 'dinner'];
 
 const mealIcons: Record<MealType, React.ReactNode> = {
   breakfast: <Utensils className="h-6 w-6 text-muted-foreground" />,
