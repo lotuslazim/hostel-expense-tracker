@@ -26,10 +26,10 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
               <h1 className="text-4xl md:text-5xl font-bold tracking-tighter font-headline">
-                Cultivate Your Wellness Journey
+                Calculate Your Meals, Master Your Day
               </h1>
               <p className="text-lg text-muted-foreground">
-                NourishTrack is your personal companion for tracking meals, monitoring expenses, and gaining insights into your daily habits. Start building a healthier you, one log at a time.
+                Meal Calculator is your personal companion for tracking meals, monitoring expenses, and gaining insights into your daily habits. Start building a healthier you, one log at a time.
               </p>
               <Button size="lg" asChild>
                 <Link href="/signup">
@@ -53,7 +53,7 @@ export default function LandingPage() {
         </section>
       </main>
       <footer className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-muted-foreground text-sm">
-        <p>&copy; {new Date().getFullYear()} NourishTrack. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} Meal Calculator. All rights reserved.</p>
       </footer>
     </div>
   );

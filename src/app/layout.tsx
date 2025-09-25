@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'NourishTrack',
+  title: 'Meal Calculator',
   description: 'Track your meals, expenses, and wellness journey.',
 };
 
