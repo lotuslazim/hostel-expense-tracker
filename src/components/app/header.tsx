@@ -20,7 +20,7 @@ export function AppHeader() {
               href="/report"
               className="transition-colors hover:text-foreground/80 text-foreground/60"
             >
-              Weekly Report
+              Monthly Report
             </Link>
           </nav>
         </div>
