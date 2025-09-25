@@ -1,0 +1,110 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Allows users to read and update their own profile data. Creation is allowed with matching user ID.
+     * @path /users/{userId}
+     * @allow (get, update) User with matching {userId}
+     * @allow (create) User creating their own profile.
+     * @deny (get, update) User trying to access another user's profile.
+     * @deny (create) User attempting to create a profile with a mismatched ID.
+     * @principle Enforces user-ownership for profile data.
+     */
+    match /users/{userId} {
+      function isOwner(userId) {
+        return request.auth.uid == userId;
+      }
+      function isExistingOwner(userId) {
+        return isOwner(userId) && resource != null;
+      }
+      allow get: if isOwner(userId);
+      allow list: if false; // User listing is disallowed for privacy.
+      allow create: if isOwner(userId) && request.resource.data.id == request.auth.uid;
+      allow update: if isExistingOwner(userId);
+      allow delete: if false;
+    }
+
+    /**
+     * @description Allows group admins to read and manage group data, and members to read group data.
+     * @path /groups/{groupId}
+     * @allow (get, list) Any authenticated user.
+     * @allow (create) Only if the adminId matches the authenticated user's UID.
+     * @allow (update, delete) Only the group admin.
+     * @deny (create) If the adminId does not match the authenticated user's UID.
+     * @principle Enforces admin-ownership for group management.
+     */
+    match /groups/{groupId} {
+      function isAdmin(groupId) {
+        return request.auth.uid == resource.data.adminId;
+      }
+       function isExistingAdmin(groupId) {
+        return isAdmin(groupId) && resource != null;
+      }
+      function isSignedIn() {
+        return request.auth != null;
+      }
+      allow get, list: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.adminId == request.auth.uid && request.resource.data.id == groupId;
+      allow update: if isExistingAdmin(groupId);
+      allow delete: if isExistingAdmin(groupId);
+
+        match /meals/{mealId} {
+          function isSignedIn() {
+            return request.auth != null;
+          }
+          function isGroupMember(groupId) {
+            return exists(/databases/$(database)/documents/groups/$(groupId));
+          }
+          function isAdmin(groupId) {
+            return get(/databases/$(database)/documents/groups/$(groupId)).data.adminId == request.auth.uid;
+          }
+          function isOwner(groupId, mealId) {
+            return get(/databases/$(database)/documents/groups/$(groupId)/meals/$(mealId)).data.userId == request.auth.uid;
+          }
+          allow get, list: if isSignedIn();
+          allow create: if isSignedIn() && request.resource.data.groupId == groupId && request.resource.data.userId == request.auth.uid;
+          allow update: if isSignedIn() && (isOwner(groupId, mealId) || isAdmin(groupId));
+          allow delete: if isSignedIn() && (isOwner(groupId, mealId) || isAdmin(groupId));
+        }
+
+       match /expenses/{expenseId} {
+          function isSignedIn() {
+            return request.auth != null;
+          }
+          function isGroupMember(groupId) {
+            return exists(/databases/$(database)/documents/groups/$(groupId));
+          }
+          function isAdmin(groupId) {
+            return get(/databases/$(database)/documents/groups/$(groupId)).data.adminId == request.auth.uid;
+          }
+          function isOwner(groupId, expenseId) {
+            return get(/databases/$(database)/documents/groups/$(groupId)/expenses/$(expenseId)).data.userId == request.auth.uid;
+          }
+          allow get, list: if isSignedIn();
+          allow create: if isSignedIn() && request.resource.data.groupId == groupId && request.resource.data.userId == request.auth.uid;
+          allow update: if isSignedIn() && (isOwner(groupId, expenseId) || isAdmin(groupId));
+          allow delete: if isSignedIn() && (isOwner(groupId, expenseId) || isAdmin(groupId));
+        }
+
+         match /purchasedItems/{itemId} {
+          function isSignedIn() {
+            return request.auth != null;
+          }
+          function isGroupMember(groupId) {
+            return exists(/databases/$(database)/documents/groups/$(groupId));
+          }
+          function isAdmin(groupId) {
+            return get(/databases/$(database)/documents/groups/$(groupId)).data.adminId == request.auth.uid;
+          }
+          function isOwner(groupId, itemId) {
+            return get(/databases/$(database)/documents/groups/$(groupId)/purchasedItems/$(itemId)).data.userId == request.auth.uid;
+          }
+          allow get, list: if isSignedIn();
+          allow create: if isSignedIn() && request.resource.data.groupId == groupId && request.resource.data.userId == request.auth.uid;
+          allow update: if isSignedIn() && (isOwner(groupId, itemId) || isAdmin(groupId));
+          allow delete: if isSignedIn() && (isOwner(groupId, itemId) || isAdmin(groupId));
+        }
+    }
+  }
+}
