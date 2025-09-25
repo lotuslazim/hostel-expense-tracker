@@ -59,10 +59,6 @@ export function MealLog({ meals }: { meals: Meal[] }) {
                            <Label htmlFor={`description-${type}`}>Description</Label>
                            <Input id={`description-${type}`} placeholder="e.g., Avocado toast" />
                         </div>
-                         <div className="space-y-2">
-                           <Label htmlFor={`calories-${type}`}>Calories (optional)</Label>
-                           <Input id={`calories-${type}`} type="number" placeholder="e.g., 300" />
-                        </div>
                         <Button className="w-full">Save Meal</Button>
                       </div>
                    </DialogContent>
