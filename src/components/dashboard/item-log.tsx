@@ -89,7 +89,7 @@ export function ItemLog({ items, onSetItems }: { items: Item[]; onSetItems: (ite
               <TableRow key={item.id}>
                 <TableCell className="font-medium">{item.name}</TableCell>
                 <TableCell>{item.quantity} {item.unit}</TableCell>
-                <TableCell className="text-right">${item.cost.toFixed(2)}</TableCell>
+                <TableCell className="text-right">Tk{item.cost.toFixed(2)}</TableCell>
               </TableRow>
             ))}
             {items.length === 0 && (

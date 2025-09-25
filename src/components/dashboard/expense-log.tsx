@@ -62,7 +62,7 @@ export function ExpenseLog({ expenses }: { expenses: Expense[] }) {
               <TableRow key={expense.id}>
                 <TableCell className="font-medium">{expense.description}</TableCell>
                 <TableCell>{expense.category}</TableCell>
-                <TableCell className="text-right">${expense.amount.toFixed(2)}</TableCell>
+                <TableCell className="text-right">Tk{expense.amount.toFixed(2)}</TableCell>
               </TableRow>
             ))}
              {expenses.length === 0 && (
