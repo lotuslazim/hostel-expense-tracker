@@ -29,7 +29,7 @@ export default function LandingPage() {
                 Hey , HOT BOYS
               </h1>
               <p className="text-lg text-muted-foreground">
-                Meal Calculator is your personal companion for tracking meals, monitoring expenses, and gaining insights into your daily habits. Start building a healthier you, one log at a time.
+                welcome to the upgrade! Track your meals, stack your stats, and stay on top—smooth, simple, done.
               </p>
               <Button size="lg" asChild>
                 <Link href="/signup">
