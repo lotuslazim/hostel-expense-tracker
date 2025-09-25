@@ -8,7 +8,7 @@ export default function DashboardPage({
 }: {
   searchParams?: { date?: string };
 }) {
-  const selectedDate = searchParams?.date ? new Date(searchParams.date) : new Date();
+  const selectedDate = searchParams?.date ? new Date(searchParams.date) : null;
 
   // In a real app, you would fetch this data based on the selectedDate
   const meals = MOCK_MEALS;
@@ -21,7 +21,7 @@ export default function DashboardPage({
         <div>
           <h1 className="text-3xl font-bold tracking-tight font-headline">Dashboard</h1>
           <p className="text-muted-foreground">
-            Logs for {format(selectedDate, "eeee, MMMM d, yyyy")}
+            {selectedDate ? `Logs for ${format(selectedDate, "eeee, MMMM d, yyyy")}` : "Select a date to view logs"}
           </p>
         </div>
         <DateSwitcher currentDate={selectedDate} />
