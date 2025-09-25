@@ -4,15 +4,14 @@ import { DailyTracker } from "@/components/dashboard/daily-tracker";
 import { DateSwitcher } from "@/components/dashboard/date-switcher";
 import { MOCK_EXPENSES, MOCK_ITEMS, MOCK_MEALS } from "@/lib/data";
 import { format } from "date-fns";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import type { Item, Meal, Expense } from "@/lib/types";
+import { useSearchParams } from "next/navigation";
 
-export default function DashboardPage({
-  searchParams,
-}: {
-  searchParams?: { date?: string };
-}) {
-  const selectedDate = searchParams?.date ? new Date(searchParams.date) : new Date();
+function DashboardContent() {
+  const searchParams = useSearchParams();
+  const dateParam = searchParams.get('date');
+  const selectedDate = dateParam ? new Date(dateParam) : new Date();
 
   // In a real app, you would fetch this data based on the selectedDate
   const [meals, setMeals] = useState<Meal[]>(MOCK_MEALS);
@@ -41,5 +40,13 @@ export default function DashboardPage({
         onSetItems={setItems}
       />
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <DashboardContent />
+    </Suspense>
   );
 }
