@@ -56,8 +56,12 @@ export function MealLog({ meals }: { meals: Meal[] }) {
                       </DialogHeader>
                       <div className="space-y-4 py-4">
                         <div className="space-y-2">
-                           <Label htmlFor={`description-${type}`}>Description</Label>
-                           <Input id={`description-${type}`} placeholder="e.g., Avocado toast" />
+                           <Label htmlFor={`meal-count-${type}`}>Meal Count</Label>
+                           <Input id={`meal-count-${type}`} type="number" placeholder="e.g., 1" />
+                        </div>
+                        <div className="space-y-2">
+                           <Label htmlFor={`item-name-${type}`}>Item Name</Label>
+                           <Input id={`item-name-${type}`} placeholder="e.g., Grilled Chicken" />
                         </div>
                         <Button className="w-full">Save Meal</Button>
                       </div>
