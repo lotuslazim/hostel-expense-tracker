@@ -16,17 +16,17 @@ export function DailyTracker({ meals, expenses, items }: DailyTrackerProps) {
     <Tabs defaultValue="meals" className="w-full">
       <TabsList className="grid w-full grid-cols-3">
         <TabsTrigger value="meals"><Utensils className="mr-2 h-4 w-4" />Meals</TabsTrigger>
-        <TabsTrigger value="expenses"><CreditCard className="mr-2 h-4 w-4" />Expenses</TabsTrigger>
         <TabsTrigger value="items"><ShoppingCart className="mr-2 h-4 w-4" />Items</TabsTrigger>
+        <TabsTrigger value="expenses"><CreditCard className="mr-2 h-4 w-4" />Expenses</TabsTrigger>
       </TabsList>
       <TabsContent value="meals">
         <MealLog meals={meals} />
       </TabsContent>
-      <TabsContent value="expenses">
-        <ExpenseLog expenses={expenses} />
-      </TabsContent>
       <TabsContent value="items">
         <ItemLog items={items} />
+      </TabsContent>
+      <TabsContent value="expenses">
+        <ExpenseLog expenses={expenses} />
       </TabsContent>
     </Tabs>
   );
