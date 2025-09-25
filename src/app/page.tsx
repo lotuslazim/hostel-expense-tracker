@@ -26,7 +26,7 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
               <h1 className="text-4xl md:text-5xl font-bold tracking-tighter font-headline">
-                Calculate Your Meals, Master Your Day
+                Hey , HOT BOYS
               </h1>
               <p className="text-lg text-muted-foreground">
                 Meal Calculator is your personal companion for tracking meals, monitoring expenses, and gaining insights into your daily habits. Start building a healthier you, one log at a time.
