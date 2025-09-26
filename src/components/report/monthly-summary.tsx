@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { Flame, Zap, Utensils, Scale, Loader2 } from "lucide-react";
+import { Flame, Zap, Utensils, Scale, Loader2, Users } from "lucide-react";
 import { useFirebase, useUser, useDoc, useMemoFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
 import { useEffect, useState } from "react";
@@ -84,16 +84,15 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     return <Card><CardContent><p className="text-center text-destructive py-8">{error}</p></CardContent></Card>;
   }
 
-  if (!groupId || !groupData || groupData.members.length === 0) {
-     return <Card><CardContent><p className="text-center text-muted-foreground py-8">No group data available for this month. You need to be in a group to see reports.</p></CardContent></Card>;
-  }
+  const members = groupData?.members ?? [];
+  const hasMembers = members.length > 0;
   
-  const totalGroupFoodExpenses = groupData.members.reduce((acc, member) => acc + member.expenses.food, 0);
-  const totalGroupElectricity = groupData.members.reduce((acc, member) => acc + member.expenses.electricity, 0);
-  const totalGroupGas = groupData.members.reduce((acc, member) => acc + member.expenses.gas, 0);
+  const totalGroupFoodExpenses = members.reduce((acc, member) => acc + member.expenses.food, 0);
+  const totalGroupElectricity = members.reduce((acc, member) => acc + member.expenses.electricity, 0);
+  const totalGroupGas = members.reduce((acc, member) => acc + member.expenses.gas, 0);
   const totalGroupUtilities = totalGroupElectricity + totalGroupGas;
-  const totalGroupMeals = groupData.members.reduce((acc, member) => acc + member.meals, 0);
-  const memberCount = groupData.members.length;
+  const totalGroupMeals = members.reduce((acc, member) => acc + member.meals, 0);
+  const memberCount = members.length;
   const utilitySharePerMember = memberCount > 0 ? totalGroupUtilities / memberCount : 0;
   
   const monthQueryParam = format(month, 'yyyy-MM-dd');
@@ -135,7 +134,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {groupData.members.map((member) => {
+                  {hasMembers ? members.map((member) => {
                     const mealRate = totalGroupFoodExpenses > 0 && totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
                     const mealShare = member.meals * mealRate;
                     const mealBalance = member.expenses.food - mealShare;
@@ -161,7 +160,17 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                         {finalBalance >= 0 ? `Gets Back: ৳${finalBalance.toFixed(2)}` : `Owes: ৳${Math.abs(finalBalance).toFixed(2)}`}
                       </TableCell>
                     </TableRow>
-                  )})}
+                  )}) : (
+                    <TableRow>
+                      <TableCell colSpan={3} className="text-center h-24">
+                        <div className="flex flex-col items-center gap-2">
+                           <Users className="h-8 w-8 text-muted-foreground" />
+                           <p className="text-muted-foreground">No members in this group for the selected month.</p>
+                           {!groupId && <p className="text-sm text-muted-foreground">Go to the Admin page to create or join a group.</p>}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
                 </TableBody>
             </Table>
           </div>
