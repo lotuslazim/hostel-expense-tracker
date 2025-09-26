@@ -1,9 +1,11 @@
+
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { MOCK_MONTHLY_GROUP_DATA } from "@/lib/data";
 import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
 const groupData = MOCK_MONTHLY_GROUP_DATA;
 const totalGroupMeals = groupData.members.reduce((acc, member) => acc + member.meals, 0);
@@ -20,11 +22,18 @@ const settlementData = groupData.members.map(member => {
   };
 });
 
-export function MonthlySummary() {
+interface MonthlySummaryProps {
+  month: Date;
+}
+
+export function MonthlySummary({ month }: MonthlySummaryProps) {
+  // In a real app, you would fetch data for the given `month`
+  // For now, we use mock data and just display the selected month.
+  
   return (
     <Card className="max-w-4xl mx-auto">
       <CardHeader>
-        <CardTitle>Monthly Settlement for {groupData.month}</CardTitle>
+        <CardTitle>Monthly Settlement for {format(month, "MMMM yyyy")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid grid-cols-3 gap-4 text-center">
