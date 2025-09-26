@@ -1,12 +1,20 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Trash2 } from "lucide-react";
+import { PlusCircle, Trash2, ShieldCheck, User } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+
+const MOCK_GROUP = {
+  name: "Sunset Apartment",
+  inviteCode: "SUNSET123",
+  memberCount: 3,
+};
 
 const MOCK_MEMBERS = [
-  { id: '1', name: 'Alice', email: 'alice@example.com' },
-  { id: '2', name: 'Bob', email: 'bob@example.com' },
-  { id: '3', name: 'Charlie', email: 'charlie@example.com' },
+  { id: '1', name: 'Alice', email: 'alice@example.com', role: 'Admin', avatar: 'https://picsum.photos/seed/1/40/40' },
+  { id: '2', name: 'Bob', email: 'bob@example.com', role: 'Member', avatar: 'https://picsum.photos/seed/2/40/40' },
+  { id: '3', name: 'Charlie', email: 'charlie@example.com', role: 'Member', avatar: 'https://picsum.photos/seed/3/40/40' },
 ];
 
 
@@ -16,9 +24,32 @@ export default function AdminPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight font-headline">Admin Panel</h1>
         <p className="text-muted-foreground">
-          Manage your group members and view their activity.
+          Manage your group members and settings.
         </p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Group Details</CardTitle>
+          <CardDescription>
+            Your group's information and invite code.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid sm:grid-cols-3 gap-4">
+          <div className="p-4 bg-muted/50 rounded-lg">
+            <p className="text-sm text-muted-foreground">Group Name</p>
+            <p className="text-lg font-semibold">{MOCK_GROUP.name}</p>
+          </div>
+          <div className="p-4 bg-muted/50 rounded-lg">
+            <p className="text-sm text-muted-foreground">Invite Code</p>
+            <p className="text-lg font-mono font-semibold bg-background/50 px-2 py-1 rounded inline-block">{MOCK_GROUP.inviteCode}</p>
+          </div>
+          <div className="p-4 bg-muted/50 rounded-lg">
+            <p className="text-sm text-muted-foreground">Total Members</p>
+            <p className="text-lg font-semibold">{MOCK_GROUP.memberCount}</p>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
@@ -27,28 +58,53 @@ export default function AdminPage() {
             <CardDescription>Add or remove members from your group.</CardDescription>
           </div>
           <Button>
-            <PlusCircle className="mr-2 h-4 w-4" /> Add Member
+            <PlusCircle className="mr-2 h-4 w-4" /> Invite Member
           </Button>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
+                <TableHead>Member</TableHead>
+                <TableHead className="hidden sm:table-cell">Role</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {MOCK_MEMBERS.map((member) => (
                 <TableRow key={member.id}>
-                  <TableCell className="font-medium">{member.name}</TableCell>
-                  <TableCell>{member.email}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <Avatar>
+                        <AvatarImage src={member.avatar} alt={member.name} />
+                        <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium">{member.name}</p>
+                        <p className="text-sm text-muted-foreground">{member.email}</p>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="hidden sm:table-cell">
+                    {member.role === 'Admin' ? (
+                      <Badge variant="default" className="bg-primary/20 text-primary-foreground hover:bg-primary/30">
+                        <ShieldCheck className="mr-1 h-3 w-3" />
+                        {member.role}
+                      </Badge>
+                    ) : (
+                       <Badge variant="secondary">
+                        <User className="mr-1 h-3 w-3" />
+                        {member.role}
+                      </Badge>
+                    )}
+                  </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="icon">
-                      <Trash2 className="h-4 w-4" />
-                      <span className="sr-only">Remove member</span>
-                    </Button>
+                    {member.role !== 'Admin' && (
+                      <Button variant="ghost" size="icon">
+                        <Trash2 className="h-4 w-4" />
+                        <span className="sr-only">Remove member</span>
+                      </Button>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
