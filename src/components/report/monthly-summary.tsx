@@ -7,28 +7,38 @@ import { MOCK_MONTHLY_GROUP_DATA } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import Link from "next/link";
-import { Flame, Zap, DollarSign, Utensils, Hash } from "lucide-react";
+import { Flame, Zap, DollarSign, Utensils, Hash, Users, Scale } from "lucide-react";
 
 const groupData = MOCK_MONTHLY_GROUP_DATA;
 const totalGroupFoodExpenses = groupData.members.reduce((acc, member) => acc + member.expenses.food, 0);
 const totalGroupElectricity = groupData.members.reduce((acc, member) => acc + member.expenses.electricity, 0);
 const totalGroupGas = groupData.members.reduce((acc, member) => acc + member.expenses.gas, 0);
+const totalGroupUtilities = totalGroupElectricity + totalGroupGas;
 const totalGroupMeals = groupData.members.reduce((acc, member) => acc + member.meals, 0);
+const memberCount = groupData.members.length;
+
 // Meal rate is based on food expenses only
 const mealRate = totalGroupFoodExpenses > 0 && totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
+// For simplicity, let's assume utility bills are split equally.
+const utilitySharePerMember = memberCount > 0 ? totalGroupUtilities / memberCount : 0;
+
 
 const settlementData = groupData.members.map(member => {
   const mealShare = member.meals * mealRate;
-  // For simplicity, let's assume utility bills are split equally. In a real app, this logic could be more complex.
-  const utilityShare = (totalGroupElectricity + totalGroupGas) / groupData.members.length;
-  const totalShare = mealShare + utilityShare;
-  const totalPaid = member.expenses.food + member.expenses.electricity + member.expenses.gas;
-  const balance = totalPaid - totalShare;
+  const mealBalance = member.expenses.food - mealShare;
+
+  const utilityPaid = member.expenses.electricity + member.expenses.gas;
+  const utilityBalance = utilityPaid - utilitySharePerMember;
+  
+  const finalBalance = mealBalance + utilityBalance;
+
   return {
     ...member,
-    share: totalShare,
-    paid: totalPaid,
-    balance
+    mealShare,
+    mealBalance,
+    utilityPaid,
+    utilityBalance,
+    finalBalance,
   };
 });
 
@@ -41,13 +51,13 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
   // For now, we use mock data and just display the selected month.
   
   return (
-    <Card className="max-w-4xl mx-auto">
+    <Card className="max-w-5xl mx-auto">
       <CardHeader>
         <CardTitle>Monthly Settlement for {format(month, "MMMM yyyy")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-8">
         <div>
-          <h3 className="text-lg font-medium mb-4">Expense & Meal Summary</h3>
+          <h3 className="text-lg font-medium mb-4">Overall Summary</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
             <div className="p-4 bg-muted/50 rounded-lg">
               <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1"><DollarSign /> Total Food</p>
@@ -65,30 +75,32 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
               <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1"><Utensils /> Total Meals</p>
               <p className="text-2xl font-bold">{totalGroupMeals}</p>
             </div>
-             <div className="p-4 bg-primary/10 rounded-lg col-span-full">
+             <div className="p-4 bg-primary/10 rounded-lg col-span-full md:col-span-2">
               <p className="text-sm text-primary/80 flex items-center justify-center gap-2 mb-1"><Hash /> Calculated Food Rate per Meal</p>
               <p className="text-2xl font-bold text-primary">৳{mealRate.toFixed(2)}</p>
             </div>
+            <div className="p-4 bg-secondary/80 rounded-lg col-span-full md:col-span-2">
+              <p className="text-sm text-secondary-foreground/80 flex items-center justify-center gap-2 mb-1"><Users /> Utility Share per Member</p>
+              <p className="text-2xl font-bold text-secondary-foreground">৳{utilitySharePerMember.toFixed(2)}</p>
+            </div>
           </div>
         </div>
+        
         <div>
-           <h3 className="text-lg font-medium mb-4">Member Settlement</h3>
+           <h3 className="text-lg font-medium mb-4 flex items-center gap-2"><Utensils /> Meal Settlement</h3>
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Member</TableHead>
                 <TableHead className="text-center">Meals</TableHead>
                 <TableHead className="text-right">Food Paid</TableHead>
-                <TableHead className="text-right">Electricity Paid</TableHead>
-                <TableHead className="text-right">Gas Paid</TableHead>
-                <TableHead className="text-right font-bold">Total Paid</TableHead>
-                <TableHead className="text-right">Total Share</TableHead>
+                <TableHead className="text-right">Meal Share</TableHead>
                 <TableHead className="text-right">Balance</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {settlementData.map((member) => (
-                <TableRow key={member.name}>
+                <TableRow key={member.id}>
                   <TableCell className="font-medium">
                     <Link href={`/report/${member.id}`} className="hover:underline text-primary">
                       {member.name}
@@ -96,21 +108,92 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                   </TableCell>
                   <TableCell className="text-center">{member.meals}</TableCell>
                   <TableCell className="text-right">৳{member.expenses.food.toFixed(2)}</TableCell>
-                  <TableCell className="text-right">৳{member.expenses.electricity.toFixed(2)}</TableCell>
-                  <TableCell className="text-right">৳{member.expenses.gas.toFixed(2)}</TableCell>
-                  <TableCell className="text-right font-medium">৳{member.paid.toFixed(2)}</TableCell>
-                  <TableCell className="text-right">৳{member.share.toFixed(2)}</TableCell>
+                  <TableCell className="text-right">৳{member.mealShare.toFixed(2)}</TableCell>
                   <TableCell className={cn(
-                    "text-right font-bold",
-                    member.balance >= 0 ? "text-green-600" : "text-red-600"
+                    "text-right font-medium",
+                    member.mealBalance >= 0 ? "text-green-600" : "text-red-600"
                   )}>
-                    {member.balance >= 0 ? `Gets ৳${member.balance.toFixed(2)}` : `Owes ৳${Math.abs(member.balance).toFixed(2)}`}
+                    {member.mealBalance >= 0 ? `+৳${member.mealBalance.toFixed(2)}` : `-৳${Math.abs(member.mealBalance).toFixed(2)}`}
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </div>
+
+        <div>
+           <h3 className="text-lg font-medium mb-4 flex items-center gap-2"><Zap /> Utility Settlement</h3>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Member</TableHead>
+                <TableHead className="text-right">Electricity Paid</TableHead>
+                <TableHead className="text-right">Gas Paid</TableHead>
+                <TableHead className="text-right font-bold">Total Paid</TableHead>
+                <TableHead className="text-right">Utility Share</TableHead>
+                <TableHead className="text-right">Balance</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {settlementData.map((member) => (
+                <TableRow key={member.id}>
+                  <TableCell className="font-medium">
+                     <Link href={`/report/${member.id}`} className="hover:underline text-primary">
+                      {member.name}
+                    </Link>
+                  </TableCell>
+                  <TableCell className="text-right">৳{member.expenses.electricity.toFixed(2)}</TableCell>
+                  <TableCell className="text-right">৳{member.expenses.gas.toFixed(2)}</TableCell>
+                  <TableCell className="text-right font-medium">৳{member.utilityPaid.toFixed(2)}</TableCell>
+                  <TableCell className="text-right">৳{utilitySharePerMember.toFixed(2)}</TableCell>
+                   <TableCell className={cn(
+                    "text-right font-medium",
+                    member.utilityBalance >= 0 ? "text-green-600" : "text-red-600"
+                  )}>
+                    {member.utilityBalance >= 0 ? `+৳${member.utilityBalance.toFixed(2)}` : `-৳${Math.abs(member.utilityBalance).toFixed(2)}`}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+
+        <div>
+           <h3 className="text-lg font-medium mb-4 flex items-center gap-2"><Scale /> Final Settlement</h3>
+           <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Member</TableHead>
+                  <TableHead className="text-right">Final Balance</TableHead>
+                  <TableHead className="text-right">Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                  {settlementData.map((member) => (
+                    <TableRow key={member.id} className="bg-muted/30">
+                      <TableCell className="font-medium">
+                        <Link href={`/report/${member.id}`} className="hover:underline text-primary">
+                          {member.name}
+                        </Link>
+                      </TableCell>
+                      <TableCell className={cn(
+                        "text-right font-bold text-lg",
+                        member.finalBalance >= 0 ? "text-green-600" : "text-red-600"
+                      )}>
+                        ৳{Math.abs(member.finalBalance).toFixed(2)}
+                      </TableCell>
+                      <TableCell className={cn(
+                        "text-right font-bold text-lg",
+                        member.finalBalance >= 0 ? "text-green-600" : "text-red-600"
+                      )}>
+                        {member.finalBalance >= 0 ? `Gets Back` : `Owes`}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+           </Table>
+        </div>
+
       </CardContent>
     </Card>
   );
