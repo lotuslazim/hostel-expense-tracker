@@ -25,10 +25,6 @@ export function MonthlySummary() {
     <Card className="max-w-4xl mx-auto">
       <CardHeader>
         <CardTitle>Monthly Settlement for {groupData.month}</CardTitle>
-        <CardDescription>
-          Here is the breakdown of meals, expenses, and balances for your group.
-          The meal rate is calculated based on total group expenses divided by total meals.
-        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid grid-cols-3 gap-4 text-center">
