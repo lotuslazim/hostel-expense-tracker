@@ -30,6 +30,8 @@ import { Switch } from "@/components/ui/switch"
 import { useFirebase, useUser, useDoc, useMemoFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 export default function SettingsPage() {
   const { lang, setLang, t } = useI18n();
@@ -239,8 +241,35 @@ export default function SettingsPage() {
                   <CardTitle className="flex items-center gap-2 text-base"><Edit className="h-4 w-4"/> {t('settings.admin_controls.group_management.title')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                   <Button variant="outline" className="w-full justify-start">{t('settings.admin_controls.group_management.edit_group_name')}</Button>
-                   <Button variant="outline" className="w-full justify-start">{t('settings.admin_controls.group_management.reset_invite_code')}</Button>
+                  <Dialog>
+                    <DialogTrigger asChild><Button variant="outline" className="w-full justify-start">{t('settings.admin_controls.group_management.edit_group_name')}</Button></DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>{t('settings.admin_controls.group_management.edit_group_name')}</DialogTitle>
+                        <DialogDescription>Enter a new name for your group.</DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                           <Label htmlFor="group-name">New Group Name</Label>
+                           <Input id="group-name" defaultValue={groupData?.groupName} />
+                        </div>
+                        <Button className="w-full">Save Changes</Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                  <AlertDialog>
+                     <AlertDialogTrigger asChild><Button variant="outline" className="w-full justify-start">{t('settings.admin_controls.group_management.reset_invite_code')}</Button></AlertDialogTrigger>
+                     <AlertDialogContent>
+                       <AlertDialogHeader>
+                         <AlertDialogTitle>Are you sure you want to reset the invite code?</AlertDialogTitle>
+                         <AlertDialogDescription>The old invite code will no longer work. All members will need the new code to join.</AlertDialogDescription>
+                       </AlertDialogHeader>
+                       <AlertDialogFooter>
+                         <AlertDialogCancel>Cancel</AlertDialogCancel>
+                         <AlertDialogAction>Reset Code</AlertDialogAction>
+                       </AlertDialogFooter>
+                     </AlertDialogContent>
+                   </AlertDialog>
                 </CardContent>
               </Card>
                <Card>
@@ -248,8 +277,29 @@ export default function SettingsPage() {
                   <CardTitle className="flex items-center gap-2 text-base"><ShieldCheck className="h-4 w-4"/> {t('settings.admin_controls.member_management.title')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                   <Button variant="outline" className="w-full justify-start">{t('settings.admin_controls.member_management.approve_requests')}</Button>
-                   <Button variant="outline" className="w-full justify-start">{t('settings.admin_controls.member_management.assign_admin')}</Button>
+                  <Dialog>
+                    <DialogTrigger asChild><Button variant="outline" className="w-full justify-start">{t('settings.admin_controls.member_management.approve_requests')}</Button></DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader><DialogTitle>Pending Member Requests</DialogTitle></DialogHeader>
+                      <div className="py-4"><p className="text-sm text-muted-foreground">No pending requests.</p></div>
+                    </DialogContent>
+                  </Dialog>
+                  <Dialog>
+                    <DialogTrigger asChild><Button variant="outline" className="w-full justify-start">{t('settings.admin_controls.member_management.assign_admin')}</Button></DialogTrigger>
+                     <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Assign New Admin</DialogTitle>
+                        <DialogDescription>Choose a member to promote to an admin role.</DialogDescription>
+                      </DialogHeader>
+                       <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                           <Label htmlFor="member-select">Select Member</Label>
+                           <Select><SelectTrigger><SelectValue placeholder="Select a member" /></SelectTrigger><SelectContent></SelectContent></Select>
+                        </div>
+                        <Button className="w-full">Assign Admin</Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </CardContent>
               </Card>
               <Card>
@@ -257,8 +307,14 @@ export default function SettingsPage() {
                   <CardTitle className="flex items-center gap-2 text-base"><SlidersHorizontal className="h-4 w-4"/> {t('settings.admin_controls.expense_rules.title')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                   <Button variant="outline" className="w-full justify-start">{t('settings.admin_controls.expense_rules.set_categories')}</Button>
-                   <Button variant="outline" className="w-full justify-start">{t('settings.admin_controls.expense_rules.define_cost_sharing')}</Button>
+                   <Dialog>
+                    <DialogTrigger asChild><Button variant="outline" className="w-full justify-start">{t('settings.admin_controls.expense_rules.set_categories')}</Button></DialogTrigger>
+                    <DialogContent><DialogHeader><DialogTitle>Set Expense Categories</DialogTitle></DialogHeader><div className="py-4"><p>Functionality to be implemented.</p></div></DialogContent>
+                  </Dialog>
+                   <Dialog>
+                    <DialogTrigger asChild><Button variant="outline" className="w-full justify-start">{t('settings.admin_controls.expense_rules.define_cost_sharing')}</Button></DialogTrigger>
+                    <DialogContent><DialogHeader><DialogTitle>Define Cost-Sharing Method</DialogTitle></DialogHeader><div className="py-4"><p>Functionality to be implemented.</p></div></DialogContent>
+                  </Dialog>
                 </CardContent>
               </Card>
               <Card>
@@ -266,7 +322,13 @@ export default function SettingsPage() {
                   <CardTitle className="flex items-center gap-2 text-base"><FileDown className="h-4 w-4"/> {t('settings.admin_controls.data_reports.title')}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Button variant="outline" className="w-full justify-start">{t('settings.admin_controls.data_reports.export_data')}</Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild><Button variant="outline" className="w-full justify-start">{t('settings.admin_controls.data_reports.export_data')}</Button></AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader><AlertDialogTitle>Export Group Data</AlertDialogTitle><AlertDialogDescription>This will generate a CSV file of all meals, expenses, and items for the current month.</AlertDialogDescription></AlertDialogHeader>
+                      <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction>Export</AlertDialogAction></AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </CardContent>
               </Card>
                <Alert variant="destructive">
@@ -283,3 +345,5 @@ export default function SettingsPage() {
     </div>
   )
 }
+
+    
