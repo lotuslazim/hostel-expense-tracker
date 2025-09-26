@@ -54,7 +54,6 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     <div className="space-y-8">
       <Card className="max-w-5xl mx-auto">
         <CardHeader>
-          <CardTitle>Monthly Settlement for {format(month, "MMMM yyyy")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-8">
           <div>
@@ -76,11 +75,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                 <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1"><Utensils /> Total Meals</p>
                 <p className="text-2xl font-bold">{totalGroupMeals}</p>
               </Link>
-              <div className="p-4 bg-primary/20 rounded-lg col-span-full md:col-span-2">
-                <p className="text-sm text-primary/80 flex items-center justify-center gap-2 mb-1"><Utensils /> Meal Rate</p>
-                <p className="text-2xl font-bold text-primary">৳{mealRate.toFixed(2)}</p>
-              </div>
-              <div className="p-4 bg-secondary/80 rounded-lg col-span-full md:col-span-2">
+              <div className="p-4 bg-secondary/80 rounded-lg col-span-full">
                 <p className="text-sm text-secondary-foreground/80 flex items-center justify-center gap-2 mb-1"><Users /> Utility Share per Member</p>
                 <p className="text-2xl font-bold text-secondary-foreground">৳{utilitySharePerMember.toFixed(2)}</p>
               </div>
