@@ -9,7 +9,6 @@ import { MealLog } from "@/components/dashboard/meal-log";
 import { ExpenseLog } from "@/components/dashboard/expense-log";
 import { ItemLog } from "@/components/dashboard/item-log";
 import type { Meal, Expense, Item } from "@/lib/types";
-import { MOCK_EXPENSES, MOCK_ITEMS, MOCK_MEALS } from "@/lib/data";
 
 export default function DashboardPage() {
   const searchParams = useSearchParams();
@@ -19,10 +18,10 @@ export default function DashboardPage() {
   const initialDate = dateParam ? parseISO(dateParam) : new Date();
   const [currentDate, setCurrentDate] = useState(initialDate);
 
-  // In a real app, you would fetch this data based on the selected date
-  const [meals, setMeals] = useState<Meal[]>(MOCK_MEALS);
-  const [expenses, setExpenses] = useState<Expense[]>(MOCK_EXPENSES);
-  const [items, setItems] = useState<Item[]>(MOCK_ITEMS);
+  // For a new user, start with empty data.
+  const [meals, setMeals] = useState<Meal[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [items, setItems] = useState<Item[]>([]);
   
   // Filter data for the current date
   const dailyMeals = meals.filter(m => format(m.loggedAt, 'yyyy-MM-dd') === format(currentDate, 'yyyy-MM-dd'));
