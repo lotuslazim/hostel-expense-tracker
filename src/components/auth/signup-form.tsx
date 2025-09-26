@@ -71,14 +71,27 @@ export function SignupForm() {
   async function onPhoneSubmit(values: z.infer<typeof phoneSchema>) {
     setIsLoading(true);
     const appVerifier = window.recaptchaVerifier;
+    
+    // E.164 format validation for Bangladesh (+880)
+    let phoneNumber = values.phone;
+    if (phoneNumber.startsWith('0')) {
+      phoneNumber = `+880${phoneNumber.substring(1)}`;
+    } else if (!phoneNumber.startsWith('+880')) {
+      phoneNumber = `+880${phoneNumber}`;
+    }
+
     try {
-      const result = await signInWithPhoneNumber(auth, `+${values.phone}`, appVerifier);
+      const result = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
       setConfirmationResult(result);
       setStep("verify");
       toast({ title: "Verification code sent!" });
     } catch (error) {
       console.error("Error sending verification code:", error);
-      toast({ variant: "destructive", title: "Error", description: "Failed to send verification code. Please try again." });
+      let errorMessage = "Failed to send verification code. Please try again.";
+      if ((error as any).code === 'auth/invalid-phone-number') {
+        errorMessage = "Invalid phone number format. Please check the number and try again."
+      }
+      toast({ variant: "destructive", title: "Error", description: errorMessage });
     } finally {
       setIsLoading(false);
     }
@@ -214,7 +227,7 @@ export function SignupForm() {
                       <FormItem>
                         <FormLabel>Phone Number</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g., 1234567890" {...field} />
+                          <Input placeholder="e.g., 01712345678" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
