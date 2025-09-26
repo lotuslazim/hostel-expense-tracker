@@ -52,8 +52,8 @@ export function UserNav() {
           <DropdownMenuItem asChild>
             <Link href="/admin">Admin Panel</Link>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            Settings
+          <DropdownMenuItem asChild>
+            <Link href="/settings">Settings</Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
