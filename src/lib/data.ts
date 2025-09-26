@@ -1,3 +1,4 @@
+
 import type { Meal, Expense, Item } from './types';
 import type { GenerateMonthlySummaryInput } from '@/ai/flows/generate-monthly-summary';
 
@@ -38,8 +39,9 @@ export const MOCK_MONTHLY_DATA: GenerateMonthlySummaryInput = {
 export const MOCK_MONTHLY_GROUP_DATA = {
   month: "September 2025",
   members: [
-    { id: "1", name: "Alice", meals: 45, expenses: 8000 },
-    { id: "2", name: "Bob", meals: 60, expenses: 6000 },
-    { id: "3", name: "Charlie", meals: 55, expenses: 7500 },
+    { id: "1", name: "Alice", meals: 45, expenses: { food: 6000, electricity: 1000, gas: 1000 } },
+    { id: "2", name: "Bob", meals: 60, expenses: { food: 5000, electricity: 500, gas: 500 } },
+    { id: "3", name: "Charlie", meals: 55, expenses: { food: 6500, electricity: 0, gas: 1000 } },
   ],
 };
+
