@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ArrowLeft, Zap, Flame } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { notFound, useSearchParams } from "next/navigation";
+import { notFound, useSearchParams, useParams } from "next/navigation";
 import { format, parseISO } from "date-fns";
 import { useState, useEffect } from "react";
 import { useFirebase, useUser, useDoc, useMemoFirebase } from "@/firebase";
@@ -42,8 +42,9 @@ function ContributionSkeleton() {
     );
 }
 
-export default function ContributionPage({ params }: { params: { category: string } }) {
-    const category = params.category;
+export default function ContributionPage() {
+    const params = useParams();
+    const category = params.category as string;
     const searchParams = useSearchParams();
     const monthParam = searchParams.get('month');
     
@@ -104,13 +105,13 @@ export default function ContributionPage({ params }: { params: { category: strin
         amount: member.expenses[details.key]
     }));
     
-    const monthQueryParam = format(targetDate, 'yyyy-MM-dd');
+    const monthQueryParam = monthParam ? `?month=${monthParam}` : '';
 
   return (
     <div className="space-y-6">
         <div className="flex items-center gap-4">
             <Button variant="outline" size="icon" asChild>
-                <Link href={`/report?month=${monthQueryParam}`}><ArrowLeft className="h-4 w-4" /></Link>
+                <Link href={`/report${monthQueryParam}`}><ArrowLeft className="h-4 w-4" /></Link>
             </Button>
             <div>
               <h1 className="text-3xl font-bold tracking-tight font-headline capitalize">
