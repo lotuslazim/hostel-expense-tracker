@@ -1,9 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Trash2, ShieldCheck, User } from "lucide-react";
+import { PlusCircle, Trash2, ShieldCheck, User, Copy } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const MOCK_GROUP = {
   name: "Sunset Apartment",
@@ -57,9 +60,38 @@ export default function AdminPage() {
             <CardTitle>Group Members</CardTitle>
             <CardDescription>Add or remove members from your group.</CardDescription>
           </div>
-          <Button>
-            <PlusCircle className="mr-2 h-4 w-4" /> Invite Member
-          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button>
+                <PlusCircle className="mr-2 h-4 w-4" /> Invite Member
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Invite a Member</DialogTitle>
+                <DialogDescription>
+                  Share this code with someone to let them join your group.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex items-center space-x-2">
+                <div className="grid flex-1 gap-2">
+                  <Label htmlFor="link" className="sr-only">
+                    Link
+                  </Label>
+                  <Input
+                    id="link"
+                    defaultValue={MOCK_GROUP.inviteCode}
+                    readOnly
+                    className="font-mono h-12 text-lg"
+                  />
+                </div>
+                <Button size="icon" className="h-12 w-12" onClick={() => navigator.clipboard.writeText(MOCK_GROUP.inviteCode)}>
+                  <span className="sr-only">Copy</span>
+                  <Copy className="h-5 w-5" />
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </CardHeader>
         <CardContent>
           <Table>
