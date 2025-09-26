@@ -3,42 +3,96 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { MOCK_MONTHLY_GROUP_DATA } from "@/lib/data";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
 import Link from "next/link";
-import { Flame, Zap, Utensils, Users, Scale } from "lucide-react";
-
-const groupData = MOCK_MONTHLY_GROUP_DATA;
-const totalGroupFoodExpenses = groupData.members.reduce((acc, member) => acc + member.expenses.food, 0);
-const totalGroupElectricity = groupData.members.reduce((acc, member) => acc + member.expenses.electricity, 0);
-const totalGroupGas = groupData.members.reduce((acc, member) => acc + member.expenses.gas, 0);
-const totalGroupUtilities = totalGroupElectricity + totalGroupGas;
-const totalGroupMeals = groupData.members.reduce((acc, member) => acc + member.meals, 0);
-const memberCount = groupData.members.length;
-
-// For simplicity, let's assume utility bills are split equally.
-const utilitySharePerMember = memberCount > 0 ? totalGroupUtilities / memberCount : 0;
-
-
-const settlementData = groupData.members.map(member => {
-  const utilityPaid = member.expenses.electricity + member.expenses.gas;
-  
-  const totalExpenses = member.expenses.food + utilityPaid;
-
-  return {
-    ...member,
-    totalExpenses,
-  };
-});
+import { Flame, Zap, Utensils, Scale, Loader2 } from "lucide-react";
+import { useFirebase, useUser, useDoc, useMemoFirebase } from "@/firebase";
+import { doc } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { getMonthlyGroupData, type MonthlyGroupData } from "@/ai/flows/get-monthly-group-data";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface MonthlySummaryProps {
   month: Date;
 }
 
+function SummarySkeleton() {
+  return (
+    <Card className="max-w-5xl mx-auto">
+      <CardContent className="space-y-8 pt-6">
+        <div>
+          <h3 className="text-lg font-medium mb-4">Overall Summary</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-20 w-full" />
+          </div>
+        </div>
+        <div>
+          <h3 className="text-lg font-medium my-4 flex items-center gap-2"><Scale/> Final Settlement</h3>
+          <Skeleton className="h-40 w-full" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+
 export function MonthlySummary({ month }: MonthlySummaryProps) {
-  // In a real app, you would fetch data for the given `month`
-  // For now, we use mock data and just display the selected month.
+  const { firestore } = useFirebase();
+  const { user: currentUser, isUserLoading: isCurrentUserLoading } = useUser();
+
+  const currentUserRef = useMemoFirebase(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
+  const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
+
+  const groupId = currentUserData?.groupId;
+
+  const [groupData, setGroupData] = useState<MonthlyGroupData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  useEffect(() => {
+    if (groupId) {
+      setIsLoading(true);
+      getMonthlyGroupData({ groupId, date: month.toISOString() })
+        .then(data => {
+          setGroupData(data);
+          setError(null);
+        })
+        .catch(err => {
+          console.error("Failed to fetch monthly data:", err);
+          setError("Could not load monthly report data.");
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    } else if (!isCurrentUserLoading && !isCurrentUserDataLoading) {
+      setIsLoading(false);
+    }
+  }, [groupId, month, isCurrentUserLoading, isCurrentUserDataLoading]);
+
+  const dataLoading = isLoading || isCurrentUserLoading || isCurrentUserDataLoading;
+
+  if (dataLoading) {
+    return <SummarySkeleton />;
+  }
+
+  if (error) {
+    return <Card><CardContent><p className="text-center text-destructive py-8">{error}</p></CardContent></Card>;
+  }
+
+  if (!groupId || !groupData || groupData.members.length === 0) {
+     return <Card><CardContent><p className="text-center text-muted-foreground py-8">No group data available for this month. You need to be in a group to see reports.</p></CardContent></Card>;
+  }
+  
+  const totalGroupFoodExpenses = groupData.members.reduce((acc, member) => acc + member.expenses.food, 0);
+  const totalGroupElectricity = groupData.members.reduce((acc, member) => acc + member.expenses.electricity, 0);
+  const totalGroupGas = groupData.members.reduce((acc, member) => acc + member.expenses.gas, 0);
+  const totalGroupUtilities = totalGroupElectricity + totalGroupGas;
+  const totalGroupMeals = groupData.members.reduce((acc, member) => acc + member.meals, 0);
+  const memberCount = groupData.members.length;
+  const utilitySharePerMember = memberCount > 0 ? totalGroupUtilities / memberCount : 0;
   
   return (
     <div className="space-y-8">
@@ -77,7 +131,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {MOCK_MONTHLY_GROUP_DATA.members.map((member) => {
+                  {groupData.members.map((member) => {
                     const mealRate = totalGroupFoodExpenses > 0 && totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
                     const mealShare = member.meals * mealRate;
                     const mealBalance = member.expenses.food - mealShare;
