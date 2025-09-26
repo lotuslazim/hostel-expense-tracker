@@ -1,10 +1,9 @@
-
 "use client";
 
 import { MonthlySummary } from "@/components/report/monthly-summary";
 import { useState } from "react";
 import { startOfMonth, format, addMonths, subMonths } from "date-fns";
-import { MonthSwitcher } from "@/components/dashboard/month-switcher";
+import { MonthSwitcher } from "@/components/report/month-switcher";
 
 export default function ReportPage() {
   const [currentDate, setCurrentDate] = useState(startOfMonth(new Date()));
@@ -33,4 +32,3 @@ export default function ReportPage() {
       <MonthlySummary month={currentDate} />
     </div>
   );
-}
