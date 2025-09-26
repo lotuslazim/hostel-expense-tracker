@@ -105,19 +105,19 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
             <h3 className="text-lg font-medium mb-4">Overall Summary</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
               <Link href="/report/items" className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors">
-                <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1"><span className="font-bold text-lg">৳</span> Total Food</p>
+                <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1 whitespace-nowrap"><span className="font-bold text-lg">৳</span> Total Food</p>
                 <p className="text-2xl font-bold">৳{totalGroupFoodExpenses.toFixed(2)}</p>
               </Link>
               <Link href="/report/contribution/electricity" className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors">
-                <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1"><Zap /> Total Electricity</p>
+                <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1 whitespace-nowrap"><Zap /> Total Electricity</p>
                 <p className="text-2xl font-bold">৳{totalGroupElectricity.toFixed(2)}</p>
               </Link>
               <Link href="/report/contribution/gas" className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors">
-                <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1"><Flame /> Total Gas</p>
+                <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1 whitespace-nowrap"><Flame /> Total Gas</p>
                 <p className="text-2xl font-bold">৳{totalGroupGas.toFixed(2)}</p>
               </Link>
               <Link href="/report/meal-settlement" className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors">
-                <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1"><Utensils /> Total Meals</p>
+                <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1 whitespace-nowrap"><Utensils /> Total Meals</p>
                 <p className="text-2xl font-bold">{totalGroupMeals}</p>
               </Link>
             </div>
