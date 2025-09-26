@@ -10,43 +10,103 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import placeholderImages from "@/lib/placeholder-images.json";
+import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/firebase";
+import { doc, collection, query, where } from "firebase/firestore";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const MOCK_GROUP = {
-  name: "Sunset Apartment",
-  inviteCode: "SUNSET123",
-  memberCount: 3,
-};
-
-const MOCK_MEMBERS = [
-  { id: '1', name: 'Alice', email: 'alice@example.com', role: 'Admin', avatarId: 'user-avatar' },
-  { id: '2', name: 'Bob', email: 'bob@example.com', role: 'Member', avatarId: 'user-avatar-2' },
-  { id: '3', name: 'Charlie', email: 'charlie@example.com', role: 'Member', avatarId: 'user-avatar-3' },
-];
-
+// In a real app, this would be fetched or calculated
 const MOCK_MEMBER_DETAILS = {
   '1': { meals: 84, expenses: 12500, purchases: 15 },
   '2': { meals: 75, expenses: 9500, purchases: 12 },
   '3': { meals: 80, expenses: 11000, purchases: 18 },
-}
+};
 
-type Member = typeof MOCK_MEMBERS[0];
-type MemberDetails = typeof MOCK_MEMBER_DETAILS['1'];
-
+type Member = { id: string; name: string; email: string; role: string; avatarId: string; };
 
 export default function AdminPage() {
+  const { firestore } = useFirebase();
+  const { user: currentUser, isUserLoading: isCurrentUserLoading } = useUser();
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
+
+  // 1. Get current user's profile to find their groupId
+  const currentUserRef = useMemoFirebase(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
+  const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
+
+  const groupId = currentUserData?.groupId;
+
+  // 2. Get the group document
+  const groupRef = useMemoFirebase(() => groupId ? doc(firestore, "groups", groupId) : null, [firestore, groupId]);
+  const { data: groupData, isLoading: isGroupLoading } = useDoc(groupRef);
+
+  const memberIds = useMemo(() => groupData?.memberIds || [], [groupData]);
+
+  // 3. Get all members of the group
+  const membersQuery = useMemoFirebase(
+    () =>
+      memberIds.length > 0
+        ? query(collection(firestore, 'users'), where('__name__', 'in', memberIds))
+        : null,
+    [firestore, memberIds]
+  );
+  const { data: membersData, isLoading: areMembersLoading } = useCollection(membersQuery);
 
   const handleRowClick = (member: Member) => {
     setSelectedMember(member);
-  }
-  
+  };
+
   const getAvatar = (avatarId: string) => {
     return placeholderImages.placeholderImages.find(p => p.id === avatarId);
-  }
-
+  };
+  
   const memberDetails = selectedMember ? MOCK_MEMBER_DETAILS[selectedMember.id as keyof typeof MOCK_MEMBER_DETAILS] : null;
+
+  const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || isGroupLoading || areMembersLoading;
+  
+  const members = useMemo(() => {
+    if (!membersData || !groupData) return [];
+    return membersData.map(member => ({
+      id: member.id,
+      name: member.email.split('@')[0], // Placeholder name
+      email: member.email,
+      role: groupData.adminId === member.id ? 'Admin' : 'Member',
+      avatarId: 'user-avatar', // Placeholder avatar
+    }));
+  }, [membersData, groupData]);
+
+  if (isLoading) {
+    return (
+       <div className="space-y-6">
+        <div>
+          <Skeleton className="h-9 w-64" />
+          <Skeleton className="h-4 w-80 mt-2" />
+        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Group Details</CardTitle>
+            <CardDescription>
+              Your group's information and invite code.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid sm:grid-cols-3 gap-4">
+             <Skeleton className="h-20 w-full" />
+             <Skeleton className="h-20 w-full" />
+             <Skeleton className="h-20 w-full" />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Group Members</CardTitle>
+            <CardDescription>Add, remove, or view members in your group.</CardDescription>
+          </CardHeader>
+          <CardContent>
+             <Skeleton className="h-40 w-full" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -67,15 +127,15 @@ export default function AdminPage() {
         <CardContent className="grid sm:grid-cols-3 gap-4">
           <div className="p-4 bg-muted/50 rounded-lg">
             <p className="text-sm text-muted-foreground">Group Name</p>
-            <p className="text-lg font-semibold">{MOCK_GROUP.name}</p>
+            <p className="text-lg font-semibold">{groupData?.groupName || 'N/A'}</p>
           </div>
           <div className="p-4 bg-muted/50 rounded-lg">
             <p className="text-sm text-muted-foreground">Invite Code</p>
-            <p className="text-lg font-mono font-semibold bg-background/50 px-2 py-1 rounded inline-block">{MOCK_GROUP.inviteCode}</p>
+            <p className="text-lg font-mono font-semibold bg-background/50 px-2 py-1 rounded inline-block">{groupData?.invitationCode || 'N/A'}</p>
           </div>
           <div className="p-4 bg-muted/50 rounded-lg">
             <p className="text-sm text-muted-foreground">Total Members</p>
-            <p className="text-lg font-semibold">{MOCK_GROUP.memberCount}</p>
+            <p className="text-lg font-semibold">{groupData?.memberIds?.length || 0}</p>
           </div>
         </CardContent>
       </Card>
@@ -88,7 +148,7 @@ export default function AdminPage() {
           </div>
           <Dialog>
             <DialogTrigger asChild>
-              <Button>
+              <Button disabled={!groupData?.invitationCode}>
                 <PlusCircle className="mr-2 h-4 w-4" /> Invite Member
               </Button>
             </DialogTrigger>
@@ -106,12 +166,12 @@ export default function AdminPage() {
                   </Label>
                   <Input
                     id="link"
-                    defaultValue={MOCK_GROUP.inviteCode}
+                    defaultValue={groupData?.invitationCode}
                     readOnly
                     className="font-mono h-12 text-lg"
                   />
                 </div>
-                <Button size="icon" className="h-12 w-12" onClick={() => navigator.clipboard.writeText(MOCK_GROUP.inviteCode)}>
+                <Button size="icon" className="h-12 w-12" onClick={() => navigator.clipboard.writeText(groupData?.invitationCode)}>
                   <span className="sr-only">Copy</span>
                   <Copy className="h-5 w-5" />
                 </Button>
@@ -130,7 +190,7 @@ export default function AdminPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {MOCK_MEMBERS.map((member) => {
+                {members.length > 0 ? members.map((member) => {
                   const avatar = getAvatar(member.avatarId);
                   return (
                   <DialogTrigger asChild key={member.id}>
@@ -139,7 +199,7 @@ export default function AdminPage() {
                         <div className="flex items-center gap-3">
                           <Avatar>
                             {avatar && <AvatarImage src={avatar.imageUrl} alt={member.name} data-ai-hint={avatar.imageHint} />}
-                            <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                            <AvatarFallback>{member.name.charAt(0).toUpperCase()}</AvatarFallback>
                           </Avatar>
                           <div>
                             <p className="font-medium">{member.name}</p>
@@ -161,8 +221,8 @@ export default function AdminPage() {
                         )}
                       </TableCell>
                       <TableCell className="text-right">
-                        {member.role !== 'Admin' && (
-                          <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); /* handle delete */ }}>
+                        {member.role !== 'Admin' && currentUserData?.isAdmin && (
+                          <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); alert('Remove member functionality to be implemented.'); }}>
                             <Trash2 className="h-4 w-4" />
                             <span className="sr-only">Remove member</span>
                           </Button>
@@ -170,7 +230,11 @@ export default function AdminPage() {
                       </TableCell>
                     </TableRow>
                   </DialogTrigger>
-                )})}
+                )}) : (
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-center h-24">No members found in this group.</TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
 
@@ -207,4 +271,4 @@ export default function AdminPage() {
     </div>
   );
 }
-
+    
