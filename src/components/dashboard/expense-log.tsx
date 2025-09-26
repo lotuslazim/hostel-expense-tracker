@@ -11,17 +11,51 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
+import { useFirebase, useUser, useDoc, useMemoFirebase, addDocumentNonBlocking } from "@/firebase";
+import { doc, collection } from "firebase/firestore";
 
 const expenseCategories = ["Food", "Electricity", "Gas"] as const;
+type ExpenseCategory = typeof expenseCategories[number];
 
-const categoryIcons: Record<typeof expenseCategories[number], React.ReactNode> = {
+const categoryIcons: Record<ExpenseCategory, React.ReactNode> = {
   Food: <Utensils className="h-5 w-5" />,
   Electricity: <Zap className="h-5 w-5" />,
   Gas: <Flame className="h-5 w-5" />,
 };
 
-export function ExpenseLog({ expenses }: { expenses: Expense[] }) {
+export function ExpenseLog({ expenses, currentDate }: { expenses: Expense[]; currentDate: Date }) {
   const [open, setOpen] = useState(false);
+  const [description, setDescription] = useState("");
+  const [amount, setAmount] = useState("");
+  const [category, setCategory] = useState<ExpenseCategory | undefined>();
+
+  const { firestore } = useFirebase();
+  const { user: currentUser } = useUser();
+  const currentUserRef = useMemoFirebase(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
+  const { data: currentUserData } = useDoc(currentUserRef);
+  const groupId = currentUserData?.groupId;
+
+  const handleSaveExpense = () => {
+    if (!description || !amount || !category || !groupId || !currentUser) return;
+
+    const expenseData = {
+      userId: currentUser.uid,
+      groupId,
+      description,
+      amount: parseFloat(amount),
+      category,
+      date: currentDate,
+    };
+
+    const expensesCol = collection(firestore, `groups/${groupId}/expenses`);
+    addDocumentNonBlocking(expensesCol, expenseData);
+
+    // Reset form
+    setDescription("");
+    setAmount("");
+    setCategory(undefined);
+    setOpen(false);
+  };
 
   return (
     <Card>
@@ -43,15 +77,15 @@ export function ExpenseLog({ expenses }: { expenses: Expense[] }) {
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
                    <Label htmlFor="description">Description</Label>
-                   <Input id="description" placeholder="e.g., Weekly groceries" />
+                   <Input id="description" placeholder="e.g., Weekly groceries" value={description} onChange={e => setDescription(e.target.value)} />
                 </div>
                  <div className="space-y-2">
                    <Label htmlFor="amount">Amount</Label>
-                   <Input id="amount" type="number" placeholder="e.g., 45.00" />
+                   <Input id="amount" type="number" placeholder="e.g., 45.00" value={amount} onChange={e => setAmount(e.target.value)} />
                 </div>
                 <div className="space-y-2">
                    <Label htmlFor="category">Category</Label>
-                   <Select>
+                   <Select value={category} onValueChange={(value: ExpenseCategory) => setCategory(value)}>
                       <SelectTrigger id="category">
                         <SelectValue placeholder="Select a category" />
                       </SelectTrigger>
@@ -67,7 +101,7 @@ export function ExpenseLog({ expenses }: { expenses: Expense[] }) {
                    <Button asChild variant="outline" className="w-full justify-start font-normal text-muted-foreground"><label htmlFor="receipt" className="flex items-center cursor-pointer w-full"><FileUp className="mr-2 h-4 w-4"/> Click to upload</label></Button>
                    <Input id="receipt" type="file" className="hidden"/>
                 </div>
-                <Button className="w-full" onClick={() => setOpen(false)}>Save Expense</Button>
+                <Button className="w-full" onClick={handleSaveExpense} disabled={!description || !amount || !category}>Save Expense</Button>
               </div>
            </DialogContent>
          </Dialog>

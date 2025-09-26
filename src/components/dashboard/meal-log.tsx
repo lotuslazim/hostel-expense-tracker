@@ -1,3 +1,6 @@
+
+"use client";
+
 import type { Meal, MealType } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -5,6 +8,9 @@ import { CheckCircle2, PlusCircle, Utensils, Sandwich, Soup, Cookie } from "luci
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useState } from "react";
+import { useFirebase, useUser, useDoc, useMemoFirebase, addDocumentNonBlocking } from "@/firebase";
+import { doc, collection } from "firebase/firestore";
 
 const mealTypes: MealType[] = ['lunch', 'dinner'];
 
@@ -15,7 +21,64 @@ const mealIcons: Record<MealType, React.ReactNode> = {
   snack: <Cookie className="h-6 w-6 text-muted-foreground" />,
 };
 
-export function MealLog({ meals }: { meals: Meal[] }) {
+function LogMealDialog({ type, currentDate }: { type: MealType; currentDate: Date }) {
+    const [open, setOpen] = useState(false);
+    const [description, setDescription] = useState("");
+    
+    const { firestore } = useFirebase();
+    const { user: currentUser } = useUser();
+    const currentUserRef = useMemoFirebase(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
+    const { data: currentUserData } = useDoc(currentUserRef);
+    const groupId = currentUserData?.groupId;
+
+    const handleSaveMeal = () => {
+        if (!description || !groupId || !currentUser) return;
+        
+        const mealData = {
+            userId: currentUser.uid,
+            groupId,
+            mealType: type,
+            description,
+            date: currentDate,
+        };
+
+        const mealsCol = collection(firestore, `groups/${groupId}/meals`);
+        addDocumentNonBlocking(mealsCol, mealData);
+
+        setDescription("");
+        setOpen(false);
+    };
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+           <DialogTrigger asChild>
+              <Button variant="ghost" size="sm">
+                <PlusCircle className="mr-2 h-4 w-4" /> Log Meal
+              </Button>
+           </DialogTrigger>
+           <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Log {type}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                   <Label htmlFor={`description-${type}`}>Item Name</Label>
+                   <Input 
+                        id={`description-${type}`}
+                        placeholder="e.g., Grilled Chicken Salad"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                    />
+                </div>
+                <Button className="w-full" onClick={handleSaveMeal} disabled={!description}>Save Meal</Button>
+              </div>
+           </DialogContent>
+         </Dialog>
+    );
+}
+
+
+export function MealLog({ meals, currentDate }: { meals: Meal[], currentDate: Date }) {
   return (
     <Card>
       <CardHeader>
@@ -24,7 +87,7 @@ export function MealLog({ meals }: { meals: Meal[] }) {
       </CardHeader>
       <CardContent className="grid gap-6">
         {mealTypes.map((type) => {
-          const loggedMeal = meals.find((meal) => meal.type === type);
+          const loggedMeal = meals.find((meal) => meal.mealType === type);
           return (
             <div key={type} className="flex items-center justify-between p-4 rounded-lg border bg-card">
               <div className="flex items-center gap-4">
@@ -44,29 +107,7 @@ export function MealLog({ meals }: { meals: Meal[] }) {
                   <span className="text-sm font-medium">Logged</span>
                 </div>
               ) : (
-                 <Dialog>
-                   <DialogTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <PlusCircle className="mr-2 h-4 w-4" /> Log Meal
-                      </Button>
-                   </DialogTrigger>
-                   <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Log {type}</DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-4 py-4">
-                        <div className="space-y-2">
-                           <Label htmlFor={`meal-count-${type}`}>Meal Count</Label>
-                           <Input id={`meal-count-${type}`} type="number" placeholder="e.g., 1" />
-                        </div>
-                        <div className="space-y-2">
-                           <Label htmlFor={`item-name-${type}`}>Item Name</Label>
-                           <Input id={`item-name-${type}`} placeholder="e.g., Grilled Chicken" />
-                        </div>
-                        <Button className="w-full">Save Meal</Button>
-                      </div>
-                   </DialogContent>
-                 </Dialog>
+                 <LogMealDialog type={type} currentDate={currentDate} />
               )}
             </div>
           );

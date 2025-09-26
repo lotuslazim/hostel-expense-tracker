@@ -18,7 +18,8 @@ import {
 export function DateSwitcher({
   className,
   currentDate: initialDate,
-}: React.HTMLAttributes<HTMLDivElement> & { currentDate: Date }) {
+  setCurrentDate,
+}: React.HTMLAttributes<HTMLDivElement> & { currentDate: Date; setCurrentDate: (date: Date) => void; }) {
   const router = useRouter();
   const [date, setDate] = React.useState<Date>(initialDate);
 
@@ -30,6 +31,7 @@ export function DateSwitcher({
   const handleDateChange = (newDate: Date | undefined) => {
     if (newDate) {
       setDate(newDate);
+      setCurrentDate(newDate);
       router.push(`/dashboard?date=${format(newDate, "yyyy-MM-dd")}`);
     }
   };

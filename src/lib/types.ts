@@ -1,11 +1,13 @@
+
 export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 
 export interface Meal {
   id: string;
-  type: MealType;
+  mealType: MealType;
   description: string;
-  calories: number;
-  loggedAt: Date;
+  date: Date;
+  userId: string;
+  groupId: string;
 }
 
 export interface Expense {

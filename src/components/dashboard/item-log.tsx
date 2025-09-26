@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { Item } from "@/lib/types";
@@ -5,28 +6,42 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
+import { useFirebase, useUser, useDoc, useMemoFirebase, addDocumentNonBlocking } from "@/firebase";
+import { doc, collection } from "firebase/firestore";
 
-export function ItemLog({ items, onSetItems }: { items: Item[]; onSetItems: (items: Item[]) => void; }) {
+export function ItemLog({ items, currentDate }: { items: Item[]; currentDate: Date }) {
   const [open, setOpen] = useState(false);
   const [itemName, setItemName] = useState('');
   const [quantity, setQuantity] = useState('');
   const [unit, setUnit] = useState('');
   const [cost, setCost] = useState('');
 
+  const { firestore } = useFirebase();
+  const { user: currentUser } = useUser();
+  const currentUserRef = useMemoFirebase(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
+  const { data: currentUserData } = useDoc(currentUserRef);
+  const groupId = currentUserData?.groupId;
+
   const handleSaveItem = () => {
-    const newItem: Item = {
-      id: new Date().toISOString(),
+    if (!itemName || !quantity || !unit || !cost || !groupId || !currentUser) return;
+    
+    const itemData = {
+      userId: currentUser.uid,
+      groupId,
       name: itemName,
       quantity: Number(quantity),
       unit: unit,
       cost: Number(cost),
-      date: new Date(),
+      date: currentDate,
     };
-    onSetItems([...items, newItem]);
+
+    const itemsCol = collection(firestore, `groups/${groupId}/purchasedItems`);
+    addDocumentNonBlocking(itemsCol, itemData);
+
     setItemName('');
     setQuantity('');
     setUnit('');
@@ -70,7 +85,7 @@ export function ItemLog({ items, onSetItems }: { items: Item[]; onSetItems: (ite
                    <Label htmlFor="cost">Total Cost</Label>
                    <Input id="cost" type="number" placeholder="e.g., 1.29" value={cost} onChange={(e) => setCost(e.target.value)} />
                 </div>
-                <Button className="w-full" onClick={handleSaveItem}>Save Item</Button>
+                <Button className="w-full" onClick={handleSaveItem} disabled={!itemName || !quantity || !unit || !cost}>Save Item</Button>
               </div>
            </DialogContent>
          </Dialog>
