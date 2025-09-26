@@ -20,8 +20,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
 import { AlertTriangle, UserCog, Settings, Bell, Palette, Globe, LogOut, Trash2, Shield, Edit, ShieldCheck, FileDown, SlidersHorizontal } from "lucide-react"
+import { ThemeSwitcher } from "@/components/settings/theme-switcher"
 
 // Mock data, in a real app this would come from your auth/user state
 const USER_IS_ADMIN = true;
@@ -57,7 +57,7 @@ export default function SettingsPage() {
               <CardContent>
                 <div className="flex items-center justify-between">
                   <Label htmlFor="dark-mode">Dark Mode</Label>
-                  <Switch id="dark-mode" />
+                  <ThemeSwitcher />
                 </div>
               </CardContent>
             </Card>
@@ -84,15 +84,15 @@ export default function SettingsPage() {
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="meal-reminders">Meal Reminders</Label>
-                  <Switch id="meal-reminders" defaultChecked />
+                  <ThemeSwitcher />
                 </div>
                 <div className="flex items-center justify-between">
                   <Label htmlFor="expense-alerts">Expense Alerts</Label>
-                  <Switch id="expense-alerts" />
+                  <ThemeSwitcher />
                 </div>
                 <div className="flex items-center justify-between">
                   <Label htmlFor="missed-day-alerts">Missed Day Alerts</Label>
-                  <Switch id="missed-day-alerts" defaultChecked />
+                  <ThemeSwitcher />
                 </div>
               </CardContent>
             </Card>
