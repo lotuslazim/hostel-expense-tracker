@@ -1,7 +1,8 @@
+
 "use client";
 
 import * as React from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { format, addDays, subDays } from "date-fns";
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -17,19 +18,12 @@ import {
 export function DateSwitcher({
   className,
   currentDate: initialDate,
-}: React.HTMLAttributes<HTMLDivElement> & { currentDate: Date | null }) {
+}: React.HTMLAttributes<HTMLDivElement> & { currentDate: Date }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const [date, setDate] = React.useState<Date | null>(initialDate);
+  const [date, setDate] = React.useState<Date>(initialDate);
 
   React.useEffect(() => {
-    if (initialDate) {
-      setDate(initialDate);
-    } else {
-      // If no date is in the URL, default to today on the client
-      const today = new Date();
-      setDate(today);
-    }
+    setDate(initialDate);
   }, [initialDate]);
 
 
@@ -41,22 +35,16 @@ export function DateSwitcher({
   };
 
   const handlePreviousDay = () => {
-    if(date) {
-      handleDateChange(subDays(date, 1));
-    }
+    handleDateChange(subDays(date, 1));
   };
 
   const handleNextDay = () => {
-    if(date) {
-      handleDateChange(addDays(date, 1));
-    }
+    handleDateChange(addDays(date, 1));
   };
-  
-  const currentDate = date || new Date();
 
   return (
     <div className={cn("flex items-center gap-2", className)}>
-      <Button variant="outline" size="icon" onClick={handlePreviousDay} aria-label="Previous day" disabled={!date}>
+      <Button variant="outline" size="icon" onClick={handlePreviousDay} aria-label="Previous day">
         <ChevronLeft className="h-4 w-4" />
       </Button>
       <Popover>
@@ -67,7 +55,6 @@ export function DateSwitcher({
               "w-[240px] justify-start text-left font-normal",
               !date && "text-muted-foreground"
             )}
-            disabled={!date}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
             {date ? format(date, "PPP") : <span>Pick a date</span>}
@@ -76,13 +63,13 @@ export function DateSwitcher({
         <PopoverContent className="w-auto p-0" align="end">
           <Calendar
             mode="single"
-            selected={date ?? undefined}
+            selected={date}
             onSelect={handleDateChange}
             initialFocus
           />
         </PopoverContent>
       </Popover>
-      <Button variant="outline" size="icon" onClick={handleNextDay} aria-label="Next day" disabled={!date}>
+      <Button variant="outline" size="icon" onClick={handleNextDay} aria-label="Next day">
         <ChevronRight className="h-4 w-4" />
       </Button>
     </div>
