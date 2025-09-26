@@ -17,30 +17,17 @@ const totalGroupUtilities = totalGroupElectricity + totalGroupGas;
 const totalGroupMeals = groupData.members.reduce((acc, member) => acc + member.meals, 0);
 const memberCount = groupData.members.length;
 
-// Meal rate is based on food expenses only
-const mealRate = totalGroupFoodExpenses > 0 && totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
 // For simplicity, let's assume utility bills are split equally.
 const utilitySharePerMember = memberCount > 0 ? totalGroupUtilities / memberCount : 0;
 
 
 const settlementData = groupData.members.map(member => {
-  const mealShare = member.meals * mealRate;
-  const mealBalance = member.expenses.food - mealShare;
-
   const utilityPaid = member.expenses.electricity + member.expenses.gas;
-  const utilityBalance = utilityPaid - utilitySharePerMember;
-  
-  const finalBalance = mealBalance + utilityBalance;
   
   const totalExpenses = member.expenses.food + utilityPaid;
 
   return {
     ...member,
-    mealShare,
-    mealBalance,
-    utilityPaid,
-    utilityBalance,
-    finalBalance,
     totalExpenses,
   };
 });
@@ -56,9 +43,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
   return (
     <div className="space-y-8">
       <Card className="max-w-5xl mx-auto">
-        <CardHeader>
-        </CardHeader>
-        <CardContent className="space-y-8">
+        <CardContent className="space-y-8 pt-6">
           <div>
             <h3 className="text-lg font-medium mb-4">Overall Summary</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
@@ -78,10 +63,6 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                 <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1"><Utensils /> Total Meals</p>
                 <p className="text-2xl font-bold">{totalGroupMeals}</p>
               </Link>
-              <div className="p-4 bg-secondary/80 rounded-lg col-span-full">
-                <p className="text-sm text-secondary-foreground/80 flex items-center justify-center gap-2 mb-1"><Users /> Utility Share per Member</p>
-                <p className="text-2xl font-bold text-secondary-foreground">৳{utilitySharePerMember.toFixed(2)}</p>
-              </div>
             </div>
           </div>
           
@@ -96,7 +77,16 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {settlementData.map((member) => (
+                  {MOCK_MONTHLY_GROUP_DATA.members.map((member) => {
+                    const mealRate = totalGroupFoodExpenses > 0 && totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
+                    const mealShare = member.meals * mealRate;
+                    const mealBalance = member.expenses.food - mealShare;
+                    const utilityPaid = member.expenses.electricity + member.expenses.gas;
+                    const utilityBalance = utilityPaid - utilitySharePerMember;
+                    const finalBalance = mealBalance + utilityBalance;
+                    const totalExpenses = member.expenses.food + utilityPaid;
+
+                    return (
                     <TableRow key={member.id}>
                       <TableCell className="font-medium">
                         <Link href={`/report/${member.id}`} className="hover:underline text-primary">
@@ -104,16 +94,16 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                         </Link>
                       </TableCell>
                       <TableCell className="text-right font-semibold">
-                        ৳{member.totalExpenses.toFixed(2)}
+                        ৳{totalExpenses.toFixed(2)}
                       </TableCell>
                       <TableCell className={cn(
                         "text-right font-bold",
-                        member.finalBalance >= 0 ? "text-green-600" : "text-red-600"
+                        finalBalance >= 0 ? "text-green-600" : "text-red-600"
                       )}>
-                        {member.finalBalance >= 0 ? `+৳${member.finalBalance.toFixed(2)}` : `-৳${Math.abs(member.finalBalance).toFixed(2)}`}
+                        {finalBalance >= 0 ? `Gets Back: ৳${finalBalance.toFixed(2)}` : `Owes: ৳${Math.abs(finalBalance).toFixed(2)}`}
                       </TableCell>
                     </TableRow>
-                  ))}
+                  )})}
                 </TableBody>
             </Table>
           </div>
