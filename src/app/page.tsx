@@ -26,7 +26,7 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
               <h1 className="text-4xl md:text-5xl font-bold tracking-tighter font-headline">
-                Collaborative Meal & Expense Tracking
+                Hey, Gorom Chele
               </h1>
               <p className="text-lg text-muted-foreground">
                 Simplify shared living with NourishTrack. Log meals, track expenses, and settle up with your flatmates, all in one place.
