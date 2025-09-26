@@ -23,23 +23,48 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { AlertTriangle, UserCog, Settings, Bell, Palette, Globe, LogOut, Trash2, Shield, Edit, ShieldCheck, FileDown, SlidersHorizontal } from "lucide-react"
+import { AlertTriangle, UserCog, Settings, Bell, Palette, Globe, LogOut, Trash2, Shield, Edit, ShieldCheck, FileDown, SlidersHorizontal, Loader2 } from "lucide-react"
 import { ThemeSwitcher } from "@/components/settings/theme-switcher"
 import { useI18n } from "@/i18n/client-provider"
 import { Switch } from "@/components/ui/switch"
-
-// Mock data, in a real app this would come from your auth/user state
-const USER_IS_ADMIN = true;
-const MOCK_GROUP = {
-  name: "Sunset Apartment",
-  inviteCode: "SUNSET123",
-};
+import { useFirebase, useUser, useDoc, useMemoFirebase } from "@/firebase";
+import { doc } from "firebase/firestore";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function SettingsPage() {
   const { lang, setLang, t } = useI18n();
   const [mealReminders, setMealReminders] = React.useState(true);
   const [expenseAlerts, setExpenseAlerts] = React.useState(false);
   const [missedDayAlerts, setMissedDayAlerts] = React.useState(true);
+
+  const { firestore } = useFirebase();
+  const { user: currentUser, isUserLoading: isCurrentUserLoading } = useUser();
+
+  const currentUserRef = useMemoFirebase(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
+  const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
+
+  const groupId = currentUserData?.groupId;
+
+  const groupRef = useMemoFirebase(() => groupId ? doc(firestore, "groups", groupId) : null, [firestore, groupId]);
+  const { data: groupData, isLoading: isGroupLoading } = useDoc(groupRef);
+
+  const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || isGroupLoading;
+
+  if (isLoading) {
+    return (
+       <div className="max-w-3xl mx-auto">
+        <div className="mb-8">
+          <Skeleton className="h-9 w-48" />
+          <Skeleton className="h-4 w-72 mt-2" />
+        </div>
+        <div className="space-y-4">
+          <Skeleton className="h-14 w-full" />
+          <Skeleton className="h-14 w-full" />
+          <Skeleton className="h-14 w-full" />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -135,14 +160,20 @@ export default function SettingsPage() {
                   <CardTitle className="text-base">{t('settings.account_settings.group_info.title')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                 <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">{t('settings.account_settings.group_info.group_name')}</span>
-                    <span className="font-medium">{MOCK_GROUP.name}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">{t('settings.account_settings.group_info.invite_code')}</span>
-                    <span className="font-mono text-sm bg-muted px-2 py-1 rounded">{MOCK_GROUP.inviteCode}</span>
-                  </div>
+                {groupData ? (
+                  <>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">{t('settings.account_settings.group_info.group_name')}</span>
+                      <span className="font-medium">{groupData.groupName}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">{t('settings.account_settings.group_info.invite_code')}</span>
+                      <span className="font-mono text-sm bg-muted px-2 py-1 rounded">{groupData.invitationCode}</span>
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-muted-foreground text-sm">You are not currently in a group. Go to the Admin Panel to create or join one.</p>
+                )}
               </CardContent>
             </Card>
             <Card>
@@ -152,7 +183,7 @@ export default function SettingsPage() {
               <CardContent className="space-y-4">
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" disabled={!groupData}>
                       <LogOut className="mr-2 h-4 w-4" /> {t('settings.account_settings.actions.leave_group')}
                     </Button>
                   </AlertDialogTrigger>
@@ -194,7 +225,7 @@ export default function SettingsPage() {
         </AccordionItem>
         
         {/* Admin Settings */}
-        {USER_IS_ADMIN && (
+        {currentUserData?.isAdmin && (
           <AccordionItem value="admin-settings">
             <AccordionTrigger className="text-lg font-semibold">
               <div className="flex items-center gap-3 text-primary">
@@ -252,3 +283,5 @@ export default function SettingsPage() {
     </div>
   )
 }
+
+    
