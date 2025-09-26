@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import { getMonthlyGroupData } from "@/ai/flows/get-monthly-group-data";
 import type { MonthlyGroupData } from "@/ai/schemas";
 import { Skeleton } from "@/components/ui/skeleton";
+import { format } from "date-fns";
 
 interface MonthlySummaryProps {
   month: Date;
@@ -95,6 +96,8 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
   const memberCount = groupData.members.length;
   const utilitySharePerMember = memberCount > 0 ? totalGroupUtilities / memberCount : 0;
   
+  const monthQueryParam = format(month, 'yyyy-MM-dd');
+
   return (
     <div className="space-y-8">
       <Card className="max-w-5xl mx-auto">
@@ -144,7 +147,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                     return (
                     <TableRow key={member.id}>
                       <TableCell className="font-medium">
-                        <Link href={`/report/${member.id}`} className="hover:underline text-primary">
+                        <Link href={`/report/${member.id}?month=${monthQueryParam}`} className="hover:underline text-primary">
                           {member.name}
                         </Link>
                       </TableCell>

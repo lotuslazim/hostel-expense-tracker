@@ -1,30 +1,127 @@
 
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { MOCK_MONTHLY_GROUP_DATA } from "@/lib/data";
-import { notFound } from "next/navigation";
-import { eachDayOfInterval, startOfMonth, endOfMonth, format } from "date-fns";
-import { ArrowLeft, Utensils, Zap, Flame, Scale, Minus, Plus } from "lucide-react";
+import { notFound, useSearchParams } from "next/navigation";
+import { eachDayOfInterval, startOfMonth, endOfMonth, format, parseISO } from "date-fns";
+import { ArrowLeft, Utensils, Zap, Flame, Scale } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useFirebase, useUser, useDoc, useMemoFirebase } from "@/firebase";
+import { doc } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { getMonthlyGroupData } from "@/ai/flows/get-monthly-group-data";
+import { getMemberDailyData } from "@/ai/flows/get-member-daily-data";
+import type { MonthlyGroupData, MemberDailyData } from "@/ai/schemas";
+import { Skeleton } from "@/components/ui/skeleton";
 
-// This is mock data for a single member's daily activity
-const MOCK_MEMBER_DAILY_DATA = [
-    { date: "2025-09-01", meals: 2, expenses: { food: 350, electricity: 0, gas: 0 } },
-    { date: "2025-09-02", meals: 3, expenses: { food: 200, electricity: 0, gas: 0 } },
-    { date: "2025-09-03", meals: 1, expenses: { food: 0, electricity: 0, gas: 0 } },
-    { date: "2025-09-04", meals: 2, expenses: { food: 500, electricity: 0, gas: 0 } },
-    { date: "2025-09-05", meals: 2, expenses: { food: 150, electricity: 1200, gas: 500 } },
-    // ... more days
-];
+function ReportSkeleton() {
+  return (
+    <div className="space-y-6">
+        <div className="flex items-center gap-4">
+            <Skeleton className="h-10 w-10" />
+            <div>
+              <Skeleton className="h-9 w-64 mb-2" />
+              <Skeleton className="h-4 w-80" />
+            </div>
+        </div>
+        
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Scale className="h-5 w-5" /> Settlement Calculation</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <Skeleton className="h-14 w-full" />
+                <Skeleton className="h-14 w-full" />
+                <Skeleton className="h-20 w-full" />
+            </CardContent>
+        </Card>
+
+        <div className="grid md:grid-cols-2 gap-6">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Daily Meal Log</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <Skeleton className="h-96 w-full" />
+                </CardContent>
+            </Card>
+            <div className="space-y-6">
+                <Card>
+                    <CardHeader><CardTitle>Meal Summary</CardTitle></CardHeader>
+                    <CardContent><Skeleton className="h-24 w-full" /></CardContent>
+                </Card>
+                <Card>
+                    <CardHeader><CardTitle>Expense Summary</CardTitle></CardHeader>
+                    <CardContent className="space-y-3">
+                        <Skeleton className="h-16 w-full" />
+                        <Skeleton className="h-16 w-full" />
+                        <Skeleton className="h-16 w-full" />
+                    </CardContent>
+                </Card>
+            </div>
+        </div>
+    </div>
+  );
+}
+
 
 export default function MemberReportPage({ params }: { params: { memberId: string } }) {
     const memberId = params.memberId;
+    const searchParams = useSearchParams();
+    const monthParam = searchParams.get('month');
+    
+    const { firestore } = useFirebase();
+    const { user: currentUser, isUserLoading: isCurrentUserLoading } = useUser();
 
-    const groupData = MOCK_MONTHLY_GROUP_DATA;
+    const currentUserRef = useMemoFirebase(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
+    const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
+    const groupId = currentUserData?.groupId;
+
+    const [groupData, setGroupData] = useState<MonthlyGroupData | null>(null);
+    const [memberDailyData, setMemberDailyData] = useState<MemberDailyData | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    const targetDate = monthParam ? parseISO(monthParam) : new Date();
+
+    useEffect(() => {
+        if (groupId && memberId) {
+            setIsLoading(true);
+            Promise.all([
+                getMonthlyGroupData({ groupId, date: targetDate.toISOString() }),
+                getMemberDailyData({ groupId, memberId, date: targetDate.toISOString() })
+            ]).then(([monthlyData, dailyData]) => {
+                setGroupData(monthlyData);
+                setMemberDailyData(dailyData);
+                setError(null);
+            }).catch(err => {
+                console.error("Failed to fetch report data:", err);
+                setError("Could not load report data.");
+            }).finally(() => {
+                setIsLoading(false);
+            });
+        } else if (!isCurrentUserLoading && !isCurrentUserDataLoading) {
+            setIsLoading(false);
+        }
+    }, [groupId, memberId, targetDate, isCurrentUserLoading, isCurrentUserDataLoading]);
+    
+    const dataLoading = isLoading || isCurrentUserLoading || isCurrentUserDataLoading;
+
+    if (dataLoading) {
+        return <ReportSkeleton />;
+    }
+
+    if (error) {
+        return <Card><CardContent><p className="text-center text-destructive py-8">{error}</p></CardContent></Card>;
+    }
+    
+    if (!groupData || !memberDailyData) {
+        return <Card><CardContent><p className="text-center text-muted-foreground py-8">No data available for this report.</p></CardContent></Card>;
+    }
+
     const member = groupData.members.find(m => m.id === memberId);
 
     if (!member) {
@@ -48,17 +145,15 @@ export default function MemberReportPage({ params }: { params: { memberId: strin
     const utilityBalance = utilityPaid - utilitySharePerMember;
     const finalBalance = mealBalance + utilityBalance;
 
-    // In a real app, you would fetch the month from a query param or state
-    const currentDate = new Date(MOCK_MONTHLY_GROUP_DATA.month);
     const daysInMonth = eachDayOfInterval({
-        start: startOfMonth(currentDate),
-        end: endOfMonth(currentDate),
+        start: startOfMonth(targetDate),
+        end: endOfMonth(targetDate),
     });
 
-    const totalMeals = MOCK_MEMBER_DAILY_DATA.reduce((acc, day) => acc + day.meals, 0);
-    const totalFoodExpenses = MOCK_MEMBER_DAILY_DATA.reduce((acc, day) => acc + day.expenses.food, 0);
-    const totalElectricityExpenses = MOCK_MEMBER_DAILY_DATA.reduce((acc, day) => acc + day.expenses.electricity, 0);
-    const totalGasExpenses = MOCK_MEMBER_DAILY_DATA.reduce((acc, day) => acc + day.expenses.gas, 0);
+    const totalMeals = memberDailyData.dailyData.reduce((acc, day) => acc + day.meals, 0);
+    const totalFoodExpenses = memberDailyData.dailyData.reduce((acc, day) => acc + day.expenses.food, 0);
+    const totalElectricityExpenses = memberDailyData.dailyData.reduce((acc, day) => acc + day.expenses.electricity, 0);
+    const totalGasExpenses = memberDailyData.dailyData.reduce((acc, day) => acc + day.expenses.gas, 0);
 
   return (
     <div className="space-y-6">
@@ -71,7 +166,7 @@ export default function MemberReportPage({ params }: { params: { memberId: strin
                 {member.name}'s Daily Log
               </h1>
               <p className="text-muted-foreground">
-                A daily breakdown of meals and expenses for {format(currentDate, "MMMM yyyy")}.
+                A daily breakdown of meals and expenses for {format(targetDate, "MMMM yyyy")}.
               </p>
             </div>
         </div>
@@ -126,7 +221,7 @@ export default function MemberReportPage({ params }: { params: { memberId: strin
                         <TableBody>
                             {daysInMonth.map((day) => {
                                 const dayString = format(day, "yyyy-MM-dd");
-                                const activity = MOCK_MEMBER_DAILY_DATA.find(d => d.date === dayString);
+                                const activity = memberDailyData.dailyData.find(d => d.date === dayString);
                                 return (
                                     <TableRow key={dayString}>
                                         <TableCell className="font-medium">{format(day, "MMMM d, yyyy")}</TableCell>

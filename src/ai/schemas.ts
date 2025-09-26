@@ -17,3 +17,20 @@ export const MonthlyGroupDataSchema = z.object({
 });
 
 export type MonthlyGroupData = z.infer<typeof MonthlyGroupDataSchema>;
+
+
+export const DailyLogSchema = z.object({
+  date: z.string(),
+  meals: z.number(),
+  expenses: z.object({
+    food: z.number(),
+    electricity: z.number(),
+    gas: z.number(),
+  }),
+});
+export type DailyLog = z.infer<typeof DailyLogSchema>;
+
+export const MemberDailyDataSchema = z.object({
+    dailyData: z.array(DailyLogSchema),
+});
+export type MemberDailyData = z.infer<typeof MemberDailyDataSchema>;
