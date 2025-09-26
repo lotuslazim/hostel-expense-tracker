@@ -6,9 +6,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { MOCK_MONTHLY_GROUP_DATA } from "@/lib/data";
 import { notFound, useParams } from "next/navigation";
 import { eachDayOfInterval, startOfMonth, endOfMonth, format } from "date-fns";
-import { ArrowLeft, Utensils, Zap, Flame } from "lucide-react";
+import { ArrowLeft, Utensils, Zap, Flame, Scale, Minus, Plus } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 // This is mock data for a single member's daily activity
 const MOCK_MEMBER_DAILY_DATA = [
@@ -24,12 +25,30 @@ export default function MemberReportPage() {
     const params = useParams();
     const memberId = params.memberId as string;
 
-    const member = MOCK_MONTHLY_GROUP_DATA.members.find(m => m.id === memberId);
+    const groupData = MOCK_MONTHLY_GROUP_DATA;
+    const member = groupData.members.find(m => m.id === memberId);
 
     if (!member) {
         notFound();
     }
-    
+
+    // Calculations from monthly-summary
+    const totalGroupFoodExpenses = groupData.members.reduce((acc, member) => acc + member.expenses.food, 0);
+    const totalGroupElectricity = groupData.members.reduce((acc, member) => acc + member.expenses.electricity, 0);
+    const totalGroupGas = groupData.members.reduce((acc, member) => acc + member.expenses.gas, 0);
+    const totalGroupUtilities = totalGroupElectricity + totalGroupGas;
+    const totalGroupMeals = groupData.members.reduce((acc, member) => acc + member.meals, 0);
+    const memberCount = groupData.members.length;
+
+    const mealRate = totalGroupFoodExpenses > 0 && totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
+    const utilitySharePerMember = memberCount > 0 ? totalGroupUtilities / memberCount : 0;
+
+    const mealShare = member.meals * mealRate;
+    const mealBalance = member.expenses.food - mealShare;
+    const utilityPaid = member.expenses.electricity + member.expenses.gas;
+    const utilityBalance = utilityPaid - utilitySharePerMember;
+    const finalBalance = mealBalance + utilityBalance;
+
     // In a real app, you would fetch the month from a query param or state
     const currentDate = new Date(MOCK_MONTHLY_GROUP_DATA.month);
     const daysInMonth = eachDayOfInterval({
@@ -57,6 +76,40 @@ export default function MemberReportPage() {
               </p>
             </div>
         </div>
+        
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Scale className="h-5 w-5" /> Settlement Calculation</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                 <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
+                    <span className="font-medium text-muted-foreground">Meal Balance</span>
+                    <div className="text-right">
+                        <p className={cn("font-semibold", mealBalance >= 0 ? 'text-green-600' : 'text-red-600')}>
+                            {mealBalance >= 0 ? `+৳${mealBalance.toFixed(2)}` : `-৳${Math.abs(mealBalance).toFixed(2)}`}
+                        </p>
+                        <p className="text-xs text-muted-foreground">(Paid ৳{member.expenses.food.toFixed(2)} - Share ৳{mealShare.toFixed(2)})</p>
+                    </div>
+                </div>
+                 <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
+                    <span className="font-medium text-muted-foreground">Utility Balance</span>
+                     <div className="text-right">
+                        <p className={cn("font-semibold", utilityBalance >= 0 ? 'text-green-600' : 'text-red-600')}>
+                            {utilityBalance >= 0 ? `+৳${utilityBalance.toFixed(2)}` : `-৳${Math.abs(utilityBalance).toFixed(2)}`}
+                        </p>
+                        <p className="text-xs text-muted-foreground">(Paid ৳{utilityPaid.toFixed(2)} - Share ৳{utilitySharePerMember.toFixed(2)})</p>
+                    </div>
+                </div>
+                <div className="flex justify-between items-center p-4 bg-background border rounded-lg">
+                    <span className="font-bold text-lg">Final Balance</span>
+                     <div className="text-right">
+                        <p className={cn("font-bold text-xl", finalBalance >= 0 ? 'text-green-600' : 'text-red-600')}>
+                           {finalBalance >= 0 ? `Gets Back: ৳${finalBalance.toFixed(2)}` : `Owes: ৳${Math.abs(finalBalance).toFixed(2)}`}
+                        </p>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
 
         <div className="grid md:grid-cols-2 gap-6">
             <Card>
