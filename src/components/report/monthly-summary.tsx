@@ -7,7 +7,7 @@ import { MOCK_MONTHLY_GROUP_DATA } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import Link from "next/link";
-import { Flame, Zap, Utensils, Hash, Users, Scale } from "lucide-react";
+import { Flame, Zap, Utensils, Users, Scale } from "lucide-react";
 
 const groupData = MOCK_MONTHLY_GROUP_DATA;
 const totalGroupFoodExpenses = groupData.members.reduce((acc, member) => acc + member.expenses.food, 0);
