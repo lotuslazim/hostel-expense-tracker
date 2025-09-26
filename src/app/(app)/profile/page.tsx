@@ -1,9 +1,14 @@
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import placeholderImages from "@/lib/placeholder-images.json";
-import { User, Home, Utensils, DollarSign, ShoppingCart } from "lucide-react";
+import { User, Home, Utensils, DollarSign, ShoppingCart, Pencil, Camera, FileUp } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 // Mock data - in a real app, this would come from Firebase
 const MOCK_USER = {
@@ -44,7 +49,7 @@ export default function ProfilePage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight font-headline">Your Profile</h1>
         <p className="text-muted-foreground">
-          View your personal and group information.
+          View and edit your personal and group information.
         </p>
       </div>
 
@@ -53,23 +58,71 @@ export default function ProfilePage() {
         <div className="md:col-span-1 space-y-6">
           {/* User Info */}
           <Card>
-            <CardHeader className="flex flex-row items-center gap-4">
-              <Avatar className="h-16 w-16">
-                {avatarImage && (
-                  <AvatarImage 
-                    src={avatarImage.imageUrl}
-                    alt="User avatar" 
-                    data-ai-hint={avatarImage.imageHint}
-                  />
-                )}
-                <AvatarFallback>{MOCK_USER.name.charAt(0)}</AvatarFallback>
-              </Avatar>
-              <div>
-                <CardTitle className="text-2xl">{MOCK_USER.name}</CardTitle>
+            <CardHeader>
+              <div className="relative w-20 h-20 mx-auto">
+                <Avatar className="h-20 w-20">
+                  {avatarImage && (
+                    <AvatarImage 
+                      src={avatarImage.imageUrl}
+                      alt="User avatar" 
+                      data-ai-hint={avatarImage.imageHint}
+                    />
+                  )}
+                  <AvatarFallback>{MOCK_USER.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="icon" className="absolute bottom-0 right-0 rounded-full h-8 w-8 bg-background">
+                      <Camera className="h-4 w-4" />
+                      <span className="sr-only">Change profile picture</span>
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Change Profile Picture</DialogTitle>
+                      <DialogDescription>
+                        Upload a new photo for your profile.
+                      </DialogDescription>
+                    </DialogHeader>
+                     <div className="space-y-4 py-4">
+                       <div className="space-y-2">
+                         <Label htmlFor="picture">New Picture</Label>
+                         <Button asChild variant="outline" className="w-full justify-start font-normal text-muted-foreground"><label htmlFor="picture" className="flex items-center cursor-pointer w-full"><FileUp className="mr-2 h-4 w-4"/> Click to upload</label></Button>
+                         <Input id="picture" type="file" className="hidden"/>
+                      </div>
+                      <Button className="w-full">Save Picture</Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+              <div className="text-center mt-4">
+                <div className="flex justify-center items-center gap-2">
+                   <CardTitle className="text-2xl">{MOCK_USER.name}</CardTitle>
+                   <Dialog>
+                      <DialogTrigger asChild>
+                         <Button variant="ghost" size="icon" className="h-7 w-7">
+                           <Pencil className="h-4 w-4" />
+                           <span className="sr-only">Edit name</span>
+                         </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Change Your Name</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                          <div className="space-y-2">
+                             <Label htmlFor="name">New Name</Label>
+                             <Input id="name" defaultValue={MOCK_USER.name} />
+                          </div>
+                          <Button className="w-full">Save Name</Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                </div>
                 <CardDescription>{MOCK_USER.email}</CardDescription>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="text-center">
               <Badge>{MOCK_USER.role}</Badge>
             </CardContent>
           </Card>
@@ -164,3 +217,5 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+    
