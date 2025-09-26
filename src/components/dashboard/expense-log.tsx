@@ -135,9 +135,8 @@ export function ExpenseLog({ expenses, currentDate }: { expenses: Expense[]; cur
                   ))}
                   {categoryExpenses.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={2} className="h-24 text-center">
-                        No expenses logged in this category.
-                      </TableCell>
+                      <TableCell className="font-medium text-muted-foreground">null</TableCell>
+                      <TableCell className="text-right text-muted-foreground">৳0.00</TableCell>
                     </TableRow>
                   )}
                 </TableBody>
