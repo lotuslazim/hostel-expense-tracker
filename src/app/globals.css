@@ -4,57 +4,57 @@
 
 @layer base {
   :root {
-    --background: 77 48% 88%; /* Pale Green */
-    --foreground: 75 48% 16%; /* Dark Olive */
-    --card: 104 22% 71%; /* Muted Green */
-    --card-foreground: 75 48% 16%; /* Dark Olive */
-    --popover: 104 22% 71%; /* Muted Green */
-    --popover-foreground: 75 48% 16%; /* Dark Olive */
-    --primary: 44 32% 42%; /* Earthy Brown-Green */
-    --primary-foreground: 77 48% 88%; /* Pale Green */
-    --secondary: 104 22% 71%; /* Muted Green */
-    --secondary-foreground: 75 48% 16%; /* Dark Olive */
-    --muted: 104 22% 71%; /* Muted Green */
-    --muted-foreground: 75 48% 25%; /* Darker Olive */
-    --accent: 44 32% 42%; /* Earthy Brown-Green */
-    --accent-foreground: 77 48% 88%; /* Pale Green */
+    --background: 62 61% 80%; /* Light Yellow */
+    --foreground: 16 29% 23%; /* Dark Brown */
+    --card: 91 32% 71%; /* Soft Green */
+    --card-foreground: 16 29% 23%; /* Dark Brown */
+    --popover: 91 32% 71%; /* Soft Green */
+    --popover-foreground: 16 29% 23%; /* Dark Brown */
+    --primary: 24 55% 53%; /* Warm Orange */
+    --primary-foreground: 16 29% 10%; /* Very Dark Brown */
+    --secondary: 91 32% 71%; /* Soft Green */
+    --secondary-foreground: 16 29% 23%; /* Dark Brown */
+    --muted: 91 32% 71%; /* Soft Green */
+    --muted-foreground: 16 29% 30%; /* Darker Brown */
+    --accent: 24 55% 53%; /* Warm Orange */
+    --accent-foreground: 16 29% 10%; /* Very Dark Brown */
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 104 15% 65%; /* Muted green, slightly darker */
-    --input: 104 15% 65%; /* Muted green, slightly darker */
-    --ring: 44 32% 42%; /* Earthy Brown-Green */
-    --chart-1: 44 32% 42%;
-    --chart-2: 104 22% 71%;
-    --chart-3: 75 48% 16%;
-    --chart-4: 44 32% 62%;
-    --chart-5: 104 22% 51%;
+    --border: 91 25% 65%; /* Muted Soft Green */
+    --input: 91 25% 65%; /* Muted Soft Green */
+    --ring: 24 55% 53%; /* Warm Orange */
+    --chart-1: 24 55% 53%;
+    --chart-2: 91 32% 71%;
+    --chart-3: 16 29% 23%;
+    --chart-4: 24 55% 63%;
+    --chart-5: 91 32% 61%;
     --radius: 0.5rem;
   }
   .dark {
-    --background: 75 48% 16%; /* Dark Olive */
-    --foreground: 77 48% 88%; /* Pale Green */
-    --card: 75 48% 20%; /* Darker Olive */
-    --card-foreground: 77 48% 88%; /* Pale Green */
-    --popover: 75 48% 20%; /* Darker Olive */
-    --popover-foreground: 77 48% 88%; /* Pale Green */
-    --primary: 44 32% 52%; /* Earthy Brown-Green */
-    --primary-foreground: 75 48% 10%; /* Darkest Olive */
-    --secondary: 75 48% 25%; /* Darker Olive */
-    --secondary-foreground: 77 48% 88%; /* Pale Green */
-    --muted: 75 48% 25%; /* Darker Olive */
-    --muted-foreground: 77 48% 70%; /* Lighter Pale Green */
-    --accent: 44 32% 52%; /* Earthy Brown-Green */
-    --accent-foreground: 75 48% 10%; /* Darkest Olive */
+    --background: 16 29% 23%; /* Dark Brown */
+    --foreground: 62 61% 80%; /* Light Yellow */
+    --card: 16 15% 18%; /* Darker Brown */
+    --card-foreground: 62 61% 80%; /* Light Yellow */
+    --popover: 16 15% 18%; /* Darker Brown */
+    --popover-foreground: 62 61% 80%; /* Light Yellow */
+    --primary: 24 55% 53%; /* Warm Orange */
+    --primary-foreground: 16 29% 10%; /* Very Dark Brown */
+    --secondary: 91 32% 71%; /* Soft Green */
+    --secondary-foreground: 16 29% 23%; /* Dark Brown */
+    --muted: 16 15% 18%; /* Darker Brown */
+    --muted-foreground: 62 61% 70%; /* Lighter Yellow */
+    --accent: 24 55% 53%; /* Warm Orange */
+    --accent-foreground: 16 29% 10%; /* Very Dark Brown */
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 75 48% 25%; /* Darker Olive */
-    --input: 75 48% 25%; /* Darker Olive */
-    --ring: 44 32% 52%; /* Earthy Brown-Green */
-    --chart-1: 44 32% 52%;
-    --chart-2: 75 48% 25%;
-    --chart-3: 77 48% 88%;
-    --chart-4: 44 32% 32%;
-    --chart-5: 75 48% 45%;
+    --border: 16 15% 28%; /* Darker Brown */
+    --input: 16 15% 28%; /* Darker Brown */
+    --ring: 24 55% 53%; /* Warm Orange */
+    --chart-1: 24 55% 53%;
+    --chart-2: 91 32% 71%;
+    --chart-3: 62 61% 80%;
+    --chart-4: 24 55% 33%;
+    --chart-5: 91 32% 51%;
   }
 }
 
