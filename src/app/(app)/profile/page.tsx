@@ -1,4 +1,6 @@
 
+"use client";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -9,39 +11,143 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/firebase";
+import { doc, collection, query, where } from "firebase/firestore";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { Meal, Expense, Item } from "@/lib/types";
 
-// Mock data - in a real app, this would come from Firebase
-const MOCK_USER = {
-  name: "Alice",
-  email: "alice@example.com",
-  role: "Admin",
-  profilePictureId: "user-avatar"
-};
+function ProfileSkeleton() {
+  return (
+    <div className="space-y-8 max-w-4xl mx-auto">
+      <div>
+        <Skeleton className="h-9 w-48" />
+        <Skeleton className="h-4 w-72 mt-2" />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-1 space-y-6">
+          <Card>
+            <CardHeader className="items-center">
+              <Skeleton className="h-20 w-20 rounded-full" />
+              <div className="text-center mt-4">
+                <Skeleton className="h-7 w-24" />
+                <Skeleton className="h-4 w-32 mt-2" />
+              </div>
+            </CardHeader>
+            <CardContent className="text-center">
+              <Skeleton className="h-6 w-16 mx-auto" />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><Home className="h-5 w-5" /> Group Info</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Skeleton className="h-5 w-full" />
+              <Skeleton className="h-5 w-full" />
+              <Skeleton className="h-5 w-full" />
+            </CardContent>
+          </Card>
+        </div>
+        <div className="md:col-span-2 space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><Utensils className="h-5 w-5" /> Meal Contribution</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 gap-4">
+              <Skeleton className="h-24 w-full" />
+              <Skeleton className="h-24 w-full" />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><span className="font-bold text-lg">৳</span> Expense Contribution</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 gap-4">
+              <Skeleton className="h-24 w-full" />
+              <Skeleton className="h-24 w-full" />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><ShoppingCart className="h-5 w-5" /> Purchase Contribution</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-32 w-full" />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-const MOCK_GROUP = {
-  name: "The Foodies",
-  invitationCode: "FDIE-1234",
-  memberCount: 3,
-};
-
-const MOCK_CONTRIBUTIONS = {
-  meals: {
-    total: 84,
-    averagePerDay: 2.8,
-  },
-  expenses: {
-    total: 12500,
-    share: 45,
-  },
-  purchases: [
-    { item: "Rice", quantity: "10 kg" },
-    { item: "Oil", quantity: "2 liters" },
-    { item: "Vegetables", quantity: "5 kg" },
-  ],
-  totalItemsLogged: 15
-};
 
 export default function ProfilePage() {
+  const { firestore } = useFirebase();
+  const { user: currentUser, isUserLoading: isCurrentUserLoading } = useUser();
+
+  // 1. Get current user's profile
+  const currentUserRef = useMemoFirebase(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
+  const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
+
+  const groupId = currentUserData?.groupId;
+  const userName = currentUserData?.email.split('@')[0] || "null";
+  const userEmail = currentUserData?.email || "null";
+
+  // 2. Get group data
+  const groupRef = useMemoFirebase(() => groupId ? doc(firestore, "groups", groupId) : null, [firestore, groupId]);
+  const { data: groupData, isLoading: isGroupDataLoading } = useDoc(groupRef);
+  const isAdmin = groupData?.adminId === currentUser?.uid;
+
+  // 3. Get user's contributions
+  const userMealsQuery = useMemoFirebase(() => (groupId && currentUser) ? query(collection(firestore, `groups/${groupId}/meals`), where("userId", "==", currentUser.uid)) : null, [firestore, groupId, currentUser]);
+  const userExpensesQuery = useMemoFirebase(() => (groupId && currentUser) ? query(collection(firestore, `groups/${groupId}/expenses`), where("userId", "==", currentUser.uid)) : null, [firestore, groupId, currentUser]);
+  const userItemsQuery = useMemoFirebase(() => (groupId && currentUser) ? query(collection(firestore, `groups/${groupId}/purchasedItems`), where("userId", "==", currentUser.uid)) : null, [firestore, groupId, currentUser]);
+  
+  const { data: userMeals, isLoading: areMealsLoading } = useCollection<Meal>(userMealsQuery);
+  const { data: userExpenses, isLoading: areExpensesLoading } = useCollection<Expense>(userExpensesQuery);
+  const { data: userItems, isLoading: areItemsLoading } = useCollection<Item>(userItemsQuery);
+
+  // 4. Get total group expenses for calculating share
+  const groupExpensesQuery = useMemoFirebase(() => groupId ? collection(firestore, `groups/${groupId}/expenses`) : null, [firestore, groupId]);
+  const { data: groupExpenses, isLoading: areGroupExpensesLoading } = useCollection<Expense>(groupExpensesQuery);
+
+
+  const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || isGroupDataLoading || areMealsLoading || areExpensesLoading || areItemsLoading || areGroupExpensesLoading;
+
+  if (isLoading) {
+    return <ProfileSkeleton />;
+  }
+
+  const MOCK_USER = {
+    name: userName,
+    email: userEmail,
+    role: isAdmin ? "Admin" : "Member",
+    profilePictureId: "user-avatar"
+  };
+
+  const MOCK_GROUP = {
+    name: groupData?.groupName || "null",
+    invitationCode: groupData?.invitationCode || "null",
+    memberCount: groupData?.memberIds?.length || 0,
+  };
+  
+  const totalUserSpend = userExpenses?.reduce((acc, expense) => acc + expense.amount, 0) || 0;
+  const totalGroupSpend = groupExpenses?.reduce((acc, expense) => acc + expense.amount, 0) || 0;
+
+  const MOCK_CONTRIBUTIONS = {
+    meals: {
+      total: userMeals?.length || 0,
+      averagePerDay: userMeals ? (userMeals.length / 30) : 0, // Simplified for now
+    },
+    expenses: {
+      total: totalUserSpend,
+      share: totalGroupSpend > 0 ? (totalUserSpend / totalGroupSpend) * 100 : 0,
+    },
+    purchases: userItems?.slice(0, 3).map(item => ({ item: item.name, quantity: `${item.quantity} ${item.unit}` })) || [],
+    totalItemsLogged: userItems?.length || 0
+  };
+
   const avatarImage = placeholderImages.placeholderImages.find(p => p.id === MOCK_USER.profilePictureId);
 
   return (
@@ -165,7 +271,7 @@ export default function ProfilePage() {
               </div>
               <div className="text-center p-4 bg-muted/50 rounded-lg">
                 <p className="text-sm text-muted-foreground">Average Meals/Day</p>
-                <p className="text-3xl font-bold">{MOCK_CONTRIBUTIONS.meals.averagePerDay}</p>
+                <p className="text-3xl font-bold">{MOCK_CONTRIBUTIONS.meals.averagePerDay.toFixed(1)}</p>
               </div>
             </CardContent>
           </Card>
@@ -182,7 +288,7 @@ export default function ProfilePage() {
               </div>
               <div className="text-center p-4 bg-muted/50 rounded-lg">
                 <p className="text-sm text-muted-foreground">Share of Group Total</p>
-                <p className="text-3xl font-bold">{MOCK_CONTRIBUTIONS.expenses.share}%</p>
+                <p className="text-3xl font-bold">{MOCK_CONTRIBUTIONS.expenses.share.toFixed(0)}%</p>
               </div>
             </CardContent>
           </Card>
@@ -202,12 +308,16 @@ export default function ProfilePage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {MOCK_CONTRIBUTIONS.purchases.map((purchase) => (
+                  {MOCK_CONTRIBUTIONS.purchases.length > 0 ? MOCK_CONTRIBUTIONS.purchases.map((purchase) => (
                     <TableRow key={purchase.item}>
                       <TableCell className="font-medium">{purchase.item}</TableCell>
                       <TableCell className="text-right">{purchase.quantity}</TableCell>
                     </TableRow>
-                  ))}
+                  )) : (
+                    <TableRow>
+                        <TableCell colSpan={2} className="text-center h-24">No items purchased yet.</TableCell>
+                    </TableRow>
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
@@ -218,5 +328,4 @@ export default function ProfilePage() {
   );
 }
 
-    
     
