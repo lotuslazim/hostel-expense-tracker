@@ -17,6 +17,12 @@ import { doc, collection } from "firebase/firestore";
 const expenseCategories = ["Food", "Electricity", "Gas"] as const;
 type ExpenseCategory = typeof expenseCategories[number];
 
+const categoryDisplayNames: Record<ExpenseCategory, string> = {
+  Food: "Bazar",
+  Electricity: "Electricity",
+  Gas: "Gas",
+};
+
 const categoryIcons: Record<ExpenseCategory, React.ReactNode> = {
   Food: <Utensils className="h-5 w-5" />,
   Electricity: <Zap className="h-5 w-5" />,
@@ -91,7 +97,7 @@ export function ExpenseLog({ expenses, currentDate }: { expenses: Expense[]; cur
                       </SelectTrigger>
                       <SelectContent>
                         {expenseCategories.map(cat => (
-                           <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                           <SelectItem key={cat} value={cat}>{categoryDisplayNames[cat]}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -117,7 +123,7 @@ export function ExpenseLog({ expenses, currentDate }: { expenses: Expense[]; cur
                 <div className="flex items-center justify-center h-8 w-8 rounded-full bg-muted text-muted-foreground">
                   {categoryIcons[category]}
                 </div>
-                <h3 className="font-semibold text-lg">{category}</h3>
+                <h3 className="font-semibold text-lg">{categoryDisplayNames[category]}</h3>
               </div>
               <Table>
                 <TableHeader>
