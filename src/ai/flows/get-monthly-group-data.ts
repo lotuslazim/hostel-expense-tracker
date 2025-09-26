@@ -20,24 +20,7 @@ import {
 } from 'firebase/firestore';
 import { initializeFirebase } from '@/firebase';
 import { startOfMonth, endOfMonth, getMonth, getYear } from 'date-fns';
-
-const MemberDataSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  meals: z.number(),
-  expenses: z.object({
-    food: z.number(),
-    electricity: z.number(),
-    gas: z.number(),
-  }),
-});
-
-export const MonthlyGroupDataSchema = z.object({
-  month: z.string(),
-  members: z.array(MemberDataSchema),
-});
-
-export type MonthlyGroupData = z.infer<typeof MonthlyGroupDataSchema>;
+import { MonthlyGroupData, MonthlyGroupDataSchema } from '../schemas';
 
 const GetMonthlyGroupDataInputSchema = z.object({
   groupId: z.string(),

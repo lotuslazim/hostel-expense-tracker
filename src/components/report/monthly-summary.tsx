@@ -9,7 +9,8 @@ import { Flame, Zap, Utensils, Scale, Loader2 } from "lucide-react";
 import { useFirebase, useUser, useDoc, useMemoFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { getMonthlyGroupData, type MonthlyGroupData } from "@/ai/flows/get-monthly-group-data";
+import { getMonthlyGroupData } from "@/ai/flows/get-monthly-group-data";
+import type { MonthlyGroupData } from "@/ai/schemas";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface MonthlySummaryProps {
