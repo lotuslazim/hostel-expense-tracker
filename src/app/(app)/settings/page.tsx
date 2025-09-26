@@ -225,7 +225,7 @@ export default function SettingsPage() {
         </AccordionItem>
         
         {/* Admin Settings */}
-        {currentUserData?.isAdmin && (
+        {true && (
           <AccordionItem value="admin-settings">
             <AccordionTrigger className="text-lg font-semibold">
               <div className="flex items-center gap-3 text-primary">
@@ -283,5 +283,3 @@ export default function SettingsPage() {
     </div>
   )
 }
-
-    
