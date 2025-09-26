@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Trash2, ShieldCheck, User, Copy, Utensils, ShoppingCart } from "lucide-react";
+import { PlusCircle, Trash2, ShieldCheck, User, Copy, Utensils, ShoppingCart, Home, LogIn } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +15,7 @@ import placeholderImages from "@/lib/placeholder-images.json";
 import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/firebase";
 import { doc, collection, query, where } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Separator } from "@/components/ui/separator";
 
 // In a real app, this would be fetched or calculated
 const MOCK_MEMBER_DETAILS = {
@@ -24,6 +25,48 @@ const MOCK_MEMBER_DETAILS = {
 };
 
 type Member = { id: string; name: string; email: string; role: string; avatarId: string; };
+
+function NewUserAdminPanel() {
+  return (
+    <div>
+        <div className="mb-8">
+            <h1 className="text-3xl font-bold tracking-tight font-headline">Admin Panel</h1>
+            <p className="text-muted-foreground">
+            You are not part of a group yet. Create or join one to get started.
+            </p>
+        </div>
+        <div className="grid md:grid-cols-2 gap-8">
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><PlusCircle/> Create a New Group</CardTitle>
+                    <CardDescription>Start a new flat or group and invite others to join.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                     <div className="space-y-2">
+                        <Label htmlFor="groupName">Group Name</Label>
+                        <Input id="groupName" placeholder="e.g., The Avengers Mess" />
+                    </div>
+                    <Button className="w-full">Create Group</Button>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><LogIn/> Join an Existing Group</CardTitle>
+                    <CardDescription>Enter an invitation code to join a group.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="inviteCode">Invitation Code</Label>
+                        <Input id="inviteCode" placeholder="e.g., AVNG-4321" />
+                    </div>
+                    <Button className="w-full">Join Group</Button>
+                </CardContent>
+            </Card>
+        </div>
+    </div>
+  );
+}
+
 
 export default function AdminPage() {
   const { firestore } = useFirebase();
@@ -106,6 +149,11 @@ export default function AdminPage() {
         </Card>
       </div>
     );
+  }
+
+  // If user is not in a group, show the new user panel
+  if (!groupId || !groupData) {
+    return <NewUserAdminPanel />;
   }
 
   return (
@@ -272,4 +320,6 @@ export default function AdminPage() {
   );
 }
     
+    
+
     
