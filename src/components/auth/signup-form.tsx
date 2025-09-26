@@ -18,100 +18,33 @@ import { AuthCard } from "./auth-card";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/firebase";
-import { GoogleAuthProvider, RecaptchaVerifier, signInWithPhoneNumber, signInWithPopup } from "firebase/auth";
-import { useState, useEffect } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 
-const emailSchema = z.object({
+const formSchema = z.object({
   name: z.string().min(1, { message: "Name is required." }),
   email: z.string().email({ message: "Please enter a valid email." }),
   password: z.string().min(8, { message: "Password must be at least 8 characters." }),
 });
 
-const phoneSchema = z.object({
-  phone: z.string().min(10, { message: "Please enter a valid phone number." }),
-});
-
 export function SignupForm() {
   const router = useRouter();
   const auth = useAuth();
-  const [step, setStep] = useState<"form" | "verify">("form");
-  const [confirmationResult, setConfirmationResult] = useState<any>(null);
-  const [verificationCode, setVerificationCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const emailForm = useForm<z.infer<typeof emailSchema>>({
-    resolver: zodResolver(emailSchema),
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: { name: "", email: "", password: "" },
   });
 
-  const phoneForm = useForm<z.infer<typeof phoneSchema>>({
-    resolver: zodResolver(phoneSchema),
-    defaultValues: { phone: "" },
-  });
-
-  useEffect(() => {
-    window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
-      'size': 'invisible',
-      'callback': (response: any) => {
-        // reCAPTCHA solved, allow signInWithPhoneNumber.
-      }
-    });
-  }, [auth]);
-
-  function onEmailSubmit(values: z.infer<typeof emailSchema>) {
+  function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
     // TODO: Implement actual email/password signup
     router.push('/dashboard');
   }
-
-  async function onPhoneSubmit(values: z.infer<typeof phoneSchema>) {
-    setIsLoading(true);
-    const appVerifier = window.recaptchaVerifier;
-    
-    // E.164 format validation for Bangladesh (+880)
-    let phoneNumber = values.phone;
-    if (phoneNumber.startsWith('0')) {
-      phoneNumber = `+880${phoneNumber.substring(1)}`;
-    } else if (!phoneNumber.startsWith('+880')) {
-      phoneNumber = `+880${phoneNumber}`;
-    }
-
-    try {
-      const result = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
-      setConfirmationResult(result);
-      setStep("verify");
-      toast({ title: "Verification code sent!" });
-    } catch (error) {
-      console.error("Error sending verification code:", error);
-      let errorMessage = "Failed to send verification code. Please try again.";
-      if ((error as any).code === 'auth/invalid-phone-number') {
-        errorMessage = "Invalid phone number format. Please check the number and try again."
-      }
-      toast({ variant: "destructive", title: "Error", description: errorMessage });
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  async function handleVerifyCode() {
-    setIsLoading(true);
-    if (!confirmationResult) return;
-    try {
-      await confirmationResult.confirm(verificationCode);
-      toast({ title: "Phone number verified!" });
-      router.push('/dashboard');
-    } catch (error) {
-      console.error("Error verifying code:", error);
-      toast({ variant: "destructive", title: "Error", description: "Invalid verification code. Please try again." });
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
 
   const handleGoogleSignIn = async () => {
     const provider = new GoogleAuthProvider();
@@ -162,105 +95,54 @@ export function SignupForm() {
           </div>
         </div>
 
-        <Tabs defaultValue="email" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="email">Email</TabsTrigger>
-            <TabsTrigger value="phone">Phone</TabsTrigger>
-          </TabsList>
-          <TabsContent value="email">
-            <Form {...emailForm}>
-              <form onSubmit={emailForm.handleSubmit(onEmailSubmit)} className="space-y-4 pt-4">
-                <FormField
-                  control={emailForm.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Your Name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={emailForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input placeholder="name@example.com" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={emailForm.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl>
-                        <Input type="password" placeholder="••••••••" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                   {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Create Account
-                </Button>
-              </form>
-            </Form>
-          </TabsContent>
-          <TabsContent value="phone">
-            {step === "form" ? (
-              <Form {...phoneForm}>
-                <form onSubmit={phoneForm.handleSubmit(onPhoneSubmit)} className="space-y-4 pt-4">
-                   <FormField
-                    control={phoneForm.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Phone Number</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g., 01712345678" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Send Verification Code
-                  </Button>
-                </form>
-              </Form>
-            ) : (
-              <div className="space-y-4 pt-4">
-                <div className="space-y-2">
-                  <Label>Verification Code</Label>
-                  <Input 
-                    placeholder="Enter the 6-digit code"
-                    value={verificationCode}
-                    onChange={(e) => setVerificationCode(e.target.value)}
-                  />
-                </div>
-                 <Button onClick={handleVerifyCode} className="w-full" disabled={isLoading}>
-                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Verify & Sign Up
-                </Button>
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
-        <div id="recaptcha-container"></div>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Your Name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input placeholder="name@example.com" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input type="password" placeholder="••••••••" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit" className="w-full" disabled={isLoading}>
+               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Create Account
+            </Button>
+          </form>
+        </Form>
       </div>
     </AuthCard>
   );
 }
-
-    
