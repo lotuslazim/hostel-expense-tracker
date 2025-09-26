@@ -7,7 +7,7 @@ import { MOCK_MONTHLY_GROUP_DATA } from "@/lib/data";
 import { ArrowLeft, Zap, Flame } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { useParams, notFound } from "next/navigation";
+import { notFound } from "next/navigation";
 import { format } from "date-fns";
 
 const categoryDetails: Record<string, { icon: React.ReactNode, key: 'electricity' | 'gas' }> = {
@@ -15,9 +15,8 @@ const categoryDetails: Record<string, { icon: React.ReactNode, key: 'electricity
     gas: { icon: <Flame className="h-5 w-5"/>, key: 'gas' },
 };
 
-export default function ContributionPage() {
-    const params = useParams();
-    const category = params.category as string;
+export default function ContributionPage({ params }: { params: { category: string } }) {
+    const category = params.category;
 
     const details = categoryDetails[category];
 
@@ -83,4 +82,3 @@ export default function ContributionPage() {
     </div>
   );
 }
-
