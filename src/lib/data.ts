@@ -38,8 +38,8 @@ export const MOCK_MONTHLY_DATA: GenerateMonthlySummaryInput = {
 export const MOCK_MONTHLY_GROUP_DATA = {
   month: "September 2025",
   members: [
-    { name: "Alice", meals: 45, expenses: 8000 },
-    { name: "Bob", meals: 60, expenses: 6000 },
-    { name: "Charlie", meals: 55, expenses: 7500 },
+    { id: "1", name: "Alice", meals: 45, expenses: 8000 },
+    { id: "2", name: "Bob", meals: 60, expenses: 6000 },
+    { id: "3", name: "Charlie", meals: 55, expenses: 7500 },
   ],
 };

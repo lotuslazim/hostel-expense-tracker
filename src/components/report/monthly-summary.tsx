@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { MOCK_MONTHLY_GROUP_DATA } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import Link from "next/link";
 
 const groupData = MOCK_MONTHLY_GROUP_DATA;
 const totalGroupMeals = groupData.members.reduce((acc, member) => acc + member.meals, 0);
@@ -63,7 +64,11 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
           <TableBody>
             {settlementData.map((member) => (
               <TableRow key={member.name}>
-                <TableCell className="font-medium">{member.name}</TableCell>
+                <TableCell className="font-medium">
+                   <Link href={`/report/${member.id}`} className="hover:underline text-primary">
+                    {member.name}
+                  </Link>
+                </TableCell>
                 <TableCell className="text-center">{member.meals}</TableCell>
                 <TableCell className="text-right">Tk{member.share.toFixed(2)}</TableCell>
                 <TableCell className="text-right">Tk{member.expenses.toFixed(2)}</TableCell>
