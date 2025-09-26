@@ -2,63 +2,56 @@
 "use client";
 
 import { useState } from "react";
-import { format, startOfMonth, addMonths, subMonths } from "date-fns";
-import { MonthlyCalendar } from "@/components/dashboard/monthly-calendar";
-import { MonthSwitcher } from "@/components/dashboard/month-switcher";
-import { MonthlySummaryStats } from "@/components/dashboard/monthly-summary-stats";
+import { useSearchParams } from "next/navigation";
+import { format, parseISO } from "date-fns";
+import { DateSwitcher } from "@/components/dashboard/date-switcher";
+import { MealLog } from "@/components/dashboard/meal-log";
+import { ExpenseLog } from "@/components/dashboard/expense-log";
+import { ItemLog } from "@/components/dashboard/item-log";
 import type { Meal, Expense, Item } from "@/lib/types";
 import { MOCK_EXPENSES, MOCK_ITEMS, MOCK_MEALS } from "@/lib/data";
 
 export default function DashboardPage() {
-  const [currentDate, setCurrentDate] = useState(startOfMonth(new Date()));
+  const searchParams = useSearchParams();
+  const dateParam = searchParams.get("date");
 
-  // In a real app, you would fetch this data based on the selected month
+  // If date param exists, parse it. Otherwise, use today.
+  const initialDate = dateParam ? parseISO(dateParam) : new Date();
+  const [currentDate, setCurrentDate] = useState(initialDate);
+
+  // In a real app, you would fetch this data based on the selected date
   const [meals, setMeals] = useState<Meal[]>(MOCK_MEALS);
   const [expenses, setExpenses] = useState<Expense[]>(MOCK_EXPENSES);
   const [items, setItems] = useState<Item[]>(MOCK_ITEMS);
-
-  const handleMonthChange = (direction: "next" | "prev") => {
-    if (direction === "next") {
-      setCurrentDate(addMonths(currentDate, 1));
-    } else {
-      setCurrentDate(subMonths(currentDate, 1));
-    }
-  };
   
-  const monthlyTotals = {
-    meals: 58, // Mock data
-    expenses: 7500, // Mock data
-  };
+  // Filter data for the current date
+  const dailyMeals = meals.filter(m => format(m.loggedAt, 'yyyy-MM-dd') === format(currentDate, 'yyyy-MM-dd'));
+  const dailyExpenses = expenses.filter(e => format(e.date, 'yyyy-MM-dd') === format(currentDate, 'yyyy-MM-dd'));
+  const dailyItems = items.filter(i => format(i.date, 'yyyy-MM-dd') === format(currentDate, 'yyyy-MM-dd'));
+
 
   return (
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight font-headline">
-            Monthly Overview
+            Daily Tracker
           </h1>
           <p className="text-muted-foreground">
-            A calendar view of your meals and expenses for {format(currentDate, "MMMM yyyy")}.
+            Log your meals, expenses, and purchased items for{" "}
+            {format(currentDate, "MMMM d, yyyy")}.
           </p>
         </div>
-        <MonthSwitcher
-          currentDate={currentDate}
-          onMonthChange={handleMonthChange}
-        />
+        <DateSwitcher currentDate={currentDate} />
       </div>
 
-      <MonthlyCalendar
-        currentDate={currentDate}
-        meals={meals}
-        expenses={expenses}
-        items={items}
-      />
-      
-      <MonthlySummaryStats
-        totalMeals={monthlyTotals.meals}
-        totalExpenses={monthlyTotals.expenses}
-        month={currentDate}
-       />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <MealLog meals={dailyMeals} />
+        <div className="space-y-8">
+          <ExpenseLog expenses={dailyExpenses} />
+          <ItemLog items={dailyItems} onSetItems={setItems} />
+        </div>
+      </div>
     </div>
   );
 }

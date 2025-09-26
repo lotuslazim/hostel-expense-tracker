@@ -1,18 +1,23 @@
-
 "use client";
 
+import * as React from "react";
 import { format } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-interface MonthSwitcherProps {
+interface MonthSwitcherProps extends React.HTMLAttributes<HTMLDivElement> {
   currentDate: Date;
   onMonthChange: (direction: "next" | "prev") => void;
 }
 
-export function MonthSwitcher({ currentDate, onMonthChange }: MonthSwitcherProps) {
+export function MonthSwitcher({
+  className,
+  currentDate,
+  onMonthChange,
+}: MonthSwitcherProps) {
   return (
-    <div className="flex items-center gap-2">
+    <div className={cn("flex items-center gap-2", className)}>
       <Button
         variant="outline"
         size="icon"
@@ -21,8 +26,10 @@ export function MonthSwitcher({ currentDate, onMonthChange }: MonthSwitcherProps
       >
         <ChevronLeft className="h-4 w-4" />
       </Button>
-      <div className="w-36 text-center text-lg font-semibold">
-        {format(currentDate, "MMMM yyyy")}
+      <div
+        className="flex h-10 w-[240px] items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+      >
+        <span>{format(currentDate, "MMMM yyyy")}</span>
       </div>
       <Button
         variant="outline"
