@@ -331,10 +331,10 @@ export default function SettingsPage() {
                   </AlertDialog>
                 </CardContent>
               </Card>
-               <Alert variant="destructive">
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertTitle>{t('settings.admin_controls.admin_responsibility.title')}</AlertTitle>
-                  <AlertDescription>
+               <Alert variant="default" className="bg-primary/10 border-primary/20">
+                  <AlertTriangle className="h-4 w-4 text-primary" />
+                  <AlertTitle className="text-primary">{t('settings.admin_controls.admin_responsibility.title')}</AlertTitle>
+                  <AlertDescription className="text-primary/80">
                     {t('settings.admin_controls.admin_responsibility.description')}
                   </AlertDescription>
                 </Alert>
@@ -345,5 +345,7 @@ export default function SettingsPage() {
     </div>
   )
 }
+
+    
 
     
