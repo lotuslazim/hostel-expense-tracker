@@ -1,5 +1,6 @@
 
 "use client";
+import * as React from "react";
 import {
   Accordion,
   AccordionContent,
@@ -25,6 +26,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AlertTriangle, UserCog, Settings, Bell, Palette, Globe, LogOut, Trash2, Shield, Edit, ShieldCheck, FileDown, SlidersHorizontal } from "lucide-react"
 import { ThemeSwitcher } from "@/components/settings/theme-switcher"
 import { useI18n } from "@/i18n/client-provider"
+import { Switch } from "@/components/ui/switch"
 
 // Mock data, in a real app this would come from your auth/user state
 const USER_IS_ADMIN = true;
@@ -35,6 +37,9 @@ const MOCK_GROUP = {
 
 export default function SettingsPage() {
   const { lang, setLang, t } = useI18n();
+  const [mealReminders, setMealReminders] = React.useState(true);
+  const [expenseAlerts, setExpenseAlerts] = React.useState(false);
+  const [missedDayAlerts, setMissedDayAlerts] = React.useState(true);
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -89,15 +94,27 @@ export default function SettingsPage() {
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="meal-reminders">{t('settings.app_settings.notifications.meal_reminders')}</Label>
-                  <ThemeSwitcher />
+                  <Switch
+                    id="meal-reminders"
+                    checked={mealReminders}
+                    onCheckedChange={setMealReminders}
+                  />
                 </div>
                 <div className="flex items-center justify-between">
                   <Label htmlFor="expense-alerts">{t('settings.app_settings.notifications.expense_alerts')}</Label>
-                  <ThemeSwitcher />
+                  <Switch
+                    id="expense-alerts"
+                    checked={expenseAlerts}
+                    onCheckedChange={setExpenseAlerts}
+                  />
                 </div>
                 <div className="flex items-center justify-between">
                   <Label htmlFor="missed-day-alerts">{t('settings.app_settings.notifications.missed_day_alerts')}</Label>
-                  <ThemeSwitcher />
+                   <Switch
+                    id="missed-day-alerts"
+                    checked={missedDayAlerts}
+                    onCheckedChange={setMissedDayAlerts}
+                  />
                 </div>
               </CardContent>
             </Card>
