@@ -76,7 +76,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
               <p className="text-2xl font-bold">{totalGroupMeals}</p>
             </div>
              <div className="p-4 bg-primary/10 rounded-lg col-span-full md:col-span-2">
-              <p className="text-sm text-primary/80 flex items-center justify-center gap-2 mb-1"><Hash /> Calculated Food Rate per Meal</p>
+              <p className="text-sm text-primary/80 flex items-center justify-center gap-2 mb-1"><Hash /> Meal Rate</p>
               <p className="text-2xl font-bold text-primary">৳{mealRate.toFixed(2)}</p>
             </div>
             <div className="p-4 bg-secondary/80 rounded-lg col-span-full md:col-span-2">
