@@ -77,9 +77,12 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
             <TableHeader>
               <TableRow>
                 <TableHead>Member</TableHead>
-                <TableHead className="text-center">Meals Eaten</TableHead>
-                <TableHead className="text-right">Their Share</TableHead>
-                <TableHead className="text-right">Actual Paid</TableHead>
+                <TableHead className="text-center">Meals</TableHead>
+                <TableHead className="text-right">Food Paid</TableHead>
+                <TableHead className="text-right">Electricity Paid</TableHead>
+                <TableHead className="text-right">Gas Paid</TableHead>
+                <TableHead className="text-right font-bold">Total Paid</TableHead>
+                <TableHead className="text-right">Total Share</TableHead>
                 <TableHead className="text-right">Balance</TableHead>
               </TableRow>
             </TableHeader>
@@ -92,8 +95,11 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                     </Link>
                   </TableCell>
                   <TableCell className="text-center">{member.meals}</TableCell>
+                  <TableCell className="text-right">৳{member.expenses.food.toFixed(2)}</TableCell>
+                  <TableCell className="text-right">৳{member.expenses.electricity.toFixed(2)}</TableCell>
+                  <TableCell className="text-right">৳{member.expenses.gas.toFixed(2)}</TableCell>
+                  <TableCell className="text-right font-medium">৳{member.paid.toFixed(2)}</TableCell>
                   <TableCell className="text-right">৳{member.share.toFixed(2)}</TableCell>
-                  <TableCell className="text-right">৳{member.paid.toFixed(2)}</TableCell>
                   <TableCell className={cn(
                     "text-right font-bold",
                     member.balance >= 0 ? "text-green-600" : "text-red-600"
