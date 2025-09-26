@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Trash2, ShieldCheck, User, Copy, Utensils, DollarSign, ShoppingCart } from "lucide-react";
+import { PlusCircle, Trash2, ShieldCheck, User, Copy, Utensils, ShoppingCart } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -253,7 +253,7 @@ export default function AdminPage() {
                       <p className="text-2xl font-bold">{memberDetails.meals}</p>
                     </div>
                     <div className="p-4 bg-muted/50 rounded-lg">
-                      <DollarSign className="h-6 w-6 mx-auto text-muted-foreground mb-2" />
+                      <span className="text-2xl font-bold text-muted-foreground mb-2">৳</span>
                       <p className="text-sm text-muted-foreground">Total Expenses</p>
                       <p className="text-2xl font-bold">৳{memberDetails.expenses.toLocaleString()}</p>
                     </div>
@@ -271,4 +271,5 @@ export default function AdminPage() {
     </div>
   );
 }
+    
     

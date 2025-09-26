@@ -7,7 +7,7 @@ import { MOCK_MONTHLY_GROUP_DATA } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import Link from "next/link";
-import { Flame, Zap, DollarSign, Utensils, Hash, Users, Scale } from "lucide-react";
+import { Flame, Zap, Utensils, Hash, Users, Scale } from "lucide-react";
 
 const groupData = MOCK_MONTHLY_GROUP_DATA;
 const totalGroupFoodExpenses = groupData.members.reduce((acc, member) => acc + member.expenses.food, 0);
@@ -60,7 +60,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
           <h3 className="text-lg font-medium mb-4">Overall Summary</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
             <div className="p-4 bg-muted/50 rounded-lg">
-              <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1"><DollarSign /> Total Food</p>
+              <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1"><span className="font-bold text-lg">৳</span> Total Food</p>
               <p className="text-2xl font-bold">৳{totalGroupFoodExpenses.toFixed(2)}</p>
             </div>
              <div className="p-4 bg-muted/50 rounded-lg">
@@ -198,3 +198,5 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     </Card>
   );
 }
+
+    

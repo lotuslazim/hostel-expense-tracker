@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { MOCK_MONTHLY_GROUP_DATA } from "@/lib/data";
 import { notFound, useParams } from "next/navigation";
 import { eachDayOfInterval, startOfMonth, endOfMonth, format } from "date-fns";
-import { ArrowLeft, Utensils, Zap, Flame, DollarSign } from "lucide-react";
+import { ArrowLeft, Utensils, Zap, Flame } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -107,7 +107,7 @@ export default function MemberReportPage() {
                     <CardContent className="space-y-3">
                         <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                             <div className="flex items-center gap-3">
-                                <DollarSign className="h-5 w-5 text-muted-foreground" />
+                                <span className="font-bold text-lg text-muted-foreground">৳</span>
                                 <span className="font-medium">Food Expenses</span>
                             </div>
                             <span className="text-lg font-bold">৳{totalFoodExpenses.toLocaleString()}</span>
@@ -134,3 +134,5 @@ export default function MemberReportPage() {
   );
 }
 
+
+    

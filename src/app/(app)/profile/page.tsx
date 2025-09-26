@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import placeholderImages from "@/lib/placeholder-images.json";
-import { User, Home, Utensils, DollarSign, ShoppingCart, Pencil, Camera, FileUp } from "lucide-react";
+import { User, Home, Utensils, ShoppingCart, Pencil, Camera, FileUp } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -173,7 +173,7 @@ export default function ProfilePage() {
           {/* Expense Contribution */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><DollarSign className="h-5 w-5" /> Expense Contribution</CardTitle>
+              <CardTitle className="flex items-center gap-2"><span className="font-bold text-lg">৳</span> Expense Contribution</CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-4">
               <div className="text-center p-4 bg-muted/50 rounded-lg">
@@ -218,4 +218,5 @@ export default function ProfilePage() {
   );
 }
 
+    
     
