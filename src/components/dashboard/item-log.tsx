@@ -109,9 +109,9 @@ export function ItemLog({ items, currentDate }: { items: Item[]; currentDate: Da
             ))}
             {items.length === 0 && (
               <TableRow>
-                <TableCell colSpan={3} className="h-24 text-center">
-                  No items logged for this day.
-                </TableCell>
+                <TableCell className="font-medium text-muted-foreground">null</TableCell>
+                <TableCell className="text-muted-foreground">null</TableCell>
+                <TableCell className="text-right text-muted-foreground">৳0.00</TableCell>
               </TableRow>
             )}
           </TableBody>
