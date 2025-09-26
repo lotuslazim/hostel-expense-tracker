@@ -31,6 +31,8 @@ const settlementData = groupData.members.map(member => {
   const utilityBalance = utilityPaid - utilitySharePerMember;
   
   const finalBalance = mealBalance + utilityBalance;
+  
+  const totalExpenses = member.expenses.food + utilityPaid;
 
   return {
     ...member,
@@ -39,6 +41,7 @@ const settlementData = groupData.members.map(member => {
     utilityPaid,
     utilityBalance,
     finalBalance,
+    totalExpenses,
   };
 });
 
@@ -88,8 +91,8 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Member</TableHead>
+                    <TableHead className="text-right">Total Spend</TableHead>
                     <TableHead className="text-right">Final Balance</TableHead>
-                    <TableHead className="text-right">Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -100,17 +103,14 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                           {member.name}
                         </Link>
                       </TableCell>
+                      <TableCell className="text-right font-semibold">
+                        ৳{member.totalExpenses.toFixed(2)}
+                      </TableCell>
                       <TableCell className={cn(
                         "text-right font-bold",
                         member.finalBalance >= 0 ? "text-green-600" : "text-red-600"
                       )}>
                         {member.finalBalance >= 0 ? `+৳${member.finalBalance.toFixed(2)}` : `-৳${Math.abs(member.finalBalance).toFixed(2)}`}
-                      </TableCell>
-                      <TableCell className={cn(
-                          "text-right font-semibold",
-                          member.finalBalance >= 0 ? "text-green-600" : "text-red-600"
-                      )}>
-                        {member.finalBalance >= 0 ? 'Gets Back' : 'Owes'}
                       </TableCell>
                     </TableRow>
                   ))}
