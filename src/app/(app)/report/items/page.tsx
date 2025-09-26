@@ -3,8 +3,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { MOCK_ITEMS } from "@/lib/data";
-import { ArrowLeft, ShoppingBag } from "lucide-react";
+import { MOCK_ITEMS, MOCK_MONTHLY_GROUP_DATA } from "@/lib/data";
+import { ArrowLeft, ShoppingBag, Users } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useMemo } from "react";
@@ -31,6 +31,12 @@ function aggregateItems(items: Item[]) {
   })).sort((a, b) => a.name.localeCompare(b.name));
 }
 
+const memberFoodExpenses = MOCK_MONTHLY_GROUP_DATA.members.map(member => ({
+    id: member.id,
+    name: member.name,
+    foodExpense: member.expenses.food,
+}));
+
 
 export default function MonthlyItemsPage() {
     const aggregatedItems = useMemo(() => aggregateItems(MOCK_ITEMS), []);
@@ -50,6 +56,33 @@ export default function MonthlyItemsPage() {
               </p>
             </div>
         </div>
+
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5"/>
+                    Food Expense by Member
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+                 <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Member</TableHead>
+                            <TableHead className="text-right">Food Expense</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {memberFoodExpenses.map((member) => (
+                            <TableRow key={member.id}>
+                                <TableCell className="font-medium">{member.name}</TableCell>
+                                <TableCell className="text-right">৳{member.foodExpense.toFixed(2)}</TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
 
         <Card>
             <CardHeader>
