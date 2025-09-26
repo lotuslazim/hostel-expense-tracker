@@ -6,7 +6,11 @@ import { Logo } from "@/components/icons/logo";
 import placeholderImages from "@/lib/placeholder-images.json";
 
 export default function LandingPage() {
-  const heroImage = placeholderImages.placeholderImages.find(p => p.id === "landing-hero");
+  const heroImage = {
+    imageUrl: "https://media.tenor.com/bC2F2I2x00cAAAAC/umaru-chan-eating.gif",
+    description: "Anime character eating noodles",
+    imageHint: "anime eating"
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -46,6 +50,7 @@ export default function LandingPage() {
                   style={{ objectFit: 'cover' }}
                   className="bg-muted"
                   data-ai-hint={heroImage.imageHint}
+                  unoptimized // Add this prop for GIFs
                 />
               )}
             </div>
@@ -53,7 +58,7 @@ export default function LandingPage() {
         </section>
       </main>
       <footer className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-muted-foreground text-sm">
-        <p>&copy; {new Date().getFullYear()} NourishTrack. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} Meal Calculator. All rights reserved.</p>
       </footer>
     </div>
   );
