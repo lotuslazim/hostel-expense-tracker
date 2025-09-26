@@ -29,7 +29,7 @@ export default function LandingPage() {
                 Hey, Gorom Chele
               </h1>
               <p className="text-lg text-muted-foreground">
-                Simplify shared living with NourishTrack. Log meals, track expenses, and settle up with your flatmates, all in one place.
+                Welcome to the upgrade! Track your meals, stack your stats, and stay on top—smooth, simple, done.
               </p>
               <Button size="lg" asChild>
                 <Link href="/signup">
