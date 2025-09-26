@@ -4,7 +4,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { MOCK_MONTHLY_GROUP_DATA } from "@/lib/data";
-import { notFound } from "next/navigation";
+import { notFound, useParams } from "next/navigation";
 import { eachDayOfInterval, startOfMonth, endOfMonth, format } from "date-fns";
 import { ArrowLeft, Utensils, Zap, Flame, DollarSign } from "lucide-react";
 import Link from "next/link";
@@ -20,8 +20,11 @@ const MOCK_MEMBER_DAILY_DATA = [
     // ... more days
 ];
 
-export default function MemberReportPage({ params }: { params: { memberId: string } }) {
-    const member = MOCK_MONTHLY_GROUP_DATA.members.find(m => m.id === params.memberId);
+export default function MemberReportPage() {
+    const params = useParams();
+    const memberId = params.memberId as string;
+
+    const member = MOCK_MONTHLY_GROUP_DATA.members.find(m => m.id === memberId);
 
     if (!member) {
         notFound();
@@ -130,3 +133,4 @@ export default function MemberReportPage({ params }: { params: { memberId: strin
     </div>
   );
 }
+
