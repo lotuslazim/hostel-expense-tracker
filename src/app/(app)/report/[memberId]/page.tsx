@@ -20,8 +20,8 @@ const MOCK_MEMBER_DAILY_DATA = [
     // ... more days
 ];
 
-export default function MemberReportPage({ params: { memberId } }: { params: { memberId: string } }) {
-    const member = MOCK_MONTHLY_GROUP_DATA.members.find(m => m.id === memberId);
+export default function MemberReportPage({ params }: { params: { memberId: string } }) {
+    const member = MOCK_MONTHLY_GROUP_DATA.members.find(m => m.id === params.memberId);
 
     if (!member) {
         notFound();
