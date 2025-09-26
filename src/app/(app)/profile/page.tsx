@@ -178,7 +178,7 @@ export default function ProfilePage() {
             <CardContent className="grid grid-cols-2 gap-4">
               <div className="text-center p-4 bg-muted/50 rounded-lg">
                 <p className="text-sm text-muted-foreground">Total Spend</p>
-                <p className="text-3xl font-bold">Tk{MOCK_CONTRIBUTIONS.expenses.total.toLocaleString()}</p>
+                <p className="text-3xl font-bold">৳{MOCK_CONTRIBUTIONS.expenses.total.toLocaleString()}</p>
               </div>
               <div className="text-center p-4 bg-muted/50 rounded-lg">
                 <p className="text-sm text-muted-foreground">Share of Group Total</p>

@@ -255,7 +255,7 @@ export default function AdminPage() {
                     <div className="p-4 bg-muted/50 rounded-lg">
                       <DollarSign className="h-6 w-6 mx-auto text-muted-foreground mb-2" />
                       <p className="text-sm text-muted-foreground">Total Expenses</p>
-                      <p className="text-2xl font-bold">Tk{memberDetails.expenses.toLocaleString()}</p>
+                      <p className="text-2xl font-bold">৳{memberDetails.expenses.toLocaleString()}</p>
                     </div>
                     <div className="p-4 bg-muted/50 rounded-lg">
                       <ShoppingCart className="h-6 w-6 mx-auto text-muted-foreground mb-2" />

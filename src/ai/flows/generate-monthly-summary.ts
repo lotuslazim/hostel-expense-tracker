@@ -51,7 +51,7 @@ Also provide a comparison against a typical user.
 
 Daily Data:
 {{#each dailyData}}
-Day {{day}}: {{meals}} meals, Food: Tk{{foodExpense}}, Electricity: Tk{{electricityBill}}, Gas: Tk{{gasBill}}
+Day {{day}}: {{meals}} meals, Food: ৳{{foodExpense}}, Electricity: ৳{{electricityBill}}, Gas: ৳{{gasBill}}
 {{/each}}
 `,
 });

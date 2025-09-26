@@ -110,21 +110,21 @@ export default function MemberReportPage() {
                                 <DollarSign className="h-5 w-5 text-muted-foreground" />
                                 <span className="font-medium">Food Expenses</span>
                             </div>
-                            <span className="text-lg font-bold">Tk{totalFoodExpenses.toLocaleString()}</span>
+                            <span className="text-lg font-bold">৳{totalFoodExpenses.toLocaleString()}</span>
                         </div>
                          <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                             <div className="flex items-center gap-3">
                                 <Zap className="h-5 w-5 text-muted-foreground" />
                                 <span className="font-medium">Electricity Bill</span>
                             </div>
-                            <span className="text-lg font-bold">Tk{totalElectricityExpenses.toLocaleString()}</span>
+                            <span className="text-lg font-bold">৳{totalElectricityExpenses.toLocaleString()}</span>
                         </div>
                          <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                              <div className="flex items-center gap-3">
                                 <Flame className="h-5 w-5 text-muted-foreground" />
                                 <span className="font-medium">Gas Bill</span>
                             </div>
-                            <span className="text-lg font-bold">Tk{totalGasExpenses.toLocaleString()}</span>
+                            <span className="text-lg font-bold">৳{totalGasExpenses.toLocaleString()}</span>
                         </div>
                     </CardContent>
                 </Card>

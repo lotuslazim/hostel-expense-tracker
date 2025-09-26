@@ -9,8 +9,8 @@ import { format } from "date-fns";
 import Link from "next/link";
 
 const groupData = MOCK_MONTHLY_GROUP_DATA;
-const totalGroupMeals = groupData.members.reduce((acc, member) => acc + member.meals, 0);
 const totalGroupExpenses = groupData.members.reduce((acc, member) => acc + member.expenses, 0);
+const totalGroupMeals = groupData.members.reduce((acc, member) => acc + member.meals, 0);
 const mealRate = totalGroupExpenses > 0 && totalGroupMeals > 0 ? totalGroupExpenses / totalGroupMeals : 0;
 
 const settlementData = groupData.members.map(member => {
@@ -40,7 +40,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
         <div className="grid grid-cols-3 gap-4 text-center">
           <div className="p-4 bg-muted/50 rounded-lg">
             <p className="text-sm text-muted-foreground">Total Expenses</p>
-            <p className="text-2xl font-bold">Tk{totalGroupExpenses.toFixed(2)}</p>
+            <p className="text-2xl font-bold">৳{totalGroupExpenses.toFixed(2)}</p>
           </div>
           <div className="p-4 bg-muted/50 rounded-lg">
             <p className="text-sm text-muted-foreground">Total Meals</p>
@@ -48,7 +48,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
           </div>
           <div className="p-4 bg-primary/10 rounded-lg">
             <p className="text-sm text-primary/80">Calculated Meal Rate</p>
-            <p className="text-2xl font-bold text-primary">Tk{mealRate.toFixed(2)}</p>
+            <p className="text-2xl font-bold text-primary">৳{mealRate.toFixed(2)}</p>
           </div>
         </div>
         <Table>
@@ -70,13 +70,13 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                   </Link>
                 </TableCell>
                 <TableCell className="text-center">{member.meals}</TableCell>
-                <TableCell className="text-right">Tk{member.share.toFixed(2)}</TableCell>
-                <TableCell className="text-right">Tk{member.expenses.toFixed(2)}</TableCell>
+                <TableCell className="text-right">৳{member.share.toFixed(2)}</TableCell>
+                <TableCell className="text-right">৳{member.expenses.toFixed(2)}</TableCell>
                 <TableCell className={cn(
                   "text-right font-bold",
                   member.balance >= 0 ? "text-green-600" : "text-red-600"
                 )}>
-                  {member.balance >= 0 ? `Gets Tk${member.balance.toFixed(2)}` : `Owes Tk${Math.abs(member.balance).toFixed(2)}`}
+                  {member.balance >= 0 ? `Gets ৳${member.balance.toFixed(2)}` : `Owes ৳${Math.abs(member.balance).toFixed(2)}`}
                 </TableCell>
               </TableRow>
             ))}

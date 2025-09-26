@@ -96,7 +96,7 @@ export function ExpenseLog({ expenses }: { expenses: Expense[] }) {
                   {categoryExpenses.map((expense) => (
                     <TableRow key={expense.id}>
                       <TableCell className="font-medium">{expense.description}</TableCell>
-                      <TableCell className="text-right">Tk{expense.amount.toFixed(2)}</TableCell>
+                      <TableCell className="text-right">৳{expense.amount.toFixed(2)}</TableCell>
                     </TableRow>
                   ))}
                   {categoryExpenses.length === 0 && (
