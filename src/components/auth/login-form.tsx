@@ -17,6 +17,8 @@ import { Input } from "@/components/ui/input";
 import { AuthCard } from "./auth-card";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/firebase";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email." }),
@@ -25,6 +27,7 @@ const formSchema = z.object({
 
 export function LoginForm() {
   const router = useRouter();
+  const auth = useAuth();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -38,16 +41,27 @@ export function LoginForm() {
     router.push('/dashboard');
   }
 
+  const handleGoogleSignIn = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+      router.push('/dashboard');
+    } catch (error) {
+      console.error("Error during Google sign-in:", error);
+      // Optionally, show a toast notification to the user
+    }
+  };
+
   return (
     <AuthCard
       title="Welcome Back"
-      description="Log in to your NourishTrack account"
+      description="Log in to your Meal Calculator account"
       footerText="Don't have an account?"
       footerLinkText="Sign Up"
       footerLinkHref="/signup"
     >
       <div className="space-y-4">
-        <Button variant="outline" className="w-full">
+        <Button variant="outline" className="w-full" onClick={handleGoogleSignIn}>
            <svg
               className="mr-2 h-4 w-4"
               aria-hidden="true"
