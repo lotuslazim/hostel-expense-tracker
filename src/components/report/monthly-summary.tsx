@@ -122,43 +122,6 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
         </div>
 
         <div>
-           <h3 className="text-lg font-medium mb-4 flex items-center gap-2"><Zap /> Utility Settlement</h3>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Member</TableHead>
-                <TableHead className="text-right">Electricity Paid</TableHead>
-                <TableHead className="text-right">Gas Paid</TableHead>
-                <TableHead className="text-right font-bold">Total Paid</TableHead>
-                <TableHead className="text-right">Utility Share</TableHead>
-                <TableHead className="text-right">Balance</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {settlementData.map((member) => (
-                <TableRow key={member.id}>
-                  <TableCell className="font-medium">
-                     <Link href={`/report/${member.id}`} className="hover:underline text-primary">
-                      {member.name}
-                    </Link>
-                  </TableCell>
-                  <TableCell className="text-right">৳{member.expenses.electricity.toFixed(2)}</TableCell>
-                  <TableCell className="text-right">৳{member.expenses.gas.toFixed(2)}</TableCell>
-                  <TableCell className="text-right font-medium">৳{member.utilityPaid.toFixed(2)}</TableCell>
-                  <TableCell className="text-right">৳{utilitySharePerMember.toFixed(2)}</TableCell>
-                   <TableCell className={cn(
-                    "text-right font-medium",
-                    member.utilityBalance >= 0 ? "text-green-600" : "text-red-600"
-                  )}>
-                    {member.utilityBalance >= 0 ? `+৳${member.utilityBalance.toFixed(2)}` : `-৳${Math.abs(member.utilityBalance).toFixed(2)}`}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-
-        <div>
           <h3 className="text-lg font-medium my-4 flex items-center gap-2"><Scale/> Final Settlement</h3>
           <Table>
               <TableHeader>
