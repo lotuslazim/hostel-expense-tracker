@@ -49,6 +49,9 @@ export function UserNav() {
           <DropdownMenuItem>
             Profile
           </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/admin">Admin Panel</Link>
+          </DropdownMenuItem>
           <DropdownMenuItem>
             Settings
           </DropdownMenuItem>
