@@ -21,10 +21,9 @@ export default function ReportPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight font-headline">Monthly Summary</h1>
-          <p className="text-muted-foreground">
-            A settlement report for your group for {format(currentDate, "MMMM yyyy")}.
-          </p>
+          <h1 className="text-3xl font-bold tracking-tight font-headline">
+            Monthly Summary for {format(currentDate, "MMMM yyyy")}
+          </h1>
         </div>
         <MonthSwitcher
           currentDate={currentDate}
