@@ -3,43 +3,126 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { MOCK_MONTHLY_GROUP_DATA } from "@/lib/data";
-import { ArrowLeft, Utensils } from "lucide-react";
+import { ArrowLeft, Utensils, Users } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
+import { useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useFirebase, useUser, useDoc, useMemoFirebase } from "@/firebase";
+import { doc } from "firebase/firestore";
+import { getMonthlyGroupData } from "@/ai/flows/get-monthly-group-data";
+import type { MonthlyGroupData } from "@/ai/schemas";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const groupData = MOCK_MONTHLY_GROUP_DATA;
-const totalGroupFoodExpenses = groupData.members.reduce((acc, member) => acc + member.expenses.food, 0);
-const totalGroupMeals = groupData.members.reduce((acc, member) => acc + member.meals, 0);
-const mealRate = totalGroupFoodExpenses > 0 && totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
+function MealSettlementSkeleton() {
+  return (
+     <div className="space-y-6">
+        <div className="flex items-center gap-4">
+            <Skeleton className="h-10 w-10" />
+            <div>
+              <Skeleton className="h-9 w-64 mb-2" />
+              <Skeleton className="h-4 w-80" />
+            </div>
+        </div>
+         <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                    <span className="flex items-center gap-2">
+                        <Utensils className="h-5 w-5"/>
+                        <Skeleton className="h-6 w-56" />
+                    </span>
+                    <div className="text-right">
+                        <p className="text-sm font-medium text-primary">Meal Rate</p>
+                        <Skeleton className="h-7 w-24 mt-1" />
+                    </div>
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+                <Skeleton className="h-48 w-full" />
+            </CardContent>
+        </Card>
+    </div>
+  )
+}
 
-const settlementData = groupData.members.map(member => {
-  const mealShare = member.meals * mealRate;
-  const mealBalance = member.expenses.food - mealShare;
-  return {
-    ...member,
-    mealShare,
-    mealBalance,
-  };
-});
 
 export default function MealSettlementPage() {
-    const currentDate = new Date(MOCK_MONTHLY_GROUP_DATA.month);
+    const searchParams = useSearchParams();
+    const monthParam = searchParams.get('month');
+    const targetDate = monthParam ? parseISO(monthParam) : new Date();
+
+    const { firestore } = useFirebase();
+    const { user: currentUser, isUserLoading: isCurrentUserLoading } = useUser();
+
+    const currentUserRef = useMemoFirebase(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
+    const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
+    const groupId = currentUserData?.groupId;
+
+    const [groupData, setGroupData] = useState<MonthlyGroupData | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (groupId) {
+            setIsLoading(true);
+            getMonthlyGroupData({ groupId, date: targetDate.toISOString() })
+                .then(data => {
+                    setGroupData(data);
+                    setError(null);
+                })
+                .catch(err => {
+                    console.error("Failed to fetch monthly data:", err);
+                    setError("Could not load settlement data.");
+                })
+                .finally(() => {
+                    setIsLoading(false);
+                });
+        } else if (!isCurrentUserLoading && !isCurrentUserDataLoading) {
+            setIsLoading(false);
+        }
+    }, [groupId, targetDate, isCurrentUserLoading, isCurrentUserDataLoading]);
+
+    const dataLoading = isLoading || isCurrentUserLoading || isCurrentUserDataLoading;
+
+    if (dataLoading) {
+        return <MealSettlementSkeleton />;
+    }
+    
+    if (error) {
+        return <Card><CardContent><p className="text-center text-destructive py-8">{error}</p></CardContent></Card>;
+    }
+
+    const members = groupData?.members ?? [];
+    const hasMembers = members.length > 0;
+    const totalGroupFoodExpenses = members.reduce((acc, member) => acc + member.expenses.food, 0);
+    const totalGroupMeals = members.reduce((acc, member) => acc + member.meals, 0);
+    const mealRate = totalGroupFoodExpenses > 0 && totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
+    const monthQueryParam = format(targetDate, 'yyyy-MM-dd');
+
+    const settlementData = members.map(member => {
+      const mealShare = member.meals * mealRate;
+      const mealBalance = member.expenses.food - mealShare;
+      return {
+        ...member,
+        mealShare,
+        mealBalance,
+      };
+    });
 
   return (
     <div className="space-y-6">
         <div className="flex items-center gap-4">
             <Button variant="outline" size="icon" asChild>
-                <Link href="/report"><ArrowLeft className="h-4 w-4" /></Link>
+                <Link href={`/report?month=${monthQueryParam}`}><ArrowLeft className="h-4 w-4" /></Link>
             </Button>
             <div>
               <h1 className="text-3xl font-bold tracking-tight font-headline">
                 Monthly Meal Settlement
               </h1>
               <p className="text-muted-foreground">
-                Breakdown of meal costs for {format(currentDate, "MMMM yyyy")}.
+                Breakdown of meal costs for {format(targetDate, "MMMM yyyy")}.
               </p>
             </div>
         </div>
@@ -69,10 +152,10 @@ export default function MealSettlementPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {settlementData.map((member) => (
+                      {hasMembers ? settlementData.map((member) => (
                         <TableRow key={member.id}>
                           <TableCell className="font-medium">
-                            <Link href={`/report/${member.id}`} className="hover:underline text-primary">
+                            <Link href={`/report/${member.id}?month=${monthQueryParam}`} className="hover:underline text-primary">
                               {member.name}
                             </Link>
                           </TableCell>
@@ -86,7 +169,16 @@ export default function MealSettlementPage() {
                             {member.mealBalance >= 0 ? `+৳${member.mealBalance.toFixed(2)}` : `-৳${Math.abs(member.mealBalance).toFixed(2)}`}
                           </TableCell>
                         </TableRow>
-                      ))}
+                      )) : (
+                         <TableRow>
+                            <TableCell colSpan={5} className="text-center h-24">
+                               <div className="flex flex-col items-center gap-2">
+                                   <Users className="h-8 w-8 text-muted-foreground" />
+                                   <p className="text-muted-foreground">No members in this group for the selected month.</p>
+                                </div>
+                            </TableCell>
+                        </TableRow>
+                      )}
                     </TableBody>
                 </Table>
             </CardContent>
