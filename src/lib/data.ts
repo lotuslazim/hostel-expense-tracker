@@ -12,8 +12,16 @@ export const MOCK_EXPENSES: Expense[] = [
 ];
 
 export const MOCK_ITEMS: Item[] = [
-  { id: '1', name: 'Apples', quantity: 6, unit: 'pcs', cost: 3.99, date: new Date() },
-  { id: '2', name: 'Almond Milk', quantity: 1, unit: 'carton', cost: 2.50, date: new Date() },
+  { id: '1', name: 'Apples', quantity: 6, unit: 'pcs', cost: 3.99, date: new Date('2025-09-01') },
+  { id: '2', name: 'Almond Milk', quantity: 1, unit: 'carton', cost: 2.50, date: new Date('2025-09-02') },
+  { id: '3', name: 'Chicken Breast', quantity: 2, unit: 'kg', cost: 15.00, date: new Date('2025-09-05') },
+  { id: '4', name: 'Rice', quantity: 5, unit: 'kg', cost: 10.00, date: new Date('2025-09-05') },
+  { id: '5', name: 'Onions', quantity: 1, unit: 'kg', cost: 2.00, date: new Date('2025-09-10') },
+  { id: '6', name: 'Potatoes', quantity: 3, unit: 'kg', cost: 4.50, date: new Date('2025-09-12') },
+  { id: '7', name: 'Lentils', quantity: 2, unit: 'kg', cost: 5.00, date: new Date('2025-09-15') },
+  { id: '8', name: 'Apples', quantity: 4, unit: 'pcs', cost: 2.50, date: new Date('2025-09-20') },
+  { id: '9', name: 'Chicken Breast', quantity: 1.5, unit: 'kg', cost: 11.25, date: new Date('2025-09-22') },
+  { id: '10', name: 'Cooking Oil', quantity: 1, unit: 'litre', cost: 4.00, date: new Date('2025-09-25') },
 ];
 
 // Summaries for GenAI
@@ -44,4 +52,3 @@ export const MOCK_MONTHLY_GROUP_DATA = {
     { id: "3", name: "Charlie", meals: 55, expenses: { food: 6500, electricity: 0, gas: 1000 } },
   ],
 };
-
