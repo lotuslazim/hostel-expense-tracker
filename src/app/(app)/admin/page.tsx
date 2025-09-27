@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { useState, useMemo } from "react";
 import placeholderImages from "@/lib/placeholder-images.json";
 import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/firebase";
-import { doc, collection, query, where, writeBatch, getDocs, arrayUnion, serverTimestamp } from "firebase/firestore";
+import { doc, collection, query, where, writeBatch, getDocs, arrayUnion, serverTimestamp, setDoc, getDoc } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
@@ -52,14 +52,24 @@ function NewUserAdminPanel() {
       const newGroupRef = doc(collection(firestore, "groups"));
       const userRef = doc(firestore, "users", currentUser.uid);
 
+      // Create the group
       batch.set(newGroupRef, {
         groupName,
         invitationCode: generateInviteCode(),
         adminId: currentUser.uid,
-        memberIds: [currentUser.uid],
+        memberIds: [currentUser.uid], // Keep this for quick member count, etc.
         createdAt: serverTimestamp(),
       });
       
+      // Add the creator as the first member in the 'members' subcollection
+      const memberRef = doc(firestore, `groups/${newGroupRef.id}/members`, currentUser.uid);
+      batch.set(memberRef, {
+          email: currentUser.email,
+          role: 'admin',
+          joinedAt: serverTimestamp(),
+      });
+
+      // Update the user's profile
       batch.update(userRef, {
         groupId: newGroupRef.id,
         isAdmin: true,
@@ -96,10 +106,20 @@ function NewUserAdminPanel() {
         const groupDoc = querySnapshot.docs[0];
         const batch = writeBatch(firestore);
 
+        // Add user to the memberIds array
         batch.update(groupDoc.ref, {
             memberIds: arrayUnion(currentUser.uid)
         });
 
+        // Add user to the 'members' subcollection
+        const memberRef = doc(firestore, `groups/${groupDoc.id}/members`, currentUser.uid);
+        batch.set(memberRef, {
+            email: currentUser.email,
+            role: 'member',
+            joinedAt: serverTimestamp(),
+        });
+
+        // Update the user's profile
         const userRef = doc(firestore, "users", currentUser.uid);
         batch.update(userRef, {
             groupId: groupDoc.id
@@ -169,27 +189,21 @@ export default function AdminPage() {
   const { user: currentUser, isUserLoading: isCurrentUserLoading } = useUser();
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
 
-  // 1. Get current user's profile to find their groupId
   const currentUserRef = useMemoFirebase(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
   const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
 
   const groupId = currentUserData?.groupId;
 
-  // 2. Get the group document
   const groupRef = useMemoFirebase(() => groupId ? doc(firestore, "groups", groupId) : null, [firestore, groupId]);
   const { data: groupData, isLoading: isGroupLoading } = useDoc(groupRef);
 
-  const memberIds = useMemo(() => groupData?.memberIds || [], [groupData]);
-
-  // 3. Get all members of the group
+  // Query the 'members' subcollection instead of the root 'users' collection
   const membersQuery = useMemoFirebase(
-    () =>
-      memberIds.length > 0
-        ? query(collection(firestore, 'users'), where('__name__', 'in', memberIds))
-        : null,
-    [firestore, memberIds]
+    () => (groupId ? collection(firestore, `groups/${groupId}/members`) : null),
+    [firestore, groupId]
   );
   const { data: membersData, isLoading: areMembersLoading } = useCollection(membersQuery);
+
 
   const handleRowClick = (member: Member) => {
     setSelectedMember(member);
@@ -204,15 +218,16 @@ export default function AdminPage() {
   const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || isGroupLoading || areMembersLoading;
   
   const members = useMemo(() => {
-    if (!membersData || !groupData) return [];
+    if (!membersData) return [];
     return membersData.map(member => ({
       id: member.id,
-      name: member.email.split('@')[0], // Placeholder name
+      name: member.email.split('@')[0],
       email: member.email,
-      role: groupData.adminId === member.id ? 'Admin' : 'Member',
-      avatarId: 'user-avatar', // Placeholder avatar
+      role: member.role === 'admin' ? 'Admin' : 'Member',
+      avatarId: 'user-avatar',
     }));
-  }, [membersData, groupData]);
+  }, [membersData]);
+
 
   if (isLoading) {
     return (
@@ -416,6 +431,8 @@ export default function AdminPage() {
   );
 }
     
+    
+
     
 
     
