@@ -283,6 +283,9 @@
           "schema": {
             "$ref": "#/backend/entities/Member"
           },
+          "rules": {
+            "list": "get(/databases/(default)/documents/groups/$(groupId)).data.memberIds.hasAny([request.auth.uid])"
+          },
           "description": "Stores basic information about each member of a group. The document ID is the user's UID. This allows secure listing of group members.",
           "params": [
             {
