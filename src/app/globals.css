@@ -4,57 +4,57 @@
 
 @layer base {
   :root {
-    --background: 62 61% 80%; /* Light Yellow */
-    --foreground: 16 29% 23%; /* Dark Brown */
-    --card: 91 32% 71%; /* Soft Green */
-    --card-foreground: 16 29% 23%; /* Dark Brown */
-    --popover: 91 32% 71%; /* Soft Green */
-    --popover-foreground: 16 29% 23%; /* Dark Brown */
-    --primary: 24 55% 53%; /* Warm Orange */
-    --primary-foreground: 16 29% 10%; /* Very Dark Brown */
-    --secondary: 91 32% 71%; /* Soft Green */
-    --secondary-foreground: 16 29% 23%; /* Dark Brown */
-    --muted: 91 32% 71%; /* Soft Green */
-    --muted-foreground: 16 29% 30%; /* Darker Brown */
-    --accent: 24 55% 53%; /* Warm Orange */
-    --accent-foreground: 16 29% 10%; /* Very Dark Brown */
+    --background: 0 0% 98%; /* Almost White */
+    --foreground: 222 47% 11%; /* Dark Blue */
+    --card: 0 0% 100%; /* White */
+    --card-foreground: 222 47% 11%; /* Dark Blue */
+    --popover: 0 0% 100%; /* White */
+    --popover-foreground: 222 47% 11%; /* Dark Blue */
+    --primary: 210 100% 50%; /* Vibrant Blue */
+    --primary-foreground: 0 0% 100%; /* White */
+    --secondary: 210 40% 96.1%; /* Light Blue */
+    --secondary-foreground: 222 47% 11%; /* Dark Blue */
+    --muted: 210 40% 96.1%; /* Light Blue */
+    --muted-foreground: 215.4 16.3% 46.9%; /* Muted Blue */
+    --accent: 210 40% 96.1%; /* Light Blue */
+    --accent-foreground: 222 47% 11%; /* Dark Blue */
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 91 25% 65%; /* Muted Soft Green */
-    --input: 91 25% 65%; /* Muted Soft Green */
-    --ring: 24 55% 53%; /* Warm Orange */
-    --chart-1: 24 55% 53%;
-    --chart-2: 91 32% 71%;
-    --chart-3: 16 29% 23%;
-    --chart-4: 24 55% 63%;
-    --chart-5: 91 32% 61%;
+    --border: 214.3 31.8% 91.4%; /* Light Gray-Blue */
+    --input: 214.3 31.8% 91.4%; /* Light Gray-Blue */
+    --ring: 210 100% 50%; /* Vibrant Blue */
+    --chart-1: 210 100% 50%;
+    --chart-2: 160 100% 35%;
+    --chart-3: 30 100% 50%;
+    --chart-4: 280 100% 60%;
+    --chart-5: 0 100% 50%;
     --radius: 0.5rem;
   }
   .dark {
-    --background: 16 29% 23%; /* Dark Brown */
-    --foreground: 62 61% 80%; /* Light Yellow */
-    --card: 16 15% 18%; /* Darker Brown */
-    --card-foreground: 62 61% 80%; /* Light Yellow */
-    --popover: 16 15% 18%; /* Darker Brown */
-    --popover-foreground: 62 61% 80%; /* Light Yellow */
-    --primary: 24 55% 53%; /* Warm Orange */
-    --primary-foreground: 16 29% 10%; /* Very Dark Brown */
-    --secondary: 91 32% 71%; /* Soft Green */
-    --secondary-foreground: 16 29% 23%; /* Dark Brown */
-    --muted: 16 15% 18%; /* Darker Brown */
-    --muted-foreground: 62 61% 70%; /* Lighter Yellow */
-    --accent: 24 55% 53%; /* Warm Orange */
-    --accent-foreground: 16 29% 10%; /* Very Dark Brown */
+    --background: 222 47% 11%; /* Dark Blue */
+    --foreground: 210 40% 98%; /* Almost White */
+    --card: 222 47% 14%; /* Darker Blue */
+    --card-foreground: 210 40% 98%; /* Almost White */
+    --popover: 222 47% 11%; /* Dark Blue */
+    --popover-foreground: 210 40% 98%; /* Almost White */
+    --primary: 210 100% 50%; /* Vibrant Blue */
+    --primary-foreground: 0 0% 100%; /* White */
+    --secondary: 217.2 32.6% 17.5%; /* Dark Muted Blue */
+    --secondary-foreground: 210 40% 98%; /* Almost White */
+    --muted: 217.2 32.6% 17.5%; /* Dark Muted Blue */
+    --muted-foreground: 215 20.2% 65.1%; /* Lighter Muted Blue */
+    --accent: 217.2 32.6% 17.5%; /* Dark Muted Blue */
+    --accent-foreground: 210 40% 98%; /* Almost White */
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 16 15% 28%; /* Darker Brown */
-    --input: 16 15% 28%; /* Darker Brown */
-    --ring: 24 55% 53%; /* Warm Orange */
-    --chart-1: 24 55% 53%;
-    --chart-2: 91 32% 71%;
-    --chart-3: 62 61% 80%;
-    --chart-4: 24 55% 33%;
-    --chart-5: 91 32% 51%;
+    --border: 217.2 32.6% 22.5%; /* Darker Gray-Blue */
+    --input: 217.2 32.6% 22.5%; /* Darker Gray-Blue */
+    --ring: 210 100% 50%; /* Vibrant Blue */
+    --chart-1: 210 100% 50%;
+    --chart-2: 160 100% 40%;
+    --chart-3: 30 100% 55%;
+    --chart-4: 280 100% 65%;
+    --chart-5: 0 100% 55%;
   }
 }
 
