@@ -560,6 +560,30 @@ export default function AdminPage() {
                                 </div>
                                 </DialogContent>
                             </Dialog>
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button variant="destructive" className="w-full justify-start">
+                                        <Trash2 className="mr-2 h-4 w-4" /> Delete Group
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            This action cannot be undone. This will permanently delete the group and all its data for all members.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction
+                                            className="bg-destructive hover:bg-destructive/90"
+                                            onClick={() => alert('Delete group functionality to be implemented.')}
+                                        >
+                                            Delete Group
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
                            </div>
                         </div>
                          <div className="space-y-2">
@@ -844,3 +868,5 @@ export default function AdminPage() {
     </div>
   );
 }
+
+    
