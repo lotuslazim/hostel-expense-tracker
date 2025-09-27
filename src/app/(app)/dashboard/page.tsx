@@ -7,8 +7,7 @@ import { format, parseISO, startOfDay, endOfDay } from "date-fns";
 import { DateSwitcher } from "@/components/dashboard/date-switcher";
 import { MealLog } from "@/components/dashboard/meal-log";
 import { ExpenseLog } from "@/components/dashboard/expense-log";
-import { SmartItemLog } from "@/components/dashboard/smart-item-log";
-import type { Meal, Expense, Item } from "@/lib/types";
+import type { Meal, Expense } from "@/lib/types";
 import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/firebase";
 import { doc, collection, query, where } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -30,8 +29,7 @@ function DashboardSkeleton() {
             <Skeleton className="h-10 w-10" />
         </div>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <CardSkeleton />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <CardSkeleton />
         <CardSkeleton />
       </div>
@@ -134,17 +132,16 @@ export default function DashboardPage() {
             Daily Tracker
           </h1>
           <p className="text-muted-foreground">
-            Log your meals, expenses, and purchased items for{" "}
+            Log your meals and expenses for{" "}
             {format(currentDate, "MMMM d, yyyy")}.
           </p>
         </div>
         <DateSwitcher currentDate={currentDate} setCurrentDate={setCurrentDate} />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <MealLog meals={meals ?? []} currentDate={currentDate} />
         <ExpenseLog expenses={expenses ?? []} currentDate={currentDate} />
-        <SmartItemLog currentDate={currentDate}/>
       </div>
     </div>
   );
