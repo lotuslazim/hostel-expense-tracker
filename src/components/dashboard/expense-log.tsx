@@ -15,17 +15,15 @@ import { useFirebase, useUser, useDoc, useMemoFirebase } from "@/firebase";
 import { doc, collection, addDoc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 
-const expenseCategories = ["Food", "Electricity", "Gas"] as const;
+const expenseCategories = ["Electricity", "Gas"] as const;
 type ExpenseCategory = typeof expenseCategories[number];
 
 const categoryDisplayNames: Record<ExpenseCategory, string> = {
-  Food: "Bazar",
   Electricity: "Electricity",
   Gas: "Gas",
 };
 
 const categoryIcons: Record<ExpenseCategory, React.ReactNode> = {
-  Food: <Utensils className="h-5 w-5" />,
   Electricity: <Zap className="h-5 w-5" />,
   Gas: <Flame className="h-5 w-5" />,
 };
@@ -64,8 +62,8 @@ export function ExpenseLog({ expenses, currentDate }: { expenses: Expense[]; cur
       userId: currentUser.uid,
       groupId,
       description,
-      quantity: category === "Food" ? parseInt(quantity, 10) : 1,
-      unit: category === "Food" ? unit : "",
+      quantity: 1,
+      unit: "",
       amount: parseFloat(amount),
       category,
       date: currentDate,
@@ -115,23 +113,11 @@ export function ExpenseLog({ expenses, currentDate }: { expenses: Expense[]; cur
                 </div>
                 <div className="space-y-2">
                    <Label htmlFor="description">Description</Label>
-                   <Input id="description" placeholder="e.g., Rice, Electricity Bill" value={description} onChange={e => setDescription(e.target.value)} />
+                   <Input id="description" placeholder="e.g., Monthly Electricity Bill" value={description} onChange={e => setDescription(e.target.value)} />
                 </div>
-                {category === 'Food' && (
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="quantity">Quantity</Label>
-                      <Input id="quantity" type="number" placeholder="e.g., 5" value={quantity} onChange={e => setQuantity(e.target.value)} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="unit">Unit</Label>
-                      <Input id="unit" placeholder="e.g., kg, litre, pcs" value={unit} onChange={e => setUnit(e.target.value)} />
-                    </div>
-                  </div>
-                )}
                  <div className="space-y-2">
                    <Label htmlFor="amount">Amount</Label>
-                   <Input id="amount" type="number" placeholder="e.g., 45.00" value={amount} onChange={e => setAmount(e.target.value)} />
+                   <Input id="amount" type="number" placeholder="e.g., 1200.00" value={amount} onChange={e => setAmount(e.target.value)} />
                 </div>
                  <div className="space-y-2">
                    <Label htmlFor="receipt">Receipt (optional)</Label>
@@ -168,7 +154,6 @@ export function ExpenseLog({ expenses, currentDate }: { expenses: Expense[]; cur
                     <TableRow key={expense.id}>
                       <TableCell className="font-medium">
                         {expense.description}
-                        {expense.category === 'Food' && expense.quantity > 1 && ` x${expense.quantity}${expense.unit ? ` ${expense.unit}`: ''}`}
                       </TableCell>
                       <TableCell className="text-right">৳{expense.amount.toFixed(2)}</TableCell>
                     </TableRow>
