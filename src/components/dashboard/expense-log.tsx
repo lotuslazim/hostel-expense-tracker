@@ -32,6 +32,7 @@ const categoryIcons: Record<ExpenseCategory, React.ReactNode> = {
 export function ExpenseLog({ expenses, currentDate }: { expenses: Expense[]; currentDate: Date }) {
   const [open, setOpen] = useState(false);
   const [description, setDescription] = useState("");
+  const [quantity, setQuantity] = useState(1);
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState<ExpenseCategory | undefined>();
 
@@ -48,6 +49,7 @@ export function ExpenseLog({ expenses, currentDate }: { expenses: Expense[]; cur
       userId: currentUser.uid,
       groupId,
       description,
+      quantity: quantity,
       amount: parseFloat(amount),
       category,
       date: currentDate,
@@ -58,6 +60,7 @@ export function ExpenseLog({ expenses, currentDate }: { expenses: Expense[]; cur
 
     // Reset form
     setDescription("");
+    setQuantity(1);
     setAmount("");
     setCategory(undefined);
     setOpen(false);
@@ -84,6 +87,10 @@ export function ExpenseLog({ expenses, currentDate }: { expenses: Expense[]; cur
                 <div className="space-y-2">
                    <Label htmlFor="description">Description</Label>
                    <Input id="description" placeholder="e.g., Weekly groceries" value={description} onChange={e => setDescription(e.target.value)} />
+                </div>
+                 <div className="space-y-2">
+                   <Label htmlFor="quantity">Quantity</Label>
+                   <Input id="quantity" type="number" placeholder="e.g., 1" value={quantity} onChange={e => setQuantity(parseInt(e.target.value) || 1)} />
                 </div>
                  <div className="space-y-2">
                    <Label htmlFor="amount">Amount</Label>
@@ -135,7 +142,10 @@ export function ExpenseLog({ expenses, currentDate }: { expenses: Expense[]; cur
                 <TableBody>
                   {categoryExpenses.map((expense) => (
                     <TableRow key={expense.id}>
-                      <TableCell className="font-medium">{expense.description}</TableCell>
+                      <TableCell className="font-medium">
+                        {expense.description}
+                        {expense.quantity > 1 && <span className="text-muted-foreground ml-2">x{expense.quantity}</span>}
+                      </TableCell>
                       <TableCell className="text-right">৳{expense.amount.toFixed(2)}</TableCell>
                     </TableRow>
                   ))}

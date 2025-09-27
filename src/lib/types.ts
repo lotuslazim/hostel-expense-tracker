@@ -14,6 +14,7 @@ export interface Meal {
 export interface Expense {
   id: string;
   description: string;
+  quantity: number;
   amount: number;
   category: string;
   date: Date;
