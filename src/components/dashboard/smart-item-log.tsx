@@ -36,10 +36,15 @@ export const SmartItemLog = ({ currentDate }: { currentDate: Date }) => {
           collection(firestore, 'groups', currentUserData.groupId, 'purchasedItems')
         );
         const snapshot = await getDocs(itemsQuery);
-        const items = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as Item[];
+        const items = snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                ...data,
+                // Ensure date is a JS Date object
+                date: data.date?.toDate ? data.date.toDate() : new Date(data.date),
+            } as Item;
+        });
         setPreviousItems(items);
       } catch (error) {
         console.error('Error loading previous items:', error);
