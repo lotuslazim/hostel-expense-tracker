@@ -18,7 +18,10 @@ import { AuthCard } from "./auth-card";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/firebase";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email." }),
@@ -28,6 +31,9 @@ const formSchema = z.object({
 export function LoginForm() {
   const router = useRouter();
   const auth = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -36,9 +42,25 @@ export function LoginForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    router.push('/dashboard');
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLoading(true);
+    try {
+      await signInWithEmailAndPassword(auth, values.email, values.password);
+      router.push('/dashboard');
+    } catch (error: any) {
+      console.error("Error signing in:", error);
+      let description = "An unexpected error occurred. Please try again.";
+      if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+        description = "Invalid email or password. Please check your credentials and try again.";
+      }
+      toast({
+        variant: "destructive",
+        title: "Login Failed",
+        description: description,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   const handleGoogleSignIn = async () => {
@@ -48,7 +70,7 @@ export function LoginForm() {
       router.push('/dashboard');
     } catch (error) {
       console.error("Error during Google sign-in:", error);
-      // Optionally, show a toast notification to the user
+      toast({ variant: "destructive", title: "Google Sign-In Failed", description: "Could not sign in with Google. Please try again."})
     }
   };
 
@@ -117,7 +139,8 @@ export function LoginForm() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full" disabled={isLoading}>
+               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Log In
             </Button>
           </form>

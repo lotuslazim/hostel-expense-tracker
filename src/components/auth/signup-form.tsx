@@ -18,7 +18,7 @@ import { AuthCard } from "./auth-card";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/firebase";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
@@ -40,10 +40,26 @@ export function SignupForm() {
     defaultValues: { name: "", email: "", password: "" },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    // TODO: Implement actual email/password signup
-    router.push('/dashboard');
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLoading(true);
+    try {
+      await createUserWithEmailAndPassword(auth, values.email, values.password);
+      // You might want to also set the user's display name here
+      router.push('/dashboard');
+    } catch (error: any) {
+      console.error("Error creating user:", error);
+      let description = "An unexpected error occurred. Please try again.";
+      if (error.code === 'auth/email-already-in-use') {
+        description = "This email address is already in use. Please try logging in.";
+      }
+      toast({
+        variant: "destructive",
+        title: "Sign-Up Failed",
+        description: description,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   const handleGoogleSignIn = async () => {
