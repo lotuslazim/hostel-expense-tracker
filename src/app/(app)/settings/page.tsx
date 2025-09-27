@@ -23,7 +23,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { AlertTriangle, UserCog, Settings, Bell, Palette, Globe, LogOut, Trash2, Shield, Edit, ShieldCheck, FileDown, SlidersHorizontal, Loader2 } from "lucide-react"
+import { AlertTriangle, UserCog, Settings, Bell, Palette, Globe, LogOut, Trash2, Shield, Edit, ShieldCheck, FileDown, SlidersHorizontal, Loader2, KeyRound } from "lucide-react"
 import { ThemeSwitcher } from "@/components/settings/theme-switcher"
 import { useI18n } from "@/i18n/client-provider"
 import { Switch } from "@/components/ui/switch"
@@ -36,7 +36,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { EmailAuthProvider, reauthenticateWithCredential, deleteUser } from "firebase/auth";
+import { EmailAuthProvider, reauthenticateWithCredential, deleteUser, updatePassword } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -45,13 +45,28 @@ const deleteFormSchema = z.object({
   password: z.string().min(1, { message: "Password is required." }),
 });
 
+const passwordFormSchema = z.object({
+  currentPassword: z.string().min(1, { message: "Current password is required." }),
+  newPassword: z.string().min(8, { message: "New password must be at least 8 characters." }),
+  confirmPassword: z.string(),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords don't match.",
+  path: ["confirmPassword"],
+});
+
+
 export default function SettingsPage() {
   const { lang, setLang, t } = useI18n();
   const [mealReminders, setMealReminders] = React.useState(true);
   const [expenseAlerts, setExpenseAlerts] = React.useState(false);
   const [missedDayAlerts, setMissedDayAlerts] = React.useState(true);
+  
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
+
+  const [isChangingPassword, setIsChangingPassword] = React.useState(false);
+  const [passwordDialogOpen, setPasswordDialogOpen] = React.useState(false);
+
 
   const { firestore, auth } = useFirebase();
   const { user: currentUser, isUserLoading: isCurrentUserLoading } = useUser();
@@ -69,20 +84,19 @@ export default function SettingsPage() {
   
   const isGoogleUser = currentUser?.providerData.some(p => p.providerId === 'google.com');
 
-  const form = useForm<z.infer<typeof deleteFormSchema>>({
+  const deleteForm = useForm<z.infer<typeof deleteFormSchema>>({
     resolver: zodResolver(deleteFormSchema),
-    defaultValues: {
-      password: "",
-    },
+    defaultValues: { password: "" },
+  });
+  
+  const passwordForm = useForm<z.infer<typeof passwordFormSchema>>({
+    resolver: zodResolver(passwordFormSchema),
+    defaultValues: { currentPassword: "", newPassword: "", confirmPassword: "" },
   });
 
   const handleDeleteAccount = async (values: z.infer<typeof deleteFormSchema>) => {
     if (!currentUser || !currentUser.email) {
-        toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Could not find user information to delete the account.",
-        });
+        toast({ variant: "destructive", title: "Error", description: "Could not find user information." });
         return;
     }
     setIsDeleting(true);
@@ -91,21 +105,11 @@ export default function SettingsPage() {
         const credential = EmailAuthProvider.credential(currentUser.email, values.password);
         await reauthenticateWithCredential(currentUser, credential);
         
-        // Re-authenticated. Now delete user data and account.
         const userDocRef = doc(firestore, "users", currentUser.uid);
-
-        // In a real app, you might want to handle removing the user from their group,
-        // especially if they are the admin. For simplicity, we just delete the user doc.
         await deleteDoc(userDocRef);
-
-        // Finally, delete the user from Firebase Auth
         await deleteUser(currentUser);
 
-        toast({
-            title: "Account Deleted",
-            description: "Your account has been permanently deleted.",
-        });
-        
+        toast({ title: "Account Deleted", description: "Your account has been permanently deleted." });
         setDeleteDialogOpen(false);
         router.push('/');
 
@@ -114,17 +118,43 @@ export default function SettingsPage() {
         let description = "An unexpected error occurred.";
         if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
             description = "Incorrect password. Please try again.";
-            form.setError("password", { type: "manual", message: "Incorrect password." });
+            deleteForm.setError("password", { type: "manual", message: "Incorrect password." });
         }
-        toast({
-            variant: "destructive",
-            title: "Deletion Failed",
-            description,
-        });
+        toast({ variant: "destructive", title: "Deletion Failed", description });
     } finally {
         setIsDeleting(false);
     }
   };
+
+  const handleChangePassword = async (values: z.infer<typeof passwordFormSchema>) => {
+    if (!currentUser || !currentUser.email) {
+        toast({ variant: "destructive", title: "Error", description: "Could not find user information." });
+        return;
+    }
+    setIsChangingPassword(true);
+    try {
+        const credential = EmailAuthProvider.credential(currentUser.email, values.currentPassword);
+        await reauthenticateWithCredential(currentUser, credential);
+        
+        await updatePassword(currentUser, values.newPassword);
+        
+        toast({ title: "Password Updated", description: "Your password has been changed successfully." });
+        setPasswordDialogOpen(false);
+        passwordForm.reset();
+
+    } catch (error: any) {
+        console.error("Error changing password: ", error);
+        let description = "An unexpected error occurred.";
+        if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+            description = "Incorrect current password. Please try again.";
+            passwordForm.setError("currentPassword", { type: "manual", message: "Incorrect password." });
+        }
+        toast({ variant: "destructive", title: "Password Change Failed", description });
+    } finally {
+        setIsChangingPassword(false);
+    }
+  }
+
 
   const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || isGroupLoading;
 
@@ -254,6 +284,71 @@ export default function SettingsPage() {
                 )}
               </CardContent>
             </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2"><KeyRound/>Password</CardTitle>
+              </CardHeader>
+               <CardContent>
+                  <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="w-full">
+                            <Button variant="outline" className="w-full justify-start" disabled={isGoogleUser} onClick={() => isGoogleUser ? {} : setPasswordDialogOpen(true)}>
+                                Change Password
+                            </Button>
+                          </div>
+                        </TooltipTrigger>
+                         {isGoogleUser && (
+                          <TooltipContent>
+                            <p>Password cannot be changed for Google Sign-In accounts.</p>
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
+                    </TooltipProvider>
+
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Change Your Password</DialogTitle>
+                    </DialogHeader>
+                    <Form {...passwordForm}>
+                        <form onSubmit={passwordForm.handleSubmit(handleChangePassword)} className="space-y-4 pt-4">
+                           <FormField control={passwordForm.control} name="currentPassword" render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Current Password</FormLabel>
+                                  <FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                           <FormField control={passwordForm.control} name="newPassword" render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>New Password</FormLabel>
+                                  <FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                           <FormField control={passwordForm.control} name="confirmPassword" render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Confirm New Password</FormLabel>
+                                  <FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <Button type="submit" className="w-full" disabled={isChangingPassword}>
+                               {isChangingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                               Save New Password
+                            </Button>
+                        </form>
+                    </Form>
+                  </DialogContent>
+                </Dialog>
+              </CardContent>
+            </Card>
+
             <Card>
                <CardHeader>
                 <CardTitle className="text-base">{t('settings.account_settings.actions.title')}</CardTitle>
@@ -303,10 +398,10 @@ export default function SettingsPage() {
                         {t('settings.account_settings.actions.delete_account_confirm_desc')} To proceed, please enter your password.
                       </DialogDescription>
                     </DialogHeader>
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(handleDeleteAccount)} className="space-y-4 pt-4">
+                    <Form {...deleteForm}>
+                        <form onSubmit={deleteForm.handleSubmit(handleDeleteAccount)} className="space-y-4 pt-4">
                            <FormField
-                              control={form.control}
+                              control={deleteForm.control}
                               name="password"
                               render={({ field }) => (
                                 <FormItem>
@@ -332,7 +427,7 @@ export default function SettingsPage() {
         </AccordionItem>
         
         {/* Admin Settings */}
-        {true && (
+        {currentUserData?.isAdmin && (
           <AccordionItem value="admin-settings">
             <AccordionTrigger className="text-lg font-semibold">
               <div className="flex items-center gap-3 text-primary">
