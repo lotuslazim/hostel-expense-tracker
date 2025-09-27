@@ -7,13 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import placeholderImages from "@/lib/placeholder-images.json";
-import { User, Home, Utensils, ShoppingCart, Pencil, Camera, FileUp, LogIn, Loader2, PlusCircle } from "lucide-react";
+import { User, Home, Utensils, ShoppingCart, Pencil, Camera, FileUp, LogIn, Loader2, PlusCircle, LogOut } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/firebase";
-import { doc, collection, query, where, writeBatch, getDocs, serverTimestamp } from "firebase/firestore";
+import { doc, collection, query, where, writeBatch, getDocs, serverTimestamp, updateDoc } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Meal, Expense, Item } from "@/lib/types";
 import Link from "next/link";
@@ -21,19 +22,12 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 
-function NoGroupProfile() {
+function JoinGroupCard() {
   const { firestore } = useFirebase();
   const { user: currentUser } = useUser();
   const { toast } = useToast();
   const [inviteCode, setInviteCode] = useState("");
   const [isJoining, setIsJoining] = useState(false);
-
-  const userProfile = {
-    name: currentUser?.displayName || currentUser?.email?.split('@')[0] || "User",
-    email: currentUser?.email || "No email",
-    profilePictureId: "user-avatar"
-  };
-  const avatarImage = placeholderImages.placeholderImages.find(p => p.id === userProfile.profilePictureId);
   
    const handleJoinGroup = async () => {
     if (!currentUser || !inviteCode) {
@@ -68,7 +62,6 @@ function NoGroupProfile() {
             joinedAt: serverTimestamp(),
         });
         
-
         await batch.commit();
         toast({ title: "Success", description: `You have joined the group "${groupDoc.data().groupName}"!` });
 
@@ -80,109 +73,39 @@ function NoGroupProfile() {
     }
   };
 
-
   return (
-     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-1 space-y-6">
-            <Card>
-                <CardHeader>
-                  <div className="relative w-20 h-20 mx-auto">
-                    <Avatar className="h-20 w-20">
-                      {avatarImage && (
-                        <AvatarImage 
-                          src={avatarImage.imageUrl}
-                          alt="User avatar" 
-                          data-ai-hint={avatarImage.imageHint}
-                        />
-                      )}
-                      <AvatarFallback>{userProfile.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                     <Dialog>
-                      <DialogTrigger asChild>
-                        <Button variant="outline" size="icon" className="absolute bottom-0 right-0 rounded-full h-8 w-8 bg-background">
-                          <Camera className="h-4 w-4" />
-                          <span className="sr-only">Change profile picture</span>
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Change Profile Picture</DialogTitle>
-                          <DialogDescription>
-                            Upload a new photo for your profile.
-                          </DialogDescription>
-                        </DialogHeader>
-                         <div className="space-y-4 py-4">
-                           <div className="space-y-2">
-                             <Label htmlFor="picture">New Picture</Label>
-                             <Button asChild variant="outline" className="w-full justify-start font-normal text-muted-foreground"><label htmlFor="picture" className="flex items-center cursor-pointer w-full"><FileUp className="mr-2 h-4 w-4"/> Click to upload</label></Button>
-                             <Input id="picture" type="file" className="hidden"/>
-                          </div>
-                          <Button className="w-full">Save Picture</Button>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-                  <div className="text-center mt-4">
-                    <div className="flex justify-center items-center gap-2">
-                       <CardTitle className="text-2xl break-all">{userProfile.name}</CardTitle>
-                       <Dialog>
-                          <DialogTrigger asChild>
-                             <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0">
-                               <Pencil className="h-4 w-4" />
-                               <span className="sr-only">Edit name</span>
-                             </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Change Your Name</DialogTitle>
-                            </DialogHeader>
-                            <div className="space-y-4 py-4">
-                              <div className="space-y-2">
-                                 <Label htmlFor="name">New Name</Label>
-                                 <Input id="name" defaultValue={userProfile.name} />
-                              </div>
-                              <Button className="w-full">Save Name</Button>
-                            </div>
-                          </DialogContent>
-                        </Dialog>
-                    </div>
-                    <CardDescription className="break-all">{userProfile.email}</CardDescription>
-                  </div>
-                </CardHeader>
-            </Card>
-        </div>
-        <div className="md:col-span-2 space-y-6">
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><LogIn/> Join an Existing Group</CardTitle>
-                    <CardDescription>Enter an invitation code to join a group.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                     <div className="space-y-2">
-                        <Label htmlFor="inviteCode">Invitation Code</Label>
-                        <Input id="inviteCode" placeholder="e.g., AVNG-4321" value={inviteCode} onChange={(e) => setInviteCode(e.target.value)} disabled={isJoining}/>
-                    </div>
-                    <Button className="w-full" onClick={handleJoinGroup} disabled={isJoining || !inviteCode}>
-                        {isJoining && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
-                        Join Group
-                    </Button>
-                </CardContent>
-            </Card>
-             <Card className="flex flex-col items-center justify-center text-center p-8 bg-muted/50 border-dashed">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2"><PlusCircle className="h-6 w-6"/> Want to Create a Group?</CardTitle>
-                <CardDescription>To create and manage your own group, head over to the Admin Panel.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button asChild>
-                    <Link href="/admin">Go to Admin Panel</Link>
-                </Button>
-              </CardContent>
-            </Card>
-        </div>
-    </div>
-  )
+    <>
+    <Card>
+        <CardHeader>
+            <CardTitle className="flex items-center gap-2"><LogIn/> Join an Existing Group</CardTitle>
+            <CardDescription>Enter an invitation code to join a group.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="inviteCode">Invitation Code</Label>
+                <Input id="inviteCode" placeholder="e.g., AVNG-4321" value={inviteCode} onChange={(e) => setInviteCode(e.target.value)} disabled={isJoining}/>
+            </div>
+            <Button className="w-full" onClick={handleJoinGroup} disabled={isJoining || !inviteCode}>
+                {isJoining && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+                Join Group
+            </Button>
+        </CardContent>
+    </Card>
+      <Card className="flex flex-col items-center justify-center text-center p-8 bg-muted/50 border-dashed">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2"><PlusCircle className="h-6 w-6"/> Want to Create a Group?</CardTitle>
+        <CardDescription>To create and manage your own group, head over to the Admin Panel.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Button asChild>
+            <Link href="/admin">Go to Admin Panel</Link>
+        </Button>
+      </CardContent>
+    </Card>
+    </>
+  );
 }
+
 
 function ProfileSkeleton() {
   return (
@@ -253,6 +176,7 @@ function ProfileSkeleton() {
 export default function ProfilePage() {
   const { firestore } = useFirebase();
   const { user: currentUser, isUserLoading: isCurrentUserLoading } = useUser();
+  const { toast } = useToast();
 
   // 1. Get current user's profile
   const currentUserRef = useMemoFirebase(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
@@ -261,29 +185,30 @@ export default function ProfilePage() {
   const groupId = currentUserData?.groupId;
   const userName = currentUser?.displayName || currentUser?.email?.split('@')[0] || "User";
   const userEmail = currentUser?.email || "No email";
+  const inGroup = !!groupId;
 
   // 2. Get group data
   const groupRef = useMemoFirebase(() => groupId ? doc(firestore, "groups", groupId) : null, [firestore, groupId]);
   const { data: groupData, isLoading: isGroupDataLoading } = useDoc(groupRef);
-  const isAdmin = groupData?.adminId === currentUser?.uid;
+  const isAdmin = currentUserData?.isAdmin ?? false;
 
   // 3. Get user's contributions
-  const userMealsQuery = useMemoFirebase(() => (groupId && currentUser) ? query(collection(firestore, `groups/${groupId}/meals`), where("userId", "==", currentUser.uid)) : null, [firestore, groupId, currentUser]);
-  const userExpensesQuery = useMemoFirebase(() => (groupId && currentUser) ? query(collection(firestore, `groups/${groupId}/expenses`), where("userId", "==", currentUser.uid)) : null, [firestore, groupId, currentUser]);
-  const userItemsQuery = useMemoFirebase(() => (groupId && currentUser) ? query(collection(firestore, `groups/${groupId}/purchasedItems`), where("userId", "==", currentUser.uid)) : null, [firestore, groupId, currentUser]);
+  const userMealsQuery = useMemoFirebase(() => (inGroup && currentUser) ? query(collection(firestore, `groups/${groupId}/meals`), where("userId", "==", currentUser.uid)) : null, [firestore, groupId, currentUser, inGroup]);
+  const userExpensesQuery = useMemoFirebase(() => (inGroup && currentUser) ? query(collection(firestore, `groups/${groupId}/expenses`), where("userId", "==", currentUser.uid)) : null, [firestore, groupId, currentUser, inGroup]);
+  const userItemsQuery = useMemoFirebase(() => (inGroup && currentUser) ? query(collection(firestore, `groups/${groupId}/purchasedItems`), where("userId", "==", currentUser.uid)) : null, [firestore, groupId, currentUser, inGroup]);
   
   const { data: userMeals, isLoading: areMealsLoading } = useCollection<Meal>(userMealsQuery);
   const { data: userExpenses, isLoading: areExpensesLoading } = useCollection<Expense>(userExpensesQuery);
   const { data: userItems, isLoading: areItemsLoading } = useCollection<Item>(userItemsQuery);
 
   // 4. Get total group expenses and members for calculating share
-  const groupExpensesQuery = useMemoFirebase(() => groupId ? collection(firestore, `groups/${groupId}/expenses`) : null, [firestore, groupId]);
+  const groupExpensesQuery = useMemoFirebase(() => inGroup ? collection(firestore, `groups/${groupId}/expenses`) : null, [firestore, groupId, inGroup]);
   const { data: groupExpenses, isLoading: areGroupExpensesLoading } = useCollection<Expense>(groupExpensesQuery);
-  const groupMembersQuery = useMemoFirebase(() => groupId ? collection(firestore, `groups/${groupId}/members`) : null, [firestore, groupId]);
+  const groupMembersQuery = useMemoFirebase(() => inGroup ? collection(firestore, `groups/${groupId}/members`) : null, [firestore, groupId, inGroup]);
   const { data: groupMembers, isLoading: areGroupMembersLoading } = useCollection(groupMembersQuery);
 
 
-  const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || isGroupDataLoading || areMealsLoading || areExpensesLoading || areItemsLoading || areGroupExpensesLoading || areGroupMembersLoading;
+  const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || (inGroup && (isGroupDataLoading || areMealsLoading || areExpensesLoading || areItemsLoading || areGroupExpensesLoading || areGroupMembersLoading));
 
   if (isLoading) {
     return <ProfileSkeleton />;
@@ -292,7 +217,7 @@ export default function ProfilePage() {
   const userProfile = {
     name: userName,
     email: userEmail,
-    role: isAdmin ? "Admin" : "Member",
+    role: inGroup ? (isAdmin ? "Admin" : "Member") : "Not in a group",
     profilePictureId: "user-avatar"
   };
 
@@ -313,6 +238,32 @@ export default function ProfilePage() {
   const recentPurchases = userItems?.slice(0, 3).map(item => ({ item: item.name, quantity: `${item.quantity} ${item.unit}` })) || [];
 
   const avatarImage = placeholderImages.placeholderImages.find(p => p.id === userProfile.profilePictureId);
+  
+  const handleLeaveGroup = async () => {
+    if (!currentUser || !groupId) return;
+
+    try {
+        const batch = writeBatch(firestore);
+        
+        // Remove member from group's members subcollection
+        const memberRef = doc(firestore, `groups/${groupId}/members`, currentUser.uid);
+        batch.delete(memberRef);
+
+        // Update user's profile
+        const userRef = doc(firestore, "users", currentUser.uid);
+        batch.update(userRef, {
+            groupId: null,
+            isAdmin: false,
+        });
+
+        await batch.commit();
+        toast({ title: "Success", description: "You have left the group." });
+    } catch(error) {
+        console.error("Error leaving group:", error);
+        toast({ variant: "destructive", title: "Error", description: "Could not leave group. Please try again." });
+    }
+  };
+
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
@@ -323,10 +274,7 @@ export default function ProfilePage() {
         </p>
       </div>
 
-       {!currentUserData?.groupId ? (
-            <NoGroupProfile />
-       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Left Column */}
             <div className="md:col-span-1 space-y-6">
               {/* User Info */}
@@ -400,28 +348,52 @@ export default function ProfilePage() {
                 </CardContent>
               </Card>
 
-              {/* Group Info */}
-              <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><Home className="h-5 w-5" /> Group Info</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Group Name</span>
-                      <span className="font-medium">{groupInfo.name}</span>
-                    </div>
-                    {isAdmin && (
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Invite Code</span>
-                        <span className="font-mono text-sm bg-muted px-2 py-1 rounded">{groupInfo.invitationCode}</span>
-                      </div>
-                    )}
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Members</span>
-                      <span className="font-medium">{groupInfo.memberCount}</span>
-                    </div>
-                  </CardContent>
-              </Card>
+                {inGroup ? (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><Home className="h-5 w-5" /> Group Info</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Group Name</span>
+                          <span className="font-medium">{groupInfo.name}</span>
+                        </div>
+                        {isAdmin && (
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Invite Code</span>
+                            <span className="font-mono text-sm bg-muted px-2 py-1 rounded">{groupInfo.invitationCode}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Members</span>
+                          <span className="font-medium">{groupInfo.memberCount}</span>
+                        </div>
+                      </CardContent>
+                      <CardContent>
+                         <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="outline" className="w-full justify-start">
+                              <LogOut className="mr-2 h-4 w-4" /> Leave Group
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you sure you want to leave?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                You will lose access to all group data. This action can only be undone by being re-invited by an admin.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={handleLeaveGroup} className="bg-destructive hover:bg-destructive/90">Leave Group</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </CardContent>
+                    </Card>
+                ) : (
+                    <JoinGroupCard />
+                )}
             </div>
 
             {/* Right Column */}
@@ -455,7 +427,7 @@ export default function ProfilePage() {
                     </div>
                     <div className="text-center p-4 bg-muted/50 rounded-lg">
                       <p className="text-sm text-muted-foreground">Share of Group Total</p>
-                      <p className="text-3xl font-bold">{expenseShare}%</p>
+                      <p className="text-3xl font-bold">{inGroup ? expenseShare : '0'}%</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -491,7 +463,8 @@ export default function ProfilePage() {
                 </Card>
             </div>
         </div>
-      )}
     </div>
   );
 }
+
+    
