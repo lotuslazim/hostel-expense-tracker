@@ -302,6 +302,9 @@
           "schema": {
             "$ref": "#/backend/entities/MealLog"
           },
+          "rules": {
+            "read, write": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId"
+          },
           "description": "Stores meal log entries for each group. Includes denormalized 'groupId' and 'userId' for authorization independence.",
           "params": [
             {
@@ -322,6 +325,9 @@
           "schema": {
             "$ref": "#/backend/entities/Expense"
           },
+          "rules": {
+            "read, write": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId"
+          },
           "description": "Stores expense entries for each group. Includes denormalized 'groupId' and 'userId' for authorization independence.",
           "params": [
             {
@@ -341,6 +347,9 @@
           "entityName": "PurchasedItem",
           "schema": {
             "$ref": "#/backend/entities/PurchasedItem"
+          },
+          "rules": {
+            "read, write": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId"
           },
           "description": "Stores purchased item entries for each group. Includes denormalized 'groupId' and 'userId' for authorization independence.",
           "params": [
