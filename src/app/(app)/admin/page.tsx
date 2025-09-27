@@ -31,6 +31,7 @@ import { EmailAuthProvider, reauthenticateWithCredential, deleteUser, updatePass
 import { useRouter } from "next/navigation";
 import { Tooltip, TooltipProvider, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Alert } from "@/components/ui/alert";
+import Papa from "papaparse";
 
 
 // In a real app, this would be fetched or calculated
@@ -184,6 +185,48 @@ export default function AdminPage() {
     resolver: zodResolver(passwordFormSchema),
     defaultValues: { newPassword: "", confirmPassword: "" },
   });
+
+  const handleExportData = async () => {
+    if (!groupId) return;
+
+    try {
+        const collectionsToExport = ['meals', 'expenses', 'purchasedItems'];
+        const allData: Record<string, any[]> = {};
+        
+        for (const coll of collectionsToExport) {
+            const q = query(collection(firestore, `groups/${groupId}/${coll}`));
+            const snapshot = await getDocs(q);
+            allData[coll] = snapshot.docs.map(d => {
+                const data = d.data();
+                // Convert Firestore Timestamps to ISO strings for CSV
+                Object.keys(data).forEach(key => {
+                    if (data[key]?.toDate) {
+                        data[key] = data[key].toDate().toISOString();
+                    }
+                });
+                return { id: d.id, ...data };
+            });
+        }
+
+        const csv = Papa.unparse(allData.meals); // Example with meals
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        if (link.download !== undefined) {
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `group-data-${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        toast({ title: "Export Successful", description: "Your group data has been downloaded." });
+
+    } catch (error) {
+        console.error("Export failed:", error);
+        toast({ variant: "destructive", title: "Export Failed", description: "Could not export group data." });
+    }
+  };
 
   const handleDeleteAccount = async (values: z.infer<typeof deleteFormSchema>) => {
     if (!currentUser || !currentUser.email) {
@@ -467,6 +510,89 @@ export default function AdminPage() {
                   </Dialog>
                 </CardContent>
             </Card>
+
+            {currentUserData?.isAdmin && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-3 text-primary"><Shield className="h-5 w-5" />Admin Controls</CardTitle>
+                        <CardDescription>Manage your group settings and members.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <div className="space-y-2">
+                           <h4 className="font-medium text-sm flex items-center gap-2"><Edit className="h-4 w-4"/> Group Management</h4>
+                           <div className="grid sm:grid-cols-2 gap-3">
+                              <Dialog>
+                                <DialogTrigger asChild><Button variant="outline" className="w-full justify-start">Edit Group Name</Button></DialogTrigger>
+                                <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Edit Group Name</DialogTitle>
+                                    <DialogDescription>Enter a new name for your group.</DialogDescription>
+                                </DialogHeader>
+                                <div className="space-y-4 py-4">
+                                    <div className="space-y-2">
+                                    <Label htmlFor="group-name">New Group Name</Label>
+                                    <Input id="group-name" defaultValue={groupData?.groupName} />
+                                    </div>
+                                    <Button className="w-full">Save Changes</Button>
+                                </div>
+                                </DialogContent>
+                            </Dialog>
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild><Button variant="outline" className="w-full justify-start">Reset Invite Code</Button></AlertDialogTrigger>
+                                <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you sure you want to reset the invite code?</AlertDialogTitle>
+                                    <AlertDialogDescription>The old invite code will no longer work. All members will need the new code to join.</AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction>Reset Code</AlertDialogAction>
+                                </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                           </div>
+                        </div>
+                         <div className="space-y-2">
+                           <h4 className="font-medium text-sm flex items-center gap-2"><ShieldCheck className="h-4 w-4"/> Member Management</h4>
+                           <div className="grid sm:grid-cols-2 gap-3">
+                               <Dialog>
+                                <DialogTrigger asChild><Button variant="outline" className="w-full justify-start">Assign New Admin</Button></DialogTrigger>
+                                <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Assign New Admin</DialogTitle>
+                                    <DialogDescription>Choose a member to promote to an admin role.</DialogDescription>
+                                </DialogHeader>
+                                <div className="space-y-4 py-4">
+                                    <div className="space-y-2">
+                                    <Label htmlFor="member-select">Select Member</Label>
+                                    <Select><SelectTrigger><SelectValue placeholder="Select a member" /></SelectTrigger><SelectContent>
+                                       {members.filter(m => m.role !== 'Admin').map(m => (
+                                            <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
+                                       ))} 
+                                    </SelectContent></Select>
+                                    </div>
+                                    <Button className="w-full">Assign Admin</Button>
+                                </div>
+                                </DialogContent>
+                            </Dialog>
+                           </div>
+                        </div>
+                        <div className="space-y-2">
+                           <h4 className="font-medium text-sm flex items-center gap-2"><FileDown className="h-4 w-4"/> Data & Reports</h4>
+                           <div className="grid sm:grid-cols-2 gap-3">
+                             <AlertDialog>
+                                <AlertDialogTrigger asChild><Button variant="outline" className="w-full justify-start" onClick={handleExportData}>Export Group Data</Button></AlertDialogTrigger>
+                                <AlertDialogContent>
+                                <AlertDialogHeader><AlertDialogTitle>Export Group Data</AlertDialogTitle><AlertDialogDescription>This will generate a CSV file of all meals, expenses, and items for the current month.</AlertDialogDescription></AlertDialogHeader>
+                                <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction>Export</AlertDialogAction></AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                           </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+
         </div>
         <div className="lg:col-span-1">
              <Accordion type="single" collapsible defaultValue="app-settings" className="w-full">
@@ -682,121 +808,6 @@ export default function AdminPage() {
                   </AccordionContent>
                 </AccordionItem>
                 
-                {/* Admin Controls */}
-                {currentUserData?.isAdmin && (
-                  <AccordionItem value="admin-settings">
-                    <AccordionTrigger className="text-lg font-semibold">
-                      <div className="flex items-center gap-3 text-primary">
-                        <Shield className="h-5 w-5" />
-                        {t('settings.admin_controls.title')}
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent className="space-y-6 pt-4">
-                       <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2 text-base"><Edit className="h-4 w-4"/> {t('settings.admin_controls.group_management.title')}</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-3">
-                          <Dialog>
-                            <DialogTrigger asChild><Button variant="outline" className="w-full justify-start">{t('settings.admin_controls.group_management.edit_group_name')}</Button></DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>{t('settings.admin_controls.group_management.edit_group_name')}</DialogTitle>
-                                <DialogDescription>Enter a new name for your group.</DialogDescription>
-                              </DialogHeader>
-                              <div className="space-y-4 py-4">
-                                <div className="space-y-2">
-                                   <Label htmlFor="group-name">New Group Name</Label>
-                                   <Input id="group-name" defaultValue={groupData?.groupName} />
-                                </div>
-                                <Button className="w-full">Save Changes</Button>
-                              </div>
-                            </DialogContent>
-                          </Dialog>
-                          <AlertDialog>
-                             <AlertDialogTrigger asChild><Button variant="outline" className="w-full justify-start">{t('settings.admin_controls.group_management.reset_invite_code')}</Button></AlertDialogTrigger>
-                             <AlertDialogContent>
-                               <AlertDialogHeader>
-                                 <AlertDialogTitle>Are you sure you want to reset the invite code?</AlertDialogTitle>
-                                 <AlertDialogDescription>The old invite code will no longer work. All members will need the new code to join.</AlertDialogDescription>
-                               </AlertDialogHeader>
-                               <AlertDialogFooter>
-                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                 <AlertDialogAction>Reset Code</AlertDialogAction>
-                               </AlertDialogFooter>
-                             </AlertDialogContent>
-                           </AlertDialog>
-                        </CardContent>
-                      </Card>
-                       <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2 text-base"><ShieldCheck className="h-4 w-4"/> {t('settings.admin_controls.member_management.title')}</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-3">
-                          <Dialog>
-                            <DialogTrigger asChild><Button variant="outline" className="w-full justify-start">{t('settings.admin_controls.member_management.approve_requests')}</Button></DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader><DialogTitle>Pending Member Requests</DialogTitle></DialogHeader>
-                              <div className="py-4"><p className="text-sm text-muted-foreground">No pending requests.</p></div>
-                            </DialogContent>
-                          </Dialog>
-                          <Dialog>
-                            <DialogTrigger asChild><Button variant="outline" className="w-full justify-start">{t('settings.admin_controls.member_management.assign_admin')}</Button></DialogTrigger>
-                             <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>Assign New Admin</DialogTitle>
-                                <DialogDescription>Choose a member to promote to an admin role.</DialogDescription>
-                              </DialogHeader>
-                               <div className="space-y-4 py-4">
-                                <div className="space-y-2">
-                                   <Label htmlFor="member-select">Select Member</Label>
-                                   <Select><SelectTrigger><SelectValue placeholder="Select a member" /></SelectTrigger><SelectContent></SelectContent></Select>
-                                </div>
-                                <Button className="w-full">Assign Admin</Button>
-                              </div>
-                            </DialogContent>
-                          </Dialog>
-                        </CardContent>
-                      </Card>
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2 text-base"><SlidersHorizontal className="h-4 w-4"/> {t('settings.admin_controls.expense_rules.title')}</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-3">
-                           <Dialog>
-                            <DialogTrigger asChild><Button variant="outline" className="w-full justify-start">{t('settings.admin_controls.expense_rules.set_categories')}</Button></DialogTrigger>
-                            <DialogContent><DialogHeader><DialogTitle>Set Expense Categories</DialogTitle></DialogHeader><div className="py-4"><p>Functionality to be implemented.</p></div></DialogContent>
-                          </Dialog>
-                           <Dialog>
-                            <DialogTrigger asChild><Button variant="outline" className="w-full justify-start">{t('settings.admin_controls.expense_rules.define_cost_sharing')}</Button></DialogTrigger>
-                            <DialogContent><DialogHeader><DialogTitle>Define Cost-Sharing Method</DialogTitle></DialogHeader><div className="py-4"><p>Functionality to be implemented.</p></div></DialogContent>
-                          </Dialog>
-                        </CardContent>
-                      </Card>
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2 text-base"><FileDown className="h-4 w-4"/> {t('settings.admin_controls.data_reports.title')}</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild><Button variant="outline" className="w-full justify-start">{t('settings.admin_controls.data_reports.export_data')}</Button></AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader><AlertDialogTitle>Export Group Data</AlertDialogTitle><AlertDialogDescription>This will generate a CSV file of all meals, expenses, and items for the current month.</AlertDialogDescription></AlertDialogHeader>
-                              <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction>Export</AlertDialogAction></AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </CardContent>
-                      </Card>
-                       <Alert variant="default" className="bg-primary/10 border-primary/20">
-                          <AlertTriangle className="h-4 w-4 text-primary" />
-                          <CardTitle className="text-primary text-base">{t('settings.admin_controls.admin_responsibility.title')}</CardTitle>
-                          <CardDescription className="text-primary/80">
-                            {t('settings.admin_controls.admin_responsibility.description')}
-                          </CardDescription>
-                        </Alert>
-                    </AccordionContent>
-                  </AccordionItem>
-                )}
             </Accordion>
         </div>
       </div>
