@@ -4,59 +4,82 @@
 
 @layer base {
   :root {
-    --background: 0 0% 98%; /* Light Gray */
-    --foreground: 145 30% 15%; /* Dark Green-Gray */
-    --card: 140 40% 99%; /* Very Light Green-White */
-    --card-foreground: 145 30% 15%; /* Dark Green-Gray */
-    --popover: 140 40% 99%; /* Very Light Green-White */
-    --popover-foreground: 145 30% 15%; /* Dark Green-Gray */
-    --primary: 150 60% 45%; /* Brighter Green */
-    --primary-foreground: 150 20% 98%; /* Almost White */
-    --secondary: 150 30% 94%; /* Light Green-Gray */
-    --secondary-foreground: 145 30% 15%; /* Dark Green-Gray */
-    --muted: 150 30% 94%; /* Light Green-Gray */
-    --muted-foreground: 150 20% 45%; /* Muted Green-Gray */
-    --accent: 150 40% 90%; /* Soft Green */
-    --accent-foreground: 145 30% 15%; /* Dark Green-Gray */
+    /* Light Mode */
+    --background: 240 10% 98%; /* Light Gray */
+    --foreground: 20 14% 23%; /* Dark Brown */
+    
+    --card: 66 55% 95%; /* Light Beige */
+    --card-foreground: 20 14% 23%; /* Dark Brown */
+    
+    --popover: 66 55% 95%; /* Light Beige */
+    --popover-foreground: 20 14% 23%; /* Dark Brown */
+    
+    --primary: 94 24% 69%; /* Soft Green */
+    --primary-foreground: 20 14% 23%; /* Dark Brown */
+
+    --secondary: 22 55% 65%; /* Warm Orange */
+    --secondary-foreground: 60 43% 97%; /* Light Beige */
+    
+    --muted: 220 10% 95%; /* Lighter Gray for muted elements */
+    --muted-foreground: 220 10% 55%; /* Muted Gray Text */
+
+    --accent: 22 55% 75%; /* Lighter Orange */
+    --accent-foreground: 20 14% 23%; /* Dark Brown */
+    
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 150 25% 88%; /* Light Green-Gray Border */
-    --input: 150 20% 85%; /* Darker gray for inactive switch */
-    --ring: 150 60% 45%; /* Brighter Green */
-    --chart-1: 150 70% 35%;
-    --chart-2: 160 100% 35%;
-    --chart-3: 30 100% 50%;
+    
+    --border: 220 10% 88%;
+    --input: 220 10% 85%;
+    --ring: 22 55% 65%; /* Warm Orange */
+    
+    --chart-1: 94 30% 50%;
+    --chart-2: 22 60% 55%;
+    --chart-3: 150 70% 35%;
     --chart-4: 280 100% 60%;
     --chart-5: 0 100% 50%;
+    
     --radius: 0.5rem;
   }
+
   .dark {
-    --background: 150 15% 10%; /* Very Dark Green */
-    --foreground: 150 20% 90%; /* Light Green-Gray */
-    --card: 150 15% 13%; /* Darker Green */
-    --card-foreground: 150 20% 90%; /* Light Green-Gray */
-    --popover: 150 15% 10%; /* Very Dark Green */
-    --popover-foreground: 150 20% 90%; /* Light Green-Gray */
-    --primary: 150 60% 45%; /* Brighter Green */
-    --primary-foreground: 150 20% 98%; /* Almost White */
-    --secondary: 150 15% 18%; /* Dark Muted Green */
-    --secondary-foreground: 150 20% 90%; /* Light Green-Gray */
-    --muted: 150 15% 18%; /* Dark Muted Green */
-    --muted-foreground: 150 15% 60%; /* Lighter Muted Green */
-    --accent: 150 15% 18%; /* Dark Muted Green */
-    --accent-foreground: 150 20% 90%; /* Light Green-Gray */
+    /* Dark Mode */
+    --background: 20 14% 12%; /* Very Dark Brown */
+    --foreground: 60 43% 92%; /* Light Beige/Gray */
+    
+    --card: 20 14% 15%; /* Dark Brown */
+    --card-foreground: 60 43% 92%; /* Light Beige/Gray */
+    
+    --popover: 20 14% 12%; /* Very Dark Brown */
+    --popover-foreground: 60 43% 92%; /* Light Beige/Gray */
+
+    --primary: 94 24% 69%; /* Soft Green */
+    --primary-foreground: 20 14% 15%; /* Dark Brown */
+
+    --secondary: 22 55% 65%; /* Warm Orange */
+    --secondary-foreground: 20 14% 15%; /* Dark Brown */
+
+    --muted: 20 14% 20%; /* Darker Muted Brown */
+    --muted-foreground: 20 10% 60%; /* Lighter Muted Brown */
+
+    --accent: 22 55% 55%; /* Darker Orange */
+    --accent-foreground: 60 43% 97%; /* Light Beige */
+    
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 150 15% 22%; /* Darker Green-Gray Border */
-    --input: 150 15% 25%; /* Darker gray for inactive switch */
-    --ring: 150 60% 45%; /* Brighter Green */
-    --chart-1: 150 60% 45%;
-    --chart-2: 160 100% 40%;
-    --chart-3: 30 100% 55%;
-    --chart-4: 280 100% 65%;
-    --chart-5: 0 100% 55%;
+    
+    --border: 20 14% 22%;
+    --input: 20 14% 25%;
+    --ring: 22 55% 65%; /* Warm Orange */
+
+    --chart-1: 94 30% 50%;
+    --chart-2: 22 60% 55%;
+    --chart-3: 150 70% 35%;
+    --chart-4: 280 100% 60%;
+    --chart-5: 0 100% 50%;
   }
 }
+
 
 @layer base {
   * {
