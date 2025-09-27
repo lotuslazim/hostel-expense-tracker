@@ -18,15 +18,15 @@ export function Logo() {
           </defs>
           
           {/* Spoon */}
-          <path d="M12 15C12 5 18 2 22 10V40C18 30 12 35 12 40V85C12 95 6 98 2 90C-2 82 4 75 8 70V25C12 20 12 15 12 15Z" fill="#4B352A" />
+          <path d="M12 15C12 5 18 2 22 10V40C18 30 12 35 12 40V85C12 95 6 98 2 90C-2 82 4 75 8 70V25C12 20 12 15 12 15Z" fill="#CA7842" />
 
           {/* Fork */}
-          <path d="M88 15C88 5 82 2 78 10V22H82V12C82 8 85 9 86 15H88Z" fill="#4B352A" />
-          <path d="M78 22V40C82 30 88 35 88 40V85C88 95 94 98 98 90C102 82 96 75 92 70V25C88 20 88 15 88 15M78 22V10C74 2 68 5 68 15H70C71 9 74 8 78 12V22Z" fill="#4B352A" />
+          <path d="M88 15C88 5 82 2 78 10V22H82V12C82 8 85 9 86 15H88Z" fill="#CA7842" />
+          <path d="M78 22V40C82 30 88 35 88 40V85C88 95 94 98 98 90C102 82 96 75 92 70V25C88 20 88 15 88 15M78 22V10C74 2 68 5 68 15H70C71 9 74 8 78 12V22Z" fill="#CA7842" />
           
           {/* Plate */}
           <circle cx="50" cy="50" r="35" fill="url(#plateGradient)" />
-          <circle cx="50" cy="50" r="35" stroke="#4B352A" strokeWidth="2" />
+          <circle cx="50" cy="50" r="35" stroke="#CA7842" strokeWidth="2" />
           <circle cx="50" cy="50" r="30" stroke="#4B352A" strokeOpacity="0.3" strokeWidth="1" />
 
           {/* Calculator Buttons */}
