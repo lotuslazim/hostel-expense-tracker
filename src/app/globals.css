@@ -10,7 +10,7 @@
     --card-foreground: 145 30% 15%; /* Dark Green-Gray */
     --popover: 140 40% 99%; /* Very Light Green-White */
     --popover-foreground: 145 30% 15%; /* Dark Green-Gray */
-    --primary: 150 70% 35%; /* Moderate Green */
+    --primary: 150 60% 45%; /* Brighter Green */
     --primary-foreground: 150 20% 98%; /* Almost White */
     --secondary: 150 30% 94%; /* Light Green-Gray */
     --secondary-foreground: 145 30% 15%; /* Dark Green-Gray */
@@ -21,8 +21,8 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     --border: 150 25% 88%; /* Light Green-Gray Border */
-    --input: 150 25% 90%; /* Light Green-Gray Input */
-    --ring: 150 70% 35%; /* Moderate Green */
+    --input: 150 20% 85%; /* Darker gray for inactive switch */
+    --ring: 150 60% 45%; /* Brighter Green */
     --chart-1: 150 70% 35%;
     --chart-2: 160 100% 35%;
     --chart-3: 30 100% 50%;
@@ -48,7 +48,7 @@
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
     --border: 150 15% 22%; /* Darker Green-Gray Border */
-    --input: 150 15% 22%; /* Darker Green-Gray Input */
+    --input: 150 15% 25%; /* Darker gray for inactive switch */
     --ring: 150 60% 45%; /* Brighter Green */
     --chart-1: 150 60% 45%;
     --chart-2: 160 100% 40%;
