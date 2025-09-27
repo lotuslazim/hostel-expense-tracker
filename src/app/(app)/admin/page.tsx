@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { useState, useMemo } from "react";
 import placeholderImages from "@/lib/placeholder-images.json";
 import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/firebase";
-import { doc, collection, writeBatch, getDocs, query, where, deleteDoc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { doc, collection, writeBatch, getDocs, query, where, deleteDoc, updateDoc, serverTimestamp, arrayUnion } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -61,9 +61,7 @@ function NewUserAdminPanel() {
   const { user: currentUser } = useUser();
   const { toast } = useToast();
   const [groupName, setGroupName] = useState("");
-  const [inviteCode, setInviteCode] = useState("");
   const [isCreating, setIsCreating] = useState(false);
-  const [isJoining, setIsJoining] = useState(false);
 
   const generateInviteCode = () => {
     return `${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -111,57 +109,12 @@ function NewUserAdminPanel() {
     }
   };
 
-  const handleJoinGroup = async () => {
-    if (!currentUser || !inviteCode) {
-        toast({ variant: "destructive", title: "Error", description: "Invitation code is required." });
-        return;
-    }
-    setIsJoining(true);
-
-    try {
-        const groupsQuery = query(collection(firestore, "groups"), where("invitationCode", "==", inviteCode));
-        const querySnapshot = await getDocs(groupsQuery);
-        
-        if (querySnapshot.empty) {
-            toast({ variant: "destructive", title: "Not Found", description: "No group found with that invitation code." });
-            setIsJoining(false);
-            return;
-        }
-
-        const groupDoc = querySnapshot.docs[0];
-        const batch = writeBatch(firestore);
-        const userRef = doc(firestore, "users", currentUser.uid);
-
-        const memberRef = doc(firestore, `groups/${groupDoc.id}/members`, currentUser.uid);
-        batch.set(memberRef, {
-            email: currentUser.email,
-            role: 'member',
-            joinedAt: serverTimestamp(),
-        });
-
-        batch.update(userRef, {
-            groupId: groupDoc.id,
-            isAdmin: false,
-        });
-
-        await batch.commit();
-        toast({ title: "Success", description: `You have joined the group "${groupDoc.data().groupName}"!` });
-
-    } catch (error) {
-        console.error("Error joining group:", error);
-        toast({ variant: "destructive", title: "Error", description: "Could not join group. Please try again." });
-    } finally {
-        setIsJoining(false);
-    }
-  };
-
-
   return (
     <div>
         <div className="mb-8">
             <h1 className="text-3xl font-bold tracking-tight font-headline">Admin Panel</h1>
             <p className="text-muted-foreground">
-            You are not part of a group yet. Create or join one to get started.
+            You are not part of a group yet. Create one to get started, or go to your profile to join an existing group.
             </p>
         </div>
         <div className="grid md:grid-cols-2 gap-8 max-w-4xl">
@@ -173,29 +126,24 @@ function NewUserAdminPanel() {
                 <CardContent className="space-y-4">
                      <div className="space-y-2">
                         <Label htmlFor="groupName">Group Name</Label>
-                        <Input id="groupName" placeholder="e.g., The Avengers Mess" value={groupName} onChange={(e) => setGroupName(e.target.value)} disabled={isCreating || isJoining}/>
+                        <Input id="groupName" placeholder="e.g., The Avengers Mess" value={groupName} onChange={(e) => setGroupName(e.target.value)} disabled={isCreating}/>
                     </div>
-                    <Button className="w-full" onClick={handleCreateGroup} disabled={isCreating || isJoining || !groupName}>
+                    <Button className="w-full" onClick={handleCreateGroup} disabled={isCreating || !groupName}>
                         {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
                         Create Group
                     </Button>
                 </CardContent>
             </Card>
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><LogIn/> Join an Existing Group</CardTitle>
-                    <CardDescription>Enter an invitation code to join a group.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                     <div className="space-y-2">
-                        <Label htmlFor="inviteCode">Invitation Code</Label>
-                        <Input id="inviteCode" placeholder="e.g., AVNG-4321" value={inviteCode} onChange={(e) => setInviteCode(e.target.value)} disabled={isJoining || isCreating}/>
-                    </div>
-                    <Button className="w-full" onClick={handleJoinGroup} disabled={isJoining || isCreating || !inviteCode}>
-                        {isJoining && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
-                        Join Group
-                    </Button>
-                </CardContent>
+             <Card className="flex flex-col items-center justify-center text-center p-8 bg-muted/50 border-dashed">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2"><LogIn className="h-6 w-6"/> Want to Join a Group?</CardTitle>
+                <CardDescription>If you have an invitation code, go to your profile page to join an existing group.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button asChild>
+                    <Link href="/profile">Go to Profile</Link>
+                </Button>
+              </CardContent>
             </Card>
         </div>
     </div>

@@ -7,13 +7,13 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import placeholderImages from "@/lib/placeholder-images.json";
-import { User, Home, Utensils, ShoppingCart, Pencil, Camera, FileUp, LogIn, Loader2 } from "lucide-react";
+import { User, Home, Utensils, ShoppingCart, Pencil, Camera, FileUp, LogIn, Loader2, PlusCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/firebase";
-import { doc, collection, query, where, writeBatch, getDocs } from "firebase/firestore";
+import { doc, collection, query, where, writeBatch, getDocs, serverTimestamp, arrayUnion } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Meal, Expense, Item } from "@/lib/types";
 import Link from "next/link";
@@ -22,7 +22,11 @@ import { useToast } from "@/hooks/use-toast";
 
 
 function NoGroupProfile() {
+  const { firestore } = useFirebase();
   const { user: currentUser } = useUser();
+  const { toast } = useToast();
+  const [inviteCode, setInviteCode] = useState("");
+  const [isJoining, setIsJoining] = useState(false);
 
   const userProfile = {
     name: currentUser?.displayName || currentUser?.email?.split('@')[0] || "User",
@@ -30,6 +34,52 @@ function NoGroupProfile() {
     profilePictureId: "user-avatar"
   };
   const avatarImage = placeholderImages.placeholderImages.find(p => p.id === userProfile.profilePictureId);
+  
+   const handleJoinGroup = async () => {
+    if (!currentUser || !inviteCode) {
+        toast({ variant: "destructive", title: "Error", description: "Invitation code is required." });
+        return;
+    }
+    setIsJoining(true);
+
+    try {
+        const groupsQuery = query(collection(firestore, "groups"), where("invitationCode", "==", inviteCode));
+        const querySnapshot = await getDocs(groupsQuery);
+        
+        if (querySnapshot.empty) {
+            toast({ variant: "destructive", title: "Not Found", description: "No group found with that invitation code." });
+            setIsJoining(false);
+            return;
+        }
+
+        const groupDoc = querySnapshot.docs[0];
+        const groupRef = doc(firestore, "groups", groupDoc.id);
+        const batch = writeBatch(firestore);
+        const userRef = doc(firestore, "users", currentUser.uid);
+
+        const memberRef = doc(firestore, `groups/${groupDoc.id}/members`, currentUser.uid);
+        batch.set(memberRef, {
+            email: currentUser.email,
+            role: 'member',
+            joinedAt: serverTimestamp(),
+        });
+        
+        batch.update(userRef, {
+            groupId: groupDoc.id,
+            isAdmin: false,
+        });
+
+        await batch.commit();
+        toast({ title: "Success", description: `You have joined the group "${groupDoc.data().groupName}"!` });
+
+    } catch (error) {
+        console.error("Error joining group:", error);
+        toast({ variant: "destructive", title: "Error", description: "Could not join group. Please try again." });
+    } finally {
+        setIsJoining(false);
+    }
+  };
+
 
   return (
      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -102,10 +152,26 @@ function NoGroupProfile() {
             </Card>
         </div>
         <div className="md:col-span-2 space-y-6">
-            <Card className="flex flex-col items-center justify-center text-center p-8">
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><LogIn/> Join an Existing Group</CardTitle>
+                    <CardDescription>Enter an invitation code to join a group.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                     <div className="space-y-2">
+                        <Label htmlFor="inviteCode">Invitation Code</Label>
+                        <Input id="inviteCode" placeholder="e.g., AVNG-4321" value={inviteCode} onChange={(e) => setInviteCode(e.target.value)} disabled={isJoining}/>
+                    </div>
+                    <Button className="w-full" onClick={handleJoinGroup} disabled={isJoining || !inviteCode}>
+                        {isJoining && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+                        Join Group
+                    </Button>
+                </CardContent>
+            </Card>
+             <Card className="flex flex-col items-center justify-center text-center p-8 bg-muted/50 border-dashed">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Home className="h-6 w-6"/>You're Not in a Group Yet</CardTitle>
-                <CardDescription>To start tracking meals and expenses with others, head over to the Admin Panel to create a new group or join an existing one.</CardDescription>
+                <CardTitle className="flex items-center gap-2"><PlusCircle className="h-6 w-6"/> Want to Create a Group?</CardTitle>
+                <CardDescription>To create and manage your own group, head over to the Admin Panel.</CardDescription>
               </CardHeader>
               <CardContent>
                 <Button asChild>
