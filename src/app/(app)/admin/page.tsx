@@ -548,47 +548,9 @@ export default function AdminPage() {
                                 </div>
                                 </DialogContent>
                             </Dialog>
-                            <AlertDialog>
-                                <AlertDialogTrigger asChild><Button variant="outline" className="w-full justify-start">Reset Invite Code</Button></AlertDialogTrigger>
-                                <AlertDialogContent>
-                                <AlertDialogHeader>
-                                    <AlertDialogTitle>Are you sure you want to reset the invite code?</AlertDialogTitle>
-                                    <AlertDialogDescription>The old invite code will no longer work. All members will need the new code to join.</AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction>Reset Code</AlertDialogAction>
-                                </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
                            </div>
                         </div>
                          <div className="space-y-2">
-                           <h4 className="font-medium text-sm flex items-center gap-2"><ShieldCheck className="h-4 w-4"/> Member Management</h4>
-                           <div className="grid sm:grid-cols-2 gap-3">
-                               <Dialog>
-                                <DialogTrigger asChild><Button variant="outline" className="w-full justify-start">Assign New Admin</Button></DialogTrigger>
-                                <DialogContent>
-                                <DialogHeader>
-                                    <DialogTitle>Assign New Admin</DialogTitle>
-                                    <DialogDescription>Choose a member to promote to an admin role.</DialogDescription>
-                                </DialogHeader>
-                                <div className="space-y-4 py-4">
-                                    <div className="space-y-2">
-                                    <Label htmlFor="member-select">Select Member</Label>
-                                    <Select><SelectTrigger><SelectValue placeholder="Select a member" /></SelectTrigger><SelectContent>
-                                       {members.filter(m => m.role !== 'Admin').map(m => (
-                                            <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
-                                       ))} 
-                                    </SelectContent></Select>
-                                    </div>
-                                    <Button className="w-full">Assign Admin</Button>
-                                </div>
-                                </DialogContent>
-                            </Dialog>
-                           </div>
-                        </div>
-                        <div className="space-y-2">
                            <h4 className="font-medium text-sm flex items-center gap-2"><FileDown className="h-4 w-4"/> Data & Reports</h4>
                            <div className="grid sm:grid-cols-2 gap-3">
                              <AlertDialog>
@@ -741,6 +703,50 @@ export default function AdminPage() {
                         </Dialog>
                       </CardContent>
                     </Card>
+                    
+                    {currentUserData?.isAdmin && (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="text-base flex items-center gap-2 text-primary"><ShieldCheck/>Admin Actions</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild><Button variant="outline" className="w-full justify-start">Reset Invite Code</Button></AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Are you sure you want to reset the invite code?</AlertDialogTitle>
+                                        <AlertDialogDescription>The old invite code will no longer work. All members will need the new code to join.</AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction>Reset Code</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                                <Dialog>
+                                    <DialogTrigger asChild><Button variant="outline" className="w-full justify-start">Assign New Admin</Button></DialogTrigger>
+                                    <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>Assign New Admin</DialogTitle>
+                                        <DialogDescription>Choose a member to promote to an admin role.</DialogDescription>
+                                    </DialogHeader>
+                                    <div className="space-y-4 py-4">
+                                        <div className="space-y-2">
+                                        <Label htmlFor="member-select">Select Member</Label>
+                                        <Select><SelectTrigger><SelectValue placeholder="Select a member" /></SelectTrigger><SelectContent>
+                                        {members.filter(m => m.role !== 'Admin').map(m => (
+                                                <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
+                                        ))} 
+                                        </SelectContent></Select>
+                                        </div>
+                                        <Button className="w-full">Assign Admin</Button>
+                                    </div>
+                                    </DialogContent>
+                                </Dialog>
+                           </CardContent>
+                        </Card>
+                    )}
+
 
                     <Card>
                        <CardHeader>
