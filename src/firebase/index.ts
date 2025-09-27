@@ -1,9 +1,11 @@
+
 'use client';
 
 import { firebaseConfig } from '@/firebase/config';
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear } from 'firebase/firestore'
+import { getFirestore } from 'firebase/firestore';
+import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, differenceInDays } from 'date-fns';
 
 // IMPORTANT: DO NOT MODIFY THIS FUNCTION
 export function initializeFirebase() {
@@ -48,4 +50,4 @@ export * from './non-blocking-updates';
 export * from './non-blocking-login';
 export * from './errors';
 export * from './error-emitter';
-export { startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear };
+export { startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, differenceInDays };
