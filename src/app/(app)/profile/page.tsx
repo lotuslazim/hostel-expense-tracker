@@ -14,11 +14,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/firebase";
-import { doc, collection, query, where, writeBatch, getDocs, serverTimestamp, updateDoc, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear } from "firebase/firestore";
+import { doc, collection, query, where, writeBatch, getDocs, serverTimestamp, updateDoc } from "firebase/firestore";
+import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Meal, Expense, Item } from "@/lib/types";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -199,7 +200,7 @@ export default function ProfilePage() {
   const isAdmin = currentUserData?.isAdmin ?? false;
 
   // Date range calculation based on time period
-  const dateRange = useMemoFirebase(() => {
+  const dateRange = useMemo(() => {
     const now = new Date();
     switch (timePeriod) {
       case 'weekly':
