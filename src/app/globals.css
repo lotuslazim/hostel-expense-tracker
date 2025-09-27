@@ -4,26 +4,26 @@
 
 @layer base {
   :root {
-    --background: 0 0% 98%; /* Almost White */
-    --foreground: 222 47% 11%; /* Dark Blue */
-    --card: 0 0% 100%; /* White */
-    --card-foreground: 222 47% 11%; /* Dark Blue */
-    --popover: 0 0% 100%; /* White */
-    --popover-foreground: 222 47% 11%; /* Dark Blue */
-    --primary: 210 100% 50%; /* Vibrant Blue */
-    --primary-foreground: 0 0% 100%; /* White */
-    --secondary: 210 40% 96.1%; /* Light Blue */
-    --secondary-foreground: 222 47% 11%; /* Dark Blue */
-    --muted: 210 40% 96.1%; /* Light Blue */
-    --muted-foreground: 215.4 16.3% 46.9%; /* Muted Blue */
-    --accent: 210 40% 96.1%; /* Light Blue */
-    --accent-foreground: 222 47% 11%; /* Dark Blue */
+    --background: 140 50% 97%; /* Soft Light Green */
+    --foreground: 145 30% 15%; /* Dark Green-Gray */
+    --card: 140 40% 99%; /* Very Light Green-White */
+    --card-foreground: 145 30% 15%; /* Dark Green-Gray */
+    --popover: 140 40% 99%; /* Very Light Green-White */
+    --popover-foreground: 145 30% 15%; /* Dark Green-Gray */
+    --primary: 150 70% 35%; /* Moderate Green */
+    --primary-foreground: 150 20% 98%; /* Almost White */
+    --secondary: 150 30% 94%; /* Light Green-Gray */
+    --secondary-foreground: 145 30% 15%; /* Dark Green-Gray */
+    --muted: 150 30% 94%; /* Light Green-Gray */
+    --muted-foreground: 150 20% 45%; /* Muted Green-Gray */
+    --accent: 150 40% 90%; /* Soft Green */
+    --accent-foreground: 145 30% 15%; /* Dark Green-Gray */
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 214.3 31.8% 91.4%; /* Light Gray-Blue */
-    --input: 214.3 31.8% 91.4%; /* Light Gray-Blue */
-    --ring: 210 100% 50%; /* Vibrant Blue */
-    --chart-1: 210 100% 50%;
+    --border: 150 25% 88%; /* Light Green-Gray Border */
+    --input: 150 25% 90%; /* Light Green-Gray Input */
+    --ring: 150 70% 35%; /* Moderate Green */
+    --chart-1: 150 70% 35%;
     --chart-2: 160 100% 35%;
     --chart-3: 30 100% 50%;
     --chart-4: 280 100% 60%;
@@ -31,26 +31,26 @@
     --radius: 0.5rem;
   }
   .dark {
-    --background: 222 47% 11%; /* Dark Blue */
-    --foreground: 210 40% 98%; /* Almost White */
-    --card: 222 47% 14%; /* Darker Blue */
-    --card-foreground: 210 40% 98%; /* Almost White */
-    --popover: 222 47% 11%; /* Dark Blue */
-    --popover-foreground: 210 40% 98%; /* Almost White */
-    --primary: 210 100% 50%; /* Vibrant Blue */
-    --primary-foreground: 0 0% 100%; /* White */
-    --secondary: 217.2 32.6% 17.5%; /* Dark Muted Blue */
-    --secondary-foreground: 210 40% 98%; /* Almost White */
-    --muted: 217.2 32.6% 17.5%; /* Dark Muted Blue */
-    --muted-foreground: 215 20.2% 65.1%; /* Lighter Muted Blue */
-    --accent: 217.2 32.6% 17.5%; /* Dark Muted Blue */
-    --accent-foreground: 210 40% 98%; /* Almost White */
+    --background: 150 15% 10%; /* Very Dark Green */
+    --foreground: 150 20% 90%; /* Light Green-Gray */
+    --card: 150 15% 13%; /* Darker Green */
+    --card-foreground: 150 20% 90%; /* Light Green-Gray */
+    --popover: 150 15% 10%; /* Very Dark Green */
+    --popover-foreground: 150 20% 90%; /* Light Green-Gray */
+    --primary: 150 60% 45%; /* Brighter Green */
+    --primary-foreground: 150 20% 98%; /* Almost White */
+    --secondary: 150 15% 18%; /* Dark Muted Green */
+    --secondary-foreground: 150 20% 90%; /* Light Green-Gray */
+    --muted: 150 15% 18%; /* Dark Muted Green */
+    --muted-foreground: 150 15% 60%; /* Lighter Muted Green */
+    --accent: 150 15% 18%; /* Dark Muted Green */
+    --accent-foreground: 150 20% 90%; /* Light Green-Gray */
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 217.2 32.6% 22.5%; /* Darker Gray-Blue */
-    --input: 217.2 32.6% 22.5%; /* Darker Gray-Blue */
-    --ring: 210 100% 50%; /* Vibrant Blue */
-    --chart-1: 210 100% 50%;
+    --border: 150 15% 22%; /* Darker Green-Gray Border */
+    --input: 150 15% 22%; /* Darker Green-Gray Input */
+    --ring: 150 60% 45%; /* Brighter Green */
+    --chart-1: 150 60% 45%;
     --chart-2: 160 100% 40%;
     --chart-3: 30 100% 55%;
     --chart-4: 280 100% 65%;
