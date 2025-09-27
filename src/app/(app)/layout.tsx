@@ -1,5 +1,4 @@
 
-
 import { AppHeader } from "@/components/app/header";
 import { FirebaseClientProvider } from "@/firebase/client-provider";
 
@@ -19,6 +18,3 @@ export default function AppLayout({
     </FirebaseClientProvider>
   );
 }
-
-
-

@@ -6,38 +6,14 @@ export function Logo() {
     <Link
       href="/"
       className="flex items-center gap-2"
-      aria-label="BachelorBite Home"
+      aria-label="NourishTrack Home"
     >
-      <div className="w-10 h-10">
-        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="plateGradient" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#F5F7DB" />
-              <stop offset="100%" stopColor="#F0F2BD" />
-            </linearGradient>
-          </defs>
-          
-          {/* Plate */}
-          <circle cx="50" cy="50" r="35" fill="url(#plateGradient)" />
-          <circle cx="50" cy="50" r="35" stroke="#CA7842" strokeWidth="2" />
-          <circle cx="50" cy="50" r="30" stroke="#4B352A" strokeOpacity="0.3" strokeWidth="1" />
-
-          {/* Calculator Buttons */}
-          <rect x="38" y="40" width="8" height="8" rx="2" fill="#CA7842" />
-          <path d="M42 35V45M37 40H47" stroke="#F0F2BD" strokeWidth="1.5" strokeLinecap="round" />
-          
-          <rect x="54" y="40" width="8" height="8" rx="2" fill="#CA7842" />
-          <path d="M57 43H63" stroke="#F0F2BD" strokeWidth="1.5" strokeLinecap="round" />
-          
-          <rect x="38" y="55" width="24" height="8" rx="2" fill="#CA7842" />
-          <path d="M42 58H58M42 60H58" stroke="#F0F2BD" strokeWidth="1.5" strokeLinecap="round" />
-
-          {/* Leaf accent */}
-          <path d="M68 32C68 32 70 28 74 28C78 28 80 32 80 32C80 32 78 36 74 36C70 36 68 32 68 32Z" fill="#B2CD9C" />
-           <path d="M74 36C74 36 76 39 74 42" stroke="#4B352A" strokeWidth="1" strokeLinecap="round" />
+        <svg width="36" height="36" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="24" cy="24" r="20" fill="hsl(var(--primary))"/>
+            <path d="M16 22C18.2534 18.5999 22.1873 17.065 25.5 18C29.0833 19.0024 32.5 22.5 32 26C31.5 29.5 28.5 32 25 32C21.5 32 18.5 29.5 18.5 26" stroke="hsl(var(--primary-foreground))" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M29 18C30.6667 17.3333 34 16 35 14" stroke="hsl(var(--primary-foreground))" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-      </div>
-      <span className="text-2xl font-bold font-headline text-foreground">BachelorBite</span>
+      <span className="text-2xl font-bold font-headline text-foreground">NourishTrack</span>
     </Link>
   );
 }

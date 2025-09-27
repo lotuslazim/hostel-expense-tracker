@@ -7,14 +7,10 @@ import { Logo } from "@/components/icons/logo";
 import placeholderImages from "@/lib/placeholder-images.json";
 
 export default function LandingPage() {
-  const heroImage = {
-    imageUrl: "https://media.tenor.com/bC2F2I2x00cAAAAC/umaru-chan-eating.gif",
-    description: "Anime character eating noodles",
-    imageHint: "anime eating"
-  };
+  const heroImage = placeholderImages.placeholderImages.find(p => p.id === "landing-hero");
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-background">
       <header className="container mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         <Logo />
         <div className="flex items-center gap-4">
@@ -31,10 +27,10 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
               <h1 className="text-4xl md:text-5xl font-bold tracking-tighter font-headline">
-                BachelorBite’s here! 🍽
+                Shared living, simplified.
               </h1>
               <p className="text-lg text-muted-foreground">
-                Mess life made simple—keep your meals sorted and your ex out of your business.
+                NourishTrack helps you and your flatmates seamlessly track shared meals, expenses, and groceries. Say goodbye to spreadsheets and confusion.
               </p>
               <Button size="lg" asChild>
                 <Link href="/signup">
@@ -59,7 +55,7 @@ export default function LandingPage() {
         </section>
       </main>
       <footer className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-muted-foreground text-sm">
-        <p>&copy; {new Date().getFullYear()} BachelorBite. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} NourishTrack. All rights reserved.</p>
       </footer>
     </div>
   );

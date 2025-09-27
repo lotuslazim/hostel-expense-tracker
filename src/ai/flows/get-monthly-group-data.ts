@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -12,18 +13,15 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import { getFirestore } from 'firebase-admin/firestore';
 import { initializeApp, getApps } from 'firebase-admin/app';
-import { startOfMonth, endOfMonth, getYear } from 'date-fns';
+import { startOfMonth, endOfMonth, getYear, parseISO } from 'date-fns';
 import { MonthlyGroupData, MonthlyGroupDataSchema } from '../schemas';
-
 
 const GetMonthlyGroupDataInputSchema = z.object({
   groupId: z.string(),
   date: z.string().describe('The date for which to fetch the data (ISO string format).'),
 });
 
-export type GetMonthlyGroupDataInput = z.infer<
-  typeof GetMonthlyGroupDataInputSchema
->;
+export type GetMonthlyGroupDataInput = z.infer<typeof GetMonthlyGroupDataInputSchema>;
 
 const getMonthlyGroupDataFlow = ai.defineFlow(
   {
@@ -37,37 +35,32 @@ const getMonthlyGroupDataFlow = ai.defineFlow(
     }
     const firestore = getFirestore();
 
-    const targetDate = new Date(date);
+    const targetDate = parseISO(date);
     const monthStart = startOfMonth(targetDate);
     const monthEnd = endOfMonth(targetDate);
     const monthName = `${targetDate.toLocaleString('default', { month: 'long' })} ${getYear(targetDate)}`;
 
     // 1. Get all members of the group
-    const usersQuery = firestore.collection('users').where('groupId', '==', groupId);
-    const usersSnapshot = await usersQuery.get();
+    const usersSnapshot = await firestore.collection('users').where('groupId', '==', groupId).get();
     const users = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    const memberIds = users.map(u => u.id);
     
-    if (memberIds.length === 0) {
+    if (users.length === 0) {
       return { month: monthName, members: [] };
     }
 
     // 2. Fetch meals and expenses for the month
-    const mealsQuery = firestore.collection(`groups/${groupId}/meals`)
+    const mealsSnapshot = await firestore.collection(`groups/${groupId}/meals`)
       .where('date', '>=', monthStart)
-      .where('date', '<=', monthEnd);
+      .where('date', '<=', monthEnd)
+      .get();
       
-    const expensesQuery = firestore.collection(`groups/${groupId}/expenses`)
+    const expensesSnapshot = await firestore.collection(`groups/${groupId}/expenses`)
       .where('date', '>=', monthStart)
-      .where('date', '<=', monthEnd);
+      .where('date', '<=', monthEnd)
+      .get();
 
-    const [mealsSnapshot, expensesSnapshot] = await Promise.all([
-        mealsQuery.get(),
-        expensesQuery.get(),
-    ]);
-
-    const meals = mealsSnapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
-    const expenses = expensesSnapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+    const meals = mealsSnapshot.docs.map(doc => doc.data());
+    const expenses = expensesSnapshot.docs.map(doc => doc.data());
 
     // 3. Process data for each member
     const membersData = users.map(user => {
@@ -90,7 +83,7 @@ const getMonthlyGroupDataFlow = ai.defineFlow(
         
       return {
         id: user.id,
-        name: user.email.split('@')[0], // Basic name generation
+        name: user.displayName || user.email.split('@')[0],
         meals: totalMeals,
         expenses: {
           food: foodExpenses,

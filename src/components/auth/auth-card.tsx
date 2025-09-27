@@ -1,3 +1,4 @@
+
 import {
   Card,
   CardContent,
@@ -7,6 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Logo } from "@/components/icons/logo";
+import Link from "next/link";
 
 interface AuthCardProps {
   children: React.ReactNode;
@@ -38,9 +40,9 @@ export function AuthCard({
       <CardFooter className="flex justify-center text-sm">
         <p className="text-muted-foreground">
           {footerText}{" "}
-          <a href={footerLinkHref} className="font-semibold text-primary hover:underline">
+          <Link href={footerLinkHref} className="font-semibold text-primary hover:underline">
             {footerLinkText}
-          </a>
+          </Link>
         </p>
       </CardFooter>
     </Card>

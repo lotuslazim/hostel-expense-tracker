@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -21,9 +22,7 @@ const GetMemberDailyDataInputSchema = z.object({
   date: z.string().describe('The date for which to fetch the data (ISO string format).'),
 });
 
-export type GetMemberDailyDataInput = z.infer<
-  typeof GetMemberDailyDataInputSchema
->;
+export type GetMemberDailyDataInput = z.infer<typeof GetMemberDailyDataInputSchema>;
 
 const getMemberDailyDataFlow = ai.defineFlow(
   {
@@ -37,30 +36,26 @@ const getMemberDailyDataFlow = ai.defineFlow(
     }
     const firestore = getFirestore();
 
-    const targetDate = new Date(date);
+    const targetDate = parseISO(date);
     const monthStart = startOfMonth(targetDate);
     const monthEnd = endOfMonth(targetDate);
     const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
     // Fetch all meals and expenses for the member for the whole month
-    const mealsQuery = firestore.collection(`groups/${groupId}/meals`)
+    const mealsSnapshot = await firestore.collection(`groups/${groupId}/meals`)
       .where('userId', '==', memberId)
       .where('date', '>=', monthStart)
-      .where('date', '<=', monthEnd);
+      .where('date', '<=', monthEnd)
+      .get();
 
-    const expensesQuery = firestore.collection(`groups/${groupId}/expenses`)
+    const expensesSnapshot = await firestore.collection(`groups/${groupId}/expenses`)
       .where('userId', '==', memberId)
       .where('date', '>=', monthStart)
-      .where('date', '<=', monthEnd);
-
-    const [mealsSnapshot, expensesSnapshot] = await Promise.all([
-        mealsQuery.get(),
-        expensesQuery.get(),
-    ]);
+      .where('date', '<=', monthEnd)
+      .get();
     
-    const meals = mealsSnapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
-    const expenses = expensesSnapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
-
+    const meals = mealsSnapshot.docs.map(doc => doc.data());
+    const expenses = expensesSnapshot.docs.map(doc => doc.data());
 
     // Process data for each day of the month
     const dailyData = daysInMonth.map(day => {

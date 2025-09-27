@@ -5,15 +5,16 @@ import type { Meal, MealType } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, PlusCircle, Utensils, Sandwich, Soup, Cookie } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { useFirebase, useUser, useDoc, useMemoFirebase } from "@/firebase";
-import { doc, collection, addDoc } from "firebase/firestore";
+import { doc, collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 
-const mealTypes: MealType[] = ['lunch', 'dinner'];
+const mealTypes: MealType[] = ['breakfast', 'lunch', 'dinner', 'snack'];
 
 const mealIcons: Record<MealType, React.ReactNode> = {
   breakfast: <Utensils className="h-6 w-6 text-muted-foreground" />,
@@ -22,10 +23,10 @@ const mealIcons: Record<MealType, React.ReactNode> = {
   snack: <Cookie className="h-6 w-6 text-muted-foreground" />,
 };
 
-function LogMealDialog({ type, currentDate }: { type: MealType; currentDate: Date }) {
+function LogMealDialog({ type, onMealLogged, currentDate }: { type: MealType; onMealLogged: () => void; currentDate: Date }) {
     const [open, setOpen] = useState(false);
     const [description, setDescription] = useState("");
-    const [numberOfItems, setNumberOfItems] = useState(1);
+    const [isSaving, setIsSaving] = useState(false);
     const { toast } = useToast();
     
     const { firestore } = useFirebase();
@@ -39,40 +40,40 @@ function LogMealDialog({ type, currentDate }: { type: MealType; currentDate: Dat
             toast({ variant: "destructive", title: "Error", description: "Could not save meal. Missing information." });
             return;
         }
+        setIsSaving(true);
         
         const mealData = {
             userId: currentUser.uid,
+            userName: currentUser.displayName || currentUser.email?.split('@')[0],
             groupId,
             mealType: type,
             description: description,
-            numberOfItems: numberOfItems,
-            date: currentDate,
+            date: serverTimestamp(),
+            createdAt: serverTimestamp(),
         };
 
         try {
             const mealsCol = collection(firestore, `groups/${groupId}/meals`);
-            await addDoc(mealsCol, mealData);
+            await addDoc(mealsCol, {
+              ...mealData,
+              date: currentDate,
+            });
 
-            // Reset state and close dialog on success
+            onMealLogged();
             setDescription("");
-            setNumberOfItems(1);
             setOpen(false);
             toast({ title: "Success", description: "Meal logged successfully." });
 
         } catch (error) {
             console.error("Error saving meal:", error);
-            toast({ variant: "destructive", title: "Save Failed", description: "There was a problem saving your meal. Please try again." });
+            toast({ variant: "destructive", title: "Save Failed", description: "There was a problem saving your meal." });
+        } finally {
+            setIsSaving(false);
         }
     };
 
     return (
-        <Dialog open={open} onOpenChange={(isOpen) => {
-            setOpen(isOpen);
-            if (!isOpen) { // Reset on close
-                setDescription("");
-                setNumberOfItems(1);
-            }
-        }}>
+        <Dialog open={open} onOpenChange={setOpen}>
            <DialogTrigger asChild>
               <Button variant="ghost" size="sm">
                 <PlusCircle className="mr-2 h-4 w-4" /> Log Meal
@@ -81,20 +82,11 @@ function LogMealDialog({ type, currentDate }: { type: MealType; currentDate: Dat
            <DialogContent>
               <DialogHeader>
                 <DialogTitle>Log {type}</DialogTitle>
+                <DialogDescription>What did you have for {type}?</DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                   <Label htmlFor={`item-count-${type}`}>Number of Meals</Label>
-                   <Input 
-                        id={`item-count-${type}`}
-                        type="number"
-                        min="1"
-                        value={numberOfItems}
-                        onChange={(e) => setNumberOfItems(parseInt(e.target.value, 10) || 1)}
-                    />
-                </div>
                  <div className="space-y-2">
-                   <Label htmlFor={`description-${type}`}>Meal Description</Label>
+                   <Label htmlFor={`description-${type}`}>Description</Label>
                    <Input 
                         id={`description-${type}`}
                         placeholder="e.g., Rice, Dal, Chicken Curry"
@@ -102,7 +94,10 @@ function LogMealDialog({ type, currentDate }: { type: MealType; currentDate: Dat
                         onChange={(e) => setDescription(e.target.value)}
                     />
                 </div>
-                <Button className="w-full" onClick={handleSaveMeal} disabled={description.length === 0}>Save Meal</Button>
+                <Button className="w-full" onClick={handleSaveMeal} disabled={isSaving || description.length === 0}>
+                    {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Save Meal
+                </Button>
               </div>
            </DialogContent>
          </Dialog>
@@ -111,6 +106,9 @@ function LogMealDialog({ type, currentDate }: { type: MealType; currentDate: Dat
 
 
 export function MealLog({ meals, currentDate }: { meals: Meal[], currentDate: Date }) {
+  // A simple way to force re-render, could be improved with better state management
+  const [, setVersion] = useState(0);
+
   return (
     <Card>
       <CardHeader>
@@ -139,7 +137,7 @@ export function MealLog({ meals, currentDate }: { meals: Meal[], currentDate: Da
                   <span className="text-sm font-medium">Logged</span>
                 </div>
               ) : (
-                 <LogMealDialog type={type} currentDate={currentDate} />
+                 <LogMealDialog type={type} currentDate={currentDate} onMealLogged={() => setVersion(v => v + 1)} />
               )}
             </div>
           );

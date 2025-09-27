@@ -18,11 +18,12 @@ import { AuthCard } from "./auth-card";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
 import { useAuth, useFirebase } from "@/firebase";
-import { GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
+import { GoogleIcon } from "../icons/google";
 
 const formSchema = z.object({
   name: z.string().min(1, { message: "Name is required." }),
@@ -42,22 +43,36 @@ export function SignupForm() {
     defaultValues: { name: "", email: "", password: "" },
   });
 
+  const createUserDocument = async (user: { uid: string, email: string | null, displayName: string | null }) => {
+    const userDocRef = doc(firestore, "users", user.uid);
+    const userDoc = await getDoc(userDocRef);
+    // Create user document only if it doesn't exist
+    if (!userDoc.exists()) {
+        await setDoc(userDocRef, {
+            id: user.uid,
+            email: user.email,
+            displayName: user.displayName,
+            groupId: null,
+            isAdmin: false,
+        });
+    }
+  };
+
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
+      
+      // Update user's profile display name
+      await updateProfile(user, { displayName: values.name });
 
       // Create a user document in Firestore
-      await setDoc(doc(firestore, "users", user.uid), {
-        id: user.uid,
-        email: user.email,
-        groupId: null,
-        isAdmin: false,
-      });
+      await createUserDocument({ uid: user.uid, email: user.email, displayName: values.name });
       
-      // You might want to also set the user's display name here
       router.push('/dashboard');
+
     } catch (error: any) {
       console.error("Error creating user:", error);
       let description = "An unexpected error occurred. Please try again.";
@@ -79,13 +94,10 @@ export function SignupForm() {
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-       // Create a user document in Firestore for new Google users
-      await setDoc(doc(firestore, "users", user.uid), {
-        id: user.uid,
-        email: user.email,
-        groupId: null,
-        isAdmin: false,
-      }, { merge: true }); // Use merge to not overwrite existing data if user already exists
+      
+      // Create user document in Firestore if it doesn't exist
+      await createUserDocument(user);
+      
       router.push('/dashboard');
     } catch (error) {
       console.error("Error during Google sign-in:", error);
@@ -96,28 +108,14 @@ export function SignupForm() {
   return (
     <AuthCard
       title="Create an Account"
-      description="Join BachelorBite and simplify your mess life."
+      description="Join NourishTrack and simplify your flat's finances."
       footerText="Already have an account?"
       footerLinkText="Log In"
       footerLinkHref="/login"
     >
       <div className="space-y-4">
         <Button variant="outline" className="w-full" onClick={handleGoogleSignIn}>
-           <svg
-              className="mr-2 h-4 w-4"
-              aria-hidden="true"
-              focusable="false"
-              data-prefix="fab"
-              data-icon="google"
-              role="img"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 488 512"
-            >
-              <path
-                fill="#4285F4"
-                d="M488 261.8C488 403.3 381.5 512 244 512S0 403.3 0 261.8 106.5 11.6 244 11.6c67.3 0 121.5 24.3 166.5 66.2l-69.5 68.3c-24-23.2-56.3-39.3-97-39.3-75.3 0-136.3 60.8-136.3 136.3s61 136.3 136.3 136.3c83.8 0 119-58.8 123.3-88.3H244v-85.8h244z"
-              ></path>
-            </svg>
+           <GoogleIcon className="mr-2 h-4 w-4" />
           Sign up with Google
         </Button>
         <div className="relative">
