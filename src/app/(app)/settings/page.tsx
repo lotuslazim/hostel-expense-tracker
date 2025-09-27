@@ -46,7 +46,6 @@ const deleteFormSchema = z.object({
 });
 
 const passwordFormSchema = z.object({
-  currentPassword: z.string().min(1, { message: "Current password is required." }),
   newPassword: z.string().min(8, { message: "New password must be at least 8 characters." }),
   confirmPassword: z.string(),
 }).refine((data) => data.newPassword === data.confirmPassword, {
@@ -91,7 +90,7 @@ export default function SettingsPage() {
   
   const passwordForm = useForm<z.infer<typeof passwordFormSchema>>({
     resolver: zodResolver(passwordFormSchema),
-    defaultValues: { currentPassword: "", newPassword: "", confirmPassword: "" },
+    defaultValues: { newPassword: "", confirmPassword: "" },
   });
 
   const handleDeleteAccount = async (values: z.infer<typeof deleteFormSchema>) => {
@@ -127,15 +126,12 @@ export default function SettingsPage() {
   };
 
   const handleChangePassword = async (values: z.infer<typeof passwordFormSchema>) => {
-    if (!currentUser || !currentUser.email) {
+    if (!currentUser) {
         toast({ variant: "destructive", title: "Error", description: "Could not find user information." });
         return;
     }
     setIsChangingPassword(true);
     try {
-        const credential = EmailAuthProvider.credential(currentUser.email, values.currentPassword);
-        await reauthenticateWithCredential(currentUser, credential);
-        
         await updatePassword(currentUser, values.newPassword);
         
         toast({ title: "Password Updated", description: "Your password has been changed successfully." });
@@ -144,10 +140,9 @@ export default function SettingsPage() {
 
     } catch (error: any) {
         console.error("Error changing password: ", error);
-        let description = "An unexpected error occurred.";
-        if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-            description = "Incorrect current password. Please try again.";
-            passwordForm.setError("currentPassword", { type: "manual", message: "Incorrect password." });
+        let description = "An unexpected error occurred. You may need to log in again to change your password.";
+        if (error.code === 'auth/requires-recent-login') {
+            description = "This action requires you to have signed in recently. Please log out and log back in to change your password.";
         }
         toast({ variant: "destructive", title: "Password Change Failed", description });
     } finally {
@@ -314,14 +309,6 @@ export default function SettingsPage() {
                     </DialogHeader>
                     <Form {...passwordForm}>
                         <form onSubmit={passwordForm.handleSubmit(handleChangePassword)} className="space-y-4 pt-4">
-                           <FormField control={passwordForm.control} name="currentPassword" render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Current Password</FormLabel>
-                                  <FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
                            <FormField control={passwordForm.control} name="newPassword" render={({ field }) => (
                                 <FormItem>
                                   <FormLabel>New Password</FormLabel>
