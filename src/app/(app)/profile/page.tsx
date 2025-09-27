@@ -22,56 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 
 
 function NoGroupProfile() {
-  const { firestore } = useFirebase();
   const { user: currentUser } = useUser();
-  const { toast } = useToast();
-  const [inviteCode, setInviteCode] = useState("");
-  const [isJoining, setIsJoining] = useState(false);
-
-  const handleJoinGroup = async () => {
-    if (!currentUser || !inviteCode) {
-        toast({ variant: "destructive", title: "Error", description: "Invitation code is required." });
-        return;
-    }
-    setIsJoining(true);
-
-    try {
-        const groupsQuery = query(collection(firestore, "groups"), where("invitationCode", "==", inviteCode));
-        const querySnapshot = await getDocs(groupsQuery);
-        
-        if (querySnapshot.empty) {
-            toast({ variant: "destructive", title: "Not Found", description: "No group found with that invitation code." });
-            setIsJoining(false);
-            return;
-        }
-
-        const groupDoc = querySnapshot.docs[0];
-        const batch = writeBatch(firestore);
-        const userRef = doc(firestore, "users", currentUser.uid);
-
-        const memberRef = doc(firestore, `groups/${groupDoc.id}/members`, currentUser.uid);
-        batch.set(memberRef, {
-            email: currentUser.email,
-            role: 'member',
-            joinedAt: new Date(),
-        });
-
-        batch.update(userRef, {
-            groupId: groupDoc.id,
-            isAdmin: false,
-        });
-
-        await batch.commit();
-        toast({ title: "Success", description: `You have joined the group "${groupDoc.data().groupName}"!` });
-
-    } catch (error) {
-        console.error("Error joining group:", error);
-        toast({ variant: "destructive", title: "Error", description: "Could not join group. Please try again." });
-    } finally {
-        setIsJoining(false);
-    }
-  };
-
 
   const userProfile = {
     name: currentUser?.displayName || currentUser?.email?.split('@')[0] || "User",
@@ -151,25 +102,15 @@ function NoGroupProfile() {
             </Card>
         </div>
         <div className="md:col-span-2 space-y-6">
-            <Card>
+            <Card className="flex flex-col items-center justify-center text-center p-8">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2"><LogIn/> Join an Existing Group</CardTitle>
-                <CardDescription>Enter an invitation code to join a group, or create one from the Admin Panel.</CardDescription>
+                <CardTitle className="flex items-center gap-2"><Home className="h-6 w-6"/>You're Not in a Group Yet</CardTitle>
+                <CardDescription>To start tracking meals and expenses with others, head over to the Admin Panel to create a new group or join an existing one.</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                      <Label htmlFor="inviteCode">Invitation Code</Label>
-                      <Input id="inviteCode" placeholder="e.g., AVNG-4321" value={inviteCode} onChange={(e) => setInviteCode(e.target.value)} disabled={isJoining}/>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <Button className="flex-1" onClick={handleJoinGroup} disabled={isJoining || !inviteCode}>
-                        {isJoining && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
-                        Join Group
-                    </Button>
-                    <Button variant="secondary" asChild className="flex-1">
-                      <Link href="/admin">Create a Group</Link>
-                    </Button>
-                  </div>
+              <CardContent>
+                <Button asChild>
+                    <Link href="/admin">Go to Admin Panel</Link>
+                </Button>
               </CardContent>
             </Card>
         </div>
@@ -488,9 +429,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
-    
-
-    
-
-    
