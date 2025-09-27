@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { format, parseISO, startOfDay, endOfDay } from "date-fns";
 import { DateSwitcher } from "@/components/dashboard/date-switcher";
@@ -27,12 +27,10 @@ function DashboardSkeleton() {
             <Skeleton className="h-10 w-10" />
         </div>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <CardSkeleton />
-        <div className="space-y-8">
-          <CardSkeleton />
-          <CardSkeleton />
-        </div>
+        <CardSkeleton />
+        <CardSkeleton />
       </div>
     </div>
   );
@@ -70,7 +68,7 @@ export default function DashboardPage() {
     useDoc(currentUserRef);
   const groupId = currentUserData?.groupId;
 
-  const dateRange = useMemoFirebase(() => {
+  const dateRange = useMemo(() => {
     return {
       start: startOfDay(currentDate),
       end: endOfDay(currentDate),
@@ -136,12 +134,10 @@ export default function DashboardPage() {
         <DateSwitcher currentDate={currentDate} setCurrentDate={setCurrentDate} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <MealLog meals={meals ?? []} currentDate={currentDate} />
-        <div className="space-y-8">
-          <ExpenseLog expenses={expenses ?? []} currentDate={currentDate} />
-          <ItemLog items={items ?? []} currentDate={currentDate} />
-        </div>
+        <ExpenseLog expenses={expenses ?? []} currentDate={currentDate} />
+        <ItemLog items={items ?? []} currentDate={currentDate} />
       </div>
     </div>
   );
