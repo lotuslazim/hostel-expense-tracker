@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { SmartItemLog } from "@/components/dashboard/smart-item-log";
 
 function DashboardSkeleton() {
   return (
@@ -29,7 +30,8 @@ function DashboardSkeleton() {
             <Skeleton className="h-10 w-10" />
         </div>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <CardSkeleton />
         <CardSkeleton />
         <CardSkeleton />
       </div>
@@ -139,9 +141,10 @@ export default function DashboardPage() {
         <DateSwitcher currentDate={currentDate} setCurrentDate={setCurrentDate} />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         <MealLog meals={meals ?? []} currentDate={currentDate} />
         <ExpenseLog expenses={expenses ?? []} currentDate={currentDate} />
+        <SmartItemLog currentDate={currentDate} />
       </div>
     </div>
   );
