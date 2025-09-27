@@ -221,7 +221,7 @@ export default function AdminPage() {
         });
       });
 
-      // Note: Deleting subcollections (members, meals, etc.) from the client is not recommended for security and scalability.
+      // Note: Deleting subcollections (meals, expenses, etc.) from the client is not recommended for security and scalability.
       // A Cloud Function triggered by the group document deletion is the robust way to handle this.
       // For this implementation, we will just delete the group document and reset user profiles.
       
@@ -914,5 +914,7 @@ export default function AdminPage() {
     </div>
   );
 }
+
+    
 
     
