@@ -15,10 +15,13 @@ export interface Expense {
   id: string;
   description: string;
   quantity: number;
+  unit: string;
   amount: number;
   category: string;
   date: Date;
   receiptUrl?: string;
+  userId: string;
+  groupId: string;
 }
 
 export interface Item {
@@ -29,3 +32,5 @@ export interface Item {
   cost: number;
   date: Date;
 }
+
+    

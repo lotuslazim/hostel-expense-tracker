@@ -11,8 +11,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
-import { useFirebase, useUser, useDoc, useMemoFirebase, addDocumentNonBlocking } from "@/firebase";
-import { doc, collection } from "firebase/firestore";
+import { useFirebase, useUser, useDoc, useMemoFirebase } from "@/firebase";
+import { doc, collection, addDoc } from "firebase/firestore";
+import { useToast } from "@/hooks/use-toast";
 
 const expenseCategories = ["Food", "Electricity", "Gas"] as const;
 type ExpenseCategory = typeof expenseCategories[number];
@@ -33,8 +34,10 @@ export function ExpenseLog({ expenses, currentDate }: { expenses: Expense[]; cur
   const [open, setOpen] = useState(false);
   const [description, setDescription] = useState("");
   const [quantity, setQuantity] = useState(1);
+  const [unit, setUnit] = useState("");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState<ExpenseCategory | undefined>();
+  const { toast } = useToast();
 
   const { firestore } = useFirebase();
   const { user: currentUser } = useUser();
@@ -42,28 +45,41 @@ export function ExpenseLog({ expenses, currentDate }: { expenses: Expense[]; cur
   const { data: currentUserData } = useDoc(currentUserRef);
   const groupId = currentUserData?.groupId;
 
-  const handleSaveExpense = () => {
-    if (!description || !amount || !category || !groupId || !currentUser) return;
+  const resetForm = () => {
+    setDescription("");
+    setQuantity(1);
+    setUnit("");
+    setAmount("");
+    setCategory(undefined);
+    setOpen(false);
+  };
+  
+  const handleSaveExpense = async () => {
+    if (!description || !amount || !category || !groupId || !currentUser) {
+      toast({ variant: "destructive", title: "Missing Information", description: "Please fill out all required fields."});
+      return;
+    };
 
-    const expenseData = {
+    const expenseData: Omit<Expense, 'id'> = {
       userId: currentUser.uid,
       groupId,
       description,
-      quantity: quantity,
+      quantity: category === 'Food' ? quantity : 1,
+      unit: category === 'Food' ? unit : "",
       amount: parseFloat(amount),
       category,
       date: currentDate,
     };
-
-    const expensesCol = collection(firestore, `groups/${groupId}/expenses`);
-    addDocumentNonBlocking(expensesCol, expenseData);
-
-    // Reset form
-    setDescription("");
-    setQuantity(1);
-    setAmount("");
-    setCategory(undefined);
-    setOpen(false);
+    
+    try {
+        const expensesCol = collection(firestore, `groups/${groupId}/expenses`);
+        await addDoc(expensesCol, expenseData);
+        toast({ title: "Success", description: "Expense logged successfully." });
+        resetForm();
+    } catch (error) {
+        console.error("Error saving expense:", error);
+        toast({ variant: "destructive", title: "Save Failed", description: "There was a problem saving your expense." });
+    }
   };
 
   return (
@@ -86,11 +102,7 @@ export function ExpenseLog({ expenses, currentDate }: { expenses: Expense[]; cur
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
                    <Label htmlFor="description">Description</Label>
-                   <Input id="description" placeholder="e.g., Weekly groceries" value={description} onChange={e => setDescription(e.target.value)} />
-                </div>
-                 <div className="space-y-2">
-                   <Label htmlFor="quantity">Quantity</Label>
-                   <Input id="quantity" type="number" placeholder="e.g., 1" value={quantity} onChange={e => setQuantity(parseInt(e.target.value) || 1)} />
+                   <Input id="description" placeholder="e.g., Weekly groceries, Electricity Bill" value={description} onChange={e => setDescription(e.target.value)} />
                 </div>
                  <div className="space-y-2">
                    <Label htmlFor="amount">Amount</Label>
@@ -109,6 +121,19 @@ export function ExpenseLog({ expenses, currentDate }: { expenses: Expense[]; cur
                       </SelectContent>
                     </Select>
                 </div>
+
+                {category === 'Food' && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                       <Label htmlFor="quantity">Quantity</Label>
+                       <Input id="quantity" type="number" placeholder="e.g., 1" value={quantity} onChange={e => setQuantity(parseInt(e.target.value) || 1)} />
+                    </div>
+                    <div className="space-y-2">
+                       <Label htmlFor="unit">Unit</Label>
+                       <Input id="unit" placeholder="e.g., kg, litre, pcs" value={unit} onChange={e => setUnit(e.target.value)} />
+                    </div>
+                  </div>
+                )}
                  <div className="space-y-2">
                    <Label htmlFor="receipt">Receipt (optional)</Label>
                    <Button asChild variant="outline" className="w-full justify-start font-normal text-muted-foreground"><label htmlFor="receipt" className="flex items-center cursor-pointer w-full"><FileUp className="mr-2 h-4 w-4"/> Click to upload</label></Button>
@@ -145,6 +170,7 @@ export function ExpenseLog({ expenses, currentDate }: { expenses: Expense[]; cur
                       <TableCell className="font-medium">
                         {expense.description}
                         {expense.quantity > 1 && <span className="text-muted-foreground ml-2">x{expense.quantity}</span>}
+                        {expense.unit && <span className="text-muted-foreground ml-1">{expense.unit}</span>}
                       </TableCell>
                       <TableCell className="text-right">৳{expense.amount.toFixed(2)}</TableCell>
                     </TableRow>
@@ -164,3 +190,5 @@ export function ExpenseLog({ expenses, currentDate }: { expenses: Expense[]; cur
     </Card>
   );
 }
+
+    
