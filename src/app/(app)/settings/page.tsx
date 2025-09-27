@@ -39,6 +39,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { EmailAuthProvider, reauthenticateWithCredential, deleteUser } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const deleteFormSchema = z.object({
   password: z.string().min(1, { message: "Password is required." }),
@@ -66,6 +67,8 @@ export default function SettingsPage() {
   const groupRef = useMemoFirebase(() => groupId ? doc(firestore, "groups", groupId) : null, [firestore, groupId]);
   const { data: groupData, isLoading: isGroupLoading } = useDoc(groupRef);
   
+  const isGoogleUser = currentUser?.providerData.some(p => p.providerId === 'google.com');
+
   const form = useForm<z.infer<typeof deleteFormSchema>>({
     resolver: zodResolver(deleteFormSchema),
     defaultValues: {
@@ -276,11 +279,23 @@ export default function SettingsPage() {
                   </AlertDialogContent>
                 </AlertDialog>
                 <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="destructive" className="w-full justify-start">
-                      <Trash2 className="mr-2 h-4 w-4" /> {t('settings.account_settings.actions.delete_account')}
-                    </Button>
-                  </DialogTrigger>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="w-full">
+                            <Button variant="destructive" className="w-full justify-start" disabled={isGoogleUser} onClick={() => isGoogleUser ? {} : setDeleteDialogOpen(true)}>
+                                <Trash2 className="mr-2 h-4 w-4" /> {t('settings.account_settings.actions.delete_account')}
+                            </Button>
+                          </div>
+                        </TooltipTrigger>
+                         {isGoogleUser && (
+                          <TooltipContent>
+                            <p>Account deletion for Google Sign-In is managed through your Google account settings.</p>
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
+                    </TooltipProvider>
+
                   <DialogContent>
                     <DialogHeader>
                       <DialogTitle>{t('settings.account_settings.actions.delete_account_confirm_title')}</DialogTitle>
@@ -433,5 +448,5 @@ export default function SettingsPage() {
         )}
       </Accordion>
     </div>
-  )
+  );
 }
