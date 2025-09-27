@@ -44,37 +44,37 @@
 
   .dark {
     /* Dark Mode */
-    --background: 20 26% 23%; /* #4B352A - Dark Brown */
-    --foreground: 47 62% 86%; /* #F0F2BD - Light Yellow */
+    --background: 0 0% 5%; /* #0C0C0C - Black */
+    --foreground: 0 0% 100%; /* #FFFFFF - White */
     
-    --card: 20 15% 20%; /* Darker shade of brown */
-    --card-foreground: 47 62% 86%;
+    --card: 0 0% 10%; /* #1A1A1A - Dark Gray */
+    --card-foreground: 0 0% 100%;
     
-    --popover: 20 26% 23%;
-    --popover-foreground: 47 62% 86%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 100%;
 
-    --primary: 27 57% 52%; /* #CA7842 - Warm Orange */
-    --primary-foreground: 20 14% 98%;
+    --primary: 98 28% 78%; /* #B2CD9C - Light Green */
+    --primary-foreground: 20 26% 23%; /* #4B352A - Dark Brown for text on green buttons */
 
-    --secondary: 98 28% 78%; /* #B2CD9C - Soft Green */
-    --secondary-foreground: 20 26% 23%;
+    --secondary: 0 0% 15%; /* A slightly lighter gray for secondary elements */
+    --secondary-foreground: 0 0% 90%;
 
-    --muted: 20 15% 28%;
-    --muted-foreground: 47 62% 70%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 60%;
 
-    --accent: 27 57% 62%;
-    --accent-foreground: 20 26% 23%;
+    --accent: 27 57% 52%; /* #CA7842 - Warm Orange */
+    --accent-foreground: 0 0% 100%;
     
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
     
-    --border: 20 15% 30%;
-    --input: 20 15% 32%;
-    --ring: 27 57% 52%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 98 28% 78%; /* Light Green ring for focus */
 
-    --chart-1: 27 57% 52%;
-    --chart-2: 98 28% 78%;
-    --chart-3: 47 62% 86%;
+    --chart-1: 98 28% 78%;
+    --chart-2: 27 57% 52%;
+    --chart-3: 0 0% 100%;
     --chart-4: 280 100% 60%;
     --chart-5: 0 100% 50%;
   }
