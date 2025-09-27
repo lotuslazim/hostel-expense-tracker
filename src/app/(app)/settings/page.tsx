@@ -28,19 +28,35 @@ import { ThemeSwitcher } from "@/components/settings/theme-switcher"
 import { useI18n } from "@/i18n/client-provider"
 import { Switch } from "@/components/ui/switch"
 import { useFirebase, useUser, useDoc, useMemoFirebase } from "@/firebase";
-import { doc } from "firebase/firestore";
+import { doc, deleteDoc, writeBatch } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { EmailAuthProvider, reauthenticateWithCredential, deleteUser } from "firebase/auth";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+
+const deleteFormSchema = z.object({
+  password: z.string().min(1, { message: "Password is required." }),
+});
 
 export default function SettingsPage() {
   const { lang, setLang, t } = useI18n();
   const [mealReminders, setMealReminders] = React.useState(true);
   const [expenseAlerts, setExpenseAlerts] = React.useState(false);
   const [missedDayAlerts, setMissedDayAlerts] = React.useState(true);
+  const [isDeleting, setIsDeleting] = React.useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
 
-  const { firestore } = useFirebase();
+  const { firestore, auth } = useFirebase();
   const { user: currentUser, isUserLoading: isCurrentUserLoading } = useUser();
+  const { toast } = useToast();
+  const router = useRouter();
+
 
   const currentUserRef = useMemoFirebase(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
   const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
@@ -49,6 +65,63 @@ export default function SettingsPage() {
 
   const groupRef = useMemoFirebase(() => groupId ? doc(firestore, "groups", groupId) : null, [firestore, groupId]);
   const { data: groupData, isLoading: isGroupLoading } = useDoc(groupRef);
+  
+  const form = useForm<z.infer<typeof deleteFormSchema>>({
+    resolver: zodResolver(deleteFormSchema),
+    defaultValues: {
+      password: "",
+    },
+  });
+
+  const handleDeleteAccount = async (values: z.infer<typeof deleteFormSchema>) => {
+    if (!currentUser || !currentUser.email) {
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Could not find user information to delete the account.",
+        });
+        return;
+    }
+    setIsDeleting(true);
+
+    try {
+        const credential = EmailAuthProvider.credential(currentUser.email, values.password);
+        await reauthenticateWithCredential(currentUser, credential);
+        
+        // Re-authenticated. Now delete user data and account.
+        const userDocRef = doc(firestore, "users", currentUser.uid);
+
+        // In a real app, you might want to handle removing the user from their group,
+        // especially if they are the admin. For simplicity, we just delete the user doc.
+        await deleteDoc(userDocRef);
+
+        // Finally, delete the user from Firebase Auth
+        await deleteUser(currentUser);
+
+        toast({
+            title: "Account Deleted",
+            description: "Your account has been permanently deleted.",
+        });
+        
+        setDeleteDialogOpen(false);
+        router.push('/');
+
+    } catch (error: any) {
+        console.error("Error deleting account: ", error);
+        let description = "An unexpected error occurred.";
+        if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+            description = "Incorrect password. Please try again.";
+            form.setError("password", { type: "manual", message: "Incorrect password." });
+        }
+        toast({
+            variant: "destructive",
+            title: "Deletion Failed",
+            description,
+        });
+    } finally {
+        setIsDeleting(false);
+    }
+  };
 
   const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || isGroupLoading;
 
@@ -202,25 +275,42 @@ export default function SettingsPage() {
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
+                <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                  <DialogTrigger asChild>
                     <Button variant="destructive" className="w-full justify-start">
                       <Trash2 className="mr-2 h-4 w-4" /> {t('settings.account_settings.actions.delete_account')}
                     </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>{t('settings.account_settings.actions.delete_account_confirm_title')}</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        {t('settings.account_settings.actions.delete_account_confirm_desc')}
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-                      <AlertDialogAction className="bg-destructive hover:bg-destructive/90">{t('settings.account_settings.actions.delete_account')}</AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>{t('settings.account_settings.actions.delete_account_confirm_title')}</DialogTitle>
+                      <DialogDescription>
+                        {t('settings.account_settings.actions.delete_account_confirm_desc')} To proceed, please enter your password.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(handleDeleteAccount)} className="space-y-4 pt-4">
+                           <FormField
+                              control={form.control}
+                              name="password"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Password</FormLabel>
+                                  <FormControl>
+                                    <Input type="password" placeholder="••••••••" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <Button type="submit" variant="destructive" className="w-full" disabled={isDeleting}>
+                               {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                               {t('settings.account_settings.actions.delete_account')}
+                            </Button>
+                        </form>
+                    </Form>
+                  </DialogContent>
+                </Dialog>
               </CardContent>
             </Card>
           </AccordionContent>
@@ -345,7 +435,3 @@ export default function SettingsPage() {
     </div>
   )
 }
-
-    
-
-    
