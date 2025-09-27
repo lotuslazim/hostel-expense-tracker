@@ -6,25 +6,25 @@
   :root {
     /* Light Mode */
     --background: 98 30% 90%; /* #E4EEDD - Light warm green */
-    --foreground: 20 26% 23%; /* #4B352A - Dark Brown */
+    --foreground: 20 26% 15%; /* #352A24 - Darker Brown for better contrast */
     
     --card: 98 28% 78%; /* #B2CD9C - Soft Green */
-    --card-foreground: 20 26% 23%; /* #4B352A - Dark Brown */
+    --card-foreground: 20 26% 15%; /* #352A24 - Darker Brown */
     
     --popover: 98 28% 78%;
-    --popover-foreground: 20 26% 23%;
+    --popover-foreground: 20 26% 15%;
     
     --primary: 27 57% 52%; /* #CA7842 - Warm Orange */
     --primary-foreground: 20 14% 98%; /* A very light color for contrast on orange */
     
     --secondary: 98 28% 70%; /* A slightly darker green for secondary elements */
-    --secondary-foreground: 20 26% 23%;
+    --secondary-foreground: 20 26% 15%;
     
     --muted: 98 28% 85%; /* Muted green for less emphasis */
-    --muted-foreground: 20 26% 40%; 
+    --muted-foreground: 20 26% 30%; /* Darker muted foreground */
 
     --accent: 27 57% 62%; /* Lighter orange for accent */
-    --accent-foreground: 20 26% 23%;
+    --accent-foreground: 20 26% 15%;
     
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
@@ -54,13 +54,13 @@
     --popover-foreground: 0 0% 100%;
 
     --primary: 98 28% 78%; /* #B2CD9C - Light Green */
-    --primary-foreground: 20 26% 23%; /* #4B352A - Dark Brown for text on green buttons */
+    --primary-foreground: 20 26% 15%; /* #352A24 - Dark Brown for text on green buttons */
 
     --secondary: 0 0% 15%; /* A slightly lighter gray for secondary elements */
     --secondary-foreground: 0 0% 90%;
 
     --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 60%;
+    --muted-foreground: 0 0% 70%; /* Lighter muted foreground */
 
     --accent: 27 57% 52%; /* #CA7842 - Warm Orange */
     --accent-foreground: 0 0% 100%;
