@@ -163,6 +163,7 @@ export default function AdminPage() {
   const [missedDayAlerts, setMissedDayAlerts] = useState(true);
   
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeletingGroup, setIsDeletingGroup] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -196,6 +197,44 @@ export default function AdminPage() {
     resolver: zodResolver(passwordFormSchema),
     defaultValues: { newPassword: "", confirmPassword: "" },
   });
+
+  const handleDeleteGroup = async () => {
+    if (!groupId || !groupRef) {
+      toast({ variant: "destructive", title: "Error", description: "Group information not found." });
+      return;
+    }
+    setIsDeletingGroup(true);
+    try {
+      const batch = writeBatch(firestore);
+
+      // Find all users in the group
+      const usersInGroupQuery = query(collection(firestore, "users"), where("groupId", "==", groupId));
+      const usersSnapshot = await getDocs(usersInGroupQuery);
+      
+      // For each user, update their document to remove group association
+      usersSnapshot.forEach(userDoc => {
+        const userRef = doc(firestore, "users", userDoc.id);
+        batch.update(userRef, {
+          groupId: null,
+          isAdmin: false,
+        });
+      });
+
+      // Note: Deleting subcollections (members, meals, etc.) from the client is not recommended for security and scalability.
+      // A Cloud Function triggered by the group document deletion is the robust way to handle this.
+      // For this implementation, we will just delete the group document and reset user profiles.
+      batch.delete(groupRef);
+      
+      await batch.commit();
+
+      toast({ title: "Group Deleted", description: "The group has been successfully deleted." });
+    } catch (error) {
+      console.error("Error deleting group:", error);
+      toast({ variant: "destructive", title: "Deletion Failed", description: "Could not delete the group. Please try again." });
+    } finally {
+      setIsDeletingGroup(false);
+    }
+  };
 
   const handleExportData = async () => {
     if (!groupId) return;
@@ -562,23 +601,26 @@ export default function AdminPage() {
                             </Dialog>
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                    <Button variant="destructive" className="w-full justify-start">
-                                        <Trash2 className="mr-2 h-4 w-4" /> Delete Group
+                                    <Button variant="destructive" className="w-full justify-start" disabled={isDeletingGroup}>
+                                        {isDeletingGroup ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
+                                        Delete Group
                                     </Button>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
                                     <AlertDialogHeader>
                                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                                         <AlertDialogDescription>
-                                            This action cannot be undone. This will permanently delete the group and all its data for all members.
+                                            This action cannot be undone. This will permanently delete the group and all associated data. All members will be removed from the group.
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
                                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                                         <AlertDialogAction
                                             className="bg-destructive hover:bg-destructive/90"
-                                            onClick={() => alert('Delete group functionality to be implemented.')}
+                                            onClick={handleDeleteGroup}
+                                            disabled={isDeletingGroup}
                                         >
+                                            {isDeletingGroup && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                             Delete Group
                                         </AlertDialogAction>
                                     </AlertDialogFooter>
