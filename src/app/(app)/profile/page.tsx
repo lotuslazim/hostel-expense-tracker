@@ -14,12 +14,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/firebase";
-import { doc, collection, query, where, writeBatch, getDocs, serverTimestamp, updateDoc } from "firebase/firestore";
+import { doc, collection, query, where, writeBatch, getDocs, serverTimestamp, updateDoc, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Meal, Expense, Item } from "@/lib/types";
 import Link from "next/link";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 
 function JoinGroupCard() {
@@ -140,6 +141,9 @@ function ProfileSkeleton() {
           </Card>
         </div>
         <div className="md:col-span-2 space-y-6">
+           <div className="flex justify-end">
+             <Skeleton className="h-10 w-64" />
+            </div>
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2"><Utensils className="h-5 w-5" /> Meal Contribution</CardTitle>
@@ -177,6 +181,8 @@ export default function ProfilePage() {
   const { firestore } = useFirebase();
   const { user: currentUser, isUserLoading: isCurrentUserLoading } = useUser();
   const { toast } = useToast();
+  const [timePeriod, setTimePeriod] = useState<'weekly' | 'monthly' | 'yearly'>('monthly');
+
 
   // 1. Get current user's profile
   const currentUserRef = useMemoFirebase(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
@@ -192,17 +198,32 @@ export default function ProfilePage() {
   const { data: groupData, isLoading: isGroupDataLoading } = useDoc(groupRef);
   const isAdmin = currentUserData?.isAdmin ?? false;
 
-  // 3. Get user's contributions
-  const userMealsQuery = useMemoFirebase(() => (inGroup && currentUser) ? query(collection(firestore, `groups/${groupId}/meals`), where("userId", "==", currentUser.uid)) : null, [firestore, groupId, currentUser, inGroup]);
-  const userExpensesQuery = useMemoFirebase(() => (inGroup && currentUser) ? query(collection(firestore, `groups/${groupId}/expenses`), where("userId", "==", currentUser.uid)) : null, [firestore, groupId, currentUser, inGroup]);
-  const userItemsQuery = useMemoFirebase(() => (inGroup && currentUser) ? query(collection(firestore, `groups/${groupId}/purchasedItems`), where("userId", "==", currentUser.uid)) : null, [firestore, groupId, currentUser, inGroup]);
+  // Date range calculation based on time period
+  const dateRange = useMemoFirebase(() => {
+    const now = new Date();
+    switch (timePeriod) {
+      case 'weekly':
+        return { start: startOfWeek(now), end: endOfWeek(now) };
+      case 'yearly':
+        return { start: startOfYear(now), end: endOfYear(now) };
+      case 'monthly':
+      default:
+        return { start: startOfMonth(now), end: endOfMonth(now) };
+    }
+  }, [timePeriod]);
+
+
+  // 3. Get user's contributions based on date range
+  const userMealsQuery = useMemoFirebase(() => (inGroup && currentUser) ? query(collection(firestore, `groups/${groupId}/meals`), where("userId", "==", currentUser.uid), where("date", ">=", dateRange.start), where("date", "<=", dateRange.end)) : null, [firestore, groupId, currentUser, inGroup, dateRange]);
+  const userExpensesQuery = useMemoFirebase(() => (inGroup && currentUser) ? query(collection(firestore, `groups/${groupId}/expenses`), where("userId", "==", currentUser.uid), where("date", ">=", dateRange.start), where("date", "<=", dateRange.end)) : null, [firestore, groupId, currentUser, inGroup, dateRange]);
+  const userItemsQuery = useMemoFirebase(() => (inGroup && currentUser) ? query(collection(firestore, `groups/${groupId}/purchasedItems`), where("userId", "==", currentUser.uid), where("date", ">=", dateRange.start), where("date", "<=", dateRange.end)) : null, [firestore, groupId, currentUser, inGroup, dateRange]);
   
   const { data: userMeals, isLoading: areMealsLoading } = useCollection<Meal>(userMealsQuery);
   const { data: userExpenses, isLoading: areExpensesLoading } = useCollection<Expense>(userExpensesQuery);
   const { data: userItems, isLoading: areItemsLoading } = useCollection<Item>(userItemsQuery);
 
   // 4. Get total group expenses and members for calculating share
-  const groupExpensesQuery = useMemoFirebase(() => inGroup ? collection(firestore, `groups/${groupId}/expenses`) : null, [firestore, groupId, inGroup]);
+  const groupExpensesQuery = useMemoFirebase(() => inGroup ? query(collection(firestore, `groups/${groupId}/expenses`), where("date", ">=", dateRange.start), where("date", "<=", dateRange.end)) : null, [firestore, groupId, inGroup, dateRange]);
   const { data: groupExpenses, isLoading: areGroupExpensesLoading } = useCollection<Expense>(groupExpensesQuery);
   const groupMembersQuery = useMemoFirebase(() => inGroup ? collection(firestore, `groups/${groupId}/members`) : null, [firestore, groupId, inGroup]);
   const { data: groupMembers, isLoading: areGroupMembersLoading } = useCollection(groupMembersQuery);
@@ -222,8 +243,8 @@ export default function ProfilePage() {
   };
 
   const groupInfo = {
-    name: groupData?.groupName || "N/A",
-    invitationCode: groupData?.invitationCode || "N/A",
+    name: groupData?.groupName || "",
+    invitationCode: groupData?.invitationCode || "",
     memberCount: groupMembers?.length || 0,
   };
   
@@ -231,9 +252,10 @@ export default function ProfilePage() {
   const totalGroupSpend = groupExpenses?.reduce((acc, expense) => acc + expense.amount, 0) || 0;
   const totalMealsLogged = userMeals?.length || 0;
   
-  const averageMealsPerDay = totalMealsLogged > 0 ? (totalMealsLogged / 30).toFixed(1) : "0.0"; // Simplified for now
+  const daysInPeriod = timePeriod === 'weekly' ? 7 : timePeriod === 'yearly' ? 365 : 30;
+  const averageMealsPerDay = totalMealsLogged > 0 ? (totalMealsLogged / daysInPeriod).toFixed(1) : "0.0";
 
-  const expenseShare = totalGroupSpend > 0 ? ((totalUserSpend / totalGroupSpend) * 100).toFixed(0) : "0";
+  const expenseShare = totalGroupSpend > 0 && inGroup ? ((totalUserSpend / totalGroupSpend) * 100).toFixed(0) : "0";
 
   const recentPurchases = userItems?.slice(0, 3).map(item => ({ item: item.name, quantity: `${item.quantity} ${item.unit}` })) || [];
 
@@ -270,7 +292,7 @@ export default function ProfilePage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight font-headline">Your Profile</h1>
         <p className="text-muted-foreground">
-          View and edit your personal and group information.
+          View your personal and group information.
         </p>
       </div>
 
@@ -398,6 +420,15 @@ export default function ProfilePage() {
 
             {/* Right Column */}
             <div className="md:col-span-2 space-y-6">
+                <div className="flex justify-end">
+                    <Tabs value={timePeriod} onValueChange={(value) => setTimePeriod(value as any)}>
+                        <TabsList>
+                            <TabsTrigger value="weekly">Weekly</TabsTrigger>
+                            <TabsTrigger value="monthly">Monthly</TabsTrigger>
+                            <TabsTrigger value="yearly">Yearly</TabsTrigger>
+                        </TabsList>
+                    </Tabs>
+                </div>
                 {/* Meal Contribution */}
                 <Card>
                   <CardHeader>
@@ -427,7 +458,7 @@ export default function ProfilePage() {
                     </div>
                     <div className="text-center p-4 bg-muted/50 rounded-lg">
                       <p className="text-sm text-muted-foreground">Share of Group Total</p>
-                      <p className="text-3xl font-bold">{inGroup ? expenseShare : '0'}%</p>
+                      <p className="text-3xl font-bold">{expenseShare}%</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -466,5 +497,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
-    
