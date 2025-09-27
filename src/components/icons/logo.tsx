@@ -44,7 +44,7 @@ export function Logo() {
            <path d="M74 36C74 36 76 39 74 42" stroke="#4B352A" strokeWidth="1" strokeLinecap="round" />
         </svg>
       </div>
-      <span className="text-2xl font-bold font-headline" style={{color: '#4B352A'}}>Meal Calculator</span>
+      <span className="text-2xl font-bold font-headline text-foreground">Meal Calculator</span>
     </Link>
   );
 }
