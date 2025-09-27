@@ -91,8 +91,8 @@ export default function ProfilePage() {
   const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
 
   const groupId = currentUserData?.groupId;
-  const userName = currentUserData?.email.split('@')[0] || "null";
-  const userEmail = currentUserData?.email || "null";
+  const userName = currentUser?.displayName || currentUser?.email?.split('@')[0] || "User";
+  const userEmail = currentUser?.email || "No email";
 
   // 2. Get group data
   const groupRef = useMemoFirebase(() => groupId ? doc(firestore, "groups", groupId) : null, [firestore, groupId]);
@@ -119,36 +119,30 @@ export default function ProfilePage() {
     return <ProfileSkeleton />;
   }
 
-  const MOCK_USER = {
+  const userProfile = {
     name: userName,
     email: userEmail,
     role: isAdmin ? "Admin" : "Member",
     profilePictureId: "user-avatar"
   };
 
-  const MOCK_GROUP = {
-    name: groupData?.groupName || "null",
-    invitationCode: groupData?.invitationCode || "null",
+  const groupInfo = {
+    name: groupData?.groupName || "N/A",
+    invitationCode: groupData?.invitationCode || "N/A",
     memberCount: groupData?.memberIds?.length || 0,
   };
   
   const totalUserSpend = userExpenses?.reduce((acc, expense) => acc + expense.amount, 0) || 0;
   const totalGroupSpend = groupExpenses?.reduce((acc, expense) => acc + expense.amount, 0) || 0;
+  const totalMealsLogged = userMeals?.length || 0;
+  
+  const averageMealsPerDay = totalMealsLogged > 0 ? (totalMealsLogged / 30).toFixed(1) : "0.0"; // Simplified for now
 
-  const MOCK_CONTRIBUTIONS = {
-    meals: {
-      total: userMeals?.length || 0,
-      averagePerDay: userMeals ? (userMeals.length / 30) : 0, // Simplified for now
-    },
-    expenses: {
-      total: totalUserSpend,
-      share: totalGroupSpend > 0 ? (totalUserSpend / totalGroupSpend) * 100 : 0,
-    },
-    purchases: userItems?.slice(0, 3).map(item => ({ item: item.name, quantity: `${item.quantity} ${item.unit}` })) || [],
-    totalItemsLogged: userItems?.length || 0
-  };
+  const expenseShare = totalGroupSpend > 0 ? ((totalUserSpend / totalGroupSpend) * 100).toFixed(0) : "0";
 
-  const avatarImage = placeholderImages.placeholderImages.find(p => p.id === MOCK_USER.profilePictureId);
+  const recentPurchases = userItems?.slice(0, 3).map(item => ({ item: item.name, quantity: `${item.quantity} ${item.unit}` })) || [];
+
+  const avatarImage = placeholderImages.placeholderImages.find(p => p.id === userProfile.profilePictureId);
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
@@ -174,7 +168,7 @@ export default function ProfilePage() {
                       data-ai-hint={avatarImage.imageHint}
                     />
                   )}
-                  <AvatarFallback>{MOCK_USER.name.charAt(0)}</AvatarFallback>
+                  <AvatarFallback>{userProfile.name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <Dialog>
                   <DialogTrigger asChild>
@@ -203,7 +197,7 @@ export default function ProfilePage() {
               </div>
               <div className="text-center mt-4">
                 <div className="flex justify-center items-center gap-2">
-                   <CardTitle className="text-2xl">{MOCK_USER.name}</CardTitle>
+                   <CardTitle className="text-2xl">{userProfile.name}</CardTitle>
                    <Dialog>
                       <DialogTrigger asChild>
                          <Button variant="ghost" size="icon" className="h-7 w-7">
@@ -218,110 +212,129 @@ export default function ProfilePage() {
                         <div className="space-y-4 py-4">
                           <div className="space-y-2">
                              <Label htmlFor="name">New Name</Label>
-                             <Input id="name" defaultValue={MOCK_USER.name} />
+                             <Input id="name" defaultValue={userProfile.name} />
                           </div>
                           <Button className="w-full">Save Name</Button>
                         </div>
                       </DialogContent>
                     </Dialog>
                 </div>
-                <CardDescription>{MOCK_USER.email}</CardDescription>
+                <CardDescription>{userProfile.email}</CardDescription>
               </div>
             </CardHeader>
             <CardContent className="text-center">
-              <Badge>{MOCK_USER.role}</Badge>
+              {currentUserData?.groupId && <Badge>{userProfile.role}</Badge>}
             </CardContent>
           </Card>
 
           {/* Group Info */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Home className="h-5 w-5" /> Group Info</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Group Name</span>
-                <span className="font-medium">{MOCK_GROUP.name}</span>
-              </div>
-              {MOCK_USER.role === 'Admin' && (
+          {currentUserData?.groupId && groupData && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Home className="h-5 w-5" /> Group Info</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Invite Code</span>
-                  <span className="font-mono text-sm bg-muted px-2 py-1 rounded">{MOCK_GROUP.invitationCode}</span>
+                  <span className="text-muted-foreground">Group Name</span>
+                  <span className="font-medium">{groupInfo.name}</span>
                 </div>
-              )}
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Members</span>
-                <span className="font-medium">{MOCK_GROUP.memberCount}</span>
-              </div>
-            </CardContent>
-          </Card>
+                {isAdmin && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Invite Code</span>
+                    <span className="font-mono text-sm bg-muted px-2 py-1 rounded">{groupInfo.invitationCode}</span>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Members</span>
+                  <span className="font-medium">{groupInfo.memberCount}</span>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Right Column */}
         <div className="md:col-span-2 space-y-6">
-          {/* Meal Contribution */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Utensils className="h-5 w-5" /> Meal Contribution</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-2 gap-4">
-              <div className="text-center p-4 bg-muted/50 rounded-lg">
-                <p className="text-sm text-muted-foreground">Total Meals Logged</p>
-                <p className="text-3xl font-bold">{MOCK_CONTRIBUTIONS.meals.total}</p>
-              </div>
-              <div className="text-center p-4 bg-muted/50 rounded-lg">
-                <p className="text-sm text-muted-foreground">Average Meals/Day</p>
-                <p className="text-3xl font-bold">{MOCK_CONTRIBUTIONS.meals.averagePerDay.toFixed(1)}</p>
-              </div>
-            </CardContent>
-          </Card>
+          {currentUserData?.groupId ? (
+            <>
+              {/* Meal Contribution */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2"><Utensils className="h-5 w-5" /> Meal Contribution</CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-2 gap-4">
+                  <div className="text-center p-4 bg-muted/50 rounded-lg">
+                    <p className="text-sm text-muted-foreground">Total Meals Logged</p>
+                    <p className="text-3xl font-bold">{totalMealsLogged}</p>
+                  </div>
+                  <div className="text-center p-4 bg-muted/50 rounded-lg">
+                    <p className="text-sm text-muted-foreground">Average Meals/Day</p>
+                    <p className="text-3xl font-bold">{averageMealsPerDay}</p>
+                  </div>
+                </CardContent>
+              </Card>
 
-          {/* Expense Contribution */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2"><span className="font-bold text-lg">৳</span> Expense Contribution</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-2 gap-4">
-              <div className="text-center p-4 bg-muted/50 rounded-lg">
-                <p className="text-sm text-muted-foreground">Total Spend</p>
-                <p className="text-3xl font-bold">৳{MOCK_CONTRIBUTIONS.expenses.total.toLocaleString()}</p>
-              </div>
-              <div className="text-center p-4 bg-muted/50 rounded-lg">
-                <p className="text-sm text-muted-foreground">Share of Group Total</p>
-                <p className="text-3xl font-bold">{MOCK_CONTRIBUTIONS.expenses.share.toFixed(0)}%</p>
-              </div>
-            </CardContent>
-          </Card>
-          
-          {/* Purchase Contribution */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2"><ShoppingCart className="h-5 w-5" /> Purchase Contribution</CardTitle>
-               <CardDescription>Total items logged: {MOCK_CONTRIBUTIONS.totalItemsLogged}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Item</TableHead>
-                    <TableHead className="text-right">Quantity Purchased</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {MOCK_CONTRIBUTIONS.purchases.length > 0 ? MOCK_CONTRIBUTIONS.purchases.map((purchase) => (
-                    <TableRow key={purchase.item}>
-                      <TableCell className="font-medium">{purchase.item}</TableCell>
-                      <TableCell className="text-right">{purchase.quantity}</TableCell>
-                    </TableRow>
-                  )) : (
-                    <TableRow>
-                        <TableCell colSpan={2} className="text-center h-24">No items purchased yet.</TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+              {/* Expense Contribution */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2"><span className="font-bold text-lg">৳</span> Expense Contribution</CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-2 gap-4">
+                  <div className="text-center p-4 bg-muted/50 rounded-lg">
+                    <p className="text-sm text-muted-foreground">Total Spend</p>
+                    <p className="text-3xl font-bold">৳{totalUserSpend.toLocaleString()}</p>
+                  </div>
+                  <div className="text-center p-4 bg-muted/50 rounded-lg">
+                    <p className="text-sm text-muted-foreground">Share of Group Total</p>
+                    <p className="text-3xl font-bold">{expenseShare}%</p>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Purchase Contribution */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2"><ShoppingCart className="h-5 w-5" /> Purchase Contribution</CardTitle>
+                  <CardDescription>Total items logged: {userItems?.length || 0}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Item</TableHead>
+                        <TableHead className="text-right">Quantity Purchased</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {recentPurchases.length > 0 ? recentPurchases.map((purchase) => (
+                        <TableRow key={purchase.item}>
+                          <TableCell className="font-medium">{purchase.item}</TableCell>
+                          <TableCell className="text-right">{purchase.quantity}</TableCell>
+                        </TableRow>
+                      )) : (
+                        <TableRow>
+                            <TableCell colSpan={2} className="text-center h-24">No items purchased yet.</TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            </>
+          ) : (
+            <Card>
+              <CardContent className="text-center py-12">
+                <Home className="mx-auto h-12 w-12 text-muted-foreground" />
+                <h3 className="mt-4 text-lg font-medium">You're not in a group yet</h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Join or create a group from the Admin Panel to start tracking.
+                </p>
+                <Button asChild className="mt-6">
+                  <Link href="/admin">Go to Admin Panel</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>
