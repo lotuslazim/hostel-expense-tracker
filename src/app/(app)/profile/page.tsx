@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/firebase";
 import { doc, collection, query, where, writeBatch, getDocs, serverTimestamp, updateDoc } from "firebase/firestore";
-import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear } from "date-fns";
+import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, differenceInDays } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Meal, Expense, Item } from "@/lib/types";
 import Link from "next/link";
@@ -253,7 +253,7 @@ export default function ProfilePage() {
   const totalGroupSpend = groupExpenses?.reduce((acc, expense) => acc + expense.amount, 0) || 0;
   const totalMealsLogged = userMeals?.length || 0;
   
-  const daysInPeriod = timePeriod === 'weekly' ? 7 : timePeriod === 'yearly' ? 365 : 30;
+  const daysInPeriod = differenceInDays(dateRange.end, dateRange.start) + 1;
   const averageMealsPerDay = totalMealsLogged > 0 ? (totalMealsLogged / daysInPeriod).toFixed(1) : "0.0";
 
   const expenseShare = totalGroupSpend > 0 && inGroup ? ((totalUserSpend / totalGroupSpend) * 100).toFixed(0) : "0";
@@ -498,3 +498,5 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+    
