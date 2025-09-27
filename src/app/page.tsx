@@ -51,7 +51,7 @@ export default function LandingPage() {
                   style={{ objectFit: 'cover' }}
                   className="bg-muted"
                   data-ai-hint={heroImage.imageHint}
-                  unoptimized // Add this prop for GIFs
+                  unoptimized
                 />
               )}
             </div>
