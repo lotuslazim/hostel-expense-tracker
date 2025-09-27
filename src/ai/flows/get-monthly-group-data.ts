@@ -22,10 +22,6 @@ import { initializeApp, getApps } from 'firebase-admin/app';
 import { startOfMonth, endOfMonth, getYear } from 'date-fns';
 import { MonthlyGroupData, MonthlyGroupDataSchema } from '../schemas';
 
-if (!getApps().length) {
-  initializeApp();
-}
-const firestore = getFirestore();
 
 const GetMonthlyGroupDataInputSchema = z.object({
   groupId: z.string(),
@@ -49,6 +45,11 @@ const getMonthlyGroupDataFlow = ai.defineFlow(
     outputSchema: MonthlyGroupDataSchema,
   },
   async ({ groupId, date }) => {
+    if (!getApps().length) {
+      initializeApp();
+    }
+    const firestore = getFirestore();
+
     const targetDate = new Date(date);
     const monthStart = startOfMonth(targetDate);
     const monthEnd = endOfMonth(targetDate);

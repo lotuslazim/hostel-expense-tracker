@@ -21,11 +21,6 @@ import { initializeApp, getApps } from 'firebase-admin/app';
 import { startOfMonth, endOfMonth, eachDayOfInterval, format, parseISO } from 'date-fns';
 import { MemberDailyData, MemberDailyDataSchema } from '../schemas';
 
-if (!getApps().length) {
-  initializeApp();
-}
-const firestore = getFirestore();
-
 const GetMemberDailyDataInputSchema = z.object({
   groupId: z.string(),
   memberId: z.string(),
@@ -48,6 +43,11 @@ const getMemberDailyDataFlow = ai.defineFlow(
     outputSchema: MemberDailyDataSchema,
   },
   async ({ groupId, memberId, date }) => {
+    if (!getApps().length) {
+      initializeApp();
+    }
+    const firestore = getFirestore();
+
     const targetDate = new Date(date);
     const monthStart = startOfMonth(targetDate);
     const monthEnd = endOfMonth(targetDate);
