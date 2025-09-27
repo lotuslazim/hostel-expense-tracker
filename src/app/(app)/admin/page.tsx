@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { useState, useMemo } from "react";
 import placeholderImages from "@/lib/placeholder-images.json";
 import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/firebase";
-import { doc, collection, writeBatch, getDocs, query, where, deleteDoc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { doc, collection, writeBatch, getDocs, query, where, deleteDoc, updateDoc, serverTimestamp, arrayUnion } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -183,7 +183,7 @@ export default function AdminPage() {
     () => (groupId ? collection(firestore, `groups/${groupId}/members`) : null),
     [firestore, groupId]
   );
-  const { data: membersData, isLoading: areMembersLoading } = useCollection(membersQuery);
+  const { data: membersData, isLoading: areMembersLoading, error: membersError } = useCollection(membersQuery);
 
   const isGoogleUser = currentUser?.providerData.some(p => p.providerId === 'google.com');
 
@@ -307,7 +307,7 @@ export default function AdminPage() {
   
   const memberDetails = selectedMember ? MOCK_MEMBER_DETAILS[selectedMember.id as keyof typeof MOCK_MEMBER_DETAILS] : null;
 
-  const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || isGroupLoading || areMembersLoading;
+  const isLoading = isCurrentUserLoading || isCurrentUserDataLoading;
   
   const members = useMemo(() => {
     if (!membersData) return [];
@@ -355,7 +355,7 @@ export default function AdminPage() {
   }
 
   // If user is not in a group, show the new user panel
-  if (!groupId || !groupData) {
+  if (!groupId) {
     return <NewUserAdminPanel />;
   }
 
@@ -433,92 +433,104 @@ export default function AdminPage() {
                   </Dialog>
                 </CardHeader>
                 <CardContent>
-                  <Dialog>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Member</TableHead>
-                          <TableHead className="hidden sm:table-cell">Role</TableHead>
-                          <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {members.length > 0 ? members.map((member) => {
-                          const avatar = getAvatar(member.avatarId);
-                          return (
-                          <DialogTrigger asChild key={member.id}>
-                            <TableRow onClick={() => handleRowClick(member)} className="cursor-pointer">
-                              <TableCell>
-                                <div className="flex items-center gap-3">
-                                  <Avatar>
-                                    {avatar && <AvatarImage src={avatar.imageUrl} alt={member.name} data-ai-hint={avatar.imageHint} />}
-                                    <AvatarFallback>{member.name.charAt(0).toUpperCase()}</AvatarFallback>
-                                  </Avatar>
-                                  <div>
-                                    <p className="font-medium">{member.name}</p>
-                                    <p className="text-sm text-muted-foreground">{member.email}</p>
-                                  </div>
-                                </div>
-                              </TableCell>
-                              <TableCell className="hidden sm:table-cell">
-                                {member.role === 'Admin' ? (
-                                  <Badge variant="default" className="bg-primary/20 text-primary-foreground hover:bg-primary/30">
-                                    <ShieldCheck className="mr-1 h-3 w-3" />
-                                    {member.role}
-                                  </Badge>
-                                ) : (
-                                  <Badge variant="secondary">
-                                    <User className="mr-1 h-3 w-3" />
-                                    {member.role}
-                                  </Badge>
-                                )}
-                              </TableCell>
-                              <TableCell className="text-right">
-                                {member.role !== 'Admin' && currentUserData?.isAdmin && (
-                                  <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); alert('Remove member functionality to be implemented.'); }}>
-                                    <Trash2 className="h-4 w-4" />
-                                    <span className="sr-only">Remove member</span>
-                                  </Button>
-                                )}
-                              </TableCell>
+                   {areMembersLoading && <Skeleton className="h-40 w-full" />}
+                   {membersError && (
+                    <Alert variant="destructive">
+                      <AlertTriangle className="h-4 w-4" />
+                      <AlertTitle>Error loading members</AlertTitle>
+                      <AlertDescription>
+                        Could not load group members. Please try again.
+                      </AlertDescription>
+                    </Alert>
+                   )}
+                   {!areMembersLoading && !membersError && (
+                      <Dialog>
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Member</TableHead>
+                              <TableHead className="hidden sm:table-cell">Role</TableHead>
+                              <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
-                          </DialogTrigger>
-                        )}) : (
-                          <TableRow>
-                            <TableCell colSpan={3} className="text-center h-24">No members found in this group.</TableCell>
-                          </TableRow>
-                        )}
-                      </TableBody>
-                    </Table>
+                          </TableHeader>
+                          <TableBody>
+                            {members.length > 0 ? members.map((member) => {
+                              const avatar = getAvatar(member.avatarId);
+                              return (
+                              <DialogTrigger asChild key={member.id}>
+                                <TableRow onClick={() => handleRowClick(member)} className="cursor-pointer">
+                                  <TableCell>
+                                    <div className="flex items-center gap-3">
+                                      <Avatar>
+                                        {avatar && <AvatarImage src={avatar.imageUrl} alt={member.name} data-ai-hint={avatar.imageHint} />}
+                                        <AvatarFallback>{member.name.charAt(0).toUpperCase()}</AvatarFallback>
+                                      </Avatar>
+                                      <div>
+                                        <p className="font-medium">{member.name}</p>
+                                        <p className="text-sm text-muted-foreground">{member.email}</p>
+                                      </div>
+                                    </div>
+                                  </TableCell>
+                                  <TableCell className="hidden sm:table-cell">
+                                    {member.role === 'Admin' ? (
+                                      <Badge variant="default" className="bg-primary/20 text-primary-foreground hover:bg-primary/30">
+                                        <ShieldCheck className="mr-1 h-3 w-3" />
+                                        {member.role}
+                                      </Badge>
+                                    ) : (
+                                      <Badge variant="secondary">
+                                        <User className="mr-1 h-3 w-3" />
+                                        {member.role}
+                                      </Badge>
+                                    )}
+                                  </TableCell>
+                                  <TableCell className="text-right">
+                                    {member.role !== 'Admin' && currentUserData?.isAdmin && (
+                                      <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); alert('Remove member functionality to be implemented.'); }}>
+                                        <Trash2 className="h-4 w-4" />
+                                        <span className="sr-only">Remove member</span>
+                                      </Button>
+                                    )}
+                                  </TableCell>
+                                </TableRow>
+                              </DialogTrigger>
+                            )}) : (
+                              <TableRow>
+                                <TableCell colSpan={3} className="text-center h-24">No members found in this group.</TableCell>
+                              </TableRow>
+                            )}
+                          </TableBody>
+                        </Table>
 
-                    {selectedMember && memberDetails && (
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Member Details: {selectedMember.name}</DialogTitle>
-                          <DialogDescription>
-                            A summary of this member's contributions for the current period.
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="grid grid-cols-3 gap-4 py-4 text-center">
-                            <div className="p-4 bg-muted/50 rounded-lg">
-                              <Utensils className="h-6 w-6 mx-auto text-muted-foreground mb-2" />
-                              <p className="text-sm text-muted-foreground">Meals Logged</p>
-                              <p className="text-2xl font-bold">{memberDetails.meals}</p>
+                        {selectedMember && memberDetails && (
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Member Details: {selectedMember.name}</DialogTitle>
+                              <DialogDescription>
+                                A summary of this member's contributions for the current period.
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="grid grid-cols-3 gap-4 py-4 text-center">
+                                <div className="p-4 bg-muted/50 rounded-lg">
+                                  <Utensils className="h-6 w-6 mx-auto text-muted-foreground mb-2" />
+                                  <p className="text-sm text-muted-foreground">Meals Logged</p>
+                                  <p className="text-2xl font-bold">{memberDetails.meals}</p>
+                                </div>
+                                <div className="p-4 bg-muted/50 rounded-lg">
+                                  <span className="text-2xl font-bold text-muted-foreground mb-2">৳</span>
+                                  <p className="text-sm text-muted-foreground">Total Expenses</p>
+                                  <p className="text-2xl font-bold">৳{memberDetails.expenses.toLocaleString()}</p>
+                                </div>
+                                <div className="p-4 bg-muted/50 rounded-lg">
+                                  <ShoppingCart className="h-6 w-6 mx-auto text-muted-foreground mb-2" />
+                                  <p className="text-sm text-muted-foreground">Items Purchased</p>
+                                  <p className="text-2xl font-bold">{memberDetails.purchases}</p>
+                                </div>
                             </div>
-                            <div className="p-4 bg-muted/50 rounded-lg">
-                              <span className="text-2xl font-bold text-muted-foreground mb-2">৳</span>
-                              <p className="text-sm text-muted-foreground">Total Expenses</p>
-                              <p className="text-2xl font-bold">৳{memberDetails.expenses.toLocaleString()}</p>
-                            </div>
-                            <div className="p-4 bg-muted/50 rounded-lg">
-                              <ShoppingCart className="h-6 w-6 mx-auto text-muted-foreground mb-2" />
-                              <p className="text-sm text-muted-foreground">Items Purchased</p>
-                              <p className="text-2xl font-bold">{memberDetails.purchases}</p>
-                            </div>
-                        </div>
-                      </DialogContent>
+                          </DialogContent>
+                        )}
+                      </Dialog>
                     )}
-                  </Dialog>
                 </CardContent>
             </Card>
 
