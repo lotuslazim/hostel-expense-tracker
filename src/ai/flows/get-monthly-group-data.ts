@@ -10,13 +10,6 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  DocumentData,
-} from 'firebase/firestore';
 import { getFirestore } from 'firebase-admin/firestore';
 import { initializeApp, getApps } from 'firebase-admin/app';
 import { startOfMonth, endOfMonth, getYear } from 'date-fns';
@@ -33,8 +26,8 @@ export type GetMonthlyGroupDataInput = z.infer<
 >;
 
 async function getDocsData(q: any) {
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const querySnapshot = await q.get();
+    return querySnapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
 }
 
 
@@ -56,7 +49,7 @@ const getMonthlyGroupDataFlow = ai.defineFlow(
     const monthName = `${targetDate.toLocaleString('default', { month: 'long' })} ${getYear(targetDate)}`;
 
     // 1. Get all members of the group
-    const usersQuery = query(collection(firestore, 'users'), where('groupId', '==', groupId));
+    const usersQuery = firestore.collection('users').where('groupId', '==', groupId);
     const users = await getDocsData(usersQuery);
     const memberIds = users.map(u => u.id);
     
@@ -65,16 +58,13 @@ const getMonthlyGroupDataFlow = ai.defineFlow(
     }
 
     // 2. Fetch meals and expenses for the month
-    const mealsQuery = query(
-      collection(firestore, `groups/${groupId}/meals`),
-      where('date', '>=', monthStart),
-      where('date', '<=', monthEnd)
-    );
-    const expensesQuery = query(
-      collection(firestore, `groups/${groupId}/expenses`),
-      where('date', '>=', monthStart),
-      where('date', '<=', monthEnd)
-    );
+    const mealsQuery = firestore.collection(`groups/${groupId}/meals`)
+      .where('date', '>=', monthStart)
+      .where('date', '<=', monthEnd);
+      
+    const expensesQuery = firestore.collection(`groups/${groupId}/expenses`)
+      .where('date', '>=', monthStart)
+      .where('date', '<=', monthEnd);
 
     const [meals, expenses] = await Promise.all([
         getDocsData(mealsQuery),

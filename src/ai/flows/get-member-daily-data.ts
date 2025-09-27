@@ -10,12 +10,6 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-} from 'firebase/firestore';
 import { getFirestore } from 'firebase-admin/firestore';
 import { initializeApp, getApps } from 'firebase-admin/app';
 import { startOfMonth, endOfMonth, eachDayOfInterval, format, parseISO } from 'date-fns';
@@ -32,8 +26,8 @@ export type GetMemberDailyDataInput = z.infer<
 >;
 
 async function getDocsData(q: any) {
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const querySnapshot = await q.get();
+    return querySnapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
 }
 
 const getMemberDailyDataFlow = ai.defineFlow(
@@ -54,18 +48,15 @@ const getMemberDailyDataFlow = ai.defineFlow(
     const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
     // Fetch all meals and expenses for the member for the whole month
-    const mealsQuery = query(
-      collection(firestore, `groups/${groupId}/meals`),
-      where('userId', '==', memberId),
-      where('date', '>=', monthStart),
-      where('date', '<=', monthEnd)
-    );
-    const expensesQuery = query(
-      collection(firestore, `groups/${groupId}/expenses`),
-      where('userId', '==', memberId),
-      where('date', '>=', monthStart),
-      where('date', '<=', monthEnd)
-    );
+    const mealsQuery = firestore.collection(`groups/${groupId}/meals`)
+      .where('userId', '==', memberId)
+      .where('date', '>=', monthStart)
+      .where('date', '<=', monthEnd);
+
+    const expensesQuery = firestore.collection(`groups/${groupId}/expenses`)
+      .where('userId', '==', memberId)
+      .where('date', '>=', monthStart)
+      .where('date', '<=', monthEnd);
 
     const [meals, expenses] = await Promise.all([
         getDocsData(mealsQuery),
