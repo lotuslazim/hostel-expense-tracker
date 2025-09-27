@@ -7,7 +7,7 @@ import { format, parseISO, startOfDay, endOfDay } from "date-fns";
 import { DateSwitcher } from "@/components/dashboard/date-switcher";
 import { MealLog } from "@/components/dashboard/meal-log";
 import { ExpenseLog } from "@/components/dashboard/expense-log";
-import { ItemLog } from "@/components/dashboard/item-log";
+import { SmartItemLog } from "@/components/dashboard/smart-item-log";
 import type { Meal, Expense, Item } from "@/lib/types";
 import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/firebase";
 import { doc, collection, query, where } from "firebase/firestore";
@@ -100,26 +100,30 @@ export default function DashboardPage() {
       : null,
     [firestore, groupId, dateRange]
   );
-  
-  const itemsQuery = useMemoFirebase(() =>
-    groupId
-      ? query(
-          collection(firestore, `groups/${groupId}/purchasedItems`),
-          where("date", ">=", dateRange.start),
-          where("date", "<=", dateRange.end)
-        )
-      : null,
-    [firestore, groupId, dateRange]
-  );
 
   const { data: meals, isLoading: areMealsLoading } = useCollection<Meal>(mealsQuery);
   const { data: expenses, isLoading: areExpensesLoading } = useCollection<Expense>(expensesQuery);
-  const { data: items, isLoading: areItemsLoading } = useCollection<Item>(itemsQuery);
-
-  const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || areMealsLoading || areExpensesLoading || areItemsLoading;
+  
+  const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || areMealsLoading || areExpensesLoading;
 
   if (isLoading) {
     return <DashboardSkeleton />;
+  }
+  
+  if (!groupId) {
+    return (
+        <Card>
+            <CardContent className="pt-6">
+                <div className="text-center py-8">
+                    <h2 className="text-2xl font-semibold mb-2">Welcome to BachelorBite!</h2>
+                    <p className="text-muted-foreground mb-4">You're not part of a group yet. Create or join one to start tracking.</p>
+                    <Button asChild>
+                        <Link href="/admin">Go to Admin Panel</Link>
+                    </Button>
+                </div>
+            </CardContent>
+        </Card>
+    );
   }
 
   return (
@@ -140,7 +144,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <MealLog meals={meals ?? []} currentDate={currentDate} />
         <ExpenseLog expenses={expenses ?? []} currentDate={currentDate} />
-        <ItemLog items={items ?? []} currentDate={currentDate} />
+        <SmartItemLog currentDate={currentDate}/>
       </div>
     </div>
   );
