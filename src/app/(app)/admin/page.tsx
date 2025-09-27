@@ -52,16 +52,16 @@ function NewUserAdminPanel() {
       const newGroupRef = doc(collection(firestore, "groups"));
       const userRef = doc(firestore, "users", currentUser.uid);
 
-      // Create the group
+      // 1. Create the group document
       batch.set(newGroupRef, {
         groupName,
         invitationCode: generateInviteCode(),
         adminId: currentUser.uid,
-        memberIds: [currentUser.uid], // Keep this for quick member count, etc.
+        memberIds: [currentUser.uid], // Start with the creator as a member
         createdAt: serverTimestamp(),
       });
       
-      // Add the creator as the first member in the 'members' subcollection
+      // 2. Add the creator to the 'members' subcollection
       const memberRef = doc(firestore, `groups/${newGroupRef.id}/members`, currentUser.uid);
       batch.set(memberRef, {
           email: currentUser.email,
@@ -69,7 +69,7 @@ function NewUserAdminPanel() {
           joinedAt: serverTimestamp(),
       });
 
-      // Update the user's profile
+      // 3. Update the user's profile to link them to the group
       batch.update(userRef, {
         groupId: newGroupRef.id,
         isAdmin: true,
@@ -105,13 +105,14 @@ function NewUserAdminPanel() {
 
         const groupDoc = querySnapshot.docs[0];
         const batch = writeBatch(firestore);
+        const userRef = doc(firestore, "users", currentUser.uid);
 
-        // Add user to the memberIds array
+        // 1. Add user's UID to the group's memberIds array
         batch.update(groupDoc.ref, {
             memberIds: arrayUnion(currentUser.uid)
         });
 
-        // Add user to the 'members' subcollection
+        // 2. Add user to the 'members' subcollection
         const memberRef = doc(firestore, `groups/${groupDoc.id}/members`, currentUser.uid);
         batch.set(memberRef, {
             email: currentUser.email,
@@ -119,8 +120,7 @@ function NewUserAdminPanel() {
             joinedAt: serverTimestamp(),
         });
 
-        // Update the user's profile
-        const userRef = doc(firestore, "users", currentUser.uid);
+        // 3. Update the user's profile to link them to the group
         batch.update(userRef, {
             groupId: groupDoc.id
         });
