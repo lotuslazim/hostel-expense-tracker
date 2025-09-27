@@ -9,8 +9,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
-import { useFirebase, useUser, useDoc, useMemoFirebase, addDocumentNonBlocking } from "@/firebase";
-import { doc, collection } from "firebase/firestore";
+import { useFirebase, useUser, useDoc, useMemoFirebase } from "@/firebase";
+import { doc, collection, addDoc } from "firebase/firestore";
+import { useToast } from "@/hooks/use-toast";
 
 const mealTypes: MealType[] = ['lunch', 'dinner'];
 
@@ -25,6 +26,7 @@ function LogMealDialog({ type, currentDate }: { type: MealType; currentDate: Dat
     const [open, setOpen] = useState(false);
     const [description, setDescription] = useState("");
     const [numberOfItems, setNumberOfItems] = useState(1);
+    const { toast } = useToast();
     
     const { firestore } = useFirebase();
     const { user: currentUser } = useUser();
@@ -32,8 +34,11 @@ function LogMealDialog({ type, currentDate }: { type: MealType; currentDate: Dat
     const { data: currentUserData } = useDoc(currentUserRef);
     const groupId = currentUserData?.groupId;
 
-    const handleSaveMeal = () => {
-        if (description.length === 0 || !groupId || !currentUser) return;
+    const handleSaveMeal = async () => {
+        if (description.length === 0 || !groupId || !currentUser) {
+            toast({ variant: "destructive", title: "Error", description: "Could not save meal. Missing information." });
+            return;
+        }
         
         const mealData = {
             userId: currentUser.uid,
@@ -44,13 +49,20 @@ function LogMealDialog({ type, currentDate }: { type: MealType; currentDate: Dat
             date: currentDate,
         };
 
-        const mealsCol = collection(firestore, `groups/${groupId}/meals`);
-        addDocumentNonBlocking(mealsCol, mealData);
+        try {
+            const mealsCol = collection(firestore, `groups/${groupId}/meals`);
+            await addDoc(mealsCol, mealData);
 
-        // Reset state
-        setDescription("");
-        setNumberOfItems(1);
-        setOpen(false);
+            // Reset state and close dialog on success
+            setDescription("");
+            setNumberOfItems(1);
+            setOpen(false);
+            toast({ title: "Success", description: "Meal logged successfully." });
+
+        } catch (error) {
+            console.error("Error saving meal:", error);
+            toast({ variant: "destructive", title: "Save Failed", description: "There was a problem saving your meal. Please try again." });
+        }
     };
 
     return (
