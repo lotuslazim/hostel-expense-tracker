@@ -17,11 +17,12 @@ import { Input } from "@/components/ui/input";
 import { AuthCard } from "./auth-card";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/firebase";
+import { useAuth, useFirebase } from "@/firebase";
 import { GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { doc, setDoc } from "firebase/firestore";
 
 const formSchema = z.object({
   name: z.string().min(1, { message: "Name is required." }),
@@ -32,6 +33,7 @@ const formSchema = z.object({
 export function SignupForm() {
   const router = useRouter();
   const auth = useAuth();
+  const { firestore } = useFirebase();
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -43,7 +45,17 @@ export function SignupForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      await createUserWithEmailAndPassword(auth, values.email, values.password);
+      const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+      const user = userCredential.user;
+
+      // Create a user document in Firestore
+      await setDoc(doc(firestore, "users", user.uid), {
+        id: user.uid,
+        email: user.email,
+        groupId: null,
+        isAdmin: false,
+      });
+      
       // You might want to also set the user's display name here
       router.push('/dashboard');
     } catch (error: any) {
@@ -65,7 +77,15 @@ export function SignupForm() {
   const handleGoogleSignIn = async () => {
     const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+       // Create a user document in Firestore for new Google users
+      await setDoc(doc(firestore, "users", user.uid), {
+        id: user.uid,
+        email: user.email,
+        groupId: null,
+        isAdmin: false,
+      }, { merge: true }); // Use merge to not overwrite existing data if user already exists
       router.push('/dashboard');
     } catch (error) {
       console.error("Error during Google sign-in:", error);
