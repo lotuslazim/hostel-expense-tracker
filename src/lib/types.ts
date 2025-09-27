@@ -5,6 +5,7 @@ export interface Meal {
   id: string;
   mealType: MealType;
   description: string;
+  numberOfItems: number;
   date: Date;
   userId: string;
   groupId: string;

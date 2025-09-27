@@ -24,6 +24,7 @@ const mealIcons: Record<MealType, React.ReactNode> = {
 function LogMealDialog({ type, currentDate }: { type: MealType; currentDate: Date }) {
     const [open, setOpen] = useState(false);
     const [description, setDescription] = useState("");
+    const [numberOfItems, setNumberOfItems] = useState("1");
     
     const { firestore } = useFirebase();
     const { user: currentUser } = useUser();
@@ -32,13 +33,14 @@ function LogMealDialog({ type, currentDate }: { type: MealType; currentDate: Dat
     const groupId = currentUserData?.groupId;
 
     const handleSaveMeal = () => {
-        if (!description || !groupId || !currentUser) return;
+        if (!description || !numberOfItems || !groupId || !currentUser) return;
         
         const mealData = {
             userId: currentUser.uid,
             groupId,
             mealType: type,
             description,
+            numberOfItems: parseInt(numberOfItems, 10),
             date: currentDate,
         };
 
@@ -46,6 +48,7 @@ function LogMealDialog({ type, currentDate }: { type: MealType; currentDate: Dat
         addDocumentNonBlocking(mealsCol, mealData);
 
         setDescription("");
+        setNumberOfItems("1");
         setOpen(false);
     };
 
@@ -61,6 +64,17 @@ function LogMealDialog({ type, currentDate }: { type: MealType; currentDate: Dat
                 <DialogTitle>Log {type}</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 py-4">
+                 <div className="space-y-2">
+                   <Label htmlFor={`numberOfItems-${type}`}>Number of Items</Label>
+                   <Input 
+                        id={`numberOfItems-${type}`}
+                        type="number"
+                        placeholder="e.g., 1"
+                        value={numberOfItems}
+                        onChange={(e) => setNumberOfItems(e.target.value)}
+                        min="1"
+                    />
+                </div>
                 <div className="space-y-2">
                    <Label htmlFor={`description-${type}`}>Item Name</Label>
                    <Input 
@@ -70,7 +84,7 @@ function LogMealDialog({ type, currentDate }: { type: MealType; currentDate: Dat
                         onChange={(e) => setDescription(e.target.value)}
                     />
                 </div>
-                <Button className="w-full" onClick={handleSaveMeal} disabled={!description}>Save Meal</Button>
+                <Button className="w-full" onClick={handleSaveMeal} disabled={!description || !numberOfItems}>Save Meal</Button>
               </div>
            </DialogContent>
          </Dialog>
@@ -95,7 +109,7 @@ export function MealLog({ meals, currentDate }: { meals: Meal[], currentDate: Da
                 <div>
                   <h3 className="font-semibold capitalize">{type}</h3>
                   {loggedMeal ? (
-                    <p className="text-sm text-muted-foreground">{loggedMeal.description}</p>
+                    <p className="text-sm text-muted-foreground">{loggedMeal.numberOfItems} x {loggedMeal.description}</p>
                   ) : (
                     <p className="text-sm text-muted-foreground">Not logged yet</p>
                   )}
