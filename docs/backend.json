@@ -277,7 +277,7 @@
             "$ref": "#/backend/entities/Member"
           },
           "rules": {
-            "list": "get(/databases/(default)/documents/users/$(request.auth.uid)).data.groupId == groupId"
+            "list": "get(/databases/(default)/documents/users/' + request.auth.uid + ').data.groupId == groupId"
           },
           "description": "Stores basic information about each member of a group. The document ID is the user's UID. This allows secure listing of group members.",
           "params": [
@@ -356,6 +356,4 @@
     "reasoning": "The Firestore structure is designed for a secure, multi-tenant application where users are organized into groups. Authorization is paramount, and the structure is built to support Query-based Access Protocols (QAPs) by denormalizing key information.\n\nKey Authorization & Data Modeling Decisions:\n\n1.  **/users/{userId}**: This is now the primary source of truth for a user's group membership via the `groupId` field. Security rules for other collections will reference this document to authorize access (e.g., `get(/databases/(default)/documents/users/$(request.auth.uid)).data.groupId == some_other_groupId`). This is more direct than checking an array in the group document.\n\n2.  **/groups/{groupId}**: This collection stores group-level information. The `memberIds` array has been removed to simplify the data model and reduce potential data inconsistency issues. Group membership is now determined by the `groupId` field in each user's document.\n\n3.  **/groups/{groupId}/members/{memberId}**: This subcollection is still used to securely list the members of a group. The crucial security rule `allow list: get(/databases/(default)/documents/users/$(request.auth.uid)).data.groupId == groupId;` ensures that a user can only list members of the group they currently belong to. This prevents users from listing members of any arbitrary group and is a secure, efficient pattern for list operations.\n\n4.  **Group Subcollections (`meals`, `expenses`, `purchasedItems`)**: All group-specific content remains in subcollections under the relevant group document. Security rules for these paths will always verify that the user is part of the parent `groupId` before allowing any read or write operation, ensuring data is only accessible to group members. This check is done by referencing the requesting user's document in the `/users` collection."
   }
 }
-    
-    
     
