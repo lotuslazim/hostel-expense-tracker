@@ -109,12 +109,14 @@ export default function ProfilePage() {
   const { data: userExpenses, isLoading: areExpensesLoading } = useCollection<Expense>(userExpensesQuery);
   const { data: userItems, isLoading: areItemsLoading } = useCollection<Item>(userItemsQuery);
 
-  // 4. Get total group expenses for calculating share
+  // 4. Get total group expenses and members for calculating share
   const groupExpensesQuery = useMemoFirebase(() => groupId ? collection(firestore, `groups/${groupId}/expenses`) : null, [firestore, groupId]);
   const { data: groupExpenses, isLoading: areGroupExpensesLoading } = useCollection<Expense>(groupExpensesQuery);
+  const groupMembersQuery = useMemoFirebase(() => groupId ? collection(firestore, `groups/${groupId}/members`) : null, [firestore, groupId]);
+  const { data: groupMembers, isLoading: areGroupMembersLoading } = useCollection(groupMembersQuery);
 
 
-  const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || isGroupDataLoading || areMealsLoading || areExpensesLoading || areItemsLoading || areGroupExpensesLoading;
+  const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || isGroupDataLoading || areMealsLoading || areExpensesLoading || areItemsLoading || areGroupExpensesLoading || areGroupMembersLoading;
 
   if (isLoading) {
     return <ProfileSkeleton />;
@@ -130,7 +132,7 @@ export default function ProfilePage() {
   const groupInfo = {
     name: groupData?.groupName || "N/A",
     invitationCode: groupData?.invitationCode || "N/A",
-    memberCount: groupData?.memberIds?.length || 0,
+    memberCount: groupMembers?.length || 0,
   };
   
   const totalUserSpend = userExpenses?.reduce((acc, expense) => acc + expense.amount, 0) || 0;
@@ -341,6 +343,8 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+    
 
     
 

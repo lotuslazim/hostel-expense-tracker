@@ -13,9 +13,8 @@ import { Label } from "@/components/ui/label";
 import { useState, useMemo } from "react";
 import placeholderImages from "@/lib/placeholder-images.json";
 import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/firebase";
-import { doc, collection, query, where, writeBatch, getDocs, arrayUnion, serverTimestamp, setDoc, getDoc } from "firebase/firestore";
+import { doc, collection, query, where, writeBatch, getDocs, serverTimestamp } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 
 // In a real app, this would be fetched or calculated
@@ -433,4 +432,5 @@ export default function AdminPage() {
 
     
 
+    
     
