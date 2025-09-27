@@ -42,17 +42,17 @@ const getMemberDailyDataFlow = ai.defineFlow(
     const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
     // Fetch all meals and expenses for the member for the whole month
-    const mealsSnapshot = await firestore.collection(`groups/${groupId}/meals`)
+    const mealsQuery = firestore.collection(`groups/${groupId}/meals`)
       .where('userId', '==', memberId)
       .where('date', '>=', monthStart)
-      .where('date', '<=', monthEnd)
-      .get();
+      .where('date', '<=', monthEnd);
+    const mealsSnapshot = await mealsQuery.get();
 
-    const expensesSnapshot = await firestore.collection(`groups/${groupId}/expenses`)
+    const expensesQuery = firestore.collection(`groups/${groupId}/expenses`)
       .where('userId', '==', memberId)
       .where('date', '>=', monthStart)
-      .where('date', '<=', monthEnd)
-      .get();
+      .where('date', '<=', monthEnd);
+    const expensesSnapshot = await expensesQuery.get();
     
     const meals = mealsSnapshot.docs.map(doc => doc.data());
     const expenses = expensesSnapshot.docs.map(doc => doc.data());

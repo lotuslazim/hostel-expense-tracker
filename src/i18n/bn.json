@@ -20,7 +20,7 @@
     "settings.account_settings.actions.title": "क्रियाएँ",
     "settings.account_settings.actions.leave_group": "গ্রুপ ত্যাগ করুন",
     "settings.account_settings.actions.leave_group_confirm_title": "আপনি কি সত্যিই ত্যাগ করতে চান?",
-    "settings.account_settings.actions.leave_group_confirm_desc": "আপনি সমস্ত গ্রুপ ডেটাতে অ্যাক্সেস হারাবেন। এই क्रियाটি केवल একজন অ্যাডমিন দ্বারা পুনরায় আমন্ত্রিত হয়েই αναιρέσει શકાય।",
+    "settings.account_settings.actions.leave_group_confirm_desc": "আপনি সমস্ত গ্রুপ ডেটাতে অ্যাক্সেস হারাবেন। এই क्रियाটি কেবল একজন অ্যাডমিন দ্বারা পুনরায় আমন্ত্রিত হয়েই αναιρέσει શકાય।",
     "settings.account_settings.actions.delete_account": "অ্যাকাউন্ট মুছুন",
     "settings.account_settings.actions.delete_account_confirm_title": "আপনি কি পুরোপুরি নিশ্চিত?",
     "settings.account_settings.actions.delete_account_confirm_desc": "এই क्रियाটি αναιρέσει করা যাবে না। এটি আপনার অ্যাকাউন্ট স্থায়ীভাবে মুছে ফেলবে এবং আমাদের সার্ভার থেকে আপনার ডেটা সরিয়ে দেবে।",

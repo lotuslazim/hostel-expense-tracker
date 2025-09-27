@@ -23,6 +23,7 @@ const GetMonthlyGroupDataInputSchema = z.object({
 
 export type GetMonthlyGroupDataInput = z.infer<typeof GetMonthlyGroupDataInputSchema>;
 
+
 const getMonthlyGroupDataFlow = ai.defineFlow(
   {
     name: 'getMonthlyGroupDataFlow',
@@ -41,7 +42,8 @@ const getMonthlyGroupDataFlow = ai.defineFlow(
     const monthName = `${targetDate.toLocaleString('default', { month: 'long' })} ${getYear(targetDate)}`;
 
     // 1. Get all members of the group
-    const usersSnapshot = await firestore.collection('users').where('groupId', '==', groupId).get();
+    const usersQuery = firestore.collection('users').where('groupId', '==', groupId);
+    const usersSnapshot = await usersQuery.get();
     const users = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     
     if (users.length === 0) {
@@ -49,15 +51,15 @@ const getMonthlyGroupDataFlow = ai.defineFlow(
     }
 
     // 2. Fetch meals and expenses for the month
-    const mealsSnapshot = await firestore.collection(`groups/${groupId}/meals`)
+    const mealsQuery = firestore.collection(`groups/${groupId}/meals`)
       .where('date', '>=', monthStart)
-      .where('date', '<=', monthEnd)
-      .get();
+      .where('date', '<=', monthEnd);
+    const mealsSnapshot = await mealsQuery.get();
       
-    const expensesSnapshot = await firestore.collection(`groups/${groupId}/expenses`)
+    const expensesQuery = firestore.collection(`groups/${groupId}/expenses`)
       .where('date', '>=', monthStart)
-      .where('date', '<=', monthEnd)
-      .get();
+      .where('date', '<=', monthEnd);
+    const expensesSnapshot = await expensesQuery.get();
 
     const meals = mealsSnapshot.docs.map(doc => doc.data());
     const expenses = expensesSnapshot.docs.map(doc => doc.data());
