@@ -66,6 +66,32 @@
         "email"
       ]
     },
+    "Member": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Member",
+      "type": "object",
+      "description": "Represents a member within a group, containing their email and role.",
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "The member's email address.",
+          "format": "email"
+        },
+        "role": {
+          "type": "string",
+          "description": "The role of the member within the group (e.g., 'admin', 'member')."
+        },
+        "joinedAt": {
+          "type": "string",
+          "description": "The timestamp when the member joined the group.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "email",
+        "role"
+      ]
+    },
     "MealLog": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "MealLog",
@@ -250,6 +276,26 @@
         }
       },
       {
+        "path": "/groups/{groupId}/members/{memberId}",
+        "definition": {
+          "entityName": "Member",
+          "schema": {
+            "$ref": "#/backend/entities/Member"
+          },
+          "description": "Stores basic information about each member of a group. The document ID is the user's UID. This allows secure listing of group members.",
+          "params": [
+            {
+              "name": "groupId",
+              "description": "The unique identifier for the group."
+            },
+            {
+              "name": "memberId",
+              "description": "The unique identifier for the member (user UID)."
+            }
+          ]
+        }
+      },
+      {
         "path": "/groups/{groupId}/meals/{mealId}",
         "definition": {
           "entityName": "MealLog",
@@ -310,6 +356,7 @@
         }
       }
     ],
-    "reasoning": "The Firestore structure is designed to support group meal tracking with admin privileges, ensuring authorization independence and secure data access.  The key is the denormalization of group membership to ensure QAPs.\n\nAuthorization Independence:\n\n*   Group Membership Denormalization: The `MealLog`, `Expense`, and `PurchasedItem` collections, which are subcollections of `groups/{groupId}`, include both `groupId` and `userId` fields. This denormalization is CRUCIAL. It allows security rules to validate that the user has access to the data based on group membership without needing to perform a `get()` operation to check the user's group. This is a core requirement for authorization independence.\n\nQAPs Support:\n\n*   Secure List Operations:  Because `MealLog`, `Expense`, and `PurchasedItem` all contain the `groupId`, listing operations can be secured by verifying that the user is a member of that group. Admins can read all logs within their groups due to the denormalized `groupId` and their admin role being checked against the `groups` collection.\n\n*   Segregation and Homogeneous Security:  Data with different access needs are segregated into different collections. User-specific data (profile) is stored under `/users/{userId}`, while group-related data (meals, expenses) is stored under `/groups/{groupId}`. This ensures that the security rules for each collection are simple and apply consistently to all documents within that collection.\n\nOther Considerations:\n\n*   User Group Association: The `users` collection stores the `groupId` to which a user belongs. While it might seem like a dependency, it is safe because it is READ-ONLY (it is acceptable to read in rules, just not use `.get()` for auth). The `isAdmin` flag is only for UI purposes. Authorization is controlled by membership in the `groups` collection and the denormalized `groupId` in the meal log/expense data.\n\n*   Admin Privileges:  Admin privileges are determined by the `adminId` field in the `groups` collection. Admins can manage members, view all logs, and control access within their group.  Security rules enforce these privileges by checking if the user's UID matches the `adminId` for the group.\n\n*   Data Integrity:  The structure supports data integrity by ensuring that all `MealLog`, `Expense`, and `PurchasedItem` documents have a consistent `groupId` and `userId`, linking them to the correct group and user. Security rules can validate these relationships during data creation and modification.\n"
+    "reasoning": "The Firestore structure is designed for a secure, multi-tenant application where users are organized into groups. Authorization is paramount, and the structure is built to support Query-based Access Protocols (QAPs) by denormalizing key information.\n\nKey Authorization & Data Modeling Decisions:\n\n1.  **/groups/{groupId}**: This is the central document for each group. It contains an `adminId` and a `memberIds` array. This document is the source of truth for who belongs to a group and who can manage it. Security rules will heavily reference this document to check for membership (`request.auth.uid in resource.data.memberIds`).\n\n2.  **/groups/{groupId}/members/{memberId}**: This subcollection was added to securely list group members. Instead of querying the top-level `/users` collection (which would require overly broad read permissions), the application can query this subcollection. Security rules can easily protect this path by checking if the requesting user is a member of the parent group (e.g., `get(/databases/(default)/documents/groups/$(groupId)).data.memberIds.hasAny([request.auth.uid])`). This prevents users from listing members of groups they don't belong to and is a textbook example of secure data modeling for list operations.\n\n3.  **/users/{userId}**: This collection stores user-specific, non-group-related data. The `groupId` field here is for UI convenience (e.g., quickly finding a user's group) and should **not** be the basis for security rules, as a user could tamper with their own document. Authorization should always be based on the `/groups/{groupId}` document.\n\n4.  **Group Subcollections (`meals`, `expenses`, `purchasedItems`)**: All group-specific content is stored in subcollections under the relevant group document. This provides natural data scoping. Security rules for these paths will always verify that the user is part of the parent `groupId` before allowing any read or write operation, ensuring data is only accessible to group members.\n\n5.  **Authorization Independence**: By placing `groupId` and `userId` directly within documents in the `meals`, `expenses`, and `purchasedItems` subcollections, we achieve authorization independence. Security rules can validate access without needing to perform extra `get()` calls to other documents, which is more performant and secure. For example, a rule for `meals` can check `resource.data.groupId == groupId` and that the user is a member of that group."
   }
 }
+    
