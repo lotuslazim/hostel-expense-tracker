@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/firebase";
-import { doc, collection, query, where, writeBatch, getDocs, serverTimestamp } from "firebase/firestore";
+import { doc, collection, query, where, writeBatch, getDocs, serverTimestamp, arrayUnion } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Meal, Expense, Item } from "@/lib/types";
 import Link from "next/link";
@@ -495,5 +495,7 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+    
 
     
