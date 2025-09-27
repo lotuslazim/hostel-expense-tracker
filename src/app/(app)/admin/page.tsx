@@ -57,7 +57,6 @@ function NewUserAdminPanel() {
         groupName,
         invitationCode: generateInviteCode(),
         adminId: currentUser.uid,
-        memberIds: [currentUser.uid], // Start with the creator as a member
         createdAt: serverTimestamp(),
       });
       
@@ -107,12 +106,7 @@ function NewUserAdminPanel() {
         const batch = writeBatch(firestore);
         const userRef = doc(firestore, "users", currentUser.uid);
 
-        // 1. Add user's UID to the group's memberIds array
-        batch.update(groupDoc.ref, {
-            memberIds: arrayUnion(currentUser.uid)
-        });
-
-        // 2. Add user to the 'members' subcollection
+        // 1. Add user to the 'members' subcollection
         const memberRef = doc(firestore, `groups/${groupDoc.id}/members`, currentUser.uid);
         batch.set(memberRef, {
             email: currentUser.email,
@@ -120,7 +114,7 @@ function NewUserAdminPanel() {
             joinedAt: serverTimestamp(),
         });
 
-        // 3. Update the user's profile to link them to the group
+        // 2. Update the user's profile to link them to the group
         batch.update(userRef, {
             groupId: groupDoc.id
         });
@@ -294,7 +288,7 @@ export default function AdminPage() {
           </div>
           <div className="p-4 bg-muted/50 rounded-lg">
             <p className="text-sm text-muted-foreground">Total Members</p>
-            <p className="text-lg font-semibold">{groupData?.memberIds?.length || 0}</p>
+            <p className="text-lg font-semibold">{members.length || 0}</p>
           </div>
         </CardContent>
       </Card>
