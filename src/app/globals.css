@@ -5,36 +5,36 @@
 @layer base {
   :root {
     /* Light Mode */
-    --background: 240 10% 98%; /* Light Gray */
+    --background: 120 25% 97%; /* #F4F9F4 - Light Desaturated Green */
     --foreground: 20 14% 23%; /* Dark Brown */
     
-    --card: 66 55% 95%; /* Light Beige */
+    --card: 120 25% 100%; /* #FFFFFF - White */
     --card-foreground: 20 14% 23%; /* Dark Brown */
     
-    --popover: 66 55% 95%; /* Light Beige */
-    --popover-foreground: 20 14% 23%; /* Dark Brown */
+    --popover: 120 25% 100%;
+    --popover-foreground: 20 14% 23%;
     
-    --primary: 94 24% 69%; /* Soft Green */
-    --primary-foreground: 20 14% 23%; /* Dark Brown */
-
-    --secondary: 22 55% 65%; /* Warm Orange */
-    --secondary-foreground: 60 43% 97%; /* Light Beige */
+    --primary: 125 31% 64%; /* #A7D1AB - Fresh Green */
+    --primary-foreground: 20 14% 15%;
     
-    --muted: 220 10% 95%; /* Lighter Gray for muted elements */
-    --muted-foreground: 220 10% 55%; /* Muted Gray Text */
+    --secondary: 47 62% 76%; /* #E8D59A - Soft Yellow */
+    --secondary-foreground: 20 14% 23%;
+    
+    --muted: 120 10% 95%; /* Lighter Gray for muted elements */
+    --muted-foreground: 120 10% 55%; /* Muted Gray Text */
 
-    --accent: 22 55% 75%; /* Lighter Orange */
-    --accent-foreground: 20 14% 23%; /* Dark Brown */
+    --accent: 47 62% 86%; /* Lighter yellow */
+    --accent-foreground: 20 14% 23%;
     
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     
-    --border: 220 10% 88%;
-    --input: 220 10% 85%;
-    --ring: 22 55% 65%; /* Warm Orange */
+    --border: 120 10% 88%;
+    --input: 120 10% 90%;
+    --ring: 125 31% 64%;
     
-    --chart-1: 94 30% 50%;
-    --chart-2: 22 60% 55%;
+    --chart-1: 125 31% 50%;
+    --chart-2: 47 62% 66%;
     --chart-3: 150 70% 35%;
     --chart-4: 280 100% 60%;
     --chart-5: 0 100% 50%;
@@ -44,36 +44,36 @@
 
   .dark {
     /* Dark Mode */
-    --background: 20 14% 12%; /* Very Dark Brown */
-    --foreground: 60 43% 92%; /* Light Beige/Gray */
+    --background: 120 5% 10%; 
+    --foreground: 120 5% 92%;
     
-    --card: 20 14% 15%; /* Dark Brown */
-    --card-foreground: 60 43% 92%; /* Light Beige/Gray */
+    --card: 120 5% 13%;
+    --card-foreground: 120 5% 92%;
     
-    --popover: 20 14% 12%; /* Very Dark Brown */
-    --popover-foreground: 60 43% 92%; /* Light Beige/Gray */
+    --popover: 120 5% 10%;
+    --popover-foreground: 120 5% 92%;
 
-    --primary: 94 24% 69%; /* Soft Green */
-    --primary-foreground: 20 14% 15%; /* Dark Brown */
+    --primary: 125 31% 64%;
+    --primary-foreground: 20 14% 15%;
 
-    --secondary: 22 55% 65%; /* Warm Orange */
-    --secondary-foreground: 20 14% 15%; /* Dark Brown */
+    --secondary: 47 62% 76%;
+    --secondary-foreground: 20 14% 15%;
 
-    --muted: 20 14% 20%; /* Darker Muted Brown */
-    --muted-foreground: 20 10% 60%; /* Lighter Muted Brown */
+    --muted: 120 5% 20%;
+    --muted-foreground: 120 5% 60%;
 
-    --accent: 22 55% 55%; /* Darker Orange */
-    --accent-foreground: 60 43% 97%; /* Light Beige */
+    --accent: 47 62% 66%;
+    --accent-foreground: 20 14% 15%;
     
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
     
-    --border: 20 14% 22%;
-    --input: 20 14% 25%;
-    --ring: 22 55% 65%; /* Warm Orange */
+    --border: 120 5% 22%;
+    --input: 120 5% 25%;
+    --ring: 125 31% 64%;
 
-    --chart-1: 94 30% 50%;
-    --chart-2: 22 60% 55%;
+    --chart-1: 125 31% 50%;
+    --chart-2: 47 62% 66%;
     --chart-3: 150 70% 35%;
     --chart-4: 280 100% 60%;
     --chart-5: 0 100% 50%;
