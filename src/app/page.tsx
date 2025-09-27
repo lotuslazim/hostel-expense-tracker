@@ -15,7 +15,7 @@ export default function LandingPage() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="container mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between border-b bg-card">
+      <header className="container mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         <Logo />
         <div className="flex items-center gap-4">
           <Button variant="ghost" asChild>
