@@ -11,16 +11,21 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import {
-  getFirestore,
   collection,
   query,
   where,
   getDocs,
   DocumentData,
 } from 'firebase/firestore';
-import { initializeFirebase } from '@/firebase';
-import { startOfMonth, endOfMonth, getMonth, getYear } from 'date-fns';
+import { getFirestore } from 'firebase-admin/firestore';
+import { initializeApp, getApps } from 'firebase-admin/app';
+import { startOfMonth, endOfMonth, getYear } from 'date-fns';
 import { MonthlyGroupData, MonthlyGroupDataSchema } from '../schemas';
+
+if (!getApps().length) {
+  initializeApp();
+}
+const firestore = getFirestore();
 
 const GetMonthlyGroupDataInputSchema = z.object({
   groupId: z.string(),
@@ -44,7 +49,6 @@ const getMonthlyGroupDataFlow = ai.defineFlow(
     outputSchema: MonthlyGroupDataSchema,
   },
   async ({ groupId, date }) => {
-    const { firestore } = initializeFirebase();
     const targetDate = new Date(date);
     const monthStart = startOfMonth(targetDate);
     const monthEnd = endOfMonth(targetDate);
