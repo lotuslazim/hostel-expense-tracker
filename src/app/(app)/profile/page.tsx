@@ -124,10 +124,10 @@ function NoGroupProfile() {
                   </div>
                   <div className="text-center mt-4">
                     <div className="flex justify-center items-center gap-2">
-                       <CardTitle className="text-2xl">{userProfile.name}</CardTitle>
+                       <CardTitle className="text-2xl break-all">{userProfile.name}</CardTitle>
                        <Dialog>
                           <DialogTrigger asChild>
-                             <Button variant="ghost" size="icon" className="h-7 w-7">
+                             <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0">
                                <Pencil className="h-4 w-4" />
                                <span className="sr-only">Edit name</span>
                              </Button>
@@ -146,7 +146,7 @@ function NoGroupProfile() {
                           </DialogContent>
                         </Dialog>
                     </div>
-                    <CardDescription>{userProfile.email}</CardDescription>
+                    <CardDescription className="break-all">{userProfile.email}</CardDescription>
                   </div>
                 </CardHeader>
             </Card>
@@ -370,10 +370,10 @@ export default function ProfilePage() {
                   </div>
                   <div className="text-center mt-4">
                     <div className="flex justify-center items-center gap-2">
-                       <CardTitle className="text-2xl">{userProfile.name}</CardTitle>
+                       <CardTitle className="text-2xl break-all">{userProfile.name}</CardTitle>
                        <Dialog>
                           <DialogTrigger asChild>
-                             <Button variant="ghost" size="icon" className="h-7 w-7">
+                             <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0">
                                <Pencil className="h-4 w-4" />
                                <span className="sr-only">Edit name</span>
                              </Button>
@@ -392,7 +392,7 @@ export default function ProfilePage() {
                           </DialogContent>
                         </Dialog>
                     </div>
-                    <CardDescription>{userProfile.email}</CardDescription>
+                    <CardDescription className="break-all">{userProfile.email}</CardDescription>
                   </div>
                 </CardHeader>
                 <CardContent className="text-center">
