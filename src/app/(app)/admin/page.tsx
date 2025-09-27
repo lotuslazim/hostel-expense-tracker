@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { useState, useMemo } from "react";
 import placeholderImages from "@/lib/placeholder-images.json";
 import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/firebase";
-import { doc, collection, writeBatch, getDocs, query, where, deleteDoc, updateDoc, serverTimestamp, arrayUnion } from "firebase/firestore";
+import { doc, collection, writeBatch, getDocs, query, where, deleteDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -832,3 +832,5 @@ export default function AdminPage() {
     </div>
   );
 }
+
+    

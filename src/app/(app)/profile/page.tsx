@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/firebase";
-import { doc, collection, query, where, writeBatch, getDocs, serverTimestamp, arrayUnion } from "firebase/firestore";
+import { doc, collection, query, where, writeBatch, getDocs, serverTimestamp } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Meal, Expense, Item } from "@/lib/types";
 import Link from "next/link";
@@ -53,9 +53,13 @@ function NoGroupProfile() {
         }
 
         const groupDoc = querySnapshot.docs[0];
-        const groupRef = doc(firestore, "groups", groupDoc.id);
         const batch = writeBatch(firestore);
+        
         const userRef = doc(firestore, "users", currentUser.uid);
+        batch.update(userRef, {
+            groupId: groupDoc.id,
+            isAdmin: false,
+        });
 
         const memberRef = doc(firestore, `groups/${groupDoc.id}/members`, currentUser.uid);
         batch.set(memberRef, {
@@ -64,10 +68,6 @@ function NoGroupProfile() {
             joinedAt: serverTimestamp(),
         });
         
-        batch.update(userRef, {
-            groupId: groupDoc.id,
-            isAdmin: false,
-        });
 
         await batch.commit();
         toast({ title: "Success", description: `You have joined the group "${groupDoc.data().groupName}"!` });
@@ -495,3 +495,5 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+    

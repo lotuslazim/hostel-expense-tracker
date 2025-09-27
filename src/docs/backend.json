@@ -1,0 +1,360 @@
+
+{
+  "entities": {
+    "Group": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Group",
+      "type": "object",
+      "description": "Represents a group or flat within the NourishTrack application, enabling shared meal and expense tracking.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the group entity."
+        },
+        "groupName": {
+          "type": "string",
+          "description": "The name of the group or flat."
+        },
+        "invitationCode": {
+          "type": "string",
+          "description": "Unique code used for users to join the group."
+        },
+        "adminId": {
+          "type": "string",
+          "description": "Reference to User who is the administrator of the group. (Relationship: User 1:N Group)"
+        }
+      },
+      "required": [
+        "id",
+        "groupName",
+        "invitationCode",
+        "adminId"
+      ]
+    },
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user within the NourishTrack application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user entity."
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address.",
+          "format": "email"
+        },
+        "groupId": {
+          "type": "string",
+          "description": "Reference to Group that the user belongs to.  If null, the user does not belong to a group. (Relationship: Group 1:N User)"
+        },
+        "isAdmin": {
+          "type": "boolean",
+          "description": "Indicates whether the user is an administrator of a group."
+        }
+      },
+      "required": [
+        "id",
+        "email"
+      ]
+    },
+    "Member": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Member",
+      "type": "object",
+      "description": "Represents a member within a group, containing their email and role.",
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "The member's email address.",
+          "format": "email"
+        },
+        "role": {
+          "type": "string",
+          "description": "The role of the member within the group (e.g., 'admin', 'member')."
+        },
+        "joinedAt": {
+          "type": "string",
+          "description": "The timestamp when the member joined the group.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "email",
+        "role"
+      ]
+    },
+    "MealLog": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "MealLog",
+      "type": "object",
+      "description": "Represents a meal log entry for a user, including details about the meal and its associated date.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the meal log entry."
+        },
+        "groupId": {
+          "type": "string",
+          "description": "Reference to Group that the meal log belongs to. (Relationship: Group 1:N MealLog)"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User who created the meal log. (Relationship: User 1:N MealLog)"
+        },
+        "mealType": {
+          "type": "string",
+          "description": "The type of meal (e.g., breakfast, lunch, dinner, snack)."
+        },
+        "date": {
+          "type": "string",
+          "description": "The date when the meal was consumed.",
+          "format": "date-time"
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the meal."
+        }
+      },
+      "required": [
+        "id",
+        "groupId",
+        "userId",
+        "mealType",
+        "date"
+      ]
+    },
+    "Expense": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Expense",
+      "type": "object",
+      "description": "Represents an expense incurred by a user, including details about the amount, date, category, and an optional receipt photo.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the expense entry."
+        },
+        "groupId": {
+          "type": "string",
+          "description": "Reference to Group that the expense belongs to. (Relationship: Group 1:N Expense)"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User who incurred the expense. (Relationship: User 1:N Expense)"
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the expense."
+        },
+        "amount": {
+          "type": "number",
+          "description": "The amount of the expense."
+        },
+        "date": {
+          "type": "string",
+          "description": "The date when the expense was incurred.",
+          "format": "date-time"
+        },
+        "category": {
+          "type": "string",
+          "description": "The category of the expense."
+        },
+        "receiptPhotoUrl": {
+          "type": "string",
+          "description": "URL of the receipt photo (optional).",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "id",
+        "groupId",
+        "userId",
+        "description",
+        "amount",
+        "date",
+        "category"
+      ]
+    },
+    "PurchasedItem": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "PurchasedItem",
+      "type": "object",
+      "description": "Represents a purchased item, including details about the quantity, unit, and cost.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the purchased item."
+        },
+        "groupId": {
+          "type": "string",
+          "description": "Reference to Group that the purchased item belongs to. (Relationship: Group 1:N PurchasedItem)"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User who purchased the item. (Relationship: User 1:N PurchasedItem)"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the purchased item."
+        },
+        "quantity": {
+          "type": "number",
+          "description": "The quantity of the purchased item."
+        },
+        "unit": {
+          "type": "string",
+          "description": "The unit of measurement for the purchased item."
+        },
+        "cost": {
+          "type": "number",
+          "description": "The cost of the purchased item."
+        },
+        "date": {
+          "type": "string",
+          "description": "The date the item was purchased.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "groupId",
+        "userId",
+        "name",
+        "quantity",
+        "unit",
+        "cost",
+        "date"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profile information. Includes 'groupId' to indicate group membership, which is used for authorization. Includes 'isAdmin' boolean for UI purposes.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/groups/{groupId}",
+        "definition": {
+          "entityName": "Group",
+          "schema": {
+            "$ref": "#/backend/entities/Group"
+          },
+          "description": "Stores group information, including group name, invitation code, and admin UID.",
+          "params": [
+            {
+              "name": "groupId",
+              "description": "The unique identifier for the group."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/groups/{groupId}/members/{memberId}",
+        "definition": {
+          "entityName": "Member",
+          "schema": {
+            "$ref": "#/backend/entities/Member"
+          },
+          "rules": {
+            "list": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
+          },
+          "description": "Stores basic information about each member of a group. The document ID is the user's UID. This allows secure listing of group members.",
+          "params": [
+            {
+              "name": "groupId",
+              "description": "The unique identifier for the group."
+            },
+            {
+              "name": "memberId",
+              "description": "The unique identifier for the member (user UID)."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/groups/{groupId}/meals/{mealId}",
+        "definition": {
+          "entityName": "MealLog",
+          "schema": {
+            "$ref": "#/backend/entities/MealLog"
+          },
+          "description": "Stores meal log entries for each group. Includes denormalized 'groupId' and 'userId' for authorization independence.",
+          "params": [
+            {
+              "name": "groupId",
+              "description": "The unique identifier for the group."
+            },
+            {
+              "name": "mealId",
+              "description": "The unique identifier for the meal log entry."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/groups/{groupId}/expenses/{expenseId}",
+        "definition": {
+          "entityName": "Expense",
+          "schema": {
+            "$ref": "#/backend/entities/Expense"
+          },
+          "description": "Stores expense entries for each group. Includes denormalized 'groupId' and 'userId' for authorization independence.",
+          "params": [
+            {
+              "name": "groupId",
+              "description": "The unique identifier for the group."
+            },
+            {
+              "name": "expenseId",
+              "description": "The unique identifier for the expense entry."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/groups/{groupId}/purchasedItems/{itemId}",
+        "definition": {
+          "entityName": "PurchasedItem",
+          "schema": {
+            "$ref": "#/backend/entities/PurchasedItem"
+          },
+          "description": "Stores purchased item entries for each group. Includes denormalized 'groupId' and 'userId' for authorization independence.",
+          "params": [
+            {
+              "name": "groupId",
+              "description": "The unique identifier for the group."
+            },
+            {
+              "name": "itemId",
+              "description": "The unique identifier for the purchased item entry."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed for a secure, multi-tenant application where users are organized into groups. Authorization is paramount, and the structure is built to support Query-based Access Protocols (QAPs) by denormalizing key information.\n\nKey Authorization & Data Modeling Decisions:\n\n1.  **/users/{userId}**: This is the primary source of truth for a user's profile information, including their `groupId`.\n\n2.  **/groups/{groupId}**: This collection stores group-level information. The `memberIds` array has been removed to simplify the data model and prevent data consistency issues. Group membership is determined by either the `groupId` field in the user's document or by existence in the `members` subcollection.\n\n3.  **/groups/{groupId}/members/{memberId}**: This subcollection is used to securely list the members of a group. The crucial security rule `allow list: if exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid));` ensures that a user can only list members if they themselves are a member of that group. This prevents users from listing members of any arbitrary group and is a secure, efficient pattern for list operations.\n\n4.  **Group Subcollections (`meals`, `expenses`, `purchasedItems`)**: All group-specific content remains in subcollections under the relevant group document. Security rules for these paths will always verify that the user is part of the parent `groupId` before allowing any read or write operation, ensuring data is only accessible to group members. This check is done by referencing the requesting user's document in the `/users` collection."
+  }
+}
+
+    
