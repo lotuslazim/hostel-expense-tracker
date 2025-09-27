@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Trash2, ShieldCheck, User, Copy, Utensils, ShoppingCart, Home, LogIn } from "lucide-react";
+import { PlusCircle, Trash2, ShieldCheck, User, Copy, Utensils, ShoppingCart, Home, LogIn, Loader2 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -13,9 +13,10 @@ import { Label } from "@/components/ui/label";
 import { useState, useMemo } from "react";
 import placeholderImages from "@/lib/placeholder-images.json";
 import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/firebase";
-import { doc, collection, query, where } from "firebase/firestore";
+import { doc, collection, query, where, writeBatch, getDocs, arrayUnion, serverTimestamp } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
 
 // In a real app, this would be fetched or calculated
 const MOCK_MEMBER_DETAILS = {
@@ -27,6 +28,95 @@ const MOCK_MEMBER_DETAILS = {
 type Member = { id: string; name: string; email: string; role: string; avatarId: string; };
 
 function NewUserAdminPanel() {
+  const { firestore } = useFirebase();
+  const { user: currentUser } = useUser();
+  const { toast } = useToast();
+  const [groupName, setGroupName] = useState("");
+  const [inviteCode, setInviteCode] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
+  const [isJoining, setIsJoining] = useState(false);
+
+  const generateInviteCode = () => {
+    return `${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
+  };
+  
+  const handleCreateGroup = async () => {
+    if (!currentUser || !groupName) {
+        toast({ variant: "destructive", title: "Error", description: "Group name is required." });
+        return;
+    }
+    setIsCreating(true);
+    
+    try {
+      const batch = writeBatch(firestore);
+      const newGroupRef = doc(collection(firestore, "groups"));
+      const userRef = doc(firestore, "users", currentUser.uid);
+
+      batch.set(newGroupRef, {
+        groupName,
+        invitationCode: generateInviteCode(),
+        adminId: currentUser.uid,
+        memberIds: [currentUser.uid],
+        createdAt: serverTimestamp(),
+      });
+      
+      batch.update(userRef, {
+        groupId: newGroupRef.id,
+        isAdmin: true,
+      });
+
+      await batch.commit();
+      toast({ title: "Success", description: `Group "${groupName}" created successfully!` });
+
+    } catch (error) {
+        console.error("Error creating group:", error);
+        toast({ variant: "destructive", title: "Error", description: "Could not create group. Please try again." });
+    } finally {
+        setIsCreating(false);
+    }
+  };
+
+  const handleJoinGroup = async () => {
+    if (!currentUser || !inviteCode) {
+        toast({ variant: "destructive", title: "Error", description: "Invitation code is required." });
+        return;
+    }
+    setIsJoining(true);
+
+    try {
+        const groupsQuery = query(collection(firestore, "groups"), where("invitationCode", "==", inviteCode));
+        const querySnapshot = await getDocs(groupsQuery);
+        
+        if (querySnapshot.empty) {
+            toast({ variant: "destructive", title: "Not Found", description: "No group found with that invitation code." });
+            setIsJoining(false);
+            return;
+        }
+
+        const groupDoc = querySnapshot.docs[0];
+        const batch = writeBatch(firestore);
+
+        batch.update(groupDoc.ref, {
+            memberIds: arrayUnion(currentUser.uid)
+        });
+
+        const userRef = doc(firestore, "users", currentUser.uid);
+        batch.update(userRef, {
+            groupId: groupDoc.id
+        });
+
+        await batch.commit();
+        toast({ title: "Success", description: `You have joined the group "${groupDoc.data().groupName}"!` });
+
+    } catch (error) {
+        console.error("Error joining group:", error);
+        toast({ variant: "destructive", title: "Error", description: "Could not join group. Please try again." });
+    } finally {
+        setIsJoining(false);
+    }
+  };
+
+
   return (
     <div>
         <div className="mb-8">
@@ -44,9 +134,12 @@ function NewUserAdminPanel() {
                 <CardContent className="space-y-4">
                      <div className="space-y-2">
                         <Label htmlFor="groupName">Group Name</Label>
-                        <Input id="groupName" placeholder="e.g., The Avengers Mess" />
+                        <Input id="groupName" placeholder="e.g., The Avengers Mess" value={groupName} onChange={(e) => setGroupName(e.target.value)} disabled={isCreating}/>
                     </div>
-                    <Button className="w-full">Create Group</Button>
+                    <Button className="w-full" onClick={handleCreateGroup} disabled={isCreating || !groupName}>
+                        {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+                        Create Group
+                    </Button>
                 </CardContent>
             </Card>
             <Card>
@@ -57,9 +150,12 @@ function NewUserAdminPanel() {
                 <CardContent className="space-y-4">
                     <div className="space-y-2">
                         <Label htmlFor="inviteCode">Invitation Code</Label>
-                        <Input id="inviteCode" placeholder="e.g., AVNG-4321" />
+                        <Input id="inviteCode" placeholder="e.g., AVNG-4321" value={inviteCode} onChange={(e) => setInviteCode(e.target.value)} disabled={isJoining}/>
                     </div>
-                    <Button className="w-full">Join Group</Button>
+                    <Button className="w-full" onClick={handleJoinGroup} disabled={isJoining || !inviteCode}>
+                        {isJoining && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+                        Join Group
+                    </Button>
                 </CardContent>
             </Card>
         </div>
