@@ -25,11 +25,6 @@ export type GetMemberDailyDataInput = z.infer<
   typeof GetMemberDailyDataInputSchema
 >;
 
-async function getDocsData(q: any) {
-    const querySnapshot = await q.get();
-    return querySnapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
-}
-
 const getMemberDailyDataFlow = ai.defineFlow(
   {
     name: 'getMemberDailyDataFlow',
@@ -58,10 +53,14 @@ const getMemberDailyDataFlow = ai.defineFlow(
       .where('date', '>=', monthStart)
       .where('date', '<=', monthEnd);
 
-    const [meals, expenses] = await Promise.all([
-        getDocsData(mealsQuery),
-        getDocsData(expensesQuery),
+    const [mealsSnapshot, expensesSnapshot] = await Promise.all([
+        mealsQuery.get(),
+        expensesQuery.get(),
     ]);
+    
+    const meals = mealsSnapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+    const expenses = expensesSnapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+
 
     // Process data for each day of the month
     const dailyData = daysInMonth.map(day => {

@@ -25,12 +25,6 @@ export type GetMonthlyGroupDataInput = z.infer<
   typeof GetMonthlyGroupDataInputSchema
 >;
 
-async function getDocsData(q: any) {
-    const querySnapshot = await q.get();
-    return querySnapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
-}
-
-
 const getMonthlyGroupDataFlow = ai.defineFlow(
   {
     name: 'getMonthlyGroupDataFlow',
@@ -50,7 +44,8 @@ const getMonthlyGroupDataFlow = ai.defineFlow(
 
     // 1. Get all members of the group
     const usersQuery = firestore.collection('users').where('groupId', '==', groupId);
-    const users = await getDocsData(usersQuery);
+    const usersSnapshot = await usersQuery.get();
+    const users = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     const memberIds = users.map(u => u.id);
     
     if (memberIds.length === 0) {
@@ -66,10 +61,13 @@ const getMonthlyGroupDataFlow = ai.defineFlow(
       .where('date', '>=', monthStart)
       .where('date', '<=', monthEnd);
 
-    const [meals, expenses] = await Promise.all([
-        getDocsData(mealsQuery),
-        getDocsData(expensesQuery),
+    const [mealsSnapshot, expensesSnapshot] = await Promise.all([
+        mealsQuery.get(),
+        expensesQuery.get(),
     ]);
+
+    const meals = mealsSnapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+    const expenses = expensesSnapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
 
     // 3. Process data for each member
     const membersData = users.map(user => {
