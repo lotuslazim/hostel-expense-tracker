@@ -31,10 +31,10 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
               <h1 className="text-4xl md:text-5xl font-bold tracking-tighter font-headline">
-                Hey, Gorom Chele
+                BachelorBite’s here! 🍽
               </h1>
               <p className="text-lg text-muted-foreground">
-                Welcome to the upgrade! Track your meals, stack your stats, and stay on top—smooth, simple, done.
+                Mess life made simple—keep your meals sorted and your ex out of your business.
               </p>
               <Button size="lg" asChild>
                 <Link href="/signup">
@@ -59,7 +59,7 @@ export default function LandingPage() {
         </section>
       </main>
       <footer className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-muted-foreground text-sm">
-        <p>&copy; {new Date().getFullYear()} Meal Calculator. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} BachelorBite. All rights reserved.</p>
       </footer>
     </div>
   );

@@ -1,3 +1,4 @@
+
 import type {Metadata} from 'next';
 import { Toaster } from "@/components/ui/toaster";
 import './globals.css';
@@ -5,7 +6,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { I18nProvider } from '@/i18n/client-provider';
 
 export const metadata: Metadata = {
-  title: 'NourishTrack',
+  title: 'BachelorBite',
   description: 'Track your meals, expenses, and wellness journey.',
 };
 

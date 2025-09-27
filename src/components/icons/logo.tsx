@@ -6,7 +6,7 @@ export function Logo() {
     <Link
       href="/"
       className="flex items-center gap-2"
-      aria-label="Meal Calculator Home"
+      aria-label="BachelorBite Home"
     >
       <div className="w-10 h-10">
         <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -44,7 +44,7 @@ export function Logo() {
            <path d="M74 36C74 36 76 39 74 42" stroke="#4B352A" strokeWidth="1" strokeLinecap="round" />
         </svg>
       </div>
-      <span className="text-2xl font-bold font-headline text-foreground">Meal Calculator</span>
+      <span className="text-2xl font-bold font-headline text-foreground">BachelorBite</span>
     </Link>
   );
 }
