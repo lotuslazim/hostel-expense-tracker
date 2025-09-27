@@ -137,23 +137,11 @@ export default function DashboardPage() {
         <DateSwitcher currentDate={currentDate} setCurrentDate={setCurrentDate} />
       </div>
 
-      {groupId ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <MealLog meals={meals ?? []} currentDate={currentDate} />
-          <ExpenseLog expenses={expenses ?? []} currentDate={currentDate} />
-          <ItemLog items={items ?? []} currentDate={currentDate} />
-        </div>
-      ) : (
-        <Card className="mt-8 col-span-full">
-            <CardContent className="p-8 text-center">
-                <h2 className="text-xl font-semibold mb-2">Welcome to BachelorBite!</h2>
-                <p className="text-muted-foreground mb-4">To start logging your meals and expenses, you need to be part of a group.</p>
-                <Button asChild>
-                    <Link href="/admin">Create or Join a Group</Link>
-                </Button>
-            </CardContent>
-        </Card>
-      )}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <MealLog meals={meals ?? []} currentDate={currentDate} />
+        <ExpenseLog expenses={expenses ?? []} currentDate={currentDate} />
+        <ItemLog items={items ?? []} currentDate={currentDate} />
+      </div>
     </div>
   );
 }
