@@ -15,6 +15,7 @@ import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/
 import { doc, collection, query, where } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Meal, Expense, Item } from "@/lib/types";
+import Link from "next/link";
 
 function ProfileSkeleton() {
   return (
@@ -340,5 +341,7 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+    
 
     
