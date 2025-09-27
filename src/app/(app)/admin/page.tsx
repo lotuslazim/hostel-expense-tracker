@@ -307,7 +307,7 @@ export default function AdminPage() {
   
   const memberDetails = selectedMember ? MOCK_MEMBER_DETAILS[selectedMember.id as keyof typeof MOCK_MEMBER_DETAILS] : null;
 
-  const isLoading = isCurrentUserLoading || isCurrentUserDataLoading;
+  const isLoading = isCurrentUserDataLoading || isGroupLoading;
   
   const members = useMemo(() => {
     if (!membersData) return [];
@@ -355,7 +355,7 @@ export default function AdminPage() {
   }
 
   // If user is not in a group, show the new user panel
-  if (!groupId) {
+  if (!groupId || !groupData) {
     return <NewUserAdminPanel />;
   }
 
@@ -424,7 +424,7 @@ export default function AdminPage() {
                             className="font-mono h-12 text-lg"
                           />
                         </div>
-                        <Button size="icon" className="h-12 w-12" onClick={() => navigator.clipboard.writeText(groupData?.invitationCode)}>
+                        <Button size="icon" className="h-12 w-12" onClick={() => {if(groupData?.invitationCode) navigator.clipboard.writeText(groupData?.invitationCode)}}>
                           <span className="sr-only">Copy</span>
                           <Copy className="h-5 w-5" />
                         </Button>
@@ -439,7 +439,7 @@ export default function AdminPage() {
                       <AlertTriangle className="h-4 w-4" />
                       <AlertTitle>Error loading members</AlertTitle>
                       <AlertDescription>
-                        Could not load group members. Please try again.
+                        Could not load group members. Please make sure you have the correct permissions and try again.
                       </AlertDescription>
                     </Alert>
                    )}
@@ -844,5 +844,3 @@ export default function AdminPage() {
     </div>
   );
 }
-
-    
