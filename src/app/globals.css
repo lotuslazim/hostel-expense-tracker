@@ -5,7 +5,7 @@
 @layer base {
   :root {
     /* Light Mode */
-    --background: 47 62% 86%; /* #F0F2BD - Light Yellow */
+    --background: 98 30% 90%; /* #E4EEDD - Light warm green */
     --foreground: 20 26% 23%; /* #4B352A - Dark Brown */
     
     --card: 98 28% 78%; /* #B2CD9C - Soft Green */
