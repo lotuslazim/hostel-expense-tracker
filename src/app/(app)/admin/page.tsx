@@ -207,13 +207,14 @@ export default function AdminPage() {
     try {
       const batch = writeBatch(firestore);
 
-      // Find all users in the group
-      const usersInGroupQuery = query(collection(firestore, "users"), where("groupId", "==", groupId));
-      const usersSnapshot = await getDocs(usersInGroupQuery);
+      // 1. Get all member documents from the members subcollection (this is allowed by security rules)
+      const membersCollectionRef = collection(firestore, `groups/${groupId}/members`);
+      const membersSnapshot = await getDocs(membersCollectionRef);
       
-      // For each user, update their document to remove group association
-      usersSnapshot.forEach(userDoc => {
-        const userRef = doc(firestore, "users", userDoc.id);
+      // 2. For each member, update their main user document to remove group association
+      membersSnapshot.forEach(memberDoc => {
+        const userId = memberDoc.id; // The member document ID is the user's UID
+        const userRef = doc(firestore, "users", userId);
         batch.update(userRef, {
           groupId: null,
           isAdmin: false,
@@ -223,8 +224,11 @@ export default function AdminPage() {
       // Note: Deleting subcollections (members, meals, etc.) from the client is not recommended for security and scalability.
       // A Cloud Function triggered by the group document deletion is the robust way to handle this.
       // For this implementation, we will just delete the group document and reset user profiles.
+      
+      // 3. Delete the group document itself
       batch.delete(groupRef);
       
+      // 4. Commit all batched writes
       await batch.commit();
 
       toast({ title: "Group Deleted", description: "The group has been successfully deleted." });
