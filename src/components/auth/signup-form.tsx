@@ -96,7 +96,7 @@ export function SignupForm() {
   return (
     <AuthCard
       title="Create an Account"
-      description="Start your wellness journey today"
+      description="Join BachelorBite and simplify your mess life."
       footerText="Already have an account?"
       footerLinkText="Log In"
       footerLinkHref="/login"
