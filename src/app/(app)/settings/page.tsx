@@ -148,7 +148,7 @@ export default function SettingsPage() {
     } finally {
         setIsChangingPassword(false);
     }
-  }
+  };
 
 
   const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || isGroupLoading;
@@ -166,7 +166,7 @@ export default function SettingsPage() {
           <Skeleton className="h-14 w-full" />
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -532,3 +532,5 @@ export default function SettingsPage() {
     </div>
   );
 }
+
+    
