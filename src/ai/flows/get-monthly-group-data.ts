@@ -16,6 +16,11 @@ import { initializeApp, getApps } from 'firebase-admin/app';
 import { startOfMonth, endOfMonth, getYear, parseISO } from 'date-fns';
 import { MonthlyGroupData, MonthlyGroupDataSchema } from '../schemas';
 
+if (!getApps().length) {
+  initializeApp();
+}
+const firestore = getFirestore();
+
 const GetMonthlyGroupDataInputSchema = z.object({
   groupId: z.string(),
   date: z.string().describe('The date for which to fetch the data (ISO string format).'),
@@ -31,11 +36,6 @@ const getMonthlyGroupDataFlow = ai.defineFlow(
     outputSchema: MonthlyGroupDataSchema,
   },
   async ({ groupId, date }) => {
-    if (!getApps().length) {
-      initializeApp();
-    }
-    const firestore = getFirestore();
-
     const targetDate = parseISO(date);
     const monthStart = startOfMonth(targetDate);
     const monthEnd = endOfMonth(targetDate);
