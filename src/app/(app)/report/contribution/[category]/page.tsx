@@ -55,9 +55,7 @@ function DataError() {
   )
 }
 
-export default function ContributionPage() {
-    const params = useParams();
-    const category = params.category as string;
+export default function ContributionPage({ params: { category } }: { params: { category: string } }) {
     const searchParams = useSearchParams();
     const monthParam = searchParams.get('month');
     
@@ -189,3 +187,5 @@ export default function ContributionPage() {
     </div>
   );
 }
+
+    

@@ -81,8 +81,7 @@ function DataError() {
 }
 
 
-export default function MemberReportPage({ params }: { params: { memberId: string } }) {
-    const memberId = params.memberId;
+export default function MemberReportPage({ params: { memberId } }: { params: { memberId: string } }) {
     const searchParams = useSearchParams();
     const monthParam = searchParams.get('month');
     
@@ -348,5 +347,7 @@ export default function MemberReportPage({ params }: { params: { memberId: strin
     </div>
   );
 }
+
+    
 
     
