@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useSearchParams, useRouter, useParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { parseISO, startOfMonth, endOfMonth, format } from "date-fns";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
@@ -51,8 +51,7 @@ function DataError() {
 
 
 export default function ContributionPage({ params }: { params: { category: string } }) {
-    const { category: encodedCategory } = params;
-    const category = decodeURIComponent(encodedCategory);
+    const category = decodeURIComponent(params.category);
     const searchParams = useSearchParams();
     const router = useRouter();
     const monthParam = searchParams.get('month');
