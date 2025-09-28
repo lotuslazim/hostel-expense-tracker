@@ -1,4 +1,5 @@
 
+
 export type MealType = 'lunch' | 'dinner';
 
 export interface Meal {
@@ -20,7 +21,7 @@ export interface Expense {
   amount: number;
   category: ExpenseCategory;
   date: Date;
-  receiptUrl?: string;
+  receiptPhotoUrl?: string;
   userId: string;
   groupId: string;
   userName?: string;

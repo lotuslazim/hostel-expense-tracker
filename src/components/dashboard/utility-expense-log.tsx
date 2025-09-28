@@ -4,16 +4,18 @@
 import type { Expense, ExpenseCategory } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Zap, Flame, Receipt, User, Loader2 } from "lucide-react";
+import { PlusCircle, Zap, Flame, Receipt, User, Loader2, Camera, Upload, Image as ImageIcon } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useFirebase, useUser, useDoc, useMemoFirebase } from "@/firebase";
 import { doc, collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import Image from "next/image";
 
 const categoryIcons: Record<ExpenseCategory, React.ReactNode> = {
   Food: <Receipt className="h-5 w-5" />,
@@ -25,11 +27,135 @@ const categoryIcons: Record<ExpenseCategory, React.ReactNode> = {
 const availableCategories: ExpenseCategory[] = ['Electricity', 'Gas', 'Other'];
 
 
+function ReceiptUploadDialog({ receipt, setReceipt }: { receipt: string | null, setReceipt: (url: string | null) => void }) {
+    const { toast } = useToast();
+    const [open, setOpen] = useState(false);
+    const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    
+    useEffect(() => {
+        if (open) {
+            const getCameraPermission = async () => {
+                // Only ask for permission if not already determined
+                if (hasCameraPermission === null) {
+                    try {
+                        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                        setHasCameraPermission(true);
+                        if (videoRef.current) {
+                            videoRef.current.srcObject = stream;
+                        }
+                    } catch (error) {
+                        console.error('Error accessing camera:', error);
+                        setHasCameraPermission(false);
+                        toast({
+                            variant: 'destructive',
+                            title: 'Camera Access Denied',
+                            description: 'Please enable camera permissions in your browser settings to use this feature.',
+                        });
+                    }
+                } else if(hasCameraPermission && videoRef.current && !videoRef.current.srcObject) {
+                    // Re-acquire stream if dialog was closed and re-opened
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                     if (videoRef.current) {
+                        videoRef.current.srcObject = stream;
+                    }
+                }
+            };
+            getCameraPermission();
+        } else {
+             // Stop camera stream when dialog closes
+            if (videoRef.current && videoRef.current.srcObject) {
+                const stream = videoRef.current.srcObject as MediaStream;
+                stream.getTracks().forEach(track => track.stop());
+                videoRef.current.srcObject = null;
+            }
+        }
+    }, [open, hasCameraPermission, toast]);
+
+    const handleCapture = () => {
+        if (videoRef.current && canvasRef.current) {
+            const context = canvasRef.current.getContext('2d');
+            if (context) {
+                const video = videoRef.current;
+                canvasRef.current.width = video.videoWidth;
+                canvasRef.current.height = video.videoHeight;
+                context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+                const dataUrl = canvasRef.current.toDataURL('image/jpeg');
+                setReceipt(dataUrl);
+                setOpen(false);
+            }
+        }
+    };
+    
+    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                setReceipt(e.target?.result as string);
+                setOpen(false);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+                <Button variant="outline">
+                    <Camera className="mr-2 h-4 w-4" />
+                    {receipt ? 'Change Receipt' : 'Add Receipt'}
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Upload Receipt</DialogTitle>
+                    <DialogDescription>Take a photo or upload an image of your receipt.</DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                     <div className="bg-muted rounded-md p-4">
+                        <video ref={videoRef} className="w-full aspect-video rounded-md bg-black" autoPlay muted playsInline />
+                        <canvas ref={canvasRef} className="hidden" />
+                         {hasCameraPermission === false && (
+                            <Alert variant="destructive" className="mt-2">
+                                <AlertTitle>Camera Access Required</AlertTitle>
+                                <AlertDescription>Please allow camera access to use this feature.</AlertDescription>
+                            </Alert>
+                        )}
+                    </div>
+                    <Button className="w-full" onClick={handleCapture} disabled={!hasCameraPermission}>
+                        <Camera className="mr-2 h-4 w-4" />
+                        Take Photo
+                    </Button>
+                     <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                           <span className="w-full border-t" />
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase">
+                            <span className="bg-background px-2 text-muted-foreground">Or</span>
+                        </div>
+                    </div>
+                    <Button variant="secondary" className="w-full" asChild>
+                        <label htmlFor="file-upload">
+                            <Upload className="mr-2 h-4 w-4" />
+                            Upload from device
+                            <input id="file-upload" type="file" accept="image/*" className="sr-only" onChange={handleFileUpload} />
+                        </label>
+                    </Button>
+                </div>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
+
 export function UtilityExpenseLog({ expenses, currentDate }: { expenses: Expense[]; currentDate: Date }) {
   const [open, setOpen] = useState(false);
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState<ExpenseCategory | "">("");
+  const [receipt, setReceipt] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
@@ -43,6 +169,7 @@ export function UtilityExpenseLog({ expenses, currentDate }: { expenses: Expense
     setDescription("");
     setAmount("");
     setCategory("");
+    setReceipt(null);
   };
 
   const handleSaveExpense = async () => {
@@ -60,6 +187,7 @@ export function UtilityExpenseLog({ expenses, currentDate }: { expenses: Expense
       amount: parseFloat(amount),
       category,
       date: currentDate,
+      receiptPhotoUrl: receipt, // This will be null or a data URL
       createdAt: serverTimestamp(),
     };
 
@@ -116,6 +244,19 @@ export function UtilityExpenseLog({ expenses, currentDate }: { expenses: Expense
               <div className="space-y-2">
                 <Label htmlFor="amount">Amount</Label>
                 <Input id="amount" type="number" placeholder="e.g., 1200.00" value={amount} onChange={e => setAmount(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Receipt (Optional)</Label>
+                <div className="flex gap-2">
+                    <div className="w-full flex items-center gap-2 p-2 border rounded-md bg-muted">
+                        <ImageIcon className="h-5 w-5 text-muted-foreground"/>
+                        <span className="text-sm text-muted-foreground truncate">
+                           {receipt ? 'Receipt captured' : 'No receipt added'}
+                        </span>
+                    </div>
+                    <ReceiptUploadDialog receipt={receipt} setReceipt={setReceipt}/>
+                </div>
+                {receipt && <Image src={receipt} alt="Receipt preview" width={100} height={100} className="rounded-md object-cover mt-2" />}
               </div>
               <Button className="w-full" onClick={handleSaveExpense} disabled={isSaving || !description || !amount || !category}>
                 {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
