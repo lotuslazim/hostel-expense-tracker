@@ -4,7 +4,7 @@
 import type { Meal, MealType } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, PlusCircle, Utensils, Sandwich, Soup, Cookie } from "lucide-react";
+import { CheckCircle2, PlusCircle, Sandwich, Soup } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,18 +14,16 @@ import { doc, collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 
-const mealTypes: MealType[] = ['breakfast', 'lunch', 'dinner', 'snack'];
+const mealTypes: MealType[] = ['lunch', 'dinner'];
 
 const mealIcons: Record<MealType, React.ReactNode> = {
-  breakfast: <Utensils className="h-6 w-6 text-muted-foreground" />,
   lunch: <Sandwich className="h-6 w-6 text-muted-foreground" />,
   dinner: <Soup className="h-6 w-6 text-muted-foreground" />,
-  snack: <Cookie className="h-6 w-6 text-muted-foreground" />,
 };
 
 function LogMealDialog({ type, onMealLogged, currentDate }: { type: MealType; onMealLogged: () => void; currentDate: Date }) {
     const [open, setOpen] = useState(false);
-    const [description, setDescription] = useState("");
+    const [mealNumber, setMealNumber] = useState("1");
     const [isSaving, setIsSaving] = useState(false);
     const { toast } = useToast();
     
@@ -36,8 +34,8 @@ function LogMealDialog({ type, onMealLogged, currentDate }: { type: MealType; on
     const groupId = currentUserData?.groupId;
 
     const handleSaveMeal = async () => {
-        if (description.length === 0 || !groupId || !currentUser) {
-            toast({ variant: "destructive", title: "Error", description: "Could not save meal. Missing information." });
+        if (parseInt(mealNumber) <= 0 || !groupId || !currentUser) {
+            toast({ variant: "destructive", title: "Error", description: "Meal number must be greater than zero." });
             return;
         }
         setIsSaving(true);
@@ -47,7 +45,8 @@ function LogMealDialog({ type, onMealLogged, currentDate }: { type: MealType; on
             userName: currentUser.displayName || currentUser.email?.split('@')[0],
             groupId,
             mealType: type,
-            description: description,
+            description: `${type.charAt(0).toUpperCase() + type.slice(1)} meal`, // Generic description
+            mealNumber: parseInt(mealNumber, 10),
             date: serverTimestamp(),
             createdAt: serverTimestamp(),
         };
@@ -60,7 +59,7 @@ function LogMealDialog({ type, onMealLogged, currentDate }: { type: MealType; on
             });
 
             onMealLogged();
-            setDescription("");
+            setMealNumber("1");
             setOpen(false);
             toast({ title: "Success", description: "Meal logged successfully." });
 
@@ -76,25 +75,27 @@ function LogMealDialog({ type, onMealLogged, currentDate }: { type: MealType; on
         <Dialog open={open} onOpenChange={setOpen}>
            <DialogTrigger asChild>
               <Button variant="ghost" size="sm">
-                <PlusCircle className="mr-2 h-4 w-4" /> Log Meal
+                <PlusCircle className="mr-2 h-4 w-4" /> Add Meal
               </Button>
            </DialogTrigger>
            <DialogContent>
               <DialogHeader>
                 <DialogTitle>Log {type}</DialogTitle>
-                <DialogDescription>What did you have for {type}?</DialogDescription>
+                <DialogDescription>How many meals for {type}?</DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
                  <div className="space-y-2">
-                   <Label htmlFor={`description-${type}`}>Description</Label>
+                   <Label htmlFor={`meal-number-${type}`}>Number of Meals</Label>
                    <Input 
-                        id={`description-${type}`}
-                        placeholder="e.g., Rice, Dal, Chicken Curry"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
+                        id={`meal-number-${type}`}
+                        type="number"
+                        min="1"
+                        placeholder="e.g., 1"
+                        value={mealNumber}
+                        onChange={(e) => setMealNumber(e.target.value)}
                     />
                 </div>
-                <Button className="w-full" onClick={handleSaveMeal} disabled={isSaving || description.length === 0}>
+                <Button className="w-full" onClick={handleSaveMeal} disabled={isSaving || parseInt(mealNumber) <= 0}>
                     {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Save Meal
                 </Button>
@@ -113,7 +114,7 @@ export function MealLog({ meals, currentDate }: { meals: Meal[], currentDate: Da
     <Card>
       <CardHeader>
         <CardTitle>Daily Meal Log</CardTitle>
-        <CardDescription>Log your meals to track your nutrition.</CardDescription>
+        <CardDescription>Log your meals for today.</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-6">
         {mealTypes.map((type) => {
@@ -125,7 +126,7 @@ export function MealLog({ meals, currentDate }: { meals: Meal[], currentDate: Da
                 <div>
                   <h3 className="font-semibold capitalize">{type}</h3>
                   {loggedMeal ? (
-                    <p className="text-sm text-muted-foreground">{loggedMeal.description}</p>
+                    <p className="text-sm text-muted-foreground">{loggedMeal.mealNumber} {loggedMeal.mealNumber > 1 ? 'meals' : 'meal'} logged</p>
                   ) : (
                     <p className="text-sm text-muted-foreground">Not logged yet</p>
                   )}

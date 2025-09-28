@@ -1,17 +1,18 @@
 
-export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
+export type MealType = 'lunch' | 'dinner';
 
 export interface Meal {
   id: string;
   mealType: MealType;
   description: string;
+  mealNumber: number;
   date: Date;
   userId: string;
   groupId: string;
   userName?: string;
 }
 
-export type ExpenseCategory = 'Food' | 'Electricity' | 'Gas' | 'Other';
+export type ExpenseCategory = 'Other';
 
 export interface Expense {
   id: string;

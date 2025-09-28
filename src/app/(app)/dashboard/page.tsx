@@ -11,11 +11,8 @@ import type { Meal, Expense, PurchasedItem } from "@/lib/types";
 import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/firebase";
 import { doc, collection, query, where } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { ItemLog } from "@/components/dashboard/item-log";
 import { WelcomeCard } from "@/components/app/welcome-card";
+import { ItemLog } from "@/components/dashboard/item-log";
 
 function DashboardSkeleton() {
   return (
@@ -118,10 +115,10 @@ export default function DashboardPage() {
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight font-headline">
-            Daily Tracker
+            Daily Meal Dashboard
           </h1>
           <p className="text-muted-foreground">
-            Log your meals and expenses for{" "}
+            Log your meals and track expenses for{" "}
             {format(currentDate, "MMMM d, yyyy")}.
           </p>
         </div>

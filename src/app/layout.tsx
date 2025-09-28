@@ -6,8 +6,8 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { I18nProvider } from '@/i18n/client-provider';
 
 export const metadata: Metadata = {
-  title: 'NourishTrack',
-  description: 'Shared living, simplified. Track meals, expenses, and groceries with your flatmates.',
+  title: 'BachelorBite',
+  description: 'Shared living, simplified. Track meals and expenses with your flatmates.',
 };
 
 export default function RootLayout({
