@@ -79,7 +79,7 @@ export default function ContributionPage({ params }: { params: Promise<{ categor
     );
 
     const expensesQuery = useMemo(() =>
-        groupId ? query(
+        (groupId && category) ? query(
             collection(firestore, `groups/${groupId}/expenses`),
             where("date", ">=", monthDateRange.start),
             where("date", "<=", monthDateRange.end),
@@ -91,11 +91,11 @@ export default function ContributionPage({ params }: { params: Promise<{ categor
     const { data: membersData, isLoading: areMembersLoading, error: membersError } = useCollection(membersQuery);
     const { data: expensesData, isLoading: areExpensesLoading, error: expensesError } = useCollection<Expense>(expensesQuery);
 
-    const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || areMembersLoading || areExpensesLoading;
+    const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || (!!groupId && (areMembersLoading || areExpensesLoading));
     const hasError = currentUserDataError || membersError || expensesError;
 
     const processedData = useMemo(() => {
-        if (!expensesData || !membersData) return null;
+        if (isLoading || !membersData || !expensesData) return null;
 
         const memberContributions = membersData.map(member => {
             const totalSpent = expensesData
@@ -110,9 +110,9 @@ export default function ContributionPage({ params }: { params: Promise<{ categor
 
         return { memberContributions };
 
-    }, [expensesData, membersData]);
+    }, [isLoading, expensesData, membersData]);
 
-    if (isLoading || !processedData) {
+    if (isLoading || (groupId && !processedData)) {
         return <PageSkeleton />;
     }
     
@@ -124,7 +124,7 @@ export default function ContributionPage({ params }: { params: Promise<{ categor
         return <DataError />;
     }
     
-    const { memberContributions } = processedData;
+    const { memberContributions } = processedData!;
     const pageTitle = `Monthly ${category} Expense Contribution`;
 
     return (

@@ -96,11 +96,11 @@ export default function FoodItemAnalysisPage() {
     const { data: membersData, isLoading: areMembersLoading, error: membersError } = useCollection(membersQuery);
     const { data: itemsData, isLoading: areItemsLoading, error: itemsError } = useCollection<PurchasedItem>(itemsQuery);
 
-    const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || areMembersLoading || areItemsLoading;
+    const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || (!!groupId && (areMembersLoading || areItemsLoading));
     const hasError = currentUserDataError || membersError || itemsError;
 
     const processedData = useMemo(() => {
-        if (!itemsData || !membersData) return null;
+        if (isLoading || !itemsData || !membersData) return null;
 
         const memberContributions = membersData.map(member => {
             const totalSpent = itemsData
@@ -128,9 +128,9 @@ export default function FoodItemAnalysisPage() {
             aggregatedItems: Object.values(aggregatedItems).sort((a, b) => b.totalCost - a.totalCost),
         };
 
-    }, [itemsData, membersData]);
+    }, [isLoading, itemsData, membersData]);
 
-    if (isLoading || !processedData) {
+    if (isLoading || (groupId && !processedData)) {
         return <PageSkeleton />;
     }
     
@@ -142,7 +142,7 @@ export default function FoodItemAnalysisPage() {
         return <DataError />;
     }
     
-    const { memberContributions, aggregatedItems } = processedData;
+    const { memberContributions, aggregatedItems } = processedData!;
 
     return (
         <div className="space-y-6">

@@ -109,22 +109,17 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
   const { data: mealsData, isLoading: areMealsLoading, error: mealsError } = useCollection<Meal>(mealsQuery);
   const { data: expensesData, isLoading: areExpensesLoading, error: expensesError } = useCollection<Expense>(expensesQuery);
 
-  const isAnyLoading = isCurrentUserLoading || isCurrentUserDataLoading || areMembersLoading || areMealsLoading || areExpensesLoading;
+  const isAnyLoading = isCurrentUserLoading || isCurrentUserDataLoading || (!!groupId && (areMembersLoading || areMealsLoading || areExpensesLoading));
   const hasAnyErrors = currentUserDataError || membersError || mealsError || expensesError;
   
-  const isDataComplete = useMemo(() => {
-    if (isAnyLoading || !groupId) return false;
-    return membersData !== undefined && mealsData !== undefined && expensesData !== undefined;
-  }, [isAnyLoading, groupId, membersData, mealsData, expensesData]);
-
   const processedData = useMemo(() => {
-    if (!isDataComplete || hasAnyErrors) {
+    if (isAnyLoading || hasAnyErrors || !membersData || !mealsData || !expensesData) {
       return null;
     }
 
-    const processedMembers = (membersData || []).map(member => {
-        const memberMeals = (mealsData || []).filter(m => m.userId === member.id);
-        const memberExpenses = (expensesData || []).filter(e => e.userId === member.id);
+    const processedMembers = membersData.map(member => {
+        const memberMeals = mealsData.filter(m => m.userId === member.id);
+        const memberExpenses = expensesData.filter(e => e.userId === member.id);
         
         const totalMeals = memberMeals.reduce((sum, meal) => sum + (meal.mealNumber || 1), 0);
         const foodExpenses = memberExpenses.filter(e => e.category === 'Food').reduce((sum, e) => sum + e.amount, 0);
@@ -157,9 +152,9 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
         memberCount,
         mealRate,
     }
-  }, [isDataComplete, hasAnyErrors, membersData, mealsData, expensesData]);
+  }, [isAnyLoading, hasAnyErrors, membersData, mealsData, expensesData]);
 
-  if (isAnyLoading || !isDataComplete || !processedData) {
+  if (isAnyLoading || (groupId && !processedData)) {
     return <SummarySkeleton />;
   }
 
@@ -175,7 +170,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
       totalGroupMeals,
       memberCount,
       mealRate,
-  } = processedData;
+  } = processedData!;
 
   const monthQueryParam = format(month, 'yyyy-MM-dd');
 
