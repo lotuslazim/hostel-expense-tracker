@@ -80,17 +80,17 @@ export default function FoodItemAnalysisPage() {
     }), [month]);
 
     const membersQuery = useMemo(() =>
-        groupId ? collection(firestore, `groups/${groupId}/members`) : null,
-        [firestore, groupId]
+        !isCurrentUserLoading && groupId ? collection(firestore, `groups/${groupId}/members`) : null,
+        [firestore, groupId, isCurrentUserLoading]
     );
 
     const itemsQuery = useMemo(() =>
-        groupId ? query(
+        !isCurrentUserLoading && groupId ? query(
             collection(firestore, `groups/${groupId}/purchasedItems`),
             where("date", ">=", monthDateRange.start),
             where("date", "<=", monthDateRange.end)
         ) : null,
-        [firestore, groupId, monthDateRange]
+        [firestore, groupId, monthDateRange, isCurrentUserLoading]
     );
 
     const { data: membersData, isLoading: areMembersLoading, error: membersError } = useCollection(membersQuery);

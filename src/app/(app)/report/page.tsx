@@ -59,7 +59,18 @@ export default function ReportPage() {
   const isLoading = isCurrentUserLoading || isCurrentUserDataLoading;
 
   if (isLoading) {
-    return <Skeleton className="w-full h-96" />
+    return (
+       <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+                <Skeleton className="h-9 w-80" />
+                <Skeleton className="h-4 w-64 mt-2" />
+            </div>
+            <Skeleton className="h-10 w-[330px]" />
+        </div>
+        <Skeleton className="w-full h-96" />
+       </div>
+    )
   }
 
   if (!groupId) {
