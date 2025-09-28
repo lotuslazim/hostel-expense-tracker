@@ -27,7 +27,7 @@ import { AlertTriangle, UserCog, Settings, Bell, Palette, Globe, LogOut, Trash2,
 import { ThemeSwitcher } from "@/components/settings/theme-switcher"
 import { useI18n } from "@/i18n/client-provider"
 import { Switch } from "@/components/ui/switch"
-import { useFirebase, useUser, useDoc, useMemoFirebase } from "@/firebase";
+import { useFirebase, useUser, useDoc } from "@/firebase";
 import { doc, deleteDoc, writeBatch } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
@@ -73,12 +73,12 @@ export default function SettingsPage() {
   const router = useRouter();
 
 
-  const currentUserRef = useMemoFirebase(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
+  const currentUserRef = React.useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
   const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
 
   const groupId = currentUserData?.groupId;
 
-  const groupRef = useMemoFirebase(() => groupId ? doc(firestore, "groups", groupId) : null, [firestore, groupId]);
+  const groupRef = React.useMemo(() => groupId ? doc(firestore, "groups", groupId) : null, [firestore, groupId]);
   const { data: groupData, isLoading: isGroupLoading } = useDoc(groupRef);
   
   const isGoogleUser = currentUser?.providerData.some(p => p.providerId === 'google.com');
@@ -480,7 +480,7 @@ export default function SettingsPage() {
                       </DialogHeader>
                        <div className="space-y-4 py-4">
                         <div className="space-y-2">
-                           <Label htmlFor="member-select">Select Member</Label>
+                           <Label htmlFor="member-select">Select Member</label>
                            <Select><SelectTrigger><SelectValue placeholder="Select a member" /></SelectTrigger><SelectContent></SelectContent></Select>
                         </div>
                         <Button className="w-full">Assign Admin</Button>

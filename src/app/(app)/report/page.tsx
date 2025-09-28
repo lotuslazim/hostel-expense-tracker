@@ -2,11 +2,11 @@
 "use client";
 
 import { MonthlySummary } from "@/components/report/monthly-summary";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams, useRouter } from 'next/navigation';
 import { startOfMonth, format, addMonths, subMonths, parseISO } from "date-fns";
 import { MonthSwitcher } from "@/components/report/month-switcher";
-import { useUser, useDoc, useMemoFirebase, useFirebase } from "@/firebase";
+import { useUser, useDoc, useFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
 import { WelcomeCard } from "@/components/app/welcome-card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -19,7 +19,6 @@ export default function ReportPage() {
   const getInitialDate = () => {
     if (monthParam) {
       try {
-        // Ensure the date is parsed correctly and normalized to the start of the month
         return startOfMonth(parseISO(monthParam));
       } catch (e) {
         console.warn("Invalid date in URL, defaulting to current month.", e);
@@ -33,7 +32,7 @@ export default function ReportPage() {
   const { firestore } = useFirebase();
   const { user: currentUser, isUserLoading: isCurrentUserLoading } = useUser();
 
-  const currentUserRef = useMemoFirebase(
+  const currentUserRef = useMemo(
     () => (currentUser ? doc(firestore, "users", currentUser.uid) : null),
     [firestore, currentUser]
   );
@@ -41,7 +40,6 @@ export default function ReportPage() {
     useDoc(currentUserRef);
   const groupId = currentUserData?.groupId;
   
-  // This effect synchronizes the state with the URL parameter on initial load or browser navigation
   useEffect(() => {
     const newDate = getInitialDate();
     if (newDate.getTime() !== currentDate.getTime()) {
@@ -55,7 +53,7 @@ export default function ReportPage() {
     const newDate = direction === "next" ? addMonths(currentDate, 1) : subMonths(currentDate, 1);
     setCurrentDate(newDate);
     const newUrl = `/report?month=${format(newDate, 'yyyy-MM')}`;
-    router.push(newUrl, { scroll: false }); // Update URL without full reload
+    router.push(newUrl, { scroll: false });
   };
 
   const isLoading = isCurrentUserLoading || isCurrentUserDataLoading;

@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useSearchParams } from "next/navigation";
 import { format, parseISO, startOfMonth, endOfMonth } from "date-fns";
 import { useMemo } from "react";
-import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/firebase";
+import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
 import { doc, collection, query, where } from "firebase/firestore";
 import type { PurchasedItem } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -70,7 +70,7 @@ export default function MonthlyItemsPage() {
     const { firestore } = useFirebase();
     const { user: currentUser, isUserLoading: isCurrentUserLoading } = useUser();
     
-    const currentUserRef = useMemoFirebase(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
+    const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
     const { data: currentUserData, isLoading: isCurrentUserDataLoading, error: currentUserDataError } = useDoc(currentUserRef);
     const groupId = currentUserData?.groupId;
 
@@ -82,12 +82,12 @@ export default function MonthlyItemsPage() {
         };
     }, [targetDate]);
 
-    const membersQuery = useMemoFirebase(() =>
+    const membersQuery = useMemo(() =>
         groupId ? collection(firestore, `groups/${groupId}/members`) : null,
         [firestore, groupId]
     );
 
-    const itemsQuery = useMemoFirebase(() =>
+    const itemsQuery = useMemo(() =>
         groupId ? query(
         collection(firestore, `groups/${groupId}/purchasedItems`),
         where("date", ">=", monthDateRange.start),
@@ -102,56 +102,55 @@ export default function MonthlyItemsPage() {
     const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || areMembersLoading || areItemsLoading;
     const hasError = currentUserDataError || membersError || itemsError;
 
-    if (isLoading) {
+    const processedData = useMemo(() => {
+        if (isLoading || hasError || !members || !items) {
+            return null;
+        }
+
+        const memberFoodExpenses = members.map(member => {
+            const foodExpense = items
+                .filter(item => item.userId === member.id)
+                .reduce((sum, item) => sum + item.cost, 0);
+
+            return {
+                id: member.id,
+                name: member.displayName || member.email.split('@')[0],
+                foodExpense,
+            };
+        });
+
+        const aggregatedItems = items.reduce((acc, item) => {
+            const key = `${item.name.trim().toLowerCase()}_${item.unit.trim().toLowerCase()}`;
+            if (!acc[key]) {
+                acc[key] = {
+                    name: item.name,
+                    unit: item.unit,
+                    totalQuantity: 0,
+                    totalCost: 0,
+                };
+            }
+            acc[key].totalQuantity += item.quantity;
+            acc[key].totalCost += item.cost;
+            return acc;
+        }, {} as Record<string, { name: string; unit: string; totalQuantity: number; totalCost: number; }>);
+        
+        const sortedAggregatedItems = Object.values(aggregatedItems).sort((a, b) => b.totalCost - a.totalCost);
+
+        return { memberFoodExpenses, sortedAggregatedItems };
+
+    }, [isLoading, hasError, members, items]);
+
+
+    if (isLoading || !processedData) {
         return <ItemsSkeleton />;
     }
 
     if (hasError) {
       return <DataError />;
     }
-
-    if (!currentUserData || !members || !items) {
-        return (
-            <Card>
-                <CardContent>
-                    <p className="text-center text-muted-foreground py-8">
-                        Data could not be fully loaded. This might be due to a temporary connection issue.
-                    </p>
-                </CardContent>
-            </Card>
-        );
-    }
-
+    
     const monthQueryParam = monthParam ? `?month=${monthParam}` : '';
-    
-    const memberFoodExpenses = members.map(member => {
-        const foodExpense = items
-            .filter(item => item.userId === member.id)
-            .reduce((sum, item) => sum + item.cost, 0);
-
-        return {
-            id: member.id,
-            name: member.displayName || member.email.split('@')[0],
-            foodExpense,
-        };
-    });
-    
-    const aggregatedItems = items.reduce((acc, item) => {
-        const key = `${item.name.trim().toLowerCase()}_${item.unit.trim().toLowerCase()}`;
-        if (!acc[key]) {
-            acc[key] = {
-                name: item.name,
-                unit: item.unit,
-                totalQuantity: 0,
-                totalCost: 0,
-            };
-        }
-        acc[key].totalQuantity += item.quantity;
-        acc[key].totalCost += item.cost;
-        return acc;
-    }, {} as Record<string, { name: string; unit: string; totalQuantity: number; totalCost: number; }>);
-    
-    const sortedAggregatedItems = Object.values(aggregatedItems).sort((a, b) => b.totalCost - a.totalCost);
+    const { memberFoodExpenses, sortedAggregatedItems } = processedData;
 
 
   return (

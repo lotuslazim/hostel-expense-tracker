@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState, useMemo } from "react";
 import placeholderImages from "@/lib/placeholder-images.json";
-import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/firebase";
+import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
 import { doc, collection, writeBatch, getDocs, query, where, deleteDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
@@ -109,15 +109,15 @@ export default function AdminPage() {
   const { user: currentUser } = useUser();
   const { toast } = useToast();
 
-  const currentUserRef = useMemoFirebase(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
+  const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
   const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
 
   const groupId = currentUserData?.groupId;
 
-  const groupRef = useMemoFirebase(() => groupId ? doc(firestore, "groups", groupId) : null, [firestore, groupId]);
+  const groupRef = useMemo(() => groupId ? doc(firestore, "groups", groupId) : null, [firestore, groupId]);
   const { data: groupData, isLoading: isGroupLoading } = useDoc(groupRef);
 
-  const membersQuery = useMemoFirebase(
+  const membersQuery = useMemo(
     () => (groupId ? collection(firestore, `groups/${groupId}/members`) : null),
     [firestore, groupId]
   );

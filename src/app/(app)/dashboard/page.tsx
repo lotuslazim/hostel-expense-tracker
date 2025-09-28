@@ -9,7 +9,7 @@ import { MealLog } from "@/components/dashboard/meal-log";
 import { AllExpenses } from "@/components/dashboard/all-expenses";
 import { ItemLog } from "@/components/dashboard/item-log";
 import type { Meal, Expense, PurchasedItem } from "@/lib/types";
-import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/firebase";
+import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
 import { doc, collection, query, where } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { WelcomeCard } from "@/components/app/welcome-card";
@@ -66,7 +66,7 @@ export default function DashboardPage() {
   const initialDate = dateParam ? parseISO(dateParam) : new Date();
   const [currentDate, setCurrentDate] = useState(initialDate);
 
-  const currentUserRef = useMemoFirebase(
+  const currentUserRef = useMemo(
     () => (currentUser ? doc(firestore, "users", currentUser.uid) : null),
     [firestore, currentUser]
   );
@@ -90,7 +90,7 @@ export default function DashboardPage() {
 
 
   // Queries for meals and expenses
-  const mealsQuery = useMemoFirebase(() =>
+  const mealsQuery = useMemo(() =>
     groupId
       ? query(
           collection(firestore, `groups/${groupId}/meals`),
@@ -101,7 +101,7 @@ export default function DashboardPage() {
     [firestore, groupId, dateRange]
   );
 
-  const expensesQuery = useMemoFirebase(() =>
+  const expensesQuery = useMemo(() =>
     groupId
       ? query(
           collection(firestore, `groups/${groupId}/expenses`),
@@ -112,7 +112,7 @@ export default function DashboardPage() {
     [firestore, groupId, dateRange]
   );
     
-  const itemsQuery = useMemoFirebase(() =>
+  const itemsQuery = useMemo(() =>
     groupId
       ? query(
           collection(firestore, `groups/${groupId}/purchasedItems`),
@@ -123,7 +123,7 @@ export default function DashboardPage() {
     [firestore, groupId, dateRange]
   );
   
-  const monthlyExpensesQuery = useMemoFirebase(() =>
+  const monthlyExpensesQuery = useMemo(() =>
     groupId
       ? query(
           collection(firestore, `groups/${groupId}/expenses`),

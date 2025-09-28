@@ -9,7 +9,7 @@ import { User, Home, Utensils, ShoppingCart, Pencil, Camera, LogIn, Loader2, Plu
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useFirebase, useUser, useDoc, useMemoFirebase } from "@/firebase";
+import { useFirebase, useUser, useDoc } from "@/firebase";
 import { doc, collection, query, where, writeBatch, getDocs, serverTimestamp, updateDoc } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
@@ -125,7 +125,7 @@ export default function ProfilePage() {
   const { user: currentUser, isUserLoading } = useUser();
   const { toast } = useToast();
   
-  const currentUserRef = useMemoFirebase(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
+  const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
   const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
 
   const [name, setName] = useState(currentUser?.displayName || "");
@@ -135,7 +135,7 @@ export default function ProfilePage() {
   const inGroup = !!groupId;
   const isAdmin = currentUserData?.isAdmin ?? false;
 
-  const groupRef = useMemoFirebase(() => groupId ? doc(firestore, "groups", groupId) : null, [firestore, groupId]);
+  const groupRef = useMemo(() => groupId ? doc(firestore, "groups", groupId) : null, [firestore, groupId]);
   const { data: groupData, isLoading: isGroupDataLoading } = useDoc(groupRef);
 
 

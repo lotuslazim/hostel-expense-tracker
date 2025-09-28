@@ -6,11 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Zap, Flame, Receipt, User, Loader2, Camera, Upload, Image as ImageIcon } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/componentsui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState, useRef, useEffect } from "react";
-import { useFirebase, useUser, useDoc, useMemoFirebase } from "@/firebase";
+import { useState, useRef, useEffect, useMemo } from "react";
+import { useFirebase, useUser, useDoc } from "@/firebase";
 import { doc, collection, addDoc, serverTimestamp, type Timestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -157,7 +157,7 @@ export function AllExpenses({ expenses, currentDate }: { expenses: Expense[]; cu
 
   const { firestore } = useFirebase();
   const { user: currentUser } = useUser();
-  const currentUserRef = useMemoFirebase(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
+  const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
   const { data: currentUserData } = useDoc(currentUserRef);
   const groupId = currentUserData?.groupId;
 
@@ -307,5 +307,3 @@ export function AllExpenses({ expenses, currentDate }: { expenses: Expense[]; cu
     </Card>
   );
 }
-
-    

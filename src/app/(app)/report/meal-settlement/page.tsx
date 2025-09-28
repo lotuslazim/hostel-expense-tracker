@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { format, parseISO, startOfMonth, endOfMonth } from "date-fns";
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
-import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/firebase";
+import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
 import { doc, collection, query, where } from "firebase/firestore";
 import type { Meal, Expense } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -68,7 +68,7 @@ export default function MealSettlementPage() {
     const { firestore } = useFirebase();
     const { user: currentUser, isUserLoading: isCurrentUserLoading } = useUser();
 
-    const currentUserRef = useMemoFirebase(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
+    const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
     const { data: currentUserData, isLoading: isCurrentUserDataLoading, error: currentUserDataError } = useDoc(currentUserRef);
     const groupId = currentUserData?.groupId;
 
@@ -80,12 +80,12 @@ export default function MealSettlementPage() {
     }, [targetDate]);
 
     // Queries
-    const membersQuery = useMemoFirebase(() =>
+    const membersQuery = useMemo(() =>
         groupId ? collection(firestore, `groups/${groupId}/members`) : null,
         [firestore, groupId]
     );
     
-    const mealsQuery = useMemoFirebase(() =>
+    const mealsQuery = useMemo(() =>
         groupId ? query(
         collection(firestore, `groups/${groupId}/meals`),
         where("date", ">=", monthDateRange.start),
@@ -94,7 +94,7 @@ export default function MealSettlementPage() {
         [firestore, groupId, monthDateRange]
     );
 
-    const expensesQuery = useMemoFirebase(() =>
+    const expensesQuery = useMemo(() =>
         groupId ? query(
         collection(firestore, `groups/${groupId}/expenses`),
         where("date", ">=", monthDateRange.start),

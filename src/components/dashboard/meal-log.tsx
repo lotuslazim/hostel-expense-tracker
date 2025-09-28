@@ -5,11 +5,11 @@ import type { Meal, MealType } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, PlusCircle, Sandwich, Soup } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/componentsui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
-import { useFirebase, useUser, useDoc, useMemoFirebase } from "@/firebase";
+import { useState, useMemo } from "react";
+import { useFirebase, useUser, useDoc } from "@/firebase";
 import { doc, collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
@@ -30,7 +30,7 @@ function LogMealDialog({ type, currentDate }: { type: MealType; currentDate: Dat
     
     const { firestore } = useFirebase();
     const { user: currentUser } = useUser();
-    const currentUserRef = useMemoFirebase(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
+    const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
     const { data: currentUserData } = useDoc(currentUserRef);
     const groupId = currentUserData?.groupId;
 

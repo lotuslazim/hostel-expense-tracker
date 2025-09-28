@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { notFound, useSearchParams, useParams } from "next/navigation";
 import { format, parseISO, startOfMonth, endOfMonth } from "date-fns";
 import { useMemo } from "react";
-import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/firebase";
+import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
 import { doc, collection, query, where } from "firebase/firestore";
 import type { Expense } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -64,7 +64,7 @@ export default function ContributionPage() {
     const { firestore } = useFirebase();
     const { user: currentUser, isUserLoading: isCurrentUserLoading } = useUser();
     
-    const currentUserRef = useMemoFirebase(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
+    const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
     const { data: currentUserData, isLoading: isCurrentUserDataLoading, error: currentUserDataError } = useDoc(currentUserRef);
     const groupId = currentUserData?.groupId;
 
@@ -79,12 +79,12 @@ export default function ContributionPage() {
 
     const details = categoryDetails[category];
     
-    const membersQuery = useMemoFirebase(() =>
+    const membersQuery = useMemo(() =>
         groupId ? collection(firestore, `groups/${groupId}/members`) : null,
         [firestore, groupId]
     );
 
-    const expensesQuery = useMemoFirebase(() =>
+    const expensesQuery = useMemo(() =>
         (groupId && details) ? query(
         collection(firestore, `groups/${groupId}/expenses`),
         where("date", ">=", monthDateRange.start),
