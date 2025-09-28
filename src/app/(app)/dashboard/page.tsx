@@ -6,13 +6,13 @@ import { useSearchParams } from "next/navigation";
 import { format, parseISO, startOfDay, endOfDay } from "date-fns";
 import { DateSwitcher } from "@/components/dashboard/date-switcher";
 import { MealLog } from "@/components/dashboard/meal-log";
-import { ExpenseLog } from "@/components/dashboard/expense-log";
+import { FoodExpenseLog } from "@/components/dashboard/food-expense-log";
+import { UtilityExpenseLog } from "@/components/dashboard/utility-expense-log";
 import type { Meal, Expense, PurchasedItem } from "@/lib/types";
 import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/firebase";
 import { doc, collection, query, where } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { WelcomeCard } from "@/components/app/welcome-card";
-import { ItemLog } from "@/components/dashboard/item-log";
 
 function DashboardSkeleton() {
   return (
@@ -110,6 +110,8 @@ export default function DashboardPage() {
     return <WelcomeCard />;
   }
 
+  const utilityExpenses = expenses?.filter(e => e.category !== 'Food') ?? [];
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -125,10 +127,12 @@ export default function DashboardPage() {
         <DateSwitcher currentDate={currentDate} setCurrentDate={setCurrentDate} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 items-start">
         <MealLog meals={meals ?? []} currentDate={currentDate} />
-        <ExpenseLog expenses={expenses ?? []} currentDate={currentDate} />
-        <ItemLog items={items ?? []} currentDate={currentDate} />
+        <div className="space-y-8">
+            <FoodExpenseLog items={items ?? []} currentDate={currentDate} />
+            <UtilityExpenseLog expenses={utilityExpenses} currentDate={currentDate} />
+        </div>
       </div>
     </div>
   );

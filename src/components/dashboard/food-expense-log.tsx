@@ -4,7 +4,7 @@
 import type { PurchasedItem } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, Loader2, User } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -13,9 +13,8 @@ import { useState } from "react";
 import { useFirebase, useUser, useDoc, useMemoFirebase } from "@/firebase";
 import { doc, collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
 
-export function ItemLog({ items, currentDate }: { items: PurchasedItem[]; currentDate: Date }) {
+export function FoodExpenseLog({ items, currentDate }: { items: PurchasedItem[]; currentDate: Date }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [quantity, setQuantity] = useState("1");
@@ -55,10 +54,25 @@ export function ItemLog({ items, currentDate }: { items: PurchasedItem[]; curren
       date: currentDate,
       createdAt: serverTimestamp(),
     };
+    
+    const expenseData = {
+        userId: currentUser.uid,
+        userName: currentUser.displayName || currentUser.email?.split('@')[0],
+        groupId,
+        description: name,
+        amount: parseFloat(cost),
+        category: 'Food',
+        date: currentDate,
+        createdAt: serverTimestamp(),
+    };
 
     try {
       const itemsCol = collection(firestore, `groups/${groupId}/purchasedItems`);
       await addDoc(itemsCol, itemData);
+
+      const expenseCol = collection(firestore, `groups/${groupId}/expenses`);
+      await addDoc(expenseCol, expenseData);
+
       toast({ title: "Success", description: "Item logged successfully." });
       resetForm();
       setOpen(false);
@@ -74,8 +88,8 @@ export function ItemLog({ items, currentDate }: { items: PurchasedItem[]; curren
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle>Item Purchase Log</CardTitle>
-          <CardDescription>Track individual items bought.</CardDescription>
+          <CardTitle>Food Purchase Log</CardTitle>
+          <CardDescription>Track individual food items bought.</CardDescription>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
@@ -86,7 +100,7 @@ export function ItemLog({ items, currentDate }: { items: PurchasedItem[]; curren
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Add Purchased Item</DialogTitle>
-              <DialogDescription>Log an item you purchased for the group.</DialogDescription>
+              <DialogDescription>Log a food item you purchased for the group.</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
@@ -120,7 +134,8 @@ export function ItemLog({ items, currentDate }: { items: PurchasedItem[]; curren
           <TableHeader>
             <TableRow>
               <TableHead>Item</TableHead>
-              <TableHead>Quantity</TableHead>
+              <TableHead>Qty</TableHead>
+              <TableHead>Paid By</TableHead>
               <TableHead className="text-right">Cost</TableHead>
             </TableRow>
           </TableHeader>
@@ -129,11 +144,12 @@ export function ItemLog({ items, currentDate }: { items: PurchasedItem[]; curren
               <TableRow key={item.id}>
                 <TableCell className="font-medium">{item.name}</TableCell>
                 <TableCell>{item.quantity} {item.unit}</TableCell>
+                <TableCell className="text-sm text-muted-foreground">{item.userName || 'N/A'}</TableCell>
                 <TableCell className="text-right">৳{item.cost.toFixed(2)}</TableCell>
               </TableRow>
             )) : (
               <TableRow>
-                <TableCell colSpan={3} className="text-center h-24 text-muted-foreground">No items purchased today.</TableCell>
+                <TableCell colSpan={4} className="text-center h-24 text-muted-foreground">No food items purchased today.</TableCell>
               </TableRow>
             )}
           </TableBody>

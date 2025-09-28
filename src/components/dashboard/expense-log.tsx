@@ -1,10 +1,10 @@
 
 "use client";
 
-import type { Expense, ExpenseCategory } from "@/lib/types";
+import type { PurchasedItem } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Zap, Flame, Receipt, User, Loader2 } from "lucide-react";
+import { PlusCircle, Loader2, User } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -13,23 +13,13 @@ import { useState } from "react";
 import { useFirebase, useUser, useDoc, useMemoFirebase } from "@/firebase";
 import { doc, collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-const categoryIcons: Record<ExpenseCategory, React.ReactNode> = {
-  Food: <Receipt className="h-5 w-5" />,
-  Electricity: <Zap className="h-5 w-5" />,
-  Gas: <Flame className="h-5 w-5" />,
-  Other: <Receipt className="h-5 w-5" />,
-};
-
-const availableCategories: ExpenseCategory[] = ['Electricity', 'Gas', 'Other'];
-
-
-export function ExpenseLog({ expenses, currentDate }: { expenses: Expense[]; currentDate: Date }) {
+export function FoodExpenseLog({ items, currentDate }: { items: PurchasedItem[]; currentDate: Date }) {
   const [open, setOpen] = useState(false);
-  const [description, setDescription] = useState("");
-  const [amount, setAmount] = useState("");
-  const [category, setCategory] = useState<ExpenseCategory | "">("");
+  const [name, setName] = useState("");
+  const [quantity, setQuantity] = useState("1");
+  const [unit, setUnit] = useState("");
+  const [cost, setCost] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
@@ -40,89 +30,100 @@ export function ExpenseLog({ expenses, currentDate }: { expenses: Expense[]; cur
   const groupId = currentUserData?.groupId;
 
   const resetForm = () => {
-    setDescription("");
-    setAmount("");
-    setCategory("");
+    setName("");
+    setQuantity("1");
+    setUnit("");
+    setCost("");
   };
 
-  const handleSaveExpense = async () => {
-    if (!description || !amount || !category || !groupId || !currentUser) {
+  const handleSaveItem = async () => {
+    if (!name || !quantity || !unit || !cost || !groupId || !currentUser) {
       toast({ variant: "destructive", title: "Missing Information", description: "Please fill out all required fields." });
       return;
     }
     setIsSaving(true);
 
-    const expenseData = {
+    const itemData = {
       userId: currentUser.uid,
       userName: currentUser.displayName || currentUser.email?.split('@')[0],
       groupId,
-      description,
-      amount: parseFloat(amount),
-      category,
+      name,
+      quantity: parseFloat(quantity),
+      unit,
+      cost: parseFloat(cost),
       date: currentDate,
       createdAt: serverTimestamp(),
     };
+    
+    const expenseData = {
+        userId: currentUser.uid,
+        userName: currentUser.displayName || currentUser.email?.split('@')[0],
+        groupId,
+        description: name,
+        amount: parseFloat(cost),
+        category: 'Food',
+        date: currentDate,
+        createdAt: serverTimestamp(),
+    };
 
     try {
-      const expensesCol = collection(firestore, `groups/${groupId}/expenses`);
-      await addDoc(expensesCol, expenseData);
-      toast({ title: "Success", description: "Expense logged successfully." });
+      const itemsCol = collection(firestore, `groups/${groupId}/purchasedItems`);
+      await addDoc(itemsCol, itemData);
+
+      const expenseCol = collection(firestore, `groups/${groupId}/expenses`);
+      await addDoc(expenseCol, expenseData);
+
+      toast({ title: "Success", description: "Item logged successfully." });
       resetForm();
       setOpen(false);
     } catch (error) {
-      console.error("Error saving expense:", error);
-      toast({ variant: "destructive", title: "Save Failed", description: "There was a problem saving your expense." });
+      console.error("Error saving item:", error);
+      toast({ variant: "destructive", title: "Save Failed", description: "There was a problem saving your item." });
     } finally {
       setIsSaving(false);
     }
   };
 
-  const utilityExpenses = expenses.filter(exp => exp.category === 'Electricity' || exp.category === 'Gas' || exp.category === 'Other');
-
-
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle>Expense Log</CardTitle>
-          <CardDescription>Daily electricity and gas bills for the group.</CardDescription>
+          <CardTitle>Food Purchase Log</CardTitle>
+          <CardDescription>Track individual food items bought.</CardDescription>
         </div>
-         <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button>
-              <PlusCircle className="mr-2 h-4 w-4" /> Add Expense
+              <PlusCircle className="mr-2 h-4 w-4" /> Add Item
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add Group Expense</DialogTitle>
-              <DialogDescription>Log a utility bill or other shared cost.</DialogDescription>
+              <DialogTitle>Add Purchased Item</DialogTitle>
+              <DialogDescription>Log a food item you purchased for the group.</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="category">Category</Label>
-                <Select value={category} onValueChange={(value) => setCategory(value as ExpenseCategory)}>
-                    <SelectTrigger id="category">
-                        <SelectValue placeholder="Select a category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {availableCategories.map(cat => (
-                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+                <Label htmlFor="name">Item Name</Label>
+                <Input id="name" placeholder="e.g., Rice, Olive Oil, etc." value={name} onChange={e => setName(e.target.value)} />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="quantity">Quantity</Label>
+                  <Input id="quantity" type="number" placeholder="e.g., 5" value={quantity} onChange={e => setQuantity(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="unit">Unit</Label>
+                  <Input id="unit" placeholder="e.g., kg, L, pcs" value={unit} onChange={e => setUnit(e.target.value)} />
+                </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Input id="description" placeholder="e.g., September Electricity Bill" value={description} onChange={e => setDescription(e.target.value)} />
+                <Label htmlFor="cost">Total Cost</Label>
+                <Input id="cost" type="number" placeholder="e.g., 550.00" value={cost} onChange={e => setCost(e.target.value)} />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="amount">Amount</Label>
-                <Input id="amount" type="number" placeholder="e.g., 1200.00" value={amount} onChange={e => setAmount(e.target.value)} />
-              </div>
-              <Button className="w-full" onClick={handleSaveExpense} disabled={isSaving || !description || !amount || !category}>
+              <Button className="w-full" onClick={handleSaveItem} disabled={isSaving || !name || !quantity || !unit || !cost}>
                 {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save Expense
+                Save Item
               </Button>
             </div>
           </DialogContent>
@@ -132,33 +133,23 @@ export function ExpenseLog({ expenses, currentDate }: { expenses: Expense[]; cur
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Expense</TableHead>
+              <TableHead>Item</TableHead>
+              <TableHead>Qty</TableHead>
               <TableHead>Paid By</TableHead>
-              <TableHead className="text-right">Amount</TableHead>
+              <TableHead className="text-right">Cost</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {utilityExpenses.length > 0 ? utilityExpenses.map((expense) => (
-              <TableRow key={expense.id}>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <span className="p-1.5 bg-muted rounded-full text-muted-foreground">
-                        {categoryIcons[expense.category] || <Receipt className="h-5 w-5" />}
-                    </span>
-                    <span>{expense.description}</span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <User className="h-4 w-4" />
-                    {expense.userName || 'N/A'}
-                  </div>
-                </TableCell>
-                <TableCell className="text-right font-medium">৳{expense.amount.toFixed(2)}</TableCell>
+            {items.length > 0 ? items.map((item) => (
+              <TableRow key={item.id}>
+                <TableCell className="font-medium">{item.name}</TableCell>
+                <TableCell>{item.quantity} {item.unit}</TableCell>
+                <TableCell className="text-sm text-muted-foreground">{item.userName || 'N/A'}</TableCell>
+                <TableCell className="text-right">৳{item.cost.toFixed(2)}</TableCell>
               </TableRow>
             )) : (
               <TableRow>
-                <TableCell colSpan={3} className="text-center h-24 text-muted-foreground">No utility expenses logged for today.</TableCell>
+                <TableCell colSpan={4} className="text-center h-24 text-muted-foreground">No food items purchased today.</TableCell>
               </TableRow>
             )}
           </TableBody>
@@ -167,4 +158,3 @@ export function ExpenseLog({ expenses, currentDate }: { expenses: Expense[]; cur
     </Card>
   );
 }
-
