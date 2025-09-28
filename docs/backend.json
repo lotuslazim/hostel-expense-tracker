@@ -58,27 +58,20 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Expense",
       "type": "object",
-      "description": "Represents a shared expense incurred for the group.",
+      "description": "Represents a shared expense incurred for the group. This includes both food purchases and utility bills.",
       "properties": {
-        "id": { "type": "string" }, "groupId": { "type": "string" }, "userId": { "type": "string" }, "userName": { "type": "string" },
-        "description": { "type": "string" }, "amount": { "type": "number" }, "date": { "type": "string", "format": "date-time" },
-        "category": { "type": "string", "enum": ["Food", "Electricity", "Gas", "Other"] },
-        "receiptPhotoUrl": { "type": "string", "format": "uri" },
-        "createdAt": { "type": "string", "format": "date-time" }
+        "id": { "type": "string", "description": "Unique identifier for the expense." }, 
+        "groupId": { "type": "string", "description": "The ID of the group this expense belongs to." }, 
+        "userId": { "type": "string", "description": "The ID of the user who logged the expense." }, 
+        "userName": { "type": "string", "description": "The display name of the user who logged the expense." },
+        "description": { "type": "string", "description": "A description of the expense (e.g., 'Groceries' or 'September Electricity Bill')." }, 
+        "amount": { "type": "number", "description": "The total amount of the expense." }, 
+        "date": { "type": "string", "format": "date-time", "description": "The date the expense was incurred." },
+        "category": { "type": "string", "enum": ["Food", "Electricity", "Gas", "Other"], "description": "The category of the expense." },
+        "receiptPhotoUrl": { "type": "string", "format": "uri", "description": "An optional URL for a photo of the receipt." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "The timestamp when the expense was logged." }
       },
       "required": ["id", "groupId", "userId", "description", "amount", "date", "category", "createdAt"]
-    },
-    "PurchasedItem": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "PurchasedItem",
-      "type": "object",
-      "description": "Represents a specific item purchased for the group.",
-      "properties": {
-        "id": { "type": "string" }, "groupId": { "type": "string" }, "userId": { "type": "string" }, "userName": { "type": "string" },
-        "name": { "type": "string" }, "quantity": { "type": "number" }, "unit": { "type": "string" }, "cost": { "type": "number" },
-        "date": { "type": "string", "format": "date-time" }, "createdAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["id", "groupId", "userId", "name", "quantity", "unit", "cost", "date", "createdAt"]
     }
   },
   "auth": { "providers": ["password", "google"] },
@@ -127,18 +120,10 @@
         "definition": {
           "entityName": "Expense", "schema": { "$ref": "#/entities/Expense" },
           "rules": { "read, write": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId" },
-          "description": "Stores expense entries. Accessible only by members of the group."
-        }
-      },
-      {
-        "path": "/groups/{groupId}/purchasedItems/{itemId}",
-        "definition": {
-          "entityName": "PurchasedItem", "schema": { "$ref": "#/entities/PurchasedItem" },
-          "rules": { "read, write": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId" },
-          "description": "Stores purchased items. Accessible only by members of the group."
+          "description": "Stores all expense entries, including food and utilities. Accessible only by members of the group."
         }
       }
     ],
-    "reasoning": "This structure enforces security by scoping all group-related data (meals, expenses, items, members) within a group's subcollections. Security rules consistently use `get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId` to verify that the requesting user is a member of the group they are trying to access, preventing unauthorized data access. Admin-only write permissions are applied to sensitive documents like the group details and member list."
+    "reasoning": "This structure enforces security by scoping all group-related data (meals, expenses) within a group's subcollections. A single 'expenses' collection is used to store all types of expenses, differentiated by a 'category' field. This simplifies querying. Security rules consistently use `get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId` to verify that the requesting user is a member of the group they are trying to access, preventing unauthorized data access."
   }
 }

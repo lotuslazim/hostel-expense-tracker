@@ -26,15 +26,3 @@ export interface Expense {
   groupId: string;
   userName?: string;
 }
-
-export interface PurchasedItem {
-  id: string;
-  name: string;
-  quantity: number;
-  unit: string;
-  cost: number;
-  date: Date;
-  userId: string;
-  groupId: string;
-  userName?: string;
-}

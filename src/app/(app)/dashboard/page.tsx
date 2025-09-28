@@ -8,7 +8,7 @@ import { DateSwitcher } from "@/components/dashboard/date-switcher";
 import { MealLog } from "@/components/dashboard/meal-log";
 import { FoodExpenseLog } from "@/components/dashboard/food-expense-log";
 import { UtilityExpenseLog } from "@/components/dashboard/utility-expense-log";
-import type { Meal, Expense, PurchasedItem } from "@/lib/types";
+import type { Meal, Expense } from "@/lib/types";
 import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/firebase";
 import { doc, collection, query, where } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -62,7 +62,7 @@ export default function DashboardPage() {
     };
   }, [currentDate]);
 
-  // Queries for meals, expenses, and items
+  // Queries for meals and expenses
   const mealsQuery = useMemoFirebase(() =>
     groupId
       ? query(
@@ -85,22 +85,10 @@ export default function DashboardPage() {
     [firestore, groupId, dateRange]
   );
 
-  const itemsQuery = useMemoFirebase(() =>
-    groupId
-      ? query(
-          collection(firestore, `groups/${groupId}/purchasedItems`),
-          where("date", ">=", dateRange.start),
-          where("date", "<=", dateRange.end)
-        )
-      : null,
-    [firestore, groupId, dateRange]
-  );
-
   const { data: meals, isLoading: areMealsLoading } = useCollection<Meal>(mealsQuery);
   const { data: expenses, isLoading: areExpensesLoading } = useCollection<Expense>(expensesQuery);
-  const { data: items, isLoading: areItemsLoading } = useCollection<PurchasedItem>(itemsQuery);
   
-  const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || areMealsLoading || areExpensesLoading || areItemsLoading;
+  const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || areMealsLoading || areExpensesLoading;
 
   if (isLoading) {
     return <DashboardSkeleton />;
@@ -110,6 +98,7 @@ export default function DashboardPage() {
     return <WelcomeCard />;
   }
 
+  const foodExpenses = expenses?.filter(e => e.category === 'Food') ?? [];
   const utilityExpenses = expenses?.filter(e => e.category !== 'Food') ?? [];
 
   return (
@@ -130,7 +119,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 items-start">
         <MealLog meals={meals ?? []} currentDate={currentDate} />
         <div className="space-y-8">
-            <FoodExpenseLog items={items ?? []} currentDate={currentDate} />
+            <FoodExpenseLog expenses={foodExpenses} currentDate={currentDate} />
             <UtilityExpenseLog expenses={utilityExpenses} currentDate={currentDate} />
         </div>
       </div>
