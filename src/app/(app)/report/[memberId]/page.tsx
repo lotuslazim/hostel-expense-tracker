@@ -355,5 +355,3 @@ export default function MemberReportPage({ params }: { params: { memberId: strin
     </div>
   );
 }
-
-    

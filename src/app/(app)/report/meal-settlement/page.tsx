@@ -118,8 +118,16 @@ export default function MealSettlementPage() {
       return <DataError />;
     }
     
-    if (!members) {
-      return <Card><CardContent><p className="text-center text-destructive py-8">Could not load members.</p></CardContent></Card>;
+    if (!currentUserData || !members || !meals || !expenses) {
+      return (
+          <Card>
+              <CardContent>
+                  <p className="text-center text-muted-foreground py-8">
+                      Data could not be fully loaded. This might be due to a temporary connection issue.
+                  </p>
+              </CardContent>
+          </Card>
+      );
     }
     
     const hasMembers = members.length > 0;
@@ -220,5 +228,3 @@ export default function MealSettlementPage() {
     </div>
   );
 }
-
-    

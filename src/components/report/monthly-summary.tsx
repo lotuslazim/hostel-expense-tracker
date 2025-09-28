@@ -317,5 +317,3 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     </div>
   );
 }
-
-    

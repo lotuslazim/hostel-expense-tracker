@@ -112,6 +112,18 @@ export default function ContributionPage() {
       return <DataError />;
     }
     
+    if (!currentUserData || !members || !expenses) {
+        return (
+            <Card>
+                <CardContent>
+                    <p className="text-center text-muted-foreground py-8">
+                        Data could not be fully loaded. This might be due to a temporary connection issue.
+                    </p>
+                </CardContent>
+            </Card>
+        );
+    }
+
     const contributions = (members || []).map(member => {
         const amount = (expenses || [])
             .filter(e => e.userId === member.id)
@@ -177,5 +189,3 @@ export default function ContributionPage() {
     </div>
   );
 }
-
-    

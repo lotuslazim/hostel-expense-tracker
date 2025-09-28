@@ -2,8 +2,9 @@
 "use client";
 
 import { MonthlySummary } from "@/components/report/monthly-summary";
-import { useState } from "react";
-import { startOfMonth, format, addMonths, subMonths } from "date-fns";
+import { useState, useEffect } from "react";
+import { useSearchParams } from 'next/navigation';
+import { startOfMonth, format, addMonths, subMonths, parseISO } from "date-fns";
 import { MonthSwitcher } from "@/components/report/month-switcher";
 import { useUser, useDoc, useMemoFirebase, useFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
@@ -11,9 +12,26 @@ import { WelcomeCard } from "@/components/app/welcome-card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ReportPage() {
-  const [currentDate, setCurrentDate] = useState(startOfMonth(new Date()));
+  const searchParams = useSearchParams();
+  const monthParam = searchParams.get('month');
+  
+  const getInitialDate = () => {
+    if (monthParam) {
+      try {
+        const parsedDate = parseISO(monthParam);
+        return startOfMonth(parsedDate);
+      } catch (e) {
+        return startOfMonth(new Date());
+      }
+    }
+    return startOfMonth(new Date());
+  };
+
+  const [currentDate, setCurrentDate] = useState(getInitialDate);
   const { firestore } = useFirebase();
   const { user: currentUser, isUserLoading: isCurrentUserLoading } = useUser();
+  const router = useRouter();
+
 
   const currentUserRef = useMemoFirebase(
     () => (currentUser ? doc(firestore, "users", currentUser.uid) : null),
@@ -23,12 +41,18 @@ export default function ReportPage() {
     useDoc(currentUserRef);
   const groupId = currentUserData?.groupId;
 
-  const handleMonthChange = (direction: "next" | "prev") => {
-    if (direction === "next") {
-      setCurrentDate(addMonths(currentDate, 1));
-    } else {
-      setCurrentDate(subMonths(currentDate, 1));
+  useEffect(() => {
+    const newDate = getInitialDate();
+    if (newDate.getTime() !== currentDate.getTime()) {
+      setCurrentDate(newDate);
     }
+  }, [monthParam]);
+
+
+  const handleMonthChange = (direction: "next" | "prev") => {
+    const newDate = direction === "next" ? addMonths(currentDate, 1) : subMonths(currentDate, 1);
+    setCurrentDate(newDate);
+    //
   };
 
   const isLoading = isCurrentUserLoading || isCurrentUserDataLoading;
