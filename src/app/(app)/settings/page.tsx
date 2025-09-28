@@ -480,7 +480,7 @@ export default function SettingsPage() {
                       </DialogHeader>
                        <div className="space-y-4 py-4">
                         <div className="space-y-2">
-                           <Label htmlFor="member-select">Select Member</label>
+                           <Label htmlFor="member-select">Select Member</Label>
                            <Select><SelectTrigger><SelectValue placeholder="Select a member" /></SelectTrigger><SelectContent></SelectContent></Select>
                         </div>
                         <Button className="w-full">Assign Admin</Button>
@@ -532,5 +532,3 @@ export default function SettingsPage() {
     </div>
   );
 }
-
-    
