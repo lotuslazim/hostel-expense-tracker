@@ -218,15 +218,14 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                 ৳{totalGroupGas.toFixed(0)}
               </p>
             </div>
-            <Link
-              href={`/report/meal-settlement?month=${monthQueryParam}`}
-              className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
+            <div
+              className="block p-4 bg-muted/50 rounded-lg"
             >
               <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1 whitespace-nowrap">
                 <Utensils className="h-4 w-4"/> Total Meals
               </p>
               <p className="text-2xl font-bold">{totalGroupMeals}</p>
-            </Link>
+            </div>
           </div>
           <div className="text-center p-4 bg-accent/20 rounded-lg mt-4">
             <p className="text-sm font-medium text-accent-foreground/80">
