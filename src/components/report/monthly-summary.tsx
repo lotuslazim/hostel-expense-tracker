@@ -198,8 +198,9 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                 ৳{totalGroupFoodExpenses.toFixed(0)}
               </p>
             </Link>
-            <div
-              className="block p-4 bg-muted/50 rounded-lg"
+             <Link
+              href={`/report/contribution/Electricity?month=${monthQueryParam}`}
+              className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
             >
               <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1 whitespace-nowrap">
                 <Zap className="h-4 w-4"/> Electricity
@@ -207,7 +208,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
               <p className="text-2xl font-bold">
                 ৳{totalGroupElectricity.toFixed(0)}
               </p>
-            </div>
+            </Link>
             <div
               className="block p-4 bg-muted/50 rounded-lg"
             >
