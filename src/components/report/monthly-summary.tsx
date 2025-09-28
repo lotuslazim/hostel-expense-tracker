@@ -10,9 +10,8 @@ import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
 import { doc, collection, query, where } from "firebase/firestore";
 import { useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { format } from "date-fns";
+import { format, startOfMonth, endOfMonth } from 'date-fns';
 import type { Meal, Expense } from "@/lib/types";
-import { startOfMonth, endOfMonth } from 'date-fns';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 
@@ -188,8 +187,9 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-            <div
-              className="block p-4 bg-muted/50 rounded-lg"
+            <Link
+              href={`/report/items?month=${monthQueryParam}`}
+              className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
             >
               <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1 whitespace-nowrap">
                 <FileText className="h-4 w-4"/> Food Expenses
@@ -197,7 +197,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
               <p className="text-2xl font-bold">
                 ৳{totalGroupFoodExpenses.toFixed(0)}
               </p>
-            </div>
+            </Link>
             <div
               className="block p-4 bg-muted/50 rounded-lg"
             >
