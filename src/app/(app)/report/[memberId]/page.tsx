@@ -241,7 +241,7 @@ export default function MemberReportPage({ params }: { params: { memberId: strin
             <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Scale className="h-5 w-5" /> Settlement Calculation</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 pt-6">
                  <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
                     <span className="font-medium text-muted-foreground">Meal Balance</span>
                     <div className="text-right">
@@ -307,7 +307,7 @@ export default function MemberReportPage({ params }: { params: { memberId: strin
                     <CardHeader>
                         <CardTitle>Meal Summary</CardTitle>
                     </CardHeader>
-                    <CardContent className="grid grid-cols-1 gap-4 text-center">
+                    <CardContent className="grid grid-cols-1 gap-4 text-center pt-6">
                          <div className="p-4 bg-muted/50 rounded-lg">
                             <Utensils className="h-6 w-6 mx-auto text-muted-foreground mb-2" />
                             <p className="text-sm text-muted-foreground">Total Meals This Month</p>
@@ -319,7 +319,7 @@ export default function MemberReportPage({ params }: { params: { memberId: strin
                     <CardHeader>
                         <CardTitle>Expense Summary</CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-3">
+                    <CardContent className="space-y-3 pt-6">
                         <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                             <div className="flex items-center gap-3">
                                 <span className="font-bold text-lg text-muted-foreground">৳</span>
@@ -348,3 +348,5 @@ export default function MemberReportPage({ params }: { params: { memberId: strin
     </div>
   );
 }
+
+    

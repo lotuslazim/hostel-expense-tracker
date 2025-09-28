@@ -111,12 +111,18 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
   const { data: mealsData, isLoading: areMealsLoading, error: mealsError } = useCollection<Meal>(mealsQuery);
   const { data: expensesData, isLoading: areExpensesLoading, error: expensesError } = useCollection<Expense>(expensesQuery);
 
-  const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || areMembersLoading || areMealsLoading || areExpensesLoading;
-  const hasError = currentUserDataError || membersError || mealsError || expensesError;
+  const isAnyLoading = isCurrentUserLoading || isCurrentUserDataLoading || areMembersLoading || areMealsLoading || areExpensesLoading;
+  const hasAnyErrors = currentUserDataError || membersError || mealsError || expensesError;
   
+  const isDataComplete = useMemo(() => {
+    if (isAnyLoading) return false;
+    if (!groupId) return true; // Not in a group, so no data is expected
+    return membersData !== undefined && mealsData !== undefined && expensesData !== undefined;
+  }, [isAnyLoading, groupId, membersData, mealsData, expensesData]);
+
   const processedData = useMemo(() => {
-    if (isLoading || hasError || !membersData || !mealsData || !expensesData) {
-        return null;
+    if (!isDataComplete || hasAnyErrors || !membersData || !mealsData || !expensesData) {
+      return null;
     }
 
     const processedMembers = membersData.map(member => {
@@ -153,15 +159,18 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
         memberCount,
         mealRate,
     }
-  }, [isLoading, hasError, membersData, mealsData, expensesData]);
+  }, [isDataComplete, hasAnyErrors, membersData, mealsData, expensesData]);
 
-
-  if (isLoading || !processedData) {
+  if (isAnyLoading || !isDataComplete) {
     return <SummarySkeleton />;
   }
 
-  if (hasError) {
+  if (hasAnyErrors) {
     return <DataError />;
+  }
+  
+  if (!processedData) {
+      return <SummarySkeleton />;
   }
 
   const {
@@ -189,7 +198,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
               className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
             >
               <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1 whitespace-nowrap">
-                <FileText /> Food Expenses
+                <FileText className="h-4 w-4"/> Food Expenses
               </p>
               <p className="text-2xl font-bold">
                 ৳{totalGroupFoodExpenses.toFixed(0)}
@@ -200,7 +209,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
               className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
             >
               <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1 whitespace-nowrap">
-                <Zap /> Electricity
+                <Zap className="h-4 w-4"/> Electricity
               </p>
               <p className="text-2xl font-bold">
                 ৳{totalGroupElectricity.toFixed(0)}
@@ -211,7 +220,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
               className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
             >
               <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1 whitespace-nowrap">
-                <Flame /> Gas
+                <Flame className="h-4 w-4"/> Gas
               </p>
               <p className="text-2xl font-bold">
                 ৳{totalGroupGas.toFixed(0)}
@@ -222,7 +231,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
               className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
             >
               <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1 whitespace-nowrap">
-                <Utensils /> Total Meals
+                <Utensils className="h-4 w-4"/> Total Meals
               </p>
               <p className="text-2xl font-bold">{totalGroupMeals}</p>
             </Link>
@@ -316,3 +325,5 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     </div>
   );
 }
+
+    
