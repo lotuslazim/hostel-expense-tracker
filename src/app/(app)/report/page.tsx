@@ -3,7 +3,7 @@
 
 import { MonthlySummary } from "@/components/report/monthly-summary";
 import { useState, useEffect } from "react";
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { startOfMonth, format, addMonths, subMonths, parseISO } from "date-fns";
 import { MonthSwitcher } from "@/components/report/month-switcher";
 import { useUser, useDoc, useMemoFirebase, useFirebase } from "@/firebase";
@@ -13,14 +13,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ReportPage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const monthParam = searchParams.get('month');
   
   const getInitialDate = () => {
     if (monthParam) {
       try {
-        const parsedDate = parseISO(monthParam);
-        return startOfMonth(parsedDate);
+        // Ensure the date is parsed correctly and normalized to the start of the month
+        return startOfMonth(parseISO(monthParam));
       } catch (e) {
+        console.warn("Invalid date in URL, defaulting to current month.", e);
         return startOfMonth(new Date());
       }
     }
@@ -30,8 +32,6 @@ export default function ReportPage() {
   const [currentDate, setCurrentDate] = useState(getInitialDate);
   const { firestore } = useFirebase();
   const { user: currentUser, isUserLoading: isCurrentUserLoading } = useUser();
-  const router = useRouter();
-
 
   const currentUserRef = useMemoFirebase(
     () => (currentUser ? doc(firestore, "users", currentUser.uid) : null),
@@ -40,19 +40,22 @@ export default function ReportPage() {
   const { data: currentUserData, isLoading: isCurrentUserDataLoading } =
     useDoc(currentUserRef);
   const groupId = currentUserData?.groupId;
-
+  
+  // This effect synchronizes the state with the URL parameter on initial load or browser navigation
   useEffect(() => {
     const newDate = getInitialDate();
     if (newDate.getTime() !== currentDate.getTime()) {
       setCurrentDate(newDate);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [monthParam]);
 
 
   const handleMonthChange = (direction: "next" | "prev") => {
     const newDate = direction === "next" ? addMonths(currentDate, 1) : subMonths(currentDate, 1);
     setCurrentDate(newDate);
-    //
+    const newUrl = `/report?month=${format(newDate, 'yyyy-MM')}`;
+    router.push(newUrl, { scroll: false }); // Update URL without full reload
   };
 
   const isLoading = isCurrentUserLoading || isCurrentUserDataLoading;

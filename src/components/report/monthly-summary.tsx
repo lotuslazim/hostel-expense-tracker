@@ -8,7 +8,7 @@ import Link from "next/link";
 import { Flame, Zap, Utensils, Scale, Users, FileText, AlertTriangle } from "lucide-react";
 import { useFirebase, useUser, useDoc, useMemoFirebase, useCollection } from "@/firebase";
 import { doc, collection, query, where } from "firebase/firestore";
-import { useEffect, useState, useMemo } from "react";
+import { useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import type { Meal, Expense } from "@/lib/types";
@@ -44,7 +44,7 @@ function SummarySkeleton() {
             <CardHeader>
                 <CardTitle><Skeleton className="h-7 w-40"/></CardTitle>
                 <CardDescription><Skeleton className="h-4 w-80"/></CardDescription>
-            </CardHeader>
+            </Header>
             <CardContent>
                 <Skeleton className="h-40 w-full rounded-lg" />
             </CardContent>
@@ -107,15 +107,57 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     [firestore, groupId, monthDateRange]
   );
   
-  const { data: members, isLoading: areMembersLoading, error: membersError } = useCollection(membersQuery);
-  const { data: meals, isLoading: areMealsLoading, error: mealsError } = useCollection<Meal>(mealsQuery);
-  const { data: expenses, isLoading: areExpensesLoading, error: expensesError } = useCollection<Expense>(expensesQuery);
+  const { data: membersData, isLoading: areMembersLoading, error: membersError } = useCollection(membersQuery);
+  const { data: mealsData, isLoading: areMealsLoading, error: mealsError } = useCollection<Meal>(mealsQuery);
+  const { data: expensesData, isLoading: areExpensesLoading, error: expensesError } = useCollection<Expense>(expensesQuery);
 
   const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || areMembersLoading || areMealsLoading || areExpensesLoading;
   const hasError = currentUserDataError || membersError || mealsError || expensesError;
+  
+  // Memoize processed data to prevent re-calculations on every render
+  const processedData = useMemo(() => {
+    if (isLoading || hasError || !membersData || !mealsData || !expensesData) {
+        return null;
+    }
+
+    const processedMembers = membersData.map(member => {
+        const memberMeals = mealsData.filter(m => m.userId === member.id);
+        const memberExpenses = expensesData.filter(e => e.userId === member.id);
+        
+        const totalMeals = memberMeals.reduce((sum, meal) => sum + (meal.mealNumber || 1), 0);
+        const foodExpenses = memberExpenses.filter(e => e.category === 'Food').reduce((sum, e) => sum + e.amount, 0);
+        const electricityExpenses = memberExpenses.filter(e => e.category === 'Electricity').reduce((sum, e) => sum + e.amount, 0);
+        const gasExpenses = memberExpenses.filter(e => e.category === 'Gas').reduce((sum, e) => sum + e.amount, 0);
+          
+        return {
+          id: member.id,
+          name: member.displayName || member.email.split('@')[0],
+          meals: totalMeals,
+          expenses: { food: foodExpenses, electricity: electricityExpenses, gas: gasExpenses }
+        };
+    });
+
+    const totalGroupFoodExpenses = processedMembers.reduce((acc, member) => acc + member.expenses.food, 0);
+    const totalGroupElectricity = processedMembers.reduce((acc, member) => acc + member.expenses.electricity, 0);
+    const totalGroupGas = processedMembers.reduce((acc, member) => acc + member.expenses.gas, 0);
+    const totalGroupMeals = processedMembers.reduce((acc, member) => acc + member.meals, 0);
+    const memberCount = processedMembers.length;
+    
+    const mealRate = totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
+
+    return {
+        processedMembers,
+        totalGroupFoodExpenses,
+        totalGroupElectricity,
+        totalGroupGas,
+        totalGroupMeals,
+        memberCount,
+        mealRate,
+    }
+  }, [isLoading, hasError, membersData, mealsData, expensesData]);
 
 
-  if (isLoading) {
+  if (isLoading || !processedData) {
     return <SummarySkeleton />;
   }
 
@@ -123,58 +165,16 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     return <DataError />;
   }
 
-  // After loading, ensure all necessary data is present before rendering.
-  if (!currentUserData || !members || !meals || !expenses) {
-      return (
-          <Card>
-              <CardContent>
-                  <p className="text-center text-muted-foreground py-8">
-                      Data could not be fully loaded. This might be due to a temporary connection issue.
-                  </p>
-              </CardContent>
-          </Card>
-      );
-  }
+  const {
+      processedMembers,
+      totalGroupFoodExpenses,
+      totalGroupElectricity,
+      totalGroupGas,
+      totalGroupMeals,
+      memberCount,
+      mealRate,
+  } = processedData;
 
-  const hasMembers = members.length > 0;
-  
-  const processedMembers = members.map(member => {
-      const memberMeals = meals.filter(m => m.userId === member.id);
-      const memberExpenses = expenses.filter(e => e.userId === member.id);
-      
-      const totalMeals = memberMeals.reduce((sum, meal) => sum + (meal.mealNumber || 1), 0);
-
-      const foodExpenses = memberExpenses
-        .filter(e => e.category === 'Food')
-        .reduce((sum, e) => sum + e.amount, 0);
-      
-      const electricityExpenses = memberExpenses
-        .filter(e => e.category === 'Electricity')
-        .reduce((sum, e) => sum + e.amount, 0);
-
-      const gasExpenses = memberExpenses
-        .filter(e => e.category === 'Gas')
-        .reduce((sum, e) => sum + e.amount, 0);
-        
-      return {
-        id: member.id,
-        name: member.displayName || member.email.split('@')[0],
-        meals: totalMeals,
-        expenses: {
-          food: foodExpenses,
-          electricity: electricityExpenses,
-          gas: gasExpenses,
-        }
-      };
-    });
-
-  const totalGroupFoodExpenses = processedMembers.reduce((acc, member) => acc + member.expenses.food, 0);
-  const totalGroupElectricity = processedMembers.reduce((acc, member) => acc + member.expenses.electricity, 0);
-  const totalGroupGas = processedMembers.reduce((acc, member) => acc + member.expenses.gas, 0);
-  const totalGroupMeals = processedMembers.reduce((acc, member) => acc + member.meals, 0);
-  const memberCount = processedMembers.length;
-  
-  const mealRate = totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
   const monthQueryParam = format(month, 'yyyy-MM-dd');
 
   return (
@@ -258,7 +258,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {hasMembers ? (
+              {memberCount > 0 ? (
                 processedMembers.map((member) => {
                   const utilitySharePerMember =
                     memberCount > 0

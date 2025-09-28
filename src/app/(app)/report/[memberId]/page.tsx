@@ -126,16 +126,82 @@ export default function MemberReportPage({ params }: { params: { memberId: strin
         [firestore, groupId, monthDateRange]
     );
 
-    const { data: members, isLoading: areMembersLoading, error: membersError } = useCollection(membersQuery);
-    const { data: meals, isLoading: areMealsLoading, error: mealsError } = useCollection<Meal>(mealsQuery);
-    const { data: expenses, isLoading: areExpensesLoading, error: expensesError } = useCollection<Expense>(expensesQuery);
+    const { data: membersData, isLoading: areMembersLoading, error: membersError } = useCollection(membersQuery);
+    const { data: mealsData, isLoading: areMealsLoading, error: mealsError } = useCollection<Meal>(mealsQuery);
+    const { data: expensesData, isLoading: areExpensesLoading, error: expensesError } = useCollection<Expense>(expensesQuery);
 
     
     const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || areMembersLoading || areMealsLoading || areExpensesLoading;
     const hasError = currentUserDataError || membersError || mealsError || expensesError;
+    
+    const processedData = useMemo(() => {
+        if (isLoading || hasError || !membersData || !mealsData || !expensesData) {
+            return null;
+        }
+
+        const memberData = membersData.find(m => m.id === memberId);
+        if (!memberData) return { notFound: true };
+
+        const memberName = memberData.displayName || memberData.email.split('@')[0];
+
+        const allMembersProcessed = membersData.map(member => {
+            const memberMeals = mealsData.filter(m => m.userId === member.id);
+            const memberExpenses = expensesData.filter(e => e.userId === member.id);
+            
+            return {
+              id: member.id,
+              meals: memberMeals.reduce((sum, meal) => sum + (meal.mealNumber || 1), 0),
+              expenses: {
+                food: memberExpenses.filter(e => e.category === 'Food').reduce((sum, e) => sum + e.amount, 0),
+                electricity: memberExpenses.filter(e => e.category === 'Electricity').reduce((sum, e) => sum + e.amount, 0),
+                gas: memberExpenses.filter(e => e.category === 'Gas').reduce((sum, e) => sum + e.amount, 0),
+              }
+            };
+        });
+
+        const targetMember = allMembersProcessed.find(m => m.id === memberId);
+        if (!targetMember) return { notFound: true };
+
+        const totalGroupFoodExpenses = allMembersProcessed.reduce((acc, m) => acc + m.expenses.food, 0);
+        const totalGroupUtilities = allMembersProcessed.reduce((acc, m) => acc + (m.expenses.electricity + m.expenses.gas), 0);
+        const totalGroupMeals = allMembersProcessed.reduce((acc, m) => acc + m.meals, 0);
+        const memberCount = allMembersProcessed.length;
+
+        const mealRate = totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
+        const utilitySharePerMember = memberCount > 0 ? totalGroupUtilities / memberCount : 0;
+
+        const mealShare = targetMember.meals * mealRate;
+        const mealBalance = targetMember.expenses.food - mealShare;
+        const utilityPaid = targetMember.expenses.electricity + targetMember.expenses.gas;
+        const utilityBalance = utilityPaid - utilitySharePerMember;
+        const finalBalance = mealBalance + utilityBalance;
+        
+        const memberDailyMeals = mealsData.filter(m => m.userId === memberId);
+        const memberDailyExpenses = expensesData.filter(e => e.userId === memberId);
+        
+        return {
+            notFound: false,
+            memberName,
+            mealBalance,
+            mealShare,
+            utilityBalance,
+            utilityPaid,
+            utilitySharePerMember,
+            finalBalance,
+            foodPaid: targetMember.expenses.food,
+            daysInMonth: eachDayOfInterval({ start: startOfMonth(targetDate), end: endOfMonth(targetDate) }),
+            memberDailyMeals,
+            memberDailyExpenses,
+            totalMeals: targetMember.meals,
+            totalFoodExpenses: targetMember.expenses.food,
+            totalElectricityExpenses: targetMember.expenses.electricity,
+            totalGasExpenses: targetMember.expenses.gas,
+        };
+
+    }, [isLoading, hasError, membersData, mealsData, expensesData, memberId, targetDate]);
 
 
-    if (isLoading) {
+    if (isLoading || !processedData) {
         return <ReportSkeleton />;
     }
     
@@ -143,89 +209,16 @@ export default function MemberReportPage({ params }: { params: { memberId: strin
       return <DataError />
     }
 
-    if (!currentUserData || !members || !meals || !expenses) {
-        return (
-            <Card>
-                <CardContent>
-                    <p className="text-center text-muted-foreground py-8">
-                        Data could not be fully loaded. This might be due to a temporary connection issue.
-                    </p>
-                </CardContent>
-            </Card>
-        );
-    }
-
-    const memberData = members.find(m => m.id === memberId);
-    if (!memberData) {
+    if (processedData.notFound) {
         notFound();
     }
-    const memberName = memberData.displayName || memberData.email.split('@')[0];
-
-    const processedMembers = (members || []).map(member => {
-        const memberMealsData = (meals || []).filter(m => m.userId === member.id);
-        const memberExpensesData = (expenses || []).filter(e => e.userId === member.id);
-        
-        const totalMeals = memberMealsData.reduce((sum, meal) => sum + (meal.mealNumber || 1), 0);
-  
-        const foodExpenses = memberExpensesData
-          .filter(e => e.category === 'Food')
-          .reduce((sum, e) => sum + e.amount, 0);
-        
-        const electricityExpenses = memberExpensesData
-          .filter(e => e.category === 'Electricity')
-          .reduce((sum, e) => sum + e.amount, 0);
-  
-        const gasExpenses = memberExpensesData
-          .filter(e => e.category === 'Gas')
-          .reduce((sum, e) => sum + e.amount, 0);
-          
-        return {
-          id: member.id,
-          name: member.displayName || member.email.split('@')[0],
-          meals: totalMeals,
-          expenses: {
-            food: foodExpenses,
-            electricity: electricityExpenses,
-            gas: gasExpenses,
-          }
-        };
-    });
-
-    const member = processedMembers.find(m => m.id === memberId);
-     if (!member) {
-        notFound();
-    }
-
-
-    // Calculations from monthly-summary
-    const totalGroupFoodExpenses = processedMembers.reduce((acc, member) => acc + member.expenses.food, 0);
-    const totalGroupElectricity = processedMembers.reduce((acc, member) => acc + member.expenses.electricity, 0);
-    const totalGroupGas = processedMembers.reduce((acc, member) => acc + member.expenses.gas, 0);
-    const totalGroupUtilities = totalGroupElectricity + totalGroupGas;
-    const totalGroupMeals = processedMembers.reduce((acc, member) => acc + member.meals, 0);
-    const memberCount = processedMembers.length;
-
-    const mealRate = totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
-    const utilitySharePerMember = memberCount > 0 ? totalGroupUtilities / memberCount : 0;
-
-    const mealShare = member.meals * mealRate;
-    const mealBalance = member.expenses.food - mealShare;
-    const utilityPaid = member.expenses.electricity + member.expenses.gas;
-    const utilityBalance = utilityPaid - utilitySharePerMember;
-    const finalBalance = mealBalance + utilityBalance;
-
-    const daysInMonth = eachDayOfInterval({
-        start: startOfMonth(targetDate),
-        end: endOfMonth(targetDate),
-    });
-
-    const memberDailyMeals = meals.filter(m => m.userId === memberId);
-    const memberDailyExpenses = expenses.filter(e => e.userId === memberId);
-
-    const totalMeals = memberDailyMeals.reduce((acc, day) => acc + day.mealNumber, 0);
-    const totalFoodExpenses = memberDailyExpenses.filter(e=>e.category === 'Food').reduce((acc, day) => acc + day.amount, 0);
-    const totalElectricityExpenses = memberDailyExpenses.filter(e=>e.category === 'Electricity').reduce((acc, day) => acc + day.amount, 0);
-    const totalGasExpenses = memberDailyExpenses.filter(e=>e.category === 'Gas').reduce((acc, day) => acc + day.amount, 0);
+    
+    const {
+        memberName, mealBalance, mealShare, utilityBalance, utilityPaid, utilitySharePerMember, finalBalance,
+        foodPaid, daysInMonth, memberDailyMeals, memberDailyExpenses, totalMeals, totalFoodExpenses,
+        totalElectricityExpenses, totalGasExpenses
+    } = processedData;
+    
     const monthQueryParam = format(targetDate, 'yyyy-MM-dd');
 
   return (
@@ -255,7 +248,7 @@ export default function MemberReportPage({ params }: { params: { memberId: strin
                         <p className={cn("font-semibold", mealBalance >= 0 ? 'text-green-600' : 'text-red-600')}>
                             {mealBalance >= 0 ? `+৳${mealBalance.toFixed(2)}` : `-৳${Math.abs(mealBalance).toFixed(2)}`}
                         </p>
-                        <p className="text-xs text-muted-foreground">(Paid ৳{member.expenses.food.toFixed(2)} - Share ৳{mealShare.toFixed(2)})</p>
+                        <p className="text-xs text-muted-foreground">(Paid ৳{foodPaid.toFixed(2)} - Share ৳{mealShare.toFixed(2)})</p>
                     </div>
                 </div>
                  <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
@@ -341,7 +334,7 @@ export default function MemberReportPage({ params }: { params: { memberId: strin
                             </div>
                             <span className="text-lg font-bold">৳{totalElectricityExpenses.toLocaleString()}</span>
                         </div>
-                         <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                         <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
                              <div className="flex items-center gap-3">
                                 <Flame className="h-5 w-5 text-muted-foreground" />
                                 <span className="font-medium">Gas Bill</span>

@@ -103,14 +103,45 @@ export default function MealSettlementPage() {
         [firestore, groupId, monthDateRange]
     );
   
-    const { data: members, isLoading: areMembersLoading, error: membersError } = useCollection(membersQuery);
-    const { data: meals, isLoading: areMealsLoading, error: mealsError } = useCollection<Meal>(mealsQuery);
-    const { data: expenses, isLoading: areExpensesLoading, error: expensesError } = useCollection<Expense>(expensesQuery);
+    const { data: membersData, isLoading: areMembersLoading, error: membersError } = useCollection(membersQuery);
+    const { data: mealsData, isLoading: areMealsLoading, error: mealsError } = useCollection<Meal>(mealsQuery);
+    const { data: expensesData, isLoading: areExpensesLoading, error: expensesError } = useCollection<Expense>(expensesQuery);
 
     const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || areMembersLoading || areMealsLoading || areExpensesLoading;
     const hasError = currentUserDataError || membersError || mealsError || expensesError;
+    
+    const settlementData = useMemo(() => {
+        if (isLoading || hasError || !membersData || !mealsData || !expensesData) {
+            return null;
+        }
+        
+        const foodExpenses = expensesData.filter(e => e.category === 'Food');
+        const totalGroupFoodExpenses = foodExpenses.reduce((acc, expense) => acc + expense.amount, 0);
+        const totalGroupMeals = mealsData.reduce((acc, meal) => acc + meal.mealNumber, 0);
+        const mealRate = totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
+        
+        const data = membersData.map(member => {
+          const memberMeals = mealsData.filter(m => m.userId === member.id).reduce((sum, m) => sum + m.mealNumber, 0);
+          const memberFoodPaid = foodExpenses.filter(e => e.userId === member.id).reduce((sum, e) => sum + e.amount, 0);
 
-    if (isLoading) {
+          const mealShare = memberMeals * mealRate;
+          const mealBalance = memberFoodPaid - mealShare;
+          return {
+            id: member.id,
+            name: member.displayName || member.email.split('@')[0],
+            meals: memberMeals,
+            expenses: { food: memberFoodPaid },
+            mealShare,
+            mealBalance,
+          };
+        });
+
+        return { data, mealRate };
+
+    }, [isLoading, hasError, membersData, mealsData, expensesData]);
+
+
+    if (isLoading || !settlementData) {
         return <MealSettlementSkeleton />;
     }
     
@@ -118,40 +149,9 @@ export default function MealSettlementPage() {
       return <DataError />;
     }
     
-    if (!currentUserData || !members || !meals || !expenses) {
-      return (
-          <Card>
-              <CardContent>
-                  <p className="text-center text-muted-foreground py-8">
-                      Data could not be fully loaded. This might be due to a temporary connection issue.
-                  </p>
-              </CardContent>
-          </Card>
-      );
-    }
-    
-    const hasMembers = members.length > 0;
-    const foodExpenses = (expenses || []).filter(e => e.category === 'Food');
-    const totalGroupFoodExpenses = foodExpenses.reduce((acc, expense) => acc + expense.amount, 0);
-    const totalGroupMeals = (meals || []).reduce((acc, meal) => acc + meal.mealNumber, 0);
-    const mealRate = totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
+    const { data, mealRate } = settlementData;
+    const hasMembers = data.length > 0;
     const monthQueryParam = format(targetDate, 'yyyy-MM-dd');
-
-    const settlementData = members.map(member => {
-      const memberMeals = (meals || []).filter(m => m.userId === member.id).reduce((sum, m) => sum + m.mealNumber, 0);
-      const memberFoodPaid = foodExpenses.filter(e => e.userId === member.id).reduce((sum, e) => sum + e.amount, 0);
-
-      const mealShare = memberMeals * mealRate;
-      const mealBalance = memberFoodPaid - mealShare;
-      return {
-        id: member.id,
-        name: member.displayName || member.email.split('@')[0],
-        meals: memberMeals,
-        expenses: { food: memberFoodPaid },
-        mealShare,
-        mealBalance,
-      };
-    });
 
   return (
     <div className="space-y-6">
@@ -194,7 +194,7 @@ export default function MealSettlementPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {hasMembers ? settlementData.map((member) => (
+                      {hasMembers ? data.map((member) => (
                         <TableRow key={member.id}>
                           <TableCell className="font-medium">
                             <Link href={`/report/${member.id}?month=${monthQueryParam}`} className="hover:underline text-primary">
