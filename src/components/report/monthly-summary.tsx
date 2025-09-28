@@ -198,9 +198,8 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                 ৳{totalGroupFoodExpenses.toFixed(0)}
               </p>
             </div>
-            <Link
-              href={`/report/contribution/electricity?month=${monthQueryParam}`}
-              className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
+            <div
+              className="block p-4 bg-muted/50 rounded-lg"
             >
               <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1 whitespace-nowrap">
                 <Zap className="h-4 w-4"/> Electricity
@@ -208,10 +207,9 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
               <p className="text-2xl font-bold">
                 ৳{totalGroupElectricity.toFixed(0)}
               </p>
-            </Link>
-            <Link
-              href={`/report/contribution/gas?month=${monthQueryParam}`}
-              className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
+            </div>
+            <div
+              className="block p-4 bg-muted/50 rounded-lg"
             >
               <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1 whitespace-nowrap">
                 <Flame className="h-4 w-4"/> Gas
@@ -219,7 +217,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
               <p className="text-2xl font-bold">
                 ৳{totalGroupGas.toFixed(0)}
               </p>
-            </Link>
+            </div>
             <Link
               href={`/report/meal-settlement?month=${monthQueryParam}`}
               className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
