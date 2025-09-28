@@ -3,7 +3,7 @@
 
 import { useState, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
-import { format, parseISO, startOfDay, endOfDay } from "date-fns";
+import { format, parseISO, startOfDay, endOfDay, startOfMonth, endOfMonth } from "date-fns";
 import { DateSwitcher } from "@/components/dashboard/date-switcher";
 import { MealLog } from "@/components/dashboard/meal-log";
 import { AllExpenses } from "@/components/dashboard/all-expenses";
@@ -12,6 +12,7 @@ import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/
 import { doc, collection, query, where } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { WelcomeCard } from "@/components/app/welcome-card";
+import { MonthlyExpenses } from "@/components/dashboard/monthly-expenses";
 
 function DashboardSkeleton() {
   return (
@@ -27,10 +28,11 @@ function DashboardSkeleton() {
             <Skeleton className="h-10 w-10" />
         </div>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <Skeleton className="h-72 w-full rounded-lg" />
-        <Skeleton className="h-72 w-full rounded-lg" />
+        <Skeleton className="h-96 w-full rounded-lg lg:col-span-2" />
       </div>
+      <Skeleton className="h-96 w-full rounded-lg" />
     </div>
   );
 }
@@ -60,6 +62,14 @@ export default function DashboardPage() {
     };
   }, [currentDate]);
 
+  const monthDateRange = useMemo(() => {
+    return {
+      start: startOfMonth(currentDate),
+      end: endOfMonth(currentDate),
+    };
+  }, [currentDate]);
+
+
   // Queries for meals and expenses
   const mealsQuery = useMemoFirebase(() =>
     groupId
@@ -82,11 +92,24 @@ export default function DashboardPage() {
       : null,
     [firestore, groupId, dateRange]
   );
+  
+  const monthlyExpensesQuery = useMemoFirebase(() =>
+    groupId
+      ? query(
+          collection(firestore, `groups/${groupId}/expenses`),
+          where("date", ">=", monthDateRange.start),
+          where("date", "<=", monthDateRange.end)
+        )
+      : null,
+    [firestore, groupId, monthDateRange]
+  );
+
 
   const { data: meals, isLoading: areMealsLoading } = useCollection<Meal>(mealsQuery);
   const { data: expenses, isLoading: areExpensesLoading } = useCollection<Expense>(expensesQuery);
-  
-  const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || areMealsLoading || areExpensesLoading;
+  const { data: monthlyExpenses, isLoading: areMonthlyExpensesLoading } = useCollection<Expense>(monthlyExpensesQuery);
+
+  const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || areMealsLoading || areExpensesLoading || areMonthlyExpensesLoading;
 
   if (isLoading) {
     return <DashboardSkeleton />;
@@ -111,12 +134,14 @@ export default function DashboardPage() {
         <DateSwitcher currentDate={currentDate} setCurrentDate={setCurrentDate} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         <MealLog meals={meals ?? []} currentDate={currentDate} />
-        <div className="xl:col-span-2">
+        <div className="lg:col-span-2">
             <AllExpenses expenses={expenses ?? []} currentDate={currentDate} />
         </div>
       </div>
+      
+      <MonthlyExpenses expenses={monthlyExpenses ?? []} currentDate={currentDate} />
     </div>
   );
 }
