@@ -21,7 +21,7 @@ const mealIcons: Record<MealType, React.ReactNode> = {
   dinner: <Soup className="h-6 w-6 text-muted-foreground" />,
 };
 
-function LogMealDialog({ type, onMealLogged, currentDate }: { type: MealType; onMealLogged: () => void; currentDate: Date }) {
+function LogMealDialog({ type, currentDate }: { type: MealType; currentDate: Date }) {
     const [open, setOpen] = useState(false);
     const [mealNumber, setMealNumber] = useState("1");
     const [description, setDescription] = useState("");
@@ -56,7 +56,6 @@ function LogMealDialog({ type, onMealLogged, currentDate }: { type: MealType; on
             const mealsCol = collection(firestore, `groups/${groupId}/meals`);
             await addDoc(mealsCol, mealData);
 
-            onMealLogged();
             setMealNumber("1");
             setDescription("");
             setOpen(false);
@@ -116,8 +115,6 @@ function LogMealDialog({ type, onMealLogged, currentDate }: { type: MealType; on
 
 
 export function MealLog({ meals, currentDate }: { meals: Meal[], currentDate: Date }) {
-  // A simple way to force re-render, could be improved with better state management
-  const [, setVersion] = useState(0);
 
   return (
     <Card>
@@ -149,7 +146,7 @@ export function MealLog({ meals, currentDate }: { meals: Meal[], currentDate: Da
                   <span className="text-sm font-medium">Logged</span>
                 </div>
               ) : (
-                 <LogMealDialog type={type} currentDate={currentDate} onMealLogged={() => setVersion(v => v + 1)} />
+                 <LogMealDialog type={type} currentDate={currentDate} />
               )}
             </div>
           );
