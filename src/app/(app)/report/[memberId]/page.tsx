@@ -9,13 +9,12 @@ import { ArrowLeft, Utensils, Zap, Flame, Scale } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useFirebase, useUser, useDoc, useMemoFirebase } from "@/firebase";
-import { doc } from "firebase/firestore";
-import { useEffect, useState } from "react";
-import { getMonthlyGroupData } from "@/ai/flows/get-monthly-group-data";
-import { getMemberDailyData } from "@/ai/flows/get-member-daily-data";
-import type { MonthlyGroupData, MemberDailyData } from "@/ai/schemas";
+import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/firebase";
+import { doc, collection, query, where } from "firebase/firestore";
+import { useMemo } from "react";
+import type { Meal, Expense } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import type { Timestamp } from "firebase/firestore";
 
 function ReportSkeleton() {
   return (
@@ -80,61 +79,103 @@ export default function MemberReportPage({ params }: { params: { memberId: strin
     const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
     const groupId = currentUserData?.groupId;
 
-    const [groupData, setGroupData] = useState<MonthlyGroupData | null>(null);
-    const [memberDailyData, setMemberDailyData] = useState<MemberDailyData | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-
     const targetDate = monthParam ? parseISO(monthParam) : new Date();
 
-    useEffect(() => {
-        if (groupId && memberId) {
-            setIsLoading(true);
-            Promise.all([
-                getMonthlyGroupData({ groupId, date: targetDate.toISOString() }),
-                getMemberDailyData({ groupId, memberId, date: targetDate.toISOString() })
-            ]).then(([monthlyData, dailyData]) => {
-                setGroupData(monthlyData);
-                setMemberDailyData(dailyData);
-                setError(null);
-            }).catch(err => {
-                console.error("Failed to fetch report data:", err);
-                setError("Could not load report data.");
-            }).finally(() => {
-                setIsLoading(false);
-            });
-        } else if (!isCurrentUserLoading && !isCurrentUserDataLoading) {
-            setIsLoading(false);
-        }
-    }, [groupId, memberId, targetDate, isCurrentUserLoading, isCurrentUserDataLoading]);
+    const monthDateRange = useMemo(() => {
+        return {
+          start: startOfMonth(targetDate),
+          end: endOfMonth(targetDate),
+        };
+    }, [targetDate]);
+
+    // Queries
+    const membersQuery = useMemoFirebase(() =>
+        groupId ? collection(firestore, `groups/${groupId}/members`) : null,
+        [firestore, groupId]
+    );
     
-    const dataLoading = isLoading || isCurrentUserLoading || isCurrentUserDataLoading;
+    const mealsQuery = useMemoFirebase(() =>
+        groupId ? query(
+        collection(firestore, `groups/${groupId}/meals`),
+        where("date", ">=", monthDateRange.start),
+        where("date", "<=", monthDateRange.end)
+        ) : null,
+        [firestore, groupId, monthDateRange]
+    );
+
+    const expensesQuery = useMemoFirebase(() =>
+        groupId ? query(
+        collection(firestore, `groups/${groupId}/expenses`),
+        where("date", ">=", monthDateRange.start),
+        where("date", "<=", monthDateRange.end)
+        ) : null,
+        [firestore, groupId, monthDateRange]
+    );
+
+    const { data: members, isLoading: areMembersLoading } = useCollection(membersQuery);
+    const { data: meals, isLoading: areMealsLoading } = useCollection<Meal>(mealsQuery);
+    const { data: expenses, isLoading: areExpensesLoading } = useCollection<Expense>(expensesQuery);
+
+    
+    const dataLoading = isCurrentUserLoading || isCurrentUserDataLoading || areMembersLoading || areMealsLoading || areExpensesLoading;
 
     if (dataLoading) {
         return <ReportSkeleton />;
     }
-
-    if (error) {
-        return <Card><CardContent><p className="text-center text-destructive py-8">{error}</p></CardContent></Card>;
-    }
     
-    if (!groupData || !memberDailyData) {
+    if (!members || !meals || !expenses) {
         return <Card><CardContent><p className="text-center text-muted-foreground py-8">No data available for this report.</p></CardContent></Card>;
     }
 
-    const member = groupData.members.find(m => m.id === memberId);
+    const memberData = members.find(m => m.id === memberId);
+    if (!memberData) {
+        notFound();
+    }
+    const memberName = memberData.displayName || memberData.email.split('@')[0];
 
-    if (!member) {
+    const processedMembers = (members || []).map(member => {
+        const memberMealsData = (meals || []).filter(m => m.userId === member.id);
+        const memberExpensesData = (expenses || []).filter(e => e.userId === member.id);
+        
+        const totalMeals = memberMealsData.reduce((sum, meal) => sum + (meal.mealNumber || 1), 0);
+  
+        const foodExpenses = memberExpensesData
+          .filter(e => e.category === 'Food')
+          .reduce((sum, e) => sum + e.amount, 0);
+        
+        const electricityExpenses = memberExpensesData
+          .filter(e => e.category === 'Electricity')
+          .reduce((sum, e) => sum + e.amount, 0);
+  
+        const gasExpenses = memberExpensesData
+          .filter(e => e.category === 'Gas')
+          .reduce((sum, e) => sum + e.amount, 0);
+          
+        return {
+          id: member.id,
+          name: member.displayName || member.email.split('@')[0],
+          meals: totalMeals,
+          expenses: {
+            food: foodExpenses,
+            electricity: electricityExpenses,
+            gas: gasExpenses,
+          }
+        };
+    });
+
+    const member = processedMembers.find(m => m.id === memberId);
+     if (!member) {
         notFound();
     }
 
+
     // Calculations from monthly-summary
-    const totalGroupFoodExpenses = groupData.members.reduce((acc, member) => acc + member.expenses.food, 0);
-    const totalGroupElectricity = groupData.members.reduce((acc, member) => acc + member.expenses.electricity, 0);
-    const totalGroupGas = groupData.members.reduce((acc, member) => acc + member.expenses.gas, 0);
+    const totalGroupFoodExpenses = processedMembers.reduce((acc, member) => acc + member.expenses.food, 0);
+    const totalGroupElectricity = processedMembers.reduce((acc, member) => acc + member.expenses.electricity, 0);
+    const totalGroupGas = processedMembers.reduce((acc, member) => acc + member.expenses.gas, 0);
     const totalGroupUtilities = totalGroupElectricity + totalGroupGas;
-    const totalGroupMeals = groupData.members.reduce((acc, member) => acc + member.meals, 0);
-    const memberCount = groupData.members.length;
+    const totalGroupMeals = processedMembers.reduce((acc, member) => acc + member.meals, 0);
+    const memberCount = processedMembers.length;
 
     const mealRate = totalGroupFoodExpenses > 0 && totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
     const utilitySharePerMember = memberCount > 0 ? totalGroupUtilities / memberCount : 0;
@@ -150,10 +191,13 @@ export default function MemberReportPage({ params }: { params: { memberId: strin
         end: endOfMonth(targetDate),
     });
 
-    const totalMeals = memberDailyData.dailyData.reduce((acc, day) => acc + day.meals, 0);
-    const totalFoodExpenses = memberDailyData.dailyData.reduce((acc, day) => acc + day.expenses.food, 0);
-    const totalElectricityExpenses = memberDailyData.dailyData.reduce((acc, day) => acc + day.expenses.electricity, 0);
-    const totalGasExpenses = memberDailyData.dailyData.reduce((acc, day) => acc + day.expenses.gas, 0);
+    const memberDailyMeals = meals.filter(m => m.userId === memberId);
+    const memberDailyExpenses = expenses.filter(e => e.userId === memberId);
+
+    const totalMeals = memberDailyMeals.reduce((acc, day) => acc + day.mealNumber, 0);
+    const totalFoodExpenses = memberDailyExpenses.filter(e=>e.category === 'Food').reduce((acc, day) => acc + day.amount, 0);
+    const totalElectricityExpenses = memberDailyExpenses.filter(e=>e.category === 'Electricity').reduce((acc, day) => acc + day.amount, 0);
+    const totalGasExpenses = memberDailyExpenses.filter(e=>e.category === 'Gas').reduce((acc, day) => acc + day.amount, 0);
     const monthQueryParam = format(targetDate, 'yyyy-MM-dd');
 
   return (
@@ -164,7 +208,7 @@ export default function MemberReportPage({ params }: { params: { memberId: strin
             </Button>
             <div>
               <h1 className="text-3xl font-bold tracking-tight font-headline">
-                {member.name}'s Daily Log
+                {memberName}'s Daily Log
               </h1>
               <p className="text-muted-foreground">
                 A daily breakdown of meals and expenses for {format(targetDate, "MMMM yyyy")}.
@@ -222,11 +266,13 @@ export default function MemberReportPage({ params }: { params: { memberId: strin
                         <TableBody>
                             {daysInMonth.map((day) => {
                                 const dayString = format(day, "yyyy-MM-dd");
-                                const activity = memberDailyData.dailyData.find(d => d.date === dayString);
+                                const mealsOnDay = memberDailyMeals
+                                    .filter(m => format((m.date as Timestamp).toDate(), 'yyyy-MM-dd') === dayString)
+                                    .reduce((sum, meal) => sum + meal.mealNumber, 0);
                                 return (
                                     <TableRow key={dayString}>
                                         <TableCell className="font-medium">{format(day, "MMMM d, yyyy")}</TableCell>
-                                        <TableCell className="text-right">{activity?.meals || 0}</TableCell>
+                                        <TableCell className="text-right">{mealsOnDay || 0}</TableCell>
                                     </TableRow>
                                 )
                             })}
@@ -281,3 +327,5 @@ export default function MemberReportPage({ params }: { params: { memberId: strin
     </div>
   );
 }
+
+    

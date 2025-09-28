@@ -7,12 +7,11 @@ import { ArrowLeft, Users } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useSearchParams } from "next/navigation";
-import { format, parseISO } from "date-fns";
-import { useState, useEffect } from "react";
-import { useFirebase, useUser, useDoc, useMemoFirebase } from "@/firebase";
-import { doc } from "firebase/firestore";
-import { getMonthlyGroupData } from "@/ai/flows/get-monthly-group-data";
-import type { MonthlyGroupData } from "@/ai/schemas";
+import { format, parseISO, startOfMonth, endOfMonth } from "date-fns";
+import { useMemo } from "react";
+import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/firebase";
+import { doc, collection, query, where } from "firebase/firestore";
+import type { Expense } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 
 function ItemsSkeleton() {
@@ -52,50 +51,51 @@ export default function MonthlyItemsPage() {
     const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
     const groupId = currentUserData?.groupId;
 
-    const [groupData, setGroupData] = useState<MonthlyGroupData | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-
     const targetDate = monthParam ? parseISO(monthParam) : new Date();
+    const monthDateRange = useMemo(() => {
+        return {
+          start: startOfMonth(targetDate),
+          end: endOfMonth(targetDate),
+        };
+    }, [targetDate]);
 
-    useEffect(() => {
-        if (groupId) {
-            setIsLoading(true);
-            getMonthlyGroupData({ groupId, date: targetDate.toISOString() })
-                .then(data => {
-                    setGroupData(data);
-                    setError(null);
-                })
-                .catch(err => {
-                    console.error("Failed to fetch monthly data:", err);
-                    setError("Could not load food expense data.");
-                })
-                .finally(() => {
-                    setIsLoading(false);
-                });
-        } else if (!isCurrentUserLoading && !isCurrentUserDataLoading) {
-            setIsLoading(false);
-        }
-    }, [groupId, targetDate, isCurrentUserLoading, isCurrentUserDataLoading]);
+    const membersQuery = useMemoFirebase(() =>
+        groupId ? collection(firestore, `groups/${groupId}/members`) : null,
+        [firestore, groupId]
+    );
+
+    const expensesQuery = useMemoFirebase(() =>
+        groupId ? query(
+        collection(firestore, `groups/${groupId}/expenses`),
+        where("date", ">=", monthDateRange.start),
+        where("date", "<=", monthDateRange.end),
+        where("category", "==", "Food")
+        ) : null,
+        [firestore, groupId, monthDateRange]
+    );
+
+    const { data: members, isLoading: areMembersLoading } = useCollection(membersQuery);
+    const { data: expenses, isLoading: areExpensesLoading } = useCollection<Expense>(expensesQuery);
     
-    const dataLoading = isLoading || isCurrentUserLoading || isCurrentUserDataLoading;
+    const dataLoading = isCurrentUserLoading || isCurrentUserDataLoading || areMembersLoading || areExpensesLoading;
 
     if (dataLoading) {
         return <ItemsSkeleton />;
     }
-    
-    if (error) {
-        return <Card><CardContent><p className="text-center text-destructive py-8">{error}</p></CardContent></Card>;
-    }
-    
+
     const monthQueryParam = monthParam ? `?month=${monthParam}` : '';
-    const members = groupData?.members ?? [];
     
-    const memberFoodExpenses = members.map(member => ({
-        id: member.id,
-        name: member.name,
-        foodExpense: member.expenses.food,
-    }));
+    const memberFoodExpenses = (members || []).map(member => {
+        const foodExpense = (expenses || [])
+            .filter(e => e.userId === member.id)
+            .reduce((sum, e) => sum + e.amount, 0);
+
+        return {
+            id: member.id,
+            name: member.displayName || member.email.split('@')[0],
+            foodExpense,
+        };
+    });
 
 
   return (
@@ -149,3 +149,5 @@ export default function MonthlyItemsPage() {
     </div>
   );
 }
+
+    

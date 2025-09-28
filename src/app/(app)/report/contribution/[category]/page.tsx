@@ -7,17 +7,16 @@ import { ArrowLeft, Zap, Flame } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { notFound, useSearchParams, useParams } from "next/navigation";
-import { format, parseISO } from "date-fns";
-import { useState, useEffect } from "react";
-import { useFirebase, useUser, useDoc, useMemoFirebase } from "@/firebase";
-import { doc } from "firebase/firestore";
-import { getMonthlyGroupData } from "@/ai/flows/get-monthly-group-data";
-import type { MonthlyGroupData } from "@/ai/schemas";
+import { format, parseISO, startOfMonth, endOfMonth } from "date-fns";
+import { useMemo } from "react";
+import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/firebase";
+import { doc, collection, query, where } from "firebase/firestore";
+import type { Expense } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const categoryDetails: Record<string, { icon: React.ReactNode, key: 'electricity' | 'gas' }> = {
-    electricity: { icon: <Zap className="h-5 w-5"/>, key: 'electricity' },
-    gas: { icon: <Flame className="h-5 w-5"/>, key: 'gas' },
+const categoryDetails: Record<string, { icon: React.ReactNode, key: 'electricity' | 'gas', name: 'Electricity' | 'Gas' }> = {
+    electricity: { icon: <Zap className="h-5 w-5"/>, key: 'electricity', name: 'Electricity' },
+    gas: { icon: <Flame className="h-5 w-5"/>, key: 'gas', name: 'Gas' },
 };
 
 function ContributionSkeleton() {
@@ -55,55 +54,56 @@ export default function ContributionPage() {
     const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
     const groupId = currentUserData?.groupId;
 
-    const [groupData, setGroupData] = useState<MonthlyGroupData | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-
     const targetDate = monthParam ? parseISO(monthParam) : new Date();
 
-    useEffect(() => {
-        if (groupId) {
-            setIsLoading(true);
-            getMonthlyGroupData({ groupId, date: targetDate.toISOString() })
-                .then(data => {
-                    setGroupData(data);
-                    setError(null);
-                })
-                .catch(err => {
-                    console.error("Failed to fetch monthly data:", err);
-                    setError(`Could not load ${category} contribution data.`);
-                })
-                .finally(() => {
-                    setIsLoading(false);
-                });
-        } else if (!isCurrentUserLoading && !isCurrentUserDataLoading) {
-            setIsLoading(false);
-        }
-    }, [groupId, targetDate, category, isCurrentUserLoading, isCurrentUserDataLoading]);
+    const monthDateRange = useMemo(() => {
+        return {
+          start: startOfMonth(targetDate),
+          end: endOfMonth(targetDate),
+        };
+    }, [targetDate]);
 
     const details = categoryDetails[category];
+    
+    const membersQuery = useMemoFirebase(() =>
+        groupId ? collection(firestore, `groups/${groupId}/members`) : null,
+        [firestore, groupId]
+    );
+
+    const expensesQuery = useMemoFirebase(() =>
+        (groupId && details) ? query(
+        collection(firestore, `groups/${groupId}/expenses`),
+        where("date", ">=", monthDateRange.start),
+        where("date", "<=", monthDateRange.end),
+        where("category", "==", details.name)
+        ) : null,
+        [firestore, groupId, monthDateRange, details]
+    );
+
+    const { data: members, isLoading: areMembersLoading } = useCollection(membersQuery);
+    const { data: expenses, isLoading: areExpensesLoading } = useCollection<Expense>(expensesQuery);
 
     if (!details) {
         notFound();
     }
 
-    const dataLoading = isLoading || isCurrentUserLoading || isCurrentUserDataLoading;
+    const dataLoading = isLoading || isCurrentUserLoading || isCurrentUserDataLoading || areMembersLoading || areExpensesLoading;
 
     if (dataLoading) {
         return <ContributionSkeleton />;
     }
     
-    if (error) {
-        return <Card><CardContent><p className="text-center text-destructive py-8">{error}</p></CardContent></Card>;
-    }
+    const contributions = (members || []).map(member => {
+        const amount = (expenses || [])
+            .filter(e => e.userId === member.id)
+            .reduce((sum, e) => sum + e.amount, 0);
 
-    const members = groupData?.members ?? [];
-    
-    const contributions = members.map(member => ({
-        id: member.id,
-        name: member.name,
-        amount: member.expenses[details.key]
-    }));
+        return {
+            id: member.id,
+            name: member.displayName || member.email.split('@')[0],
+            amount: amount
+        };
+    });
     
     const monthQueryParam = monthParam ? `?month=${monthParam}` : '';
 
@@ -158,3 +158,5 @@ export default function ContributionPage() {
     </div>
   );
 }
+
+    

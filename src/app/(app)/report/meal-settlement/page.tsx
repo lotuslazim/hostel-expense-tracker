@@ -7,13 +7,12 @@ import { ArrowLeft, Utensils, Users } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, startOfMonth, endOfMonth } from "date-fns";
 import { useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
-import { useFirebase, useUser, useDoc, useMemoFirebase } from "@/firebase";
-import { doc } from "firebase/firestore";
-import { getMonthlyGroupData } from "@/ai/flows/get-monthly-group-data";
-import type { MonthlyGroupData } from "@/ai/schemas";
+import { useMemo } from "react";
+import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/firebase";
+import { doc, collection, query, where } from "firebase/firestore";
+import type { Meal, Expense } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 
 function MealSettlementSkeleton() {
@@ -60,52 +59,69 @@ export default function MealSettlementPage() {
     const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
     const groupId = currentUserData?.groupId;
 
-    const [groupData, setGroupData] = useState<MonthlyGroupData | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const monthDateRange = useMemo(() => {
+        return {
+          start: startOfMonth(targetDate),
+          end: endOfMonth(targetDate),
+        };
+    }, [targetDate]);
 
-    useEffect(() => {
-        if (groupId) {
-            setIsLoading(true);
-            getMonthlyGroupData({ groupId, date: targetDate.toISOString() })
-                .then(data => {
-                    setGroupData(data);
-                    setError(null);
-                })
-                .catch(err => {
-                    console.error("Failed to fetch monthly data:", err);
-                    setError("Could not load settlement data.");
-                })
-                .finally(() => {
-                    setIsLoading(false);
-                });
-        } else if (!isCurrentUserLoading && !isCurrentUserDataLoading) {
-            setIsLoading(false);
-        }
-    }, [groupId, targetDate, isCurrentUserLoading, isCurrentUserDataLoading]);
+    // Queries
+    const membersQuery = useMemoFirebase(() =>
+        groupId ? collection(firestore, `groups/${groupId}/members`) : null,
+        [firestore, groupId]
+    );
+    
+    const mealsQuery = useMemoFirebase(() =>
+        groupId ? query(
+        collection(firestore, `groups/${groupId}/meals`),
+        where("date", ">=", monthDateRange.start),
+        where("date", "<=", monthDateRange.end)
+        ) : null,
+        [firestore, groupId, monthDateRange]
+    );
 
-    const dataLoading = isLoading || isCurrentUserLoading || isCurrentUserDataLoading;
+    const expensesQuery = useMemoFirebase(() =>
+        groupId ? query(
+        collection(firestore, `groups/${groupId}/expenses`),
+        where("date", ">=", monthDateRange.start),
+        where("date", "<=", monthDateRange.end)
+        ) : null,
+        [firestore, groupId, monthDateRange]
+    );
+  
+    const { data: members, isLoading: areMembersLoading } = useCollection(membersQuery);
+    const { data: meals, isLoading: areMealsLoading } = useCollection<Meal>(mealsQuery);
+    const { data: expenses, isLoading: areExpensesLoading } = useCollection<Expense>(expensesQuery);
+
+    const dataLoading = isCurrentUserLoading || isCurrentUserDataLoading || areMembersLoading || areMealsLoading || areExpensesLoading;
 
     if (dataLoading) {
         return <MealSettlementSkeleton />;
     }
     
-    if (error) {
-        return <Card><CardContent><p className="text-center text-destructive py-8">{error}</p></CardContent></Card>;
+    if (!members) {
+      return <Card><CardContent><p className="text-center text-destructive py-8">Could not load members.</p></CardContent></Card>;
     }
-
-    const members = groupData?.members ?? [];
+    
     const hasMembers = members.length > 0;
-    const totalGroupFoodExpenses = members.reduce((acc, member) => acc + member.expenses.food, 0);
-    const totalGroupMeals = members.reduce((acc, member) => acc + member.meals, 0);
+    const foodExpenses = (expenses || []).filter(e => e.category === 'Food');
+    const totalGroupFoodExpenses = foodExpenses.reduce((acc, expense) => acc + expense.amount, 0);
+    const totalGroupMeals = (meals || []).reduce((acc, meal) => acc + meal.mealNumber, 0);
     const mealRate = totalGroupFoodExpenses > 0 && totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
     const monthQueryParam = format(targetDate, 'yyyy-MM-dd');
 
     const settlementData = members.map(member => {
-      const mealShare = member.meals * mealRate;
-      const mealBalance = member.expenses.food - mealShare;
+      const memberMeals = (meals || []).filter(m => m.userId === member.id).reduce((sum, m) => sum + m.mealNumber, 0);
+      const memberFoodPaid = foodExpenses.filter(e => e.userId === member.id).reduce((sum, e) => sum + e.amount, 0);
+
+      const mealShare = memberMeals * mealRate;
+      const mealBalance = memberFoodPaid - mealShare;
       return {
-        ...member,
+        id: member.id,
+        name: member.displayName || member.email.split('@')[0],
+        meals: memberMeals,
+        expenses: { food: memberFoodPaid },
         mealShare,
         mealBalance,
       };
@@ -186,3 +202,5 @@ export default function MealSettlementPage() {
     </div>
   );
 }
+
+    
