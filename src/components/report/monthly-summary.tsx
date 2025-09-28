@@ -274,12 +274,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                   return (
                     <TableRow key={member.id}>
                       <TableCell className="font-medium">
-                        <Link
-                          href={`/report/${member.id}?month=${monthQueryParam}`}
-                          className="hover:underline text-primary"
-                        >
-                          {member.name}
-                        </Link>
+                        {member.name}
                       </TableCell>
                       <TableCell className="text-right font-semibold">
                         ৳{totalPaid.toFixed(2)}
