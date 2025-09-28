@@ -42,11 +42,11 @@ const getMonthlyGroupDataFlow = ai.defineFlow(
     const monthName = `${targetDate.toLocaleString('default', { month: 'long' })} ${getYear(targetDate)}`;
 
     // 1. Get all members of the group
-    const usersQuery = firestore.collection('users').where('groupId', '==', groupId);
-    const usersSnapshot = await usersQuery.get();
-    const users = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const membersQuery = firestore.collection(`groups/${groupId}/members`);
+    const membersSnapshot = await membersQuery.get();
+    const members = membersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     
-    if (users.length === 0) {
+    if (members.length === 0) {
       return { month: monthName, members: [] };
     }
 
@@ -65,7 +65,7 @@ const getMonthlyGroupDataFlow = ai.defineFlow(
     const expenses = expensesSnapshot.docs.map(doc => doc.data());
 
     // 3. Process data for each member
-    const membersData = users.map(user => {
+    const membersData = members.map(user => {
       const memberMeals = meals.filter(m => m.userId === user.id);
       const memberExpenses = expenses.filter(e => e.userId === user.id);
       
