@@ -39,7 +39,7 @@
         "role": { "type": "string", "description": "The role of the member within the group (e.g., 'admin', 'member')." },
         "joinedAt": { "type": "string", "description": "The timestamp when the member joined the group.", "format": "date-time" }
       },
-      "required": ["email", "role", "joinedAt"]
+      "required": ["email", "displayName", "role", "joinedAt"]
     },
     "MealLog": {
       "$schema": "http://json-schema.org/draft-07/schema#",
@@ -112,7 +112,10 @@
         "path": "/groups/{groupId}/meals/{mealId}",
         "definition": {
           "entityName": "MealLog", "schema": { "$ref": "#/entities/MealLog" },
-          "rules": { "read, write": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId" },
+          "rules": {
+            "read": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId",
+            "write": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId"
+          },
           "description": "Stores meal logs. Accessible only by members of the group."
         }
       },
@@ -120,7 +123,10 @@
         "path": "/groups/{groupId}/expenses/{expenseId}",
         "definition": {
           "entityName": "Expense", "schema": { "$ref": "#/entities/Expense" },
-          "rules": { "read, write": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId" },
+          "rules": {
+            "read": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId",
+            "write": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId"
+          },
           "description": "Stores all expense entries, including food and utilities. Accessible only by members of the group."
         }
       }
