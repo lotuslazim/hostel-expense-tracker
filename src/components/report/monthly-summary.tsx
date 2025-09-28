@@ -99,6 +99,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
   const totalGroupMeals = members.reduce((acc, member) => acc + member.meals, 0);
   const memberCount = members.length;
   
+  const mealRate = totalGroupFoodExpenses > 0 && totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
   const monthQueryParam = format(month, 'yyyy-MM-dd');
 
   return (
@@ -127,6 +128,12 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                     </Link>
                 </div>
             </CardContent>
+             <CardHeader className="pt-2">
+                <div className="text-center p-4 bg-accent/20 rounded-lg">
+                    <p className="text-sm font-medium text-accent-foreground/80">Calculated Meal Rate</p>
+                    <p className="text-2xl font-bold text-accent-foreground">৳{mealRate.toFixed(2)} / meal</p>
+                </div>
+            </CardHeader>
         </Card>
         
         <Card>
@@ -145,7 +152,6 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                     </TableHeader>
                     <TableBody>
                         {hasMembers ? members.map((member) => {
-                            const mealRate = totalGroupFoodExpenses > 0 && totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
                             const utilitySharePerMember = memberCount > 0 ? (totalGroupElectricity + totalGroupGas) / memberCount : 0;
                             const mealShare = member.meals * mealRate;
                             const mealBalance = member.expenses.food - mealShare;
