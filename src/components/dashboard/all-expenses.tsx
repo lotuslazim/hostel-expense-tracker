@@ -6,16 +6,17 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Zap, Flame, Receipt, User, Loader2, Camera, Upload, Image as ImageIcon } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState, useRef, useEffect } from "react";
 import { useFirebase, useUser, useDoc, useMemoFirebase } from "@/firebase";
-import { doc, collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { doc, collection, addDoc, serverTimestamp, type Timestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import Image from "next/image";
+import { format } from "date-fns";
 
 const categoryIcons: Record<ExpenseCategory, React.ReactNode> = {
   Food: <Receipt className="h-5 w-5" />,
@@ -168,7 +169,10 @@ export function AllExpenses({ expenses, currentDate }: { expenses: Expense[]; cu
   };
 
   const handleSaveExpense = async () => {
-    if (!description || !amount || !category || !groupId || !currentUser) {
+    const isUtility = category === 'Electricity' || category === 'Gas';
+    const finalDescription = isUtility && !description ? category : description;
+
+    if (!finalDescription || !amount || !category || !groupId || !currentUser) {
       toast({ variant: "destructive", title: "Missing Information", description: "Please fill out all required fields." });
       return;
     }
@@ -178,7 +182,7 @@ export function AllExpenses({ expenses, currentDate }: { expenses: Expense[]; cu
       userId: currentUser.uid,
       userName: currentUser.displayName || currentUser.email?.split('@')[0],
       groupId,
-      description,
+      description: finalDescription,
       amount: parseFloat(amount),
       category,
       date: currentDate,
@@ -199,6 +203,9 @@ export function AllExpenses({ expenses, currentDate }: { expenses: Expense[]; cu
       setIsSaving(false);
     }
   };
+  
+  const isSaveDisabled = isSaving || !amount || !category || ( (category === 'Food' || category === 'Other') && !description );
+
 
   return (
     <Card>
@@ -233,8 +240,8 @@ export function AllExpenses({ expenses, currentDate }: { expenses: Expense[]; cu
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Input id="description" placeholder="e.g., Groceries, Electricity Bill" value={description} onChange={e => setDescription(e.target.value)} />
+                <Label htmlFor="description">Description (Optional for Utilities)</Label>
+                <Input id="description" placeholder="e.g., Groceries, September Electricity Bill" value={description} onChange={e => setDescription(e.target.value)} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="amount">Amount</Label>
@@ -253,7 +260,7 @@ export function AllExpenses({ expenses, currentDate }: { expenses: Expense[]; cu
                 </div>
                 {receipt && <Image src={receipt} alt="Receipt preview" width={100} height={100} className="rounded-md object-cover mt-2" />}
               </div>
-              <Button className="w-full" onClick={handleSaveExpense} disabled={isSaving || !description || !amount || !category}>
+              <Button className="w-full" onClick={handleSaveExpense} disabled={isSaveDisabled}>
                 {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Save Expense
               </Button>
@@ -300,3 +307,5 @@ export function AllExpenses({ expenses, currentDate }: { expenses: Expense[]; cu
     </Card>
   );
 }
+
+    
