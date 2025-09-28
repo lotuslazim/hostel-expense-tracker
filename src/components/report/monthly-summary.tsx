@@ -11,7 +11,6 @@ import { doc, collection, query, where } from "firebase/firestore";
 import { useEffect, useState, useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
-import type { MonthlyGroupData } from "@/ai/schemas";
 import type { Meal, Expense } from "@/lib/types";
 import { startOfMonth, endOfMonth } from 'date-fns';
 
@@ -70,7 +69,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
 
   // Queries for members, meals, and expenses
   const membersQuery = useMemoFirebase(() =>
-    groupId ? query(collection(firestore, 'users'), where('groupId', '==', groupId)) : null,
+    groupId ? collection(firestore, `groups/${groupId}/members`) : null,
     [firestore, groupId]
   );
   
@@ -104,9 +103,9 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
 
   const hasMembers = members && members.length > 0;
   
-  const processedMembers = (members || []).map(user => {
-      const memberMeals = (meals || []).filter(m => m.userId === user.id);
-      const memberExpenses = (expenses || []).filter(e => e.userId === user.id);
+  const processedMembers = (members || []).map(member => {
+      const memberMeals = (meals || []).filter(m => m.userId === member.id);
+      const memberExpenses = (expenses || []).filter(e => e.userId === member.id);
       
       const totalMeals = memberMeals.reduce((sum, meal) => sum + (meal.mealNumber || 1), 0);
 
@@ -123,8 +122,8 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
         .reduce((sum, e) => sum + e.amount, 0);
         
       return {
-        id: user.id,
-        name: user.displayName || user.email.split('@')[0],
+        id: member.id,
+        name: member.displayName || member.email.split('@')[0],
         meals: totalMeals,
         expenses: {
           food: foodExpenses,
@@ -145,94 +144,141 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
 
   return (
     <div className="space-y-6">
-        <Card>
-            <CardHeader>
-                <CardTitle>Overall Summary</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                    <Link href={`/report/items?month=${monthQueryParam}`} className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors">
-                        <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1 whitespace-nowrap"><FileText /> Food Expenses</p>
-                        <p className="text-2xl font-bold">৳{totalGroupFoodExpenses.toFixed(0)}</p>
-                    </Link>
-                    <Link href={`/report/contribution/electricity?month=${monthQueryParam}`} className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors">
-                        <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1 whitespace-nowrap"><Zap /> Electricity</p>
-                        <p className="text-2xl font-bold">৳{totalGroupElectricity.toFixed(0)}</p>
-                    </Link>
-                    <Link href={`/report/contribution/gas?month=${monthQueryParam}`} className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors">
-                        <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1 whitespace-nowrap"><Flame /> Gas</p>
-                        <p className="text-2xl font-bold">৳{totalGroupGas.toFixed(0)}</p>
-                    </Link>
-                    <Link href={`/report/meal-settlement?month=${monthQueryParam}`} className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors">
-                        <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1 whitespace-nowrap"><Utensils /> Total Meals</p>
-                        <p className="text-2xl font-bold">{totalGroupMeals}</p>
-                    </Link>
-                </div>
-                 <div className="text-center p-4 bg-accent/20 rounded-lg mt-4">
-                    <p className="text-sm font-medium text-accent-foreground/80">Calculated Meal Rate</p>
-                    <p className="text-2xl font-bold text-accent-foreground">৳{mealRate.toFixed(2)} / meal</p>
-                </div>
-            </CardContent>
-        </Card>
-        
-        <Card>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Scale/> Final Settlement</CardTitle>
-                <CardDescription>A summary of who owes what for the month.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Member</TableHead>
-                            <TableHead className="text-right">Total Paid</TableHead>
-                            <TableHead className="text-right">Final Balance</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {hasMembers ? processedMembers.map((member) => {
-                            const utilitySharePerMember = memberCount > 0 ? (totalGroupElectricity + totalGroupGas) / memberCount : 0;
-                            const mealShare = member.meals * mealRate;
-                            const mealBalance = member.expenses.food - mealShare;
-                            const utilityPaid = member.expenses.electricity + member.expenses.gas;
-                            const utilityBalance = utilityPaid - utilitySharePerMember;
-                            const finalBalance = mealBalance + utilityBalance;
-                            const totalPaid = member.expenses.food + utilityPaid;
+      <Card>
+        <CardHeader>
+          <CardTitle>Overall Summary</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            <Link
+              href={`/report/items?month=${monthQueryParam}`}
+              className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
+            >
+              <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1 whitespace-nowrap">
+                <FileText /> Food Expenses
+              </p>
+              <p className="text-2xl font-bold">
+                ৳{totalGroupFoodExpenses.toFixed(0)}
+              </p>
+            </Link>
+            <Link
+              href={`/report/contribution/electricity?month=${monthQueryParam}`}
+              className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
+            >
+              <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1 whitespace-nowrap">
+                <Zap /> Electricity
+              </p>
+              <p className="text-2xl font-bold">
+                ৳{totalGroupElectricity.toFixed(0)}
+              </p>
+            </Link>
+            <Link
+              href={`/report/contribution/gas?month=${monthQueryParam}`}
+              className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
+            >
+              <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1 whitespace-nowrap">
+                <Flame /> Gas
+              </p>
+              <p className="text-2xl font-bold">
+                ৳{totalGroupGas.toFixed(0)}
+              </p>
+            </Link>
+            <Link
+              href={`/report/meal-settlement?month=${monthQueryParam}`}
+              className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
+            >
+              <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1 whitespace-nowrap">
+                <Utensils /> Total Meals
+              </p>
+              <p className="text-2xl font-bold">{totalGroupMeals}</p>
+            </Link>
+          </div>
+          <div className="text-center p-4 bg-accent/20 rounded-lg mt-4">
+            <p className="text-sm font-medium text-accent-foreground/80">
+              Calculated Meal Rate
+            </p>
+            <p className="text-2xl font-bold text-accent-foreground">
+              ৳{mealRate.toFixed(2)} / meal
+            </p>
+          </div>
+        </CardContent>
+      </Card>
 
-                            return (
-                                <TableRow key={member.id}>
-                                    <TableCell className="font-medium">
-                                        <Link href={`/report/${member.id}?month=${monthQueryParam}`} className="hover:underline text-primary">
-                                            {member.name}
-                                        </Link>
-                                    </TableCell>
-                                    <TableCell className="text-right font-semibold">
-                                        ৳{totalPaid.toFixed(2)}
-                                    </TableCell>
-                                    <TableCell className={cn(
-                                        "text-right font-bold",
-                                        finalBalance >= 0 ? "text-green-600" : "text-red-600"
-                                    )}>
-                                        {finalBalance >= 0 ? `Gets Back: ৳${finalBalance.toFixed(2)}` : `Owes: ৳${Math.abs(finalBalance).toFixed(2)}`}
-                                    </TableCell>
-                                </TableRow>
-                            )
-                        }) : (
-                            <TableRow>
-                                <TableCell colSpan={3} className="text-center h-24">
-                                    <div className="flex flex-col items-center gap-2">
-                                        <Users className="h-8 w-8 text-muted-foreground" />
-                                        <p className="text-muted-foreground">No members found for this month.</p>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Scale /> Final Settlement
+          </CardTitle>
+          <CardDescription>
+            A summary of who owes what for the month.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Member</TableHead>
+                <TableHead className="text-right">Total Paid</TableHead>
+                <TableHead className="text-right">Final Balance</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {hasMembers ? (
+                processedMembers.map((member) => {
+                  const utilitySharePerMember =
+                    memberCount > 0
+                      ? (totalGroupElectricity + totalGroupGas) / memberCount
+                      : 0;
+                  const mealShare = member.meals * mealRate;
+                  const mealBalance = member.expenses.food - mealShare;
+                  const utilityPaid =
+                    member.expenses.electricity + member.expenses.gas;
+                  const utilityBalance = utilityPaid - utilitySharePerMember;
+                  const finalBalance = mealBalance + utilityBalance;
+                  const totalPaid = member.expenses.food + utilityPaid;
+
+                  return (
+                    <TableRow key={member.id}>
+                      <TableCell className="font-medium">
+                        <Link
+                          href={`/report/${member.id}?month=${monthQueryParam}`}
+                          className="hover:underline text-primary"
+                        >
+                          {member.name}
+                        </Link>
+                      </TableCell>
+                      <TableCell className="text-right font-semibold">
+                        ৳{totalPaid.toFixed(2)}
+                      </TableCell>
+                      <TableCell
+                        className={cn(
+                          "text-right font-bold",
+                          finalBalance >= 0 ? "text-green-600" : "text-red-600"
                         )}
-                    </TableBody>
-                </Table>
-            </CardContent>
-        </Card>
+                      >
+                        {finalBalance >= 0
+                          ? `Gets Back: ৳${finalBalance.toFixed(2)}`
+                          : `Owes: ৳${Math.abs(finalBalance).toFixed(2)}`}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={3} className="text-center h-24">
+                    <div className="flex flex-col items-center gap-2">
+                      <Users className="h-8 w-8 text-muted-foreground" />
+                      <p className="text-muted-foreground">
+                        No members found for this month.
+                      </p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   );
 }
-
-    

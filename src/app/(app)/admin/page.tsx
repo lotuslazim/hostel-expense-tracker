@@ -56,6 +56,7 @@ function NewUserAdminPanel() {
           role: 'admin',
           joinedAt: serverTimestamp(),
           displayName: currentUser.displayName,
+          id: currentUser.uid
       });
 
       batch.update(userRef, {

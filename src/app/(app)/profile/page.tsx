@@ -57,6 +57,7 @@ function JoinGroupCard() {
             displayName: currentUser.displayName,
             role: 'member',
             joinedAt: serverTimestamp(),
+            id: currentUser.uid,
         });
         
         await batch.commit();
