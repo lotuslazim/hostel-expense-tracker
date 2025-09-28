@@ -83,7 +83,6 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     };
   }, [month]);
 
-  // Queries for members, meals, and expenses
   const membersQuery = useMemo(() =>
     groupId ? collection(firestore, `groups/${groupId}/members`) : null,
     [firestore, groupId]
@@ -115,19 +114,18 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
   const hasAnyErrors = currentUserDataError || membersError || mealsError || expensesError;
   
   const isDataComplete = useMemo(() => {
-    if (isAnyLoading) return false;
-    if (!groupId) return true; // Not in a group, so no data is expected
+    if (isAnyLoading || !groupId) return false;
     return membersData !== undefined && mealsData !== undefined && expensesData !== undefined;
   }, [isAnyLoading, groupId, membersData, mealsData, expensesData]);
 
   const processedData = useMemo(() => {
-    if (!isDataComplete || hasAnyErrors || !membersData || !mealsData || !expensesData) {
+    if (!isDataComplete || hasAnyErrors) {
       return null;
     }
 
-    const processedMembers = membersData.map(member => {
-        const memberMeals = mealsData.filter(m => m.userId === member.id);
-        const memberExpenses = expensesData.filter(e => e.userId === member.id);
+    const processedMembers = (membersData || []).map(member => {
+        const memberMeals = (mealsData || []).filter(m => m.userId === member.id);
+        const memberExpenses = (expensesData || []).filter(e => e.userId === member.id);
         
         const totalMeals = memberMeals.reduce((sum, meal) => sum + (meal.mealNumber || 1), 0);
         const foodExpenses = memberExpenses.filter(e => e.category === 'Food').reduce((sum, e) => sum + e.amount, 0);
@@ -148,6 +146,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     const totalGroupMeals = processedMembers.reduce((acc, member) => acc + member.meals, 0);
     const memberCount = processedMembers.length;
     
+    // Prevent division by zero
     const mealRate = totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
 
     return {
@@ -161,7 +160,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     }
   }, [isDataComplete, hasAnyErrors, membersData, mealsData, expensesData]);
 
-  if (isAnyLoading || !isDataComplete) {
+  if (isAnyLoading || !isDataComplete || !processedData) {
     return <SummarySkeleton />;
   }
 
@@ -169,10 +168,6 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     return <DataError />;
   }
   
-  if (!processedData) {
-      return <SummarySkeleton />;
-  }
-
   const {
       processedMembers,
       totalGroupFoodExpenses,
@@ -325,5 +320,3 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     </div>
   );
 }
-
-    
