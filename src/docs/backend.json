@@ -34,12 +34,13 @@
       "type": "object",
       "description": "Represents a member within a group, containing their email and role.",
       "properties": {
+        "id": { "type": "string" },
         "email": { "type": "string", "description": "The member's email address.", "format": "email" },
         "displayName": { "type": "string", "description": "The user's display name." },
         "role": { "type": "string", "description": "The role of the member within the group (e.g., 'admin', 'member')." },
         "joinedAt": { "type": "string", "description": "The timestamp when the member joined the group.", "format": "date-time" }
       },
-      "required": ["email", "displayName", "role", "joinedAt"]
+      "required": ["id", "email", "displayName", "role", "joinedAt"]
     },
     "MealLog": {
       "$schema": "http://json-schema.org/draft-07/schema#",
@@ -51,9 +52,10 @@
         "mealType": { "type": "string", "enum": ["breakfast", "lunch", "dinner", "snack"] },
         "date": { "type": "string", "format": "date-time" },
         "description": { "type": "string" },
+        "mealNumber": { "type": "number" },
         "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["id", "groupId", "userId", "userName", "mealType", "date", "description", "createdAt"]
+      "required": ["id", "groupId", "userId", "userName", "mealType", "date", "description", "mealNumber", "createdAt"]
     },
     "Expense": {
       "$schema": "http://json-schema.org/draft-07/schema#",
@@ -92,9 +94,9 @@
           "entityName": "Group", "schema": { "$ref": "#/entities/Group" },
           "rules": {
             "read": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId",
-            "write": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true"
+            "write": "resource.data.adminId == request.auth.uid"
           },
-          "description": "Stores group information. Readable by members, writable by admins."
+          "description": "Stores group information. Readable by members, writable only by the group admin."
         }
       },
       {
@@ -103,16 +105,16 @@
           "entityName": "Member", "schema": { "$ref": "#/entities/Member" },
           "rules": {
             "read": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId",
-            "write": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true"
+            "write": "get(/databases/$(database)/documents/groups/$(groupId)).data.adminId == request.auth.uid || request.auth.uid == memberId"
           },
-          "description": "Stores basic info about group members. Readable by members, writable by admins."
+          "description": "Stores basic info about group members. Readable by all members. Writable by admins or the member themselves."
         }
       },
       {
         "path": "/groups/{groupId}/meals/{mealId}",
         "definition": {
           "entityName": "MealLog", "schema": { "$ref": "#/entities/MealLog" },
-          "rules": {
+          "rules": { 
             "read": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId",
             "write": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId"
           },
@@ -131,6 +133,7 @@
         }
       }
     ],
-    "reasoning": "This structure enforces security by scoping all group-related data (meals, expenses) within a group's subcollections. A single 'expenses' collection is used to store all types of expenses, differentiated by a 'category' field. This simplifies querying. Security rules consistently use `get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId` to verify that the requesting user is a member of the group they are trying to access, preventing unauthorized data access."
+    "reasoning": "This structure enforces security by scoping all group-related data (meals, expenses) within a group's subcollections. The rule `get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId` is used consistently to verify that the requesting user belongs to the group they are trying to access. This is a secure and scalable pattern that prevents unauthorized data access across groups. Write access is also based on group membership, with more restrictive admin-only writes on the core group document."
   }
 }
+    
