@@ -115,7 +115,8 @@
         "definition": {
           "entityName": "MealLog", "schema": { "$ref": "#/entities/MealLog" },
           "rules": { 
-            "read, write": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
+            "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "write": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
           },
           "description": "Stores meal logs. Accessible only by members of the group."
         }
@@ -125,7 +126,8 @@
         "definition": {
           "entityName": "Expense", "schema": { "$ref": "#/entities/Expense" },
           "rules": {
-            "read, write": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
+            "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "write": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
           },
           "description": "Stores all expense entries, including food and utilities. Accessible only by members of the group."
         }
