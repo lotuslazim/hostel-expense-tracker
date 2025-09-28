@@ -34,9 +34,9 @@ function SummarySkeleton() {
                     <Skeleton className="h-24 w-full rounded-lg" />
                     <Skeleton className="h-24 w-full rounded-lg" />
                 </div>
-                 <div className="text-center p-4 mt-4">
-                    <Skeleton className="h-6 w-1/2 mx-auto rounded-lg" />
-                    <Skeleton className="h-8 w-1/3 mx-auto mt-2 rounded-lg" />
+                 <div className="text-center p-4 mt-4 bg-accent/20 rounded-lg">
+                    <Skeleton className="h-5 w-1/3 mx-auto rounded-lg" />
+                    <Skeleton className="h-8 w-1/4 mx-auto mt-2 rounded-lg" />
                 </div>
             </CardContent>
         </Card>
@@ -111,7 +111,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
   const { data: meals, isLoading: areMealsLoading, error: mealsError } = useCollection<Meal>(mealsQuery);
   const { data: expenses, isLoading: areExpensesLoading, error: expensesError } = useCollection<Expense>(expensesQuery);
 
-  const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || (groupId && (areMembersLoading || areMealsLoading || areExpensesLoading));
+  const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || areMembersLoading || areMealsLoading || areExpensesLoading;
   const hasError = currentUserDataError || membersError || mealsError || expensesError;
 
 
@@ -123,11 +123,24 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     return <DataError />;
   }
 
-  const hasMembers = members && members.length > 0;
+  // After loading, ensure all necessary data is present before rendering.
+  if (!currentUserData || !members || !meals || !expenses) {
+      return (
+          <Card>
+              <CardContent>
+                  <p className="text-center text-muted-foreground py-8">
+                      Data could not be fully loaded. This might be due to a temporary connection issue.
+                  </p>
+              </CardContent>
+          </Card>
+      );
+  }
+
+  const hasMembers = members.length > 0;
   
-  const processedMembers = (members || []).map(member => {
-      const memberMeals = (meals || []).filter(m => m.userId === member.id);
-      const memberExpenses = (expenses || []).filter(e => e.userId === member.id);
+  const processedMembers = members.map(member => {
+      const memberMeals = meals.filter(m => m.userId === member.id);
+      const memberExpenses = expenses.filter(e => e.userId === member.id);
       
       const totalMeals = memberMeals.reduce((sum, meal) => sum + (meal.mealNumber || 1), 0);
 
@@ -305,4 +318,4 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
   );
 }
 
-
+    

@@ -32,7 +32,7 @@ function ReportSkeleton() {
             <CardHeader>
                 <CardTitle><Skeleton className="h-6 w-56" /></CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 pt-6">
                 <Skeleton className="h-14 w-full" />
                 <Skeleton className="h-14 w-full" />
                 <Skeleton className="h-20 w-full" />
@@ -51,11 +51,11 @@ function ReportSkeleton() {
             <div className="space-y-6">
                 <Card>
                     <CardHeader><CardTitle><Skeleton className="h-6 w-32" /></CardTitle></CardHeader>
-                    <CardContent><Skeleton className="h-24 w-full" /></CardContent>
+                    <CardContent className="pt-6"><Skeleton className="h-24 w-full" /></CardContent>
                 </Card>
                 <Card>
                     <CardHeader><CardTitle><Skeleton className="h-6 w-40" /></CardTitle></CardHeader>
-                    <CardContent className="space-y-3">
+                    <CardContent className="space-y-3 pt-6">
                         <Skeleton className="h-16 w-full" />
                         <Skeleton className="h-16 w-full" />
                         <Skeleton className="h-16 w-full" />
@@ -143,8 +143,16 @@ export default function MemberReportPage({ params }: { params: { memberId: strin
       return <DataError />
     }
 
-    if (!members || !meals || !expenses) {
-        return <Card><CardContent><p className="text-center text-muted-foreground py-8">No data available for this report.</p></CardContent></Card>;
+    if (!currentUserData || !members || !meals || !expenses) {
+        return (
+            <Card>
+                <CardContent>
+                    <p className="text-center text-muted-foreground py-8">
+                        Data could not be fully loaded. This might be due to a temporary connection issue.
+                    </p>
+                </CardContent>
+            </Card>
+        );
     }
 
     const memberData = members.find(m => m.id === memberId);

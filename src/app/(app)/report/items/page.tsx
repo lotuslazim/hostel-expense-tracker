@@ -110,10 +110,22 @@ export default function MonthlyItemsPage() {
       return <DataError />;
     }
 
+    if (!currentUserData || !members || !items) {
+        return (
+            <Card>
+                <CardContent>
+                    <p className="text-center text-muted-foreground py-8">
+                        Data could not be fully loaded. This might be due to a temporary connection issue.
+                    </p>
+                </CardContent>
+            </Card>
+        );
+    }
+
     const monthQueryParam = monthParam ? `?month=${monthParam}` : '';
     
-    const memberFoodExpenses = (members || []).map(member => {
-        const foodExpense = (items || [])
+    const memberFoodExpenses = members.map(member => {
+        const foodExpense = items
             .filter(item => item.userId === member.id)
             .reduce((sum, item) => sum + item.cost, 0);
 
@@ -124,7 +136,7 @@ export default function MonthlyItemsPage() {
         };
     });
     
-    const aggregatedItems = (items || []).reduce((acc, item) => {
+    const aggregatedItems = items.reduce((acc, item) => {
         const key = `${item.name.trim().toLowerCase()}_${item.unit.trim().toLowerCase()}`;
         if (!acc[key]) {
             acc[key] = {
@@ -228,3 +240,5 @@ export default function MonthlyItemsPage() {
     </div>
   );
 }
+
+    
