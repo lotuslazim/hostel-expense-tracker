@@ -12,7 +12,7 @@ export interface Meal {
   userName?: string;
 }
 
-export type ExpenseCategory = 'Other';
+export type ExpenseCategory = 'Food' | 'Electricity' | 'Gas' | 'Other';
 
 export interface Expense {
   id: string;

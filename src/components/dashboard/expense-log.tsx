@@ -4,7 +4,7 @@
 import type { Expense, ExpenseCategory } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, ShoppingBasket } from "lucide-react";
+import { PlusCircle, ShoppingBasket, Zap, Flame, Receipt } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -14,11 +14,20 @@ import { useFirebase, useUser, useDoc, useMemoFirebase } from "@/firebase";
 import { doc, collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+const categoryIcons: Record<ExpenseCategory, React.ReactNode> = {
+  Food: <ShoppingBasket className="h-5 w-5" />,
+  Electricity: <Zap className="h-5 w-5" />,
+  Gas: <Flame className="h-5 w-5" />,
+  Other: <Receipt className="h-5 w-5" />,
+};
 
 export function ExpenseLog({ expenses, currentDate }: { expenses: Expense[]; currentDate: Date }) {
   const [open, setOpen] = useState(false);
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
+  const [category, setCategory] = useState<ExpenseCategory>("Other");
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
@@ -31,10 +40,11 @@ export function ExpenseLog({ expenses, currentDate }: { expenses: Expense[]; cur
   const resetForm = () => {
     setDescription("");
     setAmount("");
+    setCategory("Other");
   };
   
   const handleSaveExpense = async () => {
-    if (!description || !amount || !groupId || !currentUser) {
+    if (!description || !amount || !category || !groupId || !currentUser) {
       toast({ variant: "destructive", title: "Missing Information", description: "Please fill out all required fields."});
       return;
     };
@@ -46,7 +56,7 @@ export function ExpenseLog({ expenses, currentDate }: { expenses: Expense[]; cur
       groupId,
       description,
       amount: parseFloat(amount),
-      category: 'Other' as ExpenseCategory,
+      category,
       date: currentDate,
       createdAt: serverTimestamp(),
     };
@@ -85,8 +95,22 @@ export function ExpenseLog({ expenses, currentDate }: { expenses: Expense[]; cur
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
+                   <Label htmlFor="category">Category</Label>
+                   <Select onValueChange={(value: ExpenseCategory) => setCategory(value)} defaultValue={category}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select a category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Food">Food</SelectItem>
+                            <SelectItem value="Electricity">Electricity</SelectItem>
+                            <SelectItem value="Gas">Gas</SelectItem>
+                            <SelectItem value="Other">Other</SelectItem>
+                        </SelectContent>
+                   </Select>
+                </div>
+                <div className="space-y-2">
                    <Label htmlFor="description">Description</Label>
-                   <Input id="description" placeholder="e.g., Monthly groceries, electricity bill" value={description} onChange={e => setDescription(e.target.value)} />
+                   <Input id="description" placeholder="e.g., Monthly groceries, utility bill" value={description} onChange={e => setDescription(e.target.value)} />
                 </div>
                  <div className="space-y-2">
                    <Label htmlFor="amount">Total Amount</Label>
@@ -105,6 +129,7 @@ export function ExpenseLog({ expenses, currentDate }: { expenses: Expense[]; cur
           <TableHeader>
             <TableRow>
               <TableHead>Expense</TableHead>
+              <TableHead>Category</TableHead>
               <TableHead className="text-right">Amount</TableHead>
             </TableRow>
           </TableHeader>
@@ -112,16 +137,21 @@ export function ExpenseLog({ expenses, currentDate }: { expenses: Expense[]; cur
             {expenses.length > 0 ? expenses.map((expense) => (
               <TableRow key={expense.id}>
                 <TableCell className="font-medium">
+                  {expense.description}
+                </TableCell>
+                <TableCell>
                   <div className="flex items-center gap-2">
-                    <span className="p-1.5 bg-muted rounded-full text-muted-foreground"><ShoppingBasket className="h-5 w-5" /></span>
-                    <span>{expense.description}</span>
+                    <span className="p-1.5 bg-muted rounded-full text-muted-foreground">
+                        {categoryIcons[expense.category] || <Receipt className="h-5 w-5" />}
+                    </span>
+                    <span>{expense.category}</span>
                   </div>
                 </TableCell>
                 <TableCell className="text-right">৳{expense.amount.toFixed(2)}</TableCell>
               </TableRow>
             )) : (
               <TableRow>
-                <TableCell colSpan={2} className="text-center h-24 text-muted-foreground">No expenses logged for today.</TableCell>
+                <TableCell colSpan={3} className="text-center h-24 text-muted-foreground">No expenses logged for today.</TableCell>
               </TableRow>
             )}
           </TableBody>
