@@ -17,11 +17,13 @@ import { useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { updateProfile } from "firebase/auth";
+import { useRouter } from "next/navigation";
 
 function JoinGroupCard() {
   const { firestore } = useFirebase();
   const { user: currentUser } = useUser();
   const { toast } = useToast();
+  const router = useRouter();
   const [inviteCode, setInviteCode] = useState("");
   const [isJoining, setIsJoining] = useState(false);
   
@@ -62,6 +64,7 @@ function JoinGroupCard() {
         
         await batch.commit();
         toast({ title: "Success", description: `You have joined the group "${groupDoc.data().groupName}"!` });
+        router.push('/dashboard');
 
     } catch (error) {
         console.error("Error joining group:", error);
@@ -154,7 +157,7 @@ export default function ProfilePage() {
               await updateDoc(memberDocRef, { displayName: name });
           }
           toast({ title: "Success", description: "Your name has been updated." });
-      } catch (error) {
+      } catch (error) => {
           toast({ variant: "destructive", title: "Error", description: "Could not update your name." });
           console.error(error);
       } finally {

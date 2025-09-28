@@ -91,47 +91,47 @@ export default function DashboardPage() {
 
   // Queries for meals and expenses
   const mealsQuery = useMemo(() =>
-    !isCurrentUserLoading && groupId
+    !isCurrentUserLoading && !isCurrentUserDataLoading && groupId
       ? query(
           collection(firestore, `groups/${groupId}/meals`),
           where("date", ">=", dateRange.start),
           where("date", "<=", dateRange.end)
         )
       : null,
-    [firestore, groupId, dateRange, isCurrentUserLoading]
+    [firestore, groupId, dateRange, isCurrentUserLoading, isCurrentUserDataLoading]
   );
 
   const expensesQuery = useMemo(() =>
-    !isCurrentUserLoading && groupId
+    !isCurrentUserLoading && !isCurrentUserDataLoading && groupId
       ? query(
           collection(firestore, `groups/${groupId}/expenses`),
           where("date", ">=", dateRange.start),
           where("date", "<=", dateRange.end)
         )
       : null,
-    [firestore, groupId, dateRange, isCurrentUserLoading]
+    [firestore, groupId, dateRange, isCurrentUserLoading, isCurrentUserDataLoading]
   );
     
   const itemsQuery = useMemo(() =>
-    !isCurrentUserLoading && groupId
+    !isCurrentUserLoading && !isCurrentUserDataLoading && groupId
       ? query(
           collection(firestore, `groups/${groupId}/purchasedItems`),
           where("date", ">=", dateRange.start),
           where("date", "<=", dateRange.end)
         )
       : null,
-    [firestore, groupId, dateRange, isCurrentUserLoading]
+    [firestore, groupId, dateRange, isCurrentUserLoading, isCurrentUserDataLoading]
   );
   
   const monthlyExpensesQuery = useMemo(() =>
-    !isCurrentUserLoading && groupId
+    !isCurrentUserLoading && !isCurrentUserDataLoading && groupId
       ? query(
           collection(firestore, `groups/${groupId}/expenses`),
           where("date", ">=", monthDateRange.start),
           where("date", "<=", monthDateRange.end)
         )
       : null,
-    [firestore, groupId, monthDateRange, isCurrentUserLoading]
+    [firestore, groupId, monthDateRange, isCurrentUserLoading, isCurrentUserDataLoading]
   );
 
 

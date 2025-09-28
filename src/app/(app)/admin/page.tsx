@@ -19,11 +19,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { WelcomeCard } from "@/components/app/welcome-card";
+import { useRouter } from "next/navigation";
 
 function NewUserAdminPanel() {
   const { firestore } = useFirebase();
   const { user: currentUser } = useUser();
   const { toast } = useToast();
+  const router = useRouter();
   const [groupName, setGroupName] = useState("");
   const [isCreating, setIsCreating] = useState(false);
 
@@ -66,6 +68,7 @@ function NewUserAdminPanel() {
 
       await batch.commit();
       toast({ title: "Success", description: `Group "${groupName}" created successfully!` });
+      router.push('/dashboard');
 
     } catch (error) {
         console.error("Error creating group:", error);

@@ -80,17 +80,17 @@ export default function FoodItemAnalysisPage() {
     }), [month]);
 
     const membersQuery = useMemo(() =>
-        !isCurrentUserLoading && groupId ? collection(firestore, `groups/${groupId}/members`) : null,
-        [firestore, groupId, isCurrentUserLoading]
+        !isCurrentUserLoading && !isCurrentUserDataLoading && groupId ? collection(firestore, `groups/${groupId}/members`) : null,
+        [firestore, groupId, isCurrentUserLoading, isCurrentUserDataLoading]
     );
 
     const itemsQuery = useMemo(() =>
-        !isCurrentUserLoading && groupId ? query(
+        !isCurrentUserLoading && !isCurrentUserDataLoading && groupId ? query(
             collection(firestore, `groups/${groupId}/purchasedItems`),
             where("date", ">=", monthDateRange.start),
             where("date", "<=", monthDateRange.end)
         ) : null,
-        [firestore, groupId, monthDateRange, isCurrentUserLoading]
+        [firestore, groupId, monthDateRange, isCurrentUserLoading, isCurrentUserDataLoading]
     );
 
     const { data: membersData, isLoading: areMembersLoading, error: membersError } = useCollection(membersQuery);
@@ -100,7 +100,7 @@ export default function FoodItemAnalysisPage() {
     const hasError = currentUserDataError || membersError || itemsError;
 
     const processedData = useMemo(() => {
-        if (isLoading || !itemsData || !membersData) return null;
+        if (!membersData || !itemsData) return null;
 
         const memberContributions = membersData.map(member => {
             const totalSpent = itemsData
@@ -128,7 +128,7 @@ export default function FoodItemAnalysisPage() {
             aggregatedItems: Object.values(aggregatedItems).sort((a, b) => b.totalCost - a.totalCost),
         };
 
-    }, [isLoading, itemsData, membersData]);
+    }, [itemsData, membersData]);
 
     if (isLoading || (groupId && !processedData)) {
         return <PageSkeleton />;
