@@ -188,9 +188,8 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-            <Link
-              href={`/report/items?month=${monthQueryParam}`}
-              className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
+            <div
+              className="block p-4 bg-muted/50 rounded-lg"
             >
               <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1 whitespace-nowrap">
                 <FileText className="h-4 w-4"/> Food Expenses
@@ -198,7 +197,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
               <p className="text-2xl font-bold">
                 ৳{totalGroupFoodExpenses.toFixed(0)}
               </p>
-            </Link>
+            </div>
             <Link
               href={`/report/contribution/electricity?month=${monthQueryParam}`}
               className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"

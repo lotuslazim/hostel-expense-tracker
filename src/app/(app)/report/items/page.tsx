@@ -1,243 +1,320 @@
-
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, Users, ShoppingCart, AlertTriangle } from "lucide-react";
+import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { useSearchParams } from "next/navigation";
-import { format, parseISO, startOfMonth, endOfMonth } from "date-fns";
-import { useMemo } from "react";
+import { Flame, Zap, Utensils, Scale, Users, FileText, AlertTriangle } from "lucide-react";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
 import { doc, collection, query, where } from "firebase/firestore";
-import type { PurchasedItem } from "@/lib/types";
+import { useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { format } from "date-fns";
+import type { Meal, Expense } from "@/lib/types";
+import { startOfMonth, endOfMonth } from 'date-fns';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-function ItemsSkeleton() {
-    return (
-        <div className="space-y-6">
-            <div className="flex items-center gap-4">
-                <Skeleton className="h-10 w-10 rounded-md" />
-                <div>
-                    <Skeleton className="h-9 w-64 mb-2" />
-                    <Skeleton className="h-4 w-80" />
-                </div>
-            </div>
-            <Card>
-                <CardHeader>
-                     <CardTitle className="flex items-center gap-2">
-                        <Users className="h-5 w-5 text-muted-foreground"/>
-                        <Skeleton className="h-6 w-56" />
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-6">
-                    <Skeleton className="h-48 w-full" />
-                </CardContent>
-            </Card>
-            <Card>
-                <CardHeader>
-                     <CardTitle className="flex items-center gap-2">
-                        <ShoppingCart className="h-5 w-5 text-muted-foreground"/>
-                        <Skeleton className="h-6 w-56" />
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-6">
-                    <Skeleton className="h-48 w-full" />
-                </CardContent>
-            </Card>
-        </div>
-    );
+
+interface MonthlySummaryProps {
+  month: Date;
 }
 
-function DataError() {
-  return (
-    <Alert variant="destructive">
-      <AlertTriangle className="h-4 w-4" />
-      <AlertTitle>Error Loading Report</AlertTitle>
-      <AlertDescription>
-        There was a problem fetching the data for this report. Please try again later.
-      </AlertDescription>
-    </Alert>
-  )
-}
-
-export default function MonthlyItemsPage() {
-    const searchParams = useSearchParams();
-    const monthParam = searchParams.get('month');
-    
-    const { firestore } = useFirebase();
-    const { user: currentUser, isUserLoading: isCurrentUserLoading } = useUser();
-    
-    const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
-    const { data: currentUserData, isLoading: isCurrentUserDataLoading, error: currentUserDataError } = useDoc(currentUserRef);
-    const groupId = currentUserData?.groupId;
-
-    const targetDate = monthParam ? parseISO(monthParam) : new Date();
-    const monthDateRange = useMemo(() => {
-        return {
-          start: startOfMonth(targetDate),
-          end: endOfMonth(targetDate),
-        };
-    }, [targetDate]);
-
-    const membersQuery = useMemo(() =>
-        groupId ? collection(firestore, `groups/${groupId}/members`) : null,
-        [firestore, groupId]
-    );
-
-    const itemsQuery = useMemo(() =>
-        groupId ? query(
-        collection(firestore, `groups/${groupId}/purchasedItems`),
-        where("date", ">=", monthDateRange.start),
-        where("date", "<=", monthDateRange.end)
-        ) : null,
-        [firestore, groupId, monthDateRange]
-    );
-
-    const { data: members, isLoading: areMembersLoading, error: membersError } = useCollection(membersQuery);
-    const { data: items, isLoading: areItemsLoading, error: itemsError } = useCollection<PurchasedItem>(itemsQuery);
-    
-    const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || areMembersLoading || areItemsLoading;
-    const hasError = currentUserDataError || membersError || itemsError;
-
-    const processedData = useMemo(() => {
-        if (isLoading || hasError || !members || !items) {
-            return null;
-        }
-
-        const memberFoodExpenses = members.map(member => {
-            const foodExpense = items
-                .filter(item => item.userId === member.id)
-                .reduce((sum, item) => sum + item.cost, 0);
-
-            return {
-                id: member.id,
-                name: member.displayName || member.email.split('@')[0],
-                foodExpense,
-            };
-        });
-
-        const aggregatedItems = items.reduce((acc, item) => {
-            const key = `${item.name.trim().toLowerCase()}_${item.unit.trim().toLowerCase()}`;
-            if (!acc[key]) {
-                acc[key] = {
-                    name: item.name,
-                    unit: item.unit,
-                    totalQuantity: 0,
-                    totalCost: 0,
-                };
-            }
-            acc[key].totalQuantity += item.quantity;
-            acc[key].totalCost += item.cost;
-            return acc;
-        }, {} as Record<string, { name: string; unit: string; totalQuantity: number; totalCost: number; }>);
-        
-        const sortedAggregatedItems = Object.values(aggregatedItems).sort((a, b) => b.totalCost - a.totalCost);
-
-        return { memberFoodExpenses, sortedAggregatedItems };
-
-    }, [isLoading, hasError, members, items]);
-
-
-    if (isLoading || !processedData) {
-        return <ItemsSkeleton />;
-    }
-
-    if (hasError) {
-      return <DataError />;
-    }
-    
-    const monthQueryParam = monthParam ? `?month=${monthParam}` : '';
-    const { memberFoodExpenses, sortedAggregatedItems } = processedData;
-
-
+function SummarySkeleton() {
   return (
     <div className="space-y-6">
-        <div className="flex items-center gap-4">
-            <Button variant="outline" size="icon" asChild>
-                <Link href={`/report${monthQueryParam}`}><ArrowLeft className="h-4 w-4" /></Link>
-            </Button>
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight font-headline">
-                Monthly Food Item Analysis
-              </h1>
-              <p className="text-muted-foreground">
-                A detailed breakdown of food items purchased in {format(targetDate, "MMMM yyyy")}.
-              </p>
-            </div>
-        </div>
-
         <Card>
             <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <Users className="h-5 w-5"/>
-                    Food Expense by Member
-                </CardTitle>
+                <CardTitle><Skeleton className="h-7 w-48"/></CardTitle>
             </CardHeader>
             <CardContent>
-                 <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Member</TableHead>
-                            <TableHead className="text-right">Total Spent on Food</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {memberFoodExpenses.length > 0 ? memberFoodExpenses.map((member) => (
-                            <TableRow key={member.id}>
-                                <TableCell className="font-medium">{member.name}</TableCell>
-                                <TableCell className="text-right">৳{member.foodExpense.toFixed(2)}</TableCell>
-                            </TableRow>
-                        )) : (
-                            <TableRow>
-                                <TableCell colSpan={2} className="text-center h-24">
-                                    No food expenses logged for this month.
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                    <Skeleton className="h-24 w-full rounded-lg" />
+                    <Skeleton className="h-24 w-full rounded-lg" />
+                    <Skeleton className="h-24 w-full rounded-lg" />
+                    <Skeleton className="h-24 w-full rounded-lg" />
+                </div>
+                 <div className="text-center p-4 mt-4 bg-accent/20 rounded-lg">
+                    <Skeleton className="h-5 w-1/3 mx-auto rounded-lg" />
+                    <Skeleton className="h-8 w-1/4 mx-auto mt-2 rounded-lg" />
+                </div>
             </CardContent>
         </Card>
-
         <Card>
             <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <ShoppingCart className="h-5 w-5"/>
-                    Aggregated Item Summary
-                </CardTitle>
+                <CardTitle><Skeleton className="h-7 w-40"/></CardTitle>
+                <CardDescription><Skeleton className="h-4 w-80"/></CardDescription>
             </CardHeader>
             <CardContent>
-                 <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Item</TableHead>
-                            <TableHead className="text-center">Total Quantity</TableHead>
-                            <TableHead className="text-right">Total Cost</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {sortedAggregatedItems.length > 0 ? sortedAggregatedItems.map((item) => (
-                            <TableRow key={item.name + item.unit}>
-                                <TableCell className="font-medium">{item.name}</TableCell>
-                                <TableCell className="text-center">{item.totalQuantity.toLocaleString()} {item.unit}</TableCell>
-                                <TableCell className="text-right">৳{item.totalCost.toFixed(2)}</TableCell>
-                            </TableRow>
-                        )) : (
-                            <TableRow>
-                                <TableCell colSpan={3} className="text-center h-24">
-                                    No individual food items were logged this month.
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
+                <Skeleton className="h-40 w-full rounded-lg" />
             </CardContent>
         </Card>
     </div>
   );
 }
 
+
+function DataError() {
+  return (
+    <Alert variant="destructive">
+      <AlertTriangle className="h-4 w-4" />
+      <AlertTitle>Error Loading Summary</AlertTitle>
+      <AlertDescription>
+        There was a problem fetching the data for the monthly summary. Please try again later.
+      </AlertDescription>
+    </Alert>
+  );
+}
+
+
+export function MonthlySummary({ month }: MonthlySummaryProps) {
+  const { firestore } = useFirebase();
+  const { user: currentUser, isUserLoading: isCurrentUserLoading } = useUser();
+
+  const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
+  const { data: currentUserData, isLoading: isCurrentUserDataLoading, error: currentUserDataError } = useDoc(currentUserRef);
+
+  const groupId = currentUserData?.groupId;
+
+  const monthDateRange = useMemo(() => {
+    return {
+      start: startOfMonth(month),
+      end: endOfMonth(month),
+    };
+  }, [month]);
+
+  const membersQuery = useMemo(() =>
+    groupId ? collection(firestore, `groups/${groupId}/members`) : null,
+    [firestore, groupId]
+  );
+  
+  const mealsQuery = useMemo(() =>
+    groupId ? query(
+      collection(firestore, `groups/${groupId}/meals`),
+      where("date", ">=", monthDateRange.start),
+      where("date", "<=", monthDateRange.end)
+    ) : null,
+    [firestore, groupId, monthDateRange]
+  );
+
+  const expensesQuery = useMemo(() =>
+    groupId ? query(
+      collection(firestore, `groups/${groupId}/expenses`),
+      where("date", ">=", monthDateRange.start),
+      where("date", "<=", monthDateRange.end)
+    ) : null,
+    [firestore, groupId, monthDateRange]
+  );
+  
+  const { data: membersData, isLoading: areMembersLoading, error: membersError } = useCollection(membersQuery);
+  const { data: mealsData, isLoading: areMealsLoading, error: mealsError } = useCollection<Meal>(mealsQuery);
+  const { data: expensesData, isLoading: areExpensesLoading, error: expensesError } = useCollection<Expense>(expensesQuery);
+
+  const isAnyLoading = isCurrentUserLoading || isCurrentUserDataLoading || areMembersLoading || areMealsLoading || areExpensesLoading;
+  const hasAnyErrors = currentUserDataError || membersError || mealsError || expensesError;
+  
+  const isDataComplete = useMemo(() => {
+    if (isAnyLoading || !groupId) return false;
+    return membersData !== undefined && mealsData !== undefined && expensesData !== undefined;
+  }, [isAnyLoading, groupId, membersData, mealsData, expensesData]);
+
+  const processedData = useMemo(() => {
+    if (!isDataComplete || hasAnyErrors) {
+      return null;
+    }
+
+    const processedMembers = (membersData || []).map(member => {
+        const memberMeals = (mealsData || []).filter(m => m.userId === member.id);
+        const memberExpenses = (expensesData || []).filter(e => e.userId === member.id);
+        
+        const totalMeals = memberMeals.reduce((sum, meal) => sum + (meal.mealNumber || 1), 0);
+        const foodExpenses = memberExpenses.filter(e => e.category === 'Food').reduce((sum, e) => sum + e.amount, 0);
+        const electricityExpenses = memberExpenses.filter(e => e.category === 'Electricity').reduce((sum, e) => sum + e.amount, 0);
+        const gasExpenses = memberExpenses.filter(e => e.category === 'Gas').reduce((sum, e) => sum + e.amount, 0);
+          
+        return {
+          id: member.id,
+          name: member.displayName || member.email.split('@')[0],
+          meals: totalMeals,
+          expenses: { food: foodExpenses, electricity: electricityExpenses, gas: gasExpenses }
+        };
+    });
+
+    const totalGroupFoodExpenses = processedMembers.reduce((acc, member) => acc + member.expenses.food, 0);
+    const totalGroupElectricity = processedMembers.reduce((acc, member) => acc + member.expenses.electricity, 0);
+    const totalGroupGas = processedMembers.reduce((acc, member) => acc + member.expenses.gas, 0);
+    const totalGroupMeals = processedMembers.reduce((acc, member) => acc + member.meals, 0);
+    const memberCount = processedMembers.length;
     
+    // Prevent division by zero
+    const mealRate = totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
+
+    return {
+        processedMembers,
+        totalGroupFoodExpenses,
+        totalGroupElectricity,
+        totalGroupGas,
+        totalGroupMeals,
+        memberCount,
+        mealRate,
+    }
+  }, [isDataComplete, hasAnyErrors, membersData, mealsData, expensesData]);
+
+  if (isAnyLoading || !isDataComplete || !processedData) {
+    return <SummarySkeleton />;
+  }
+
+  if (hasAnyErrors) {
+    return <DataError />;
+  }
+  
+  const {
+      processedMembers,
+      totalGroupFoodExpenses,
+      totalGroupElectricity,
+      totalGroupGas,
+      totalGroupMeals,
+      memberCount,
+      mealRate,
+  } = processedData;
+
+  const monthQueryParam = format(month, 'yyyy-MM-dd');
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Overall Summary</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            <div
+              className="block p-4 bg-muted/50 rounded-lg"
+            >
+              <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1 whitespace-nowrap">
+                <FileText className="h-4 w-4"/> Food Expenses
+              </p>
+              <p className="text-2xl font-bold">
+                ৳{totalGroupFoodExpenses.toFixed(0)}
+              </p>
+            </div>
+            <Link
+              href={`/report/contribution/electricity?month=${monthQueryParam}`}
+              className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
+            >
+              <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1 whitespace-nowrap">
+                <Zap className="h-4 w-4"/> Electricity
+              </p>
+              <p className="text-2xl font-bold">
+                ৳{totalGroupElectricity.toFixed(0)}
+              </p>
+            </Link>
+            <Link
+              href={`/report/contribution/gas?month=${monthQueryParam}`}
+              className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
+            >
+              <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1 whitespace-nowrap">
+                <Flame className="h-4 w-4"/> Gas
+              </p>
+              <p className="text-2xl font-bold">
+                ৳{totalGroupGas.toFixed(0)}
+              </p>
+            </Link>
+            <Link
+              href={`/report/meal-settlement?month=${monthQueryParam}`}
+              className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
+            >
+              <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1 whitespace-nowrap">
+                <Utensils className="h-4 w-4"/> Total Meals
+              </p>
+              <p className="text-2xl font-bold">{totalGroupMeals}</p>
+            </Link>
+          </div>
+          <div className="text-center p-4 bg-accent/20 rounded-lg mt-4">
+            <p className="text-sm font-medium text-accent-foreground/80">
+              Calculated Meal Rate
+            </p>
+            <p className="text-2xl font-bold text-accent-foreground">
+              ৳{mealRate.toFixed(2)} / meal
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Scale /> Final Settlement
+          </CardTitle>
+          <CardDescription>
+            A summary of who owes what for the month.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Member</TableHead>
+                <TableHead className="text-right">Total Paid</TableHead>
+                <TableHead className="text-right">Final Balance</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {memberCount > 0 ? (
+                processedMembers.map((member) => {
+                  const utilitySharePerMember =
+                    memberCount > 0
+                      ? (totalGroupElectricity + totalGroupGas) / memberCount
+                      : 0;
+                  const mealShare = member.meals * mealRate;
+                  const mealBalance = member.expenses.food - mealShare;
+                  const utilityPaid =
+                    member.expenses.electricity + member.expenses.gas;
+                  const utilityBalance = utilityPaid - utilitySharePerMember;
+                  const finalBalance = mealBalance + utilityBalance;
+                  const totalPaid = member.expenses.food + utilityPaid;
+
+                  return (
+                    <TableRow key={member.id}>
+                      <TableCell className="font-medium">
+                        <Link
+                          href={`/report/${member.id}?month=${monthQueryParam}`}
+                          className="hover:underline text-primary"
+                        >
+                          {member.name}
+                        </Link>
+                      </TableCell>
+                      <TableCell className="text-right font-semibold">
+                        ৳{totalPaid.toFixed(2)}
+                      </TableCell>
+                      <TableCell
+                        className={cn(
+                          "text-right font-bold",
+                          finalBalance >= 0 ? "text-green-600" : "text-red-600"
+                        )}
+                      >
+                        {finalBalance >= 0
+                          ? `Gets Back: ৳${finalBalance.toFixed(2)}`
+                          : `Owes: ৳${Math.abs(finalBalance).toFixed(2)}`}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={3} className="text-center h-24">
+                    <div className="flex flex-col items-center gap-2">
+                      <Users className="h-8 w-8 text-muted-foreground" />
+                      <p className="text-muted-foreground">
+                        No members found for this month.
+                      </p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
