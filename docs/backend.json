@@ -109,7 +109,7 @@
         "definition": {
           "entityName": "Group", "schema": { "$ref": "#/entities/Group" },
           "rules": {
-            "read": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId",
+            "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
             "write": "resource.data.adminId == request.auth.uid"
           },
           "description": "Stores group information. Readable by members, writable only by the group admin."
@@ -120,7 +120,7 @@
         "definition": {
           "entityName": "Member", "schema": { "$ref": "#/entities/Member" },
           "rules": {
-            "read": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId",
+            "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
             "write": "get(/databases/$(database)/documents/groups/$(groupId)).data.adminId == request.auth.uid || request.auth.uid == memberId"
           },
           "description": "Stores basic info about group members. Readable by all members. Writable by admins or the member themselves."
@@ -131,8 +131,8 @@
         "definition": {
           "entityName": "MealLog", "schema": { "$ref": "#/entities/MealLog" },
           "rules": { 
-            "read": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId",
-            "write": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId"
+            "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "write": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
           },
           "description": "Stores meal logs. Accessible only by members of the group."
         }
@@ -142,8 +142,8 @@
         "definition": {
           "entityName": "Expense", "schema": { "$ref": "#/entities/Expense" },
           "rules": {
-            "read": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId",
-            "write": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId"
+            "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "write": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
           },
           "description": "Stores all expense entries, including food and utilities. Accessible only by members of the group."
         }
@@ -153,13 +153,13 @@
         "definition": {
           "entityName": "PurchasedItem", "schema": { "$ref": "#/entities/PurchasedItem" },
           "rules": {
-            "read": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId",
-            "write": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId"
+            "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "write": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
           },
           "description": "Stores detailed food item purchases. Accessible only by members of the group."
         }
       }
     ],
-    "reasoning": "This structure enforces security by scoping all group-related data within a group's subcollections. The rule `get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId` is used consistently to verify that the requesting user belongs to the group they are trying to access. This is a secure and scalable pattern. Write access is also based on group membership, with more restrictive admin-only writes on the core group document."
+    "reasoning": "This structure enforces security by scoping all group-related data within a group's subcollections. The rule `exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))` is used consistently to verify that the requesting user is a member of the group they are trying to access. This is a secure and scalable pattern that prevents unauthorized data access and race conditions. Write access is also based on group membership, with more restrictive admin-only writes on the core group document."
   }
 }
