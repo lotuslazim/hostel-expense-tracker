@@ -44,7 +44,7 @@ function SummarySkeleton() {
             <CardHeader>
                 <CardTitle><Skeleton className="h-7 w-40"/></CardTitle>
                 <CardDescription><Skeleton className="h-4 w-80"/></CardDescription>
-            </Header>
+            </CardHeader>
             <CardContent>
                 <Skeleton className="h-40 w-full rounded-lg" />
             </CardContent>
