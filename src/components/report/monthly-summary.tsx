@@ -113,7 +113,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
   const hasAnyErrors = currentUserDataError || membersError || mealsError || expensesError;
   
   const processedData = useMemo(() => {
-    if (isAnyLoading || hasAnyErrors || !membersData || !mealsData || !expensesData) {
+    if (!membersData || !mealsData || !expensesData) {
       return null;
     }
 
@@ -152,7 +152,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
         memberCount,
         mealRate,
     }
-  }, [isAnyLoading, hasAnyErrors, membersData, mealsData, expensesData]);
+  }, [membersData, mealsData, expensesData]);
 
   if (isAnyLoading) {
     return <SummarySkeleton />;
@@ -163,8 +163,6 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
   }
   
   if (!processedData) {
-      // This case handles when data is loaded, there are no errors, but some data array is empty (e.g., new group)
-      // We can show a state indicating no data is available for the month.
       return (
           <div className="space-y-6">
               <Card>
@@ -240,8 +238,9 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                 ৳{totalGroupFoodExpenses.toFixed(0)}
               </p>
             </Link>
-             <div
-              className="block p-4 bg-muted/50 rounded-lg"
+             <Link
+              href={`/report/contribution/electricity?month=${monthQueryParam}`}
+              className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
             >
               <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1 whitespace-nowrap">
                 <Zap className="h-4 w-4"/> Electricity
@@ -249,7 +248,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
               <p className="text-2xl font-bold">
                 ৳{totalGroupElectricity.toFixed(0)}
               </p>
-            </div>
+            </Link>
             <div
               className="block p-4 bg-muted/50 rounded-lg"
             >
