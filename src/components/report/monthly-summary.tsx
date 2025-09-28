@@ -154,7 +154,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     }
   }, [isAnyLoading, hasAnyErrors, membersData, mealsData, expensesData]);
 
-  if (isAnyLoading || (groupId && !processedData)) {
+  if (isAnyLoading) {
     return <SummarySkeleton />;
   }
 
@@ -162,6 +162,53 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     return <DataError />;
   }
   
+  if (!processedData) {
+      // This case handles when data is loaded, there are no errors, but some data array is empty (e.g., new group)
+      // We can show a state indicating no data is available for the month.
+      return (
+          <div className="space-y-6">
+              <Card>
+                  <CardHeader>
+                      <CardTitle>Overall Summary</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                          <div className="p-4 bg-muted/50 rounded-lg"><p className="text-sm text-muted-foreground">Food Expenses</p><p className="text-2xl font-bold">৳0</p></div>
+                          <div className="p-4 bg-muted/50 rounded-lg"><p className="text-sm text-muted-foreground">Electricity</p><p className="text-2xl font-bold">৳0</p></div>
+                          <div className="p-4 bg-muted/50 rounded-lg"><p className="text-sm text-muted-foreground">Gas</p><p className="text-2xl font-bold">৳0</p></div>
+                          <div className="p-4 bg-muted/50 rounded-lg"><p className="text-sm text-muted-foreground">Total Meals</p><p className="text-2xl font-bold">0</p></div>
+                      </div>
+                      <div className="text-center p-4 bg-accent/20 rounded-lg mt-4">
+                          <p className="text-sm font-medium text-accent-foreground/80">Calculated Meal Rate</p>
+                          <p className="text-2xl font-bold text-accent-foreground">৳0.00 / meal</p>
+                      </div>
+                  </CardContent>
+              </Card>
+              <Card>
+                  <CardHeader>
+                      <CardTitle className="flex items-center gap-2"><Scale /> Final Settlement</CardTitle>
+                      <CardDescription>A summary of who owes what for the month.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                      <Table>
+                          <TableHeader><TableRow><TableHead>Member</TableHead><TableHead className="text-right">Total Paid</TableHead><TableHead className="text-right">Final Balance</TableHead></TableRow></TableHeader>
+                          <TableBody>
+                              <TableRow>
+                                  <TableCell colSpan={3} className="text-center h-24">
+                                      <div className="flex flex-col items-center gap-2">
+                                          <Users className="h-8 w-8 text-muted-foreground" />
+                                          <p className="text-muted-foreground">No financial data to process for this month.</p>
+                                      </div>
+                                  </TableCell>
+                              </TableRow>
+                          </TableBody>
+                      </Table>
+                  </CardContent>
+              </Card>
+          </div>
+      );
+  }
+
   const {
       processedMembers,
       totalGroupFoodExpenses,
@@ -170,7 +217,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
       totalGroupMeals,
       memberCount,
       mealRate,
-  } = processedData!;
+  } = processedData;
 
   const monthQueryParam = format(month, 'yyyy-MM-dd');
 
