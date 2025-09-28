@@ -71,7 +71,7 @@
         "receiptPhotoUrl": { "type": "string", "format": "uri", "description": "An optional URL for a photo of the receipt." },
         "createdAt": { "type": "string", "format": "date-time", "description": "The timestamp when the expense was logged." }
       },
-      "required": ["id", "groupId", "userId", "userName", "description", "amount", "date", "category", "createdAt"]
+      "required": ["id", "groupId", "userId", "description", "amount", "date", "category", "createdAt"]
     }
   },
   "auth": { "providers": ["password", "google"] },
@@ -127,3 +127,5 @@
     "reasoning": "This structure enforces security by scoping all group-related data (meals, expenses) within a group's subcollections. A single 'expenses' collection is used to store all types of expenses, differentiated by a 'category' field. This simplifies querying. Security rules consistently use `get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId` to verify that the requesting user is a member of the group they are trying to access, preventing unauthorized data access."
   }
 }
+
+    

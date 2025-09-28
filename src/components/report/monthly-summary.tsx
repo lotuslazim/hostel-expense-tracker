@@ -6,13 +6,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { Flame, Zap, Utensils, Scale, Users, FileText } from "lucide-react";
-import { useFirebase, useUser, useDoc, useMemoFirebase } from "@/firebase";
-import { doc } from "firebase/firestore";
-import { useEffect, useState } from "react";
-import { getMonthlyGroupData } from "@/ai/flows/get-monthly-group-data";
-import type { MonthlyGroupData } from "@/ai/schemas";
+import { useFirebase, useUser, useDoc, useMemoFirebase, useCollection } from "@/firebase";
+import { doc, collection, query, where } from "firebase/firestore";
+import { useEffect, useState, useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
+import type { MonthlyGroupData } from "@/ai/schemas";
+import type { Meal, Expense } from "@/lib/types";
+import { startOfMonth, endOfMonth } from 'date-fns';
 
 interface MonthlySummaryProps {
   month: Date;
@@ -60,48 +61,84 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
 
   const groupId = currentUserData?.groupId;
 
-  const [groupData, setGroupData] = useState<MonthlyGroupData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  
-  useEffect(() => {
-    if (groupId) {
-      setIsLoading(true);
-      getMonthlyGroupData({ groupId, date: month.toISOString() })
-        .then(data => {
-          setGroupData(data);
-          setError(null);
-        })
-        .catch(err => {
-          console.error("Failed to fetch monthly data:", err);
-          setError("Could not load monthly report data.");
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
-    } else if (!isCurrentUserLoading && !isCurrentUserDataLoading) {
-      setIsLoading(false);
-    }
-  }, [groupId, month, isCurrentUserLoading, isCurrentUserDataLoading]);
+  const monthDateRange = useMemo(() => {
+    return {
+      start: startOfMonth(month),
+      end: endOfMonth(month),
+    };
+  }, [month]);
 
-  const dataLoading = isLoading || isCurrentUserLoading || isCurrentUserDataLoading;
+  // Queries for members, meals, and expenses
+  const membersQuery = useMemoFirebase(() =>
+    groupId ? query(collection(firestore, 'users'), where('groupId', '==', groupId)) : null,
+    [firestore, groupId]
+  );
+  
+  const mealsQuery = useMemoFirebase(() =>
+    groupId ? query(
+      collection(firestore, `groups/${groupId}/meals`),
+      where("date", ">=", monthDateRange.start),
+      where("date", "<=", monthDateRange.end)
+    ) : null,
+    [firestore, groupId, monthDateRange]
+  );
+
+  const expensesQuery = useMemoFirebase(() =>
+    groupId ? query(
+      collection(firestore, `groups/${groupId}/expenses`),
+      where("date", ">=", monthDateRange.start),
+      where("date", "<=", monthDateRange.end)
+    ) : null,
+    [firestore, groupId, monthDateRange]
+  );
+  
+  const { data: members, isLoading: areMembersLoading } = useCollection(membersQuery);
+  const { data: meals, isLoading: areMealsLoading } = useCollection<Meal>(mealsQuery);
+  const { data: expenses, isLoading: areExpensesLoading } = useCollection<Expense>(expensesQuery);
+
+  const dataLoading = isCurrentUserLoading || isCurrentUserDataLoading || areMembersLoading || areMealsLoading || areExpensesLoading;
 
   if (dataLoading) {
     return <SummarySkeleton />;
   }
 
-  if (error) {
-    return <Card><CardContent><p className="text-center text-destructive py-8">{error}</p></CardContent></Card>;
-  }
-
-  const members = groupData?.members ?? [];
-  const hasMembers = members.length > 0;
+  const hasMembers = members && members.length > 0;
   
-  const totalGroupFoodExpenses = members.reduce((acc, member) => acc + member.expenses.food, 0);
-  const totalGroupElectricity = members.reduce((acc, member) => acc + member.expenses.electricity, 0);
-  const totalGroupGas = members.reduce((acc, member) => acc + member.expenses.gas, 0);
-  const totalGroupMeals = members.reduce((acc, member) => acc + member.meals, 0);
-  const memberCount = members.length;
+  const processedMembers = (members || []).map(user => {
+      const memberMeals = (meals || []).filter(m => m.userId === user.id);
+      const memberExpenses = (expenses || []).filter(e => e.userId === user.id);
+      
+      const totalMeals = memberMeals.reduce((sum, meal) => sum + (meal.mealNumber || 1), 0);
+
+      const foodExpenses = memberExpenses
+        .filter(e => e.category === 'Food')
+        .reduce((sum, e) => sum + e.amount, 0);
+      
+      const electricityExpenses = memberExpenses
+        .filter(e => e.category === 'Electricity')
+        .reduce((sum, e) => sum + e.amount, 0);
+
+      const gasExpenses = memberExpenses
+        .filter(e => e.category === 'Gas')
+        .reduce((sum, e) => sum + e.amount, 0);
+        
+      return {
+        id: user.id,
+        name: user.displayName || user.email.split('@')[0],
+        meals: totalMeals,
+        expenses: {
+          food: foodExpenses,
+          electricity: electricityExpenses,
+          gas: gasExpenses,
+        }
+      };
+    });
+
+  const totalGroupFoodExpenses = processedMembers.reduce((acc, member) => acc + member.expenses.food, 0);
+  const totalGroupElectricity = processedMembers.reduce((acc, member) => acc + member.expenses.electricity, 0);
+  const totalGroupGas = processedMembers.reduce((acc, member) => acc + member.expenses.gas, 0);
+  const totalGroupMeals = processedMembers.reduce((acc, member) => acc + member.meals, 0);
+  const memberCount = processedMembers.length;
   
   const mealRate = totalGroupFoodExpenses > 0 && totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
   const monthQueryParam = format(month, 'yyyy-MM-dd');
@@ -153,7 +190,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {hasMembers ? members.map((member) => {
+                        {hasMembers ? processedMembers.map((member) => {
                             const utilitySharePerMember = memberCount > 0 ? (totalGroupElectricity + totalGroupGas) / memberCount : 0;
                             const mealShare = member.meals * mealRate;
                             const mealBalance = member.expenses.food - mealShare;
@@ -197,3 +234,5 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     </div>
   );
 }
+
+    
