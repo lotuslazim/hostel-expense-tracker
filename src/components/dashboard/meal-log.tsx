@@ -24,6 +24,7 @@ const mealIcons: Record<MealType, React.ReactNode> = {
 function LogMealDialog({ type, onMealLogged, currentDate }: { type: MealType; onMealLogged: () => void; currentDate: Date }) {
     const [open, setOpen] = useState(false);
     const [mealNumber, setMealNumber] = useState("1");
+    const [description, setDescription] = useState("");
     const [isSaving, setIsSaving] = useState(false);
     const { toast } = useToast();
     
@@ -34,7 +35,7 @@ function LogMealDialog({ type, onMealLogged, currentDate }: { type: MealType; on
     const groupId = currentUserData?.groupId;
 
     const handleSaveMeal = async () => {
-        if (parseInt(mealNumber) <= 0 || !groupId || !currentUser) {
+        if (parseFloat(mealNumber) <= 0 || !groupId || !currentUser) {
             toast({ variant: "destructive", title: "Error", description: "Meal number must be greater than zero." });
             return;
         }
@@ -45,8 +46,8 @@ function LogMealDialog({ type, onMealLogged, currentDate }: { type: MealType; on
             userName: currentUser.displayName || currentUser.email?.split('@')[0],
             groupId,
             mealType: type,
-            description: `${type.charAt(0).toUpperCase() + type.slice(1)} meal`, // Generic description
-            mealNumber: parseInt(mealNumber, 10),
+            description: description || `${type.charAt(0).toUpperCase() + type.slice(1)} meal`,
+            mealNumber: parseFloat(mealNumber),
             date: currentDate,
             createdAt: serverTimestamp(),
         };
@@ -57,6 +58,7 @@ function LogMealDialog({ type, onMealLogged, currentDate }: { type: MealType; on
 
             onMealLogged();
             setMealNumber("1");
+            setDescription("");
             setOpen(false);
             toast({ title: "Success", description: "Meal logged successfully." });
 
@@ -78,7 +80,7 @@ function LogMealDialog({ type, onMealLogged, currentDate }: { type: MealType; on
            <DialogContent>
               <DialogHeader>
                 <DialogTitle>Log {type}</DialogTitle>
-                <DialogDescription>How many meals for {type}?</DialogDescription>
+                <DialogDescription>Log your meal count and an optional description.</DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
                  <div className="space-y-2">
@@ -86,13 +88,23 @@ function LogMealDialog({ type, onMealLogged, currentDate }: { type: MealType; on
                    <Input 
                         id={`meal-number-${type}`}
                         type="number"
-                        min="1"
-                        placeholder="e.g., 1"
+                        step="0.5"
+                        min="0.5"
+                        placeholder="e.g., 1 or 1.5"
                         value={mealNumber}
                         onChange={(e) => setMealNumber(e.target.value)}
                     />
                 </div>
-                <Button className="w-full" onClick={handleSaveMeal} disabled={isSaving || parseInt(mealNumber) <= 0}>
+                 <div className="space-y-2">
+                   <Label htmlFor={`meal-description-${type}`}>Meal Description (Optional)</Label>
+                   <Input 
+                        id={`meal-description-${type}`}
+                        placeholder="e.g., Chicken Curry"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                    />
+                </div>
+                <Button className="w-full" onClick={handleSaveMeal} disabled={isSaving || parseFloat(mealNumber) <= 0}>
                     {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Save Meal
                 </Button>
@@ -115,21 +127,23 @@ export function MealLog({ meals, currentDate }: { meals: Meal[], currentDate: Da
       </CardHeader>
       <CardContent className="grid gap-6">
         {mealTypes.map((type) => {
-          const loggedMeal = meals.find((meal) => meal.mealType === type);
+          const loggedMeals = meals.filter((meal) => meal.mealType === type);
+          const totalMeals = loggedMeals.reduce((sum, meal) => sum + meal.mealNumber, 0);
+          
           return (
             <div key={type} className="flex items-center justify-between p-4 rounded-lg border bg-card">
               <div className="flex items-center gap-4">
                 {mealIcons[type]}
                 <div>
                   <h3 className="font-semibold capitalize">{type}</h3>
-                  {loggedMeal ? (
-                    <p className="text-sm text-muted-foreground">{loggedMeal.mealNumber} {loggedMeal.mealNumber > 1 ? 'meals' : 'meal'} logged</p>
+                  {totalMeals > 0 ? (
+                    <p className="text-sm text-muted-foreground">{totalMeals} {totalMeals > 1 ? 'meals' : 'meal'} logged</p>
                   ) : (
                     <p className="text-sm text-muted-foreground">Not logged yet</p>
                   )}
                 </div>
               </div>
-              {loggedMeal ? (
+              {totalMeals > 0 ? (
                 <div className="flex items-center gap-2 text-primary">
                   <CheckCircle2 className="h-5 w-5" />
                   <span className="text-sm font-medium">Logged</span>
