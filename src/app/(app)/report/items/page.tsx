@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, Users } from "lucide-react";
+import { ArrowLeft, Users, ShoppingCart } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useSearchParams } from "next/navigation";
@@ -11,7 +11,7 @@ import { format, parseISO, startOfMonth, endOfMonth } from "date-fns";
 import { useMemo } from "react";
 import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/firebase";
 import { doc, collection, query, where } from "firebase/firestore";
-import type { Expense } from "@/lib/types";
+import type { PurchasedItem } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 
 function ItemsSkeleton() {
@@ -35,10 +35,20 @@ function ItemsSkeleton() {
                     <Skeleton className="h-48 w-full" />
                 </CardContent>
             </Card>
+            <Card>
+                <CardHeader>
+                     <CardTitle className="flex items-center gap-2">
+                        <ShoppingCart className="h-5 w-5"/>
+                        <Skeleton className="h-6 w-56" />
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <Skeleton className="h-48 w-full" />
+                </CardContent>
+            </Card>
         </div>
     );
 }
-
 
 export default function MonthlyItemsPage() {
     const searchParams = useSearchParams();
@@ -64,20 +74,19 @@ export default function MonthlyItemsPage() {
         [firestore, groupId]
     );
 
-    const expensesQuery = useMemoFirebase(() =>
+    const itemsQuery = useMemoFirebase(() =>
         groupId ? query(
-        collection(firestore, `groups/${groupId}/expenses`),
+        collection(firestore, `groups/${groupId}/purchasedItems`),
         where("date", ">=", monthDateRange.start),
-        where("date", "<=", monthDateRange.end),
-        where("category", "==", "Food")
+        where("date", "<=", monthDateRange.end)
         ) : null,
         [firestore, groupId, monthDateRange]
     );
 
     const { data: members, isLoading: areMembersLoading } = useCollection(membersQuery);
-    const { data: expenses, isLoading: areExpensesLoading } = useCollection<Expense>(expensesQuery);
+    const { data: items, isLoading: areItemsLoading } = useCollection<PurchasedItem>(itemsQuery);
     
-    const dataLoading = isCurrentUserLoading || isCurrentUserDataLoading || areMembersLoading || areExpensesLoading;
+    const dataLoading = isCurrentUserLoading || isCurrentUserDataLoading || areMembersLoading || areItemsLoading;
 
     if (dataLoading) {
         return <ItemsSkeleton />;
@@ -86,9 +95,9 @@ export default function MonthlyItemsPage() {
     const monthQueryParam = monthParam ? `?month=${monthParam}` : '';
     
     const memberFoodExpenses = (members || []).map(member => {
-        const foodExpense = (expenses || [])
-            .filter(e => e.userId === member.id)
-            .reduce((sum, e) => sum + e.amount, 0);
+        const foodExpense = (items || [])
+            .filter(item => item.userId === member.id)
+            .reduce((sum, item) => sum + item.cost, 0);
 
         return {
             id: member.id,
@@ -96,6 +105,23 @@ export default function MonthlyItemsPage() {
             foodExpense,
         };
     });
+    
+    const aggregatedItems = (items || []).reduce((acc, item) => {
+        const key = `${item.name.trim().toLowerCase()}_${item.unit.trim().toLowerCase()}`;
+        if (!acc[key]) {
+            acc[key] = {
+                name: item.name,
+                unit: item.unit,
+                totalQuantity: 0,
+                totalCost: 0,
+            };
+        }
+        acc[key].totalQuantity += item.quantity;
+        acc[key].totalCost += item.cost;
+        return acc;
+    }, {} as Record<string, { name: string; unit: string; totalQuantity: number; totalCost: number; }>);
+    
+    const sortedAggregatedItems = Object.values(aggregatedItems).sort((a, b) => b.totalCost - a.totalCost);
 
 
   return (
@@ -106,10 +132,10 @@ export default function MonthlyItemsPage() {
             </Button>
             <div>
               <h1 className="text-3xl font-bold tracking-tight font-headline">
-                Monthly Food Expenses
+                Monthly Food Item Analysis
               </h1>
               <p className="text-muted-foreground">
-                Breakdown of food expenses for {format(targetDate, "MMMM yyyy")}.
+                A detailed breakdown of food items purchased in {format(targetDate, "MMMM yyyy")}.
               </p>
             </div>
         </div>
@@ -126,7 +152,7 @@ export default function MonthlyItemsPage() {
                     <TableHeader>
                         <TableRow>
                             <TableHead>Member</TableHead>
-                            <TableHead className="text-right">Food Expense</TableHead>
+                            <TableHead className="text-right">Total Spent on Food</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -146,8 +172,41 @@ export default function MonthlyItemsPage() {
                 </Table>
             </CardContent>
         </Card>
+
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                    <ShoppingCart className="h-5 w-5"/>
+                    Aggregated Item Summary
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+                 <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Item</TableHead>
+                            <TableHead className="text-center">Total Quantity</TableHead>
+                            <TableHead className="text-right">Total Cost</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {sortedAggregatedItems.length > 0 ? sortedAggregatedItems.map((item) => (
+                            <TableRow key={item.name + item.unit}>
+                                <TableCell className="font-medium">{item.name}</TableCell>
+                                <TableCell className="text-center">{item.totalQuantity.toLocaleString()} {item.unit}</TableCell>
+                                <TableCell className="text-right">৳{item.totalCost.toFixed(2)}</TableCell>
+                            </TableRow>
+                        )) : (
+                            <TableRow>
+                                <TableCell colSpan={3} className="text-center h-24">
+                                    No individual food items were logged this month.
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
     </div>
   );
 }
-
-    

@@ -75,6 +75,22 @@
         "createdAt": { "type": "string", "format": "date-time", "description": "The timestamp when the expense was logged." }
       },
       "required": ["id", "groupId", "userId", "userName", "description", "amount", "date", "category", "createdAt"]
+    },
+     "PurchasedItem": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "PurchasedItem",
+      "type": "object",
+      "description": "Represents a specific food item purchased for the group.",
+      "properties": {
+        "id": { "type": "string" }, "groupId": { "type": "string" }, "userId": { "type": "string" }, "userName": { "type": "string" },
+        "name": { "type": "string", "description": "Name of the item (e.g., 'Rice', 'Olive Oil')." },
+        "quantity": { "type": "number", "description": "Quantity of the item." },
+        "unit": { "type": "string", "description": "Unit of measurement (e.g., 'kg', 'L', 'pcs')." },
+        "cost": { "type": "number", "description": "Total cost of the item(s)." },
+        "date": { "type": "string", "format": "date-time", "description": "The date the item was purchased." },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "groupId", "userId", "userName", "name", "quantity", "unit", "cost", "date", "createdAt"]
     }
   },
   "auth": { "providers": ["password", "google"] },
@@ -93,7 +109,7 @@
         "definition": {
           "entityName": "Group", "schema": { "$ref": "#/entities/Group" },
           "rules": {
-            "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "read": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId",
             "write": "resource.data.adminId == request.auth.uid"
           },
           "description": "Stores group information. Readable by members, writable only by the group admin."
@@ -104,7 +120,7 @@
         "definition": {
           "entityName": "Member", "schema": { "$ref": "#/entities/Member" },
           "rules": {
-            "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "read": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId",
             "write": "get(/databases/$(database)/documents/groups/$(groupId)).data.adminId == request.auth.uid || request.auth.uid == memberId"
           },
           "description": "Stores basic info about group members. Readable by all members. Writable by admins or the member themselves."
@@ -115,8 +131,8 @@
         "definition": {
           "entityName": "MealLog", "schema": { "$ref": "#/entities/MealLog" },
           "rules": { 
-            "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
-            "write": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
+            "read": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId",
+            "write": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId"
           },
           "description": "Stores meal logs. Accessible only by members of the group."
         }
@@ -126,13 +142,24 @@
         "definition": {
           "entityName": "Expense", "schema": { "$ref": "#/entities/Expense" },
           "rules": {
-            "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
-            "write": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
+            "read": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId",
+            "write": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId"
           },
           "description": "Stores all expense entries, including food and utilities. Accessible only by members of the group."
         }
+      },
+       {
+        "path": "/groups/{groupId}/purchasedItems/{itemId}",
+        "definition": {
+          "entityName": "PurchasedItem", "schema": { "$ref": "#/entities/PurchasedItem" },
+          "rules": {
+            "read": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId",
+            "write": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId"
+          },
+          "description": "Stores detailed food item purchases. Accessible only by members of the group."
+        }
       }
     ],
-    "reasoning": "This structure enforces security by scoping all group-related data (meals, expenses) within a group's subcollections. The rule `exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))` is used consistently to verify that the requesting user is a member of the group they are trying to access. This is a secure and scalable pattern that prevents unauthorized data access across groups."
+    "reasoning": "This structure enforces security by scoping all group-related data within a group's subcollections. The rule `get(/databases/$(database)/documents/users/$(request.auth.uid)).data.groupId == groupId` is used consistently to verify that the requesting user belongs to the group they are trying to access. This is a secure and scalable pattern. Write access is also based on group membership, with more restrictive admin-only writes on the core group document."
   }
 }

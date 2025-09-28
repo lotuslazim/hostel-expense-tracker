@@ -7,7 +7,8 @@ import { format, parseISO, startOfDay, endOfDay, startOfMonth, endOfMonth } from
 import { DateSwitcher } from "@/components/dashboard/date-switcher";
 import { MealLog } from "@/components/dashboard/meal-log";
 import { AllExpenses } from "@/components/dashboard/all-expenses";
-import type { Meal, Expense } from "@/lib/types";
+import { ItemLog } from "@/components/dashboard/item-log";
+import type { Meal, Expense, PurchasedItem } from "@/lib/types";
 import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/firebase";
 import { doc, collection, query, where } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -29,7 +30,10 @@ function DashboardSkeleton() {
         </div>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <Skeleton className="h-72 w-full rounded-lg" />
+        <div className="space-y-8">
+            <Skeleton className="h-72 w-full rounded-lg" />
+            <Skeleton className="h-96 w-full rounded-lg" />
+        </div>
         <Skeleton className="h-96 w-full rounded-lg lg:col-span-2" />
       </div>
       <Skeleton className="h-96 w-full rounded-lg" />
@@ -92,6 +96,17 @@ export default function DashboardPage() {
       : null,
     [firestore, groupId, dateRange]
   );
+    
+  const itemsQuery = useMemoFirebase(() =>
+    groupId
+      ? query(
+          collection(firestore, `groups/${groupId}/purchasedItems`),
+          where("date", ">=", dateRange.start),
+          where("date", "<=", dateRange.end)
+        )
+      : null,
+    [firestore, groupId, dateRange]
+  );
   
   const monthlyExpensesQuery = useMemoFirebase(() =>
     groupId
@@ -107,9 +122,10 @@ export default function DashboardPage() {
 
   const { data: meals, isLoading: areMealsLoading } = useCollection<Meal>(mealsQuery);
   const { data: expenses, isLoading: areExpensesLoading } = useCollection<Expense>(expensesQuery);
+  const { data: items, isLoading: areItemsLoading } = useCollection<PurchasedItem>(itemsQuery);
   const { data: monthlyExpenses, isLoading: areMonthlyExpensesLoading } = useCollection<Expense>(monthlyExpensesQuery);
 
-  const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || areMealsLoading || areExpensesLoading || areMonthlyExpensesLoading;
+  const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || areMealsLoading || areExpensesLoading || areMonthlyExpensesLoading || areItemsLoading;
 
   if (isLoading) {
     return <DashboardSkeleton />;
@@ -135,7 +151,10 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        <MealLog meals={meals ?? []} currentDate={currentDate} />
+        <div className="space-y-8">
+          <MealLog meals={meals ?? []} currentDate={currentDate} />
+          <ItemLog items={items ?? []} currentDate={currentDate} />
+        </div>
         <div className="lg:col-span-2">
             <AllExpenses expenses={expenses ?? []} currentDate={currentDate} />
         </div>
