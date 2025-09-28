@@ -1,4 +1,5 @@
 
+import type { Timestamp } from 'firebase/firestore';
 
 export type MealType = 'lunch' | 'dinner';
 
@@ -7,7 +8,7 @@ export interface Meal {
   mealType: MealType;
   description: string;
   mealNumber: number;
-  date: Date;
+  date: Date | Timestamp;
   userId: string;
   groupId: string;
   userName?: string;
@@ -20,7 +21,7 @@ export interface Expense {
   description: string;
   amount: number;
   category: ExpenseCategory;
-  date: Date;
+  date: Date | Timestamp;
   receiptPhotoUrl?: string;
   userId: string;
   groupId: string;

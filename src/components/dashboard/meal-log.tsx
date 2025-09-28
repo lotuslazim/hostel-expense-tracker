@@ -47,16 +47,13 @@ function LogMealDialog({ type, onMealLogged, currentDate }: { type: MealType; on
             mealType: type,
             description: `${type.charAt(0).toUpperCase() + type.slice(1)} meal`, // Generic description
             mealNumber: parseInt(mealNumber, 10),
-            date: serverTimestamp(),
+            date: currentDate,
             createdAt: serverTimestamp(),
         };
 
         try {
             const mealsCol = collection(firestore, `groups/${groupId}/meals`);
-            await addDoc(mealsCol, {
-              ...mealData,
-              date: currentDate,
-            });
+            await addDoc(mealsCol, mealData);
 
             onMealLogged();
             setMealNumber("1");
