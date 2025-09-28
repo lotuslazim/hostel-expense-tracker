@@ -157,7 +157,7 @@ export default function ProfilePage() {
               await updateDoc(memberDocRef, { displayName: name });
           }
           toast({ title: "Success", description: "Your name has been updated." });
-      } catch (error) => {
+      } catch (error) {
           toast({ variant: "destructive", title: "Error", description: "Could not update your name." });
           console.error(error);
       } finally {
