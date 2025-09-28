@@ -50,8 +50,8 @@ function DataError() {
 }
 
 
-export default function ContributionPage({ params: { category: encodedCategory } }: { params: { category: string } }) {
-    const category = decodeURIComponent(encodedCategory);
+export default function ContributionPage({ params }: { params: { category: string } }) {
+    const category = decodeURIComponent(params.category);
     const searchParams = useSearchParams();
     const router = useRouter();
     const monthParam = searchParams.get('month');
