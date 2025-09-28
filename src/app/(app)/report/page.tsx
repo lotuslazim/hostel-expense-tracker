@@ -48,7 +48,7 @@ export default function ReportPage() {
           <h1 className="text-3xl font-bold tracking-tight font-headline">
             Monthly Summary for {format(currentDate, "MMMM yyyy")}
           </h1>
-          <p className="text-muted-foreground">An AI-generated summary of your group's activity.</p>
+          <p className="text-muted-foreground">A summary of your group's activity.</p>
         </div>
         <MonthSwitcher
           currentDate={currentDate}

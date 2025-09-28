@@ -61,7 +61,9 @@ const getMemberDailyDataFlow = ai.defineFlow(
     const dailyData = daysInMonth.map(day => {
         const dayString = format(day, 'yyyy-MM-dd');
         
-        const mealsOnDay = meals.filter(m => format(m.date.toDate(), 'yyyy-MM-dd') === dayString).length;
+        const mealsOnDay = meals
+            .filter(m => format(m.date.toDate(), 'yyyy-MM-dd') === dayString)
+            .reduce((sum, meal) => sum + (meal.mealNumber || 1), 0);
         
         const foodExpensesOnDay = expenses
             .filter(e => e.category === 'Food' && format(e.date.toDate(), 'yyyy-MM-dd') === dayString)

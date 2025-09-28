@@ -154,12 +154,13 @@ export default function MemberReportPage({ params }: { params: { memberId: strin
     const totalFoodExpenses = memberDailyData.dailyData.reduce((acc, day) => acc + day.expenses.food, 0);
     const totalElectricityExpenses = memberDailyData.dailyData.reduce((acc, day) => acc + day.expenses.electricity, 0);
     const totalGasExpenses = memberDailyData.dailyData.reduce((acc, day) => acc + day.expenses.gas, 0);
+    const monthQueryParam = format(targetDate, 'yyyy-MM-dd');
 
   return (
     <div className="space-y-6">
         <div className="flex items-center gap-4">
             <Button variant="outline" size="icon" asChild>
-                <Link href="/report"><ArrowLeft className="h-4 w-4" /></Link>
+                <Link href={`/report?month=${monthQueryParam}`}><ArrowLeft className="h-4 w-4" /></Link>
             </Button>
             <div>
               <h1 className="text-3xl font-bold tracking-tight font-headline">
@@ -279,3 +280,4 @@ export default function MemberReportPage({ params }: { params: { memberId: strin
         </div>
     </div>
   );
+}

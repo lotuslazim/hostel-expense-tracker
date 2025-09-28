@@ -69,7 +69,7 @@ const getMonthlyGroupDataFlow = ai.defineFlow(
       const memberMeals = meals.filter(m => m.userId === user.id);
       const memberExpenses = expenses.filter(e => e.userId === user.id);
       
-      const totalMeals = memberMeals.length;
+      const totalMeals = memberMeals.reduce((sum, meal) => sum + (meal.mealNumber || 1), 0);
 
       const foodExpenses = memberExpenses
         .filter(e => e.category === 'Food')
