@@ -177,7 +177,7 @@ export default function MemberReportPage({ params }: { params: { memberId: strin
     const totalGroupMeals = processedMembers.reduce((acc, member) => acc + member.meals, 0);
     const memberCount = processedMembers.length;
 
-    const mealRate = totalGroupFoodExpenses > 0 && totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
+    const mealRate = totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
     const utilitySharePerMember = memberCount > 0 ? totalGroupUtilities / memberCount : 0;
 
     const mealShare = member.meals * mealRate;

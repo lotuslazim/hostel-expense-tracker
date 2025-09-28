@@ -108,7 +108,7 @@ export default function MealSettlementPage() {
     const foodExpenses = (expenses || []).filter(e => e.category === 'Food');
     const totalGroupFoodExpenses = foodExpenses.reduce((acc, expense) => acc + expense.amount, 0);
     const totalGroupMeals = (meals || []).reduce((acc, meal) => acc + meal.mealNumber, 0);
-    const mealRate = totalGroupFoodExpenses > 0 && totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
+    const mealRate = totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
     const monthQueryParam = format(targetDate, 'yyyy-MM-dd');
 
     const settlementData = members.map(member => {

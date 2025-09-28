@@ -139,7 +139,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
   const totalGroupMeals = processedMembers.reduce((acc, member) => acc + member.meals, 0);
   const memberCount = processedMembers.length;
   
-  const mealRate = totalGroupFoodExpenses > 0 && totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
+  const mealRate = totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
   const monthQueryParam = format(month, 'yyyy-MM-dd');
 
   return (
@@ -282,3 +282,4 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     </div>
   );
 }
+
