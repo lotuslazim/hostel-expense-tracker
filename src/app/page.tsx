@@ -30,7 +30,7 @@ export default function LandingPage() {
                 Shared living, simplified.
               </h1>
               <p className="text-lg text-muted-foreground">
-                BachelorBite helps you and your flatmates seamlessly track shared meals and expenses. Say goodbye to spreadsheets and confusion.
+                NourishTrack helps you and your flatmates seamlessly track shared meals and expenses. Say goodbye to spreadsheets and confusion.
               </p>
               <Button size="lg" asChild>
                 <Link href="/signup">
@@ -55,7 +55,7 @@ export default function LandingPage() {
         </section>
       </main>
       <footer className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-muted-foreground text-sm">
-        <p>&copy; {new Date().getFullYear()} BachelorBite. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} NourishTrack. All rights reserved.</p>
       </footer>
     </div>
   );

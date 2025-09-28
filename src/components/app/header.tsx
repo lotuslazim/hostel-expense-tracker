@@ -16,6 +16,7 @@ export function AppHeader() {
             <NavLink href="/report">Monthly Report</NavLink>
             <NavLink href="/profile">Profile</NavLink>
             <NavLink href="/admin">Admin</NavLink>
+            <NavLink href="/settings">Settings</NavLink>
         </nav>
         <div className="flex flex-1 items-center justify-end space-x-4">
           <UserNav />

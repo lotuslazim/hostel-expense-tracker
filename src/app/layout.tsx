@@ -6,7 +6,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { I18nProvider } from '@/i18n/client-provider';
 
 export const metadata: Metadata = {
-  title: 'BachelorBite',
+  title: 'NourishTrack',
   description: 'Shared living, simplified. Track meals and expenses with your flatmates.',
 };
 

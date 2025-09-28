@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { Flame, Zap, Utensils, Scale, Users } from "lucide-react";
+import { Flame, Zap, Utensils, Scale, Users, FileText } from "lucide-react";
 import { useFirebase, useUser, useDoc, useMemoFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
 import { useEffect, useState } from "react";
@@ -31,6 +31,10 @@ function SummarySkeleton() {
                     <Skeleton className="h-20 w-full" />
                     <Skeleton className="h-20 w-full" />
                     <Skeleton className="h-20 w-full" />
+                </div>
+                 <div className="text-center p-4 bg-accent/20 rounded-lg mt-4">
+                    <Skeleton className="h-6 w-1/2 mx-auto" />
+                    <Skeleton className="h-8 w-1/3 mx-auto mt-2" />
                 </div>
             </CardContent>
         </Card>
@@ -111,7 +115,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
             <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                     <Link href={`/report/items?month=${monthQueryParam}`} className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors">
-                        <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1 whitespace-nowrap"><span className="font-bold text-lg">৳</span> Food</p>
+                        <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1 whitespace-nowrap"><FileText /> Food Expenses</p>
                         <p className="text-2xl font-bold">৳{totalGroupFoodExpenses.toFixed(0)}</p>
                     </Link>
                     <Link href={`/report/contribution/electricity?month=${monthQueryParam}`} className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors">
@@ -123,17 +127,15 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                         <p className="text-2xl font-bold">৳{totalGroupGas.toFixed(0)}</p>
                     </Link>
                     <Link href={`/report/meal-settlement?month=${monthQueryParam}`} className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors">
-                        <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1 whitespace-nowrap"><Utensils /> Meals</p>
+                        <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1 whitespace-nowrap"><Utensils /> Total Meals</p>
                         <p className="text-2xl font-bold">{totalGroupMeals}</p>
                     </Link>
                 </div>
-            </CardContent>
-             <CardHeader className="pt-2">
-                <div className="text-center p-4 bg-accent/20 rounded-lg">
+                 <div className="text-center p-4 bg-accent/20 rounded-lg mt-4">
                     <p className="text-sm font-medium text-accent-foreground/80">Calculated Meal Rate</p>
                     <p className="text-2xl font-bold text-accent-foreground">৳{mealRate.toFixed(2)} / meal</p>
                 </div>
-            </CardHeader>
+            </CardContent>
         </Card>
         
         <Card>
