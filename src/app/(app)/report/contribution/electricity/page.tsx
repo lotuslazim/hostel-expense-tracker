@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { parseISO, startOfMonth, endOfMonth, format } from "date-fns";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
-import { doc, collection, query, where, type Timestamp } from "firebase/firestore";
+import { doc, collection, query, where, type Timestamp, getDocs } from "firebase/firestore";
 import type { Expense } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -56,7 +56,7 @@ export default function ElectricityContributionPage() {
     const router = useRouter();
     const monthParam = searchParams.get('month');
 
-    const { firestore } = useFirebase();
+    const { firestore, auth } = useFirebase();
     const { user: currentUser, isUserLoading: isCurrentUserLoading } = useUser();
 
     const month = useMemo(() => {
@@ -73,18 +73,18 @@ export default function ElectricityContributionPage() {
     }), [month]);
 
     const membersQuery = useMemo(() =>
-        !isCurrentUserLoading && groupId ? collection(firestore, `groups/${groupId}/members`) : null,
-        [firestore, groupId, isCurrentUserLoading]
+        !isCurrentUserLoading && !isCurrentUserDataLoading && groupId ? collection(firestore, `groups/${groupId}/members`) : null,
+        [firestore, groupId, isCurrentUserLoading, isCurrentUserDataLoading]
     );
 
     const expensesQuery = useMemo(() =>
-        !isCurrentUserLoading && groupId ? query(
+        !isCurrentUserLoading && !isCurrentUserDataLoading && groupId ? query(
             collection(firestore, `groups/${groupId}/expenses`),
             where("date", ">=", monthDateRange.start),
             where("date", "<=", monthDateRange.end),
             where("category", "==", "Electricity")
         ) : null,
-        [firestore, groupId, monthDateRange, isCurrentUserLoading]
+        [firestore, groupId, monthDateRange, isCurrentUserLoading, isCurrentUserDataLoading]
     );
 
     const { data: membersData, isLoading: areMembersLoading, error: membersError } = useCollection(membersQuery);
@@ -92,6 +92,25 @@ export default function ElectricityContributionPage() {
 
     const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || (!!groupId && (areMembersLoading || areExpensesLoading));
     const hasError = currentUserDataError || membersError || expensesError;
+
+    const testFirestore = async () => {
+        if (!groupId) {
+            console.error("Test Firestore: No groupId found.");
+            return;
+        }
+        try {
+          console.log('Testing Firestore access...');
+          console.log('Current user:', auth.currentUser?.uid);
+          
+          const expensesRef = collection(firestore, 'groups', groupId, 'expenses');
+          const snapshot = await getDocs(expensesRef);
+          
+          console.log('Success! Found', snapshot.size, 'expenses');
+        } catch (error) {
+          console.error('Firestore test failed:', error);
+        }
+      };
+
 
     const processedData = useMemo(() => {
         if (!membersData || !expensesData) return null;
@@ -132,15 +151,18 @@ export default function ElectricityContributionPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center gap-4">
-                <Button variant="outline" size="icon" className="h-10 w-10" onClick={() => router.back()}>
-                    <ChevronLeft className="h-6 w-6" />
-                    <span className="sr-only">Back</span>
-                </Button>
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight font-headline">Monthly Electricity Contribution</h1>
-                    <p className="text-muted-foreground">A breakdown of who paid for electricity in {format(month, "MMMM yyyy")}.</p>
+            <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                    <Button variant="outline" size="icon" className="h-10 w-10" onClick={() => router.back()}>
+                        <ChevronLeft className="h-6 w-6" />
+                        <span className="sr-only">Back</span>
+                    </Button>
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight font-headline">Monthly Electricity Contribution</h1>
+                        <p className="text-muted-foreground">A breakdown of who paid for electricity in {format(month, "MMMM yyyy")}.</p>
+                    </div>
                 </div>
+                 <Button onClick={testFirestore}>Test Firestore</Button>
             </div>
 
             <Card>
