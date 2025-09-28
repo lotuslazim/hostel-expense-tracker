@@ -63,7 +63,7 @@ function DataError() {
         There was a problem fetching the data for the monthly summary. Please try again later.
       </AlertDescription>
     </Alert>
-  )
+  );
 }
 
 
