@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { parseISO, startOfMonth, endOfMonth, format } from "date-fns";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
@@ -11,15 +11,19 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle, Users, Package } from "lucide-react";
+import { AlertTriangle, Users, Package, ChevronLeft } from "lucide-react";
 import { WelcomeCard } from "@/components/app/welcome-card";
+import { Button } from "@/components/ui/button";
 
 function PageSkeleton() {
     return (
         <div className="space-y-6">
-            <div>
-                <Skeleton className="h-9 w-1/2" />
-                <Skeleton className="h-4 w-3/4 mt-2" />
+            <div className="flex items-center gap-4">
+                 <Skeleton className="h-10 w-10" />
+                <div>
+                    <Skeleton className="h-9 w-72" />
+                    <Skeleton className="h-4 w-96 mt-2" />
+                </div>
             </div>
             <Card>
                 <CardHeader>
@@ -56,6 +60,7 @@ function DataError() {
 
 export default function FoodItemAnalysisPage() {
     const searchParams = useSearchParams();
+    const router = useRouter();
     const monthParam = searchParams.get('month');
 
     const { firestore } = useFirebase();
@@ -95,9 +100,7 @@ export default function FoodItemAnalysisPage() {
     const hasError = currentUserDataError || membersError || itemsError;
 
     const processedData = useMemo(() => {
-        if (isLoading || hasError || !membersData || !itemsData) {
-            return null;
-        }
+        if (!itemsData || !membersData) return null;
 
         const memberContributions = membersData.map(member => {
             const totalSpent = itemsData
@@ -125,7 +128,7 @@ export default function FoodItemAnalysisPage() {
             aggregatedItems: Object.values(aggregatedItems).sort((a, b) => b.totalCost - a.totalCost),
         };
 
-    }, [isLoading, hasError, membersData, itemsData]);
+    }, [itemsData, membersData]);
 
     if (isLoading || !processedData) {
         return <PageSkeleton />;
@@ -143,9 +146,15 @@ export default function FoodItemAnalysisPage() {
 
     return (
         <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight font-headline">Monthly Food Item Analysis</h1>
-                <p className="text-muted-foreground">A detailed breakdown of food items purchased in {format(month, "MMMM yyyy")}.</p>
+            <div className="flex items-center gap-4">
+                <Button variant="outline" size="icon" className="h-10 w-10" onClick={() => router.back()}>
+                    <ChevronLeft className="h-6 w-6" />
+                    <span className="sr-only">Back</span>
+                </Button>
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight font-headline">Monthly Food Item Analysis</h1>
+                    <p className="text-muted-foreground">A detailed breakdown of food items purchased in {format(month, "MMMM yyyy")}.</p>
+                </div>
             </div>
 
             <Card>
