@@ -6,8 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { format, parseISO, startOfDay, endOfDay } from "date-fns";
 import { DateSwitcher } from "@/components/dashboard/date-switcher";
 import { MealLog } from "@/components/dashboard/meal-log";
-import { FoodExpenseLog } from "@/components/dashboard/food-expense-log";
-import { UtilityExpenseLog } from "@/components/dashboard/utility-expense-log";
+import { AllExpenses } from "@/components/dashboard/all-expenses";
 import type { Meal, Expense } from "@/lib/types";
 import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/firebase";
 import { doc, collection, query, where } from "firebase/firestore";
@@ -28,8 +27,7 @@ function DashboardSkeleton() {
             <Skeleton className="h-10 w-10" />
         </div>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <Skeleton className="h-72 w-full rounded-lg" />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Skeleton className="h-72 w-full rounded-lg" />
         <Skeleton className="h-72 w-full rounded-lg" />
       </div>
@@ -98,9 +96,6 @@ export default function DashboardPage() {
     return <WelcomeCard />;
   }
 
-  const foodExpenses = expenses?.filter(e => e.category === 'Food') ?? [];
-  const utilityExpenses = expenses?.filter(e => e.category !== 'Food') ?? [];
-
   return (
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -118,9 +113,8 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 items-start">
         <MealLog meals={meals ?? []} currentDate={currentDate} />
-        <div className="space-y-8">
-            <FoodExpenseLog expenses={foodExpenses} currentDate={currentDate} />
-            <UtilityExpenseLog expenses={utilityExpenses} currentDate={currentDate} />
+        <div className="xl:col-span-2">
+            <AllExpenses expenses={expenses ?? []} currentDate={currentDate} />
         </div>
       </div>
     </div>

@@ -24,8 +24,7 @@ const categoryIcons: Record<ExpenseCategory, React.ReactNode> = {
   Other: <Receipt className="h-5 w-5" />,
 };
 
-const availableCategories: ExpenseCategory[] = ['Electricity', 'Gas', 'Other'];
-
+const availableCategories: ExpenseCategory[] = ['Food', 'Electricity', 'Gas', 'Other'];
 
 function ReceiptUploadDialog({ receipt, setReceipt }: { receipt: string | null, setReceipt: (url: string | null) => void }) {
     const { toast } = useToast();
@@ -37,7 +36,6 @@ function ReceiptUploadDialog({ receipt, setReceipt }: { receipt: string | null, 
     useEffect(() => {
         if (open) {
             const getCameraPermission = async () => {
-                // Only ask for permission if not already determined
                 if (hasCameraPermission === null) {
                     try {
                         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -55,7 +53,6 @@ function ReceiptUploadDialog({ receipt, setReceipt }: { receipt: string | null, 
                         });
                     }
                 } else if(hasCameraPermission && videoRef.current && !videoRef.current.srcObject) {
-                    // Re-acquire stream if dialog was closed and re-opened
                     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                      if (videoRef.current) {
                         videoRef.current.srcObject = stream;
@@ -64,7 +61,6 @@ function ReceiptUploadDialog({ receipt, setReceipt }: { receipt: string | null, 
             };
             getCameraPermission();
         } else {
-             // Stop camera stream when dialog closes
             if (videoRef.current && videoRef.current.srcObject) {
                 const stream = videoRef.current.srcObject as MediaStream;
                 stream.getTracks().forEach(track => track.stop());
@@ -149,8 +145,7 @@ function ReceiptUploadDialog({ receipt, setReceipt }: { receipt: string | null, 
     );
 }
 
-
-export function UtilityExpenseLog({ expenses, currentDate }: { expenses: Expense[]; currentDate: Date }) {
+export function AllExpenses({ expenses, currentDate }: { expenses: Expense[]; currentDate: Date }) {
   const [open, setOpen] = useState(false);
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
@@ -187,7 +182,7 @@ export function UtilityExpenseLog({ expenses, currentDate }: { expenses: Expense
       amount: parseFloat(amount),
       category,
       date: currentDate,
-      receiptPhotoUrl: receipt, // This will be null or a data URL
+      receiptPhotoUrl: receipt,
       createdAt: serverTimestamp(),
     };
 
@@ -209,8 +204,8 @@ export function UtilityExpenseLog({ expenses, currentDate }: { expenses: Expense
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle>Utility Expense</CardTitle>
-          <CardDescription>Log and view shared utility bills.</CardDescription>
+          <CardTitle>Daily Expense Log</CardTitle>
+          <CardDescription>Log and view all food and utility expenses for today.</CardDescription>
         </div>
          <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
@@ -220,8 +215,8 @@ export function UtilityExpenseLog({ expenses, currentDate }: { expenses: Expense
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add Utility Expense</DialogTitle>
-              <DialogDescription>Log a utility bill or other shared cost.</DialogDescription>
+              <DialogTitle>Add Expense</DialogTitle>
+              <DialogDescription>Log a food purchase, utility bill, or other shared cost.</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
@@ -239,7 +234,7 @@ export function UtilityExpenseLog({ expenses, currentDate }: { expenses: Expense
               </div>
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>
-                <Input id="description" placeholder="e.g., September Electricity Bill" value={description} onChange={e => setDescription(e.target.value)} />
+                <Input id="description" placeholder="e.g., Groceries, Electricity Bill" value={description} onChange={e => setDescription(e.target.value)} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="amount">Amount</Label>
@@ -296,7 +291,7 @@ export function UtilityExpenseLog({ expenses, currentDate }: { expenses: Expense
               </TableRow>
             )) : (
               <TableRow>
-                <TableCell colSpan={3} className="text-center h-24 text-muted-foreground">No utility expenses logged for today.</TableCell>
+                <TableCell colSpan={3} className="text-center h-24 text-muted-foreground">No expenses logged for today.</TableCell>
               </TableRow>
             )}
           </TableBody>
