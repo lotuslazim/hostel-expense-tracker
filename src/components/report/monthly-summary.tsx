@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { Flame, Zap, Utensils, Scale, Users, FileText } from "lucide-react";
+import { Flame, Zap, Utensils, Scale, Users, FileText, AlertTriangle } from "lucide-react";
 import { useFirebase, useUser, useDoc, useMemoFirebase, useCollection } from "@/firebase";
 import { doc, collection, query, where } from "firebase/firestore";
 import { useEffect, useState, useMemo } from "react";
@@ -13,6 +13,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import type { Meal, Expense } from "@/lib/types";
 import { startOfMonth, endOfMonth } from 'date-fns';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
 
 interface MonthlySummaryProps {
   month: Date;
@@ -23,31 +25,45 @@ function SummarySkeleton() {
     <div className="space-y-6">
         <Card>
             <CardHeader>
-                <Skeleton className="h-6 w-48"/>
+                <CardTitle><Skeleton className="h-7 w-48"/></CardTitle>
             </CardHeader>
             <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                    <Skeleton className="h-20 w-full" />
-                    <Skeleton className="h-20 w-full" />
-                    <Skeleton className="h-20 w-full" />
-                    <Skeleton className="h-20 w-full" />
+                    <Skeleton className="h-24 w-full rounded-lg" />
+                    <Skeleton className="h-24 w-full rounded-lg" />
+                    <Skeleton className="h-24 w-full rounded-lg" />
+                    <Skeleton className="h-24 w-full rounded-lg" />
                 </div>
-                 <div className="text-center p-4 bg-accent/20 rounded-lg mt-4">
-                    <Skeleton className="h-6 w-1/2 mx-auto" />
-                    <Skeleton className="h-8 w-1/3 mx-auto mt-2" />
+                 <div className="text-center p-4 mt-4">
+                    <Skeleton className="h-6 w-1/2 mx-auto rounded-lg" />
+                    <Skeleton className="h-8 w-1/3 mx-auto mt-2 rounded-lg" />
                 </div>
             </CardContent>
         </Card>
         <Card>
             <CardHeader>
-                <Skeleton className="h-6 w-40"/>
+                <CardTitle><Skeleton className="h-7 w-40"/></CardTitle>
+                <CardDescription><Skeleton className="h-4 w-80"/></CardDescription>
             </CardHeader>
             <CardContent>
-                <Skeleton className="h-40 w-full" />
+                <Skeleton className="h-40 w-full rounded-lg" />
             </CardContent>
         </Card>
     </div>
   );
+}
+
+
+function DataError() {
+  return (
+    <Alert variant="destructive">
+      <AlertTriangle className="h-4 w-4" />
+      <AlertTitle>Error Loading Summary</AlertTitle>
+      <AlertDescription>
+        There was a problem fetching the data for the monthly summary. Please try again later.
+      </AlertDescription>
+    </Alert>
+  )
 }
 
 
@@ -56,7 +72,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
   const { user: currentUser, isUserLoading: isCurrentUserLoading } = useUser();
 
   const currentUserRef = useMemoFirebase(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
-  const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
+  const { data: currentUserData, isLoading: isCurrentUserDataLoading, error: currentUserDataError } = useDoc(currentUserRef);
 
   const groupId = currentUserData?.groupId;
 
@@ -91,14 +107,20 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     [firestore, groupId, monthDateRange]
   );
   
-  const { data: members, isLoading: areMembersLoading } = useCollection(membersQuery);
-  const { data: meals, isLoading: areMealsLoading } = useCollection<Meal>(mealsQuery);
-  const { data: expenses, isLoading: areExpensesLoading } = useCollection<Expense>(expensesQuery);
+  const { data: members, isLoading: areMembersLoading, error: membersError } = useCollection(membersQuery);
+  const { data: meals, isLoading: areMealsLoading, error: mealsError } = useCollection<Meal>(mealsQuery);
+  const { data: expenses, isLoading: areExpensesLoading, error: expensesError } = useCollection<Expense>(expensesQuery);
 
-  const dataLoading = isCurrentUserLoading || isCurrentUserDataLoading || areMembersLoading || areMealsLoading || areExpensesLoading;
+  const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || (groupId && (areMembersLoading || areMealsLoading || areExpensesLoading));
+  const hasError = currentUserDataError || membersError || mealsError || expensesError;
 
-  if (dataLoading) {
+
+  if (isLoading) {
     return <SummarySkeleton />;
+  }
+
+  if (hasError) {
+    return <DataError />;
   }
 
   const hasMembers = members && members.length > 0;
@@ -282,4 +304,5 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     </div>
   );
 }
+
 

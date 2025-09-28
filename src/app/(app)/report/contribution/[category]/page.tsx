@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, Zap, Flame } from "lucide-react";
+import { ArrowLeft, Zap, Flame, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { notFound, useSearchParams, useParams } from "next/navigation";
@@ -13,6 +13,8 @@ import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/
 import { doc, collection, query, where } from "firebase/firestore";
 import type { Expense } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
 
 const categoryDetails: Record<string, { icon: React.ReactNode, key: 'electricity' | 'gas', name: 'Electricity' | 'Gas' }> = {
     electricity: { icon: <Zap className="h-5 w-5"/>, key: 'electricity', name: 'Electricity' },
@@ -23,7 +25,7 @@ function ContributionSkeleton() {
     return (
         <div className="space-y-6">
             <div className="flex items-center gap-4">
-                <Skeleton className="h-10 w-10" />
+                <Skeleton className="h-10 w-10 rounded-md" />
                 <div>
                     <Skeleton className="h-9 w-64 mb-2" />
                     <Skeleton className="h-4 w-80" />
@@ -41,6 +43,18 @@ function ContributionSkeleton() {
     );
 }
 
+function DataError() {
+  return (
+    <Alert variant="destructive">
+      <AlertTriangle className="h-4 w-4" />
+      <AlertTitle>Error Loading Report</AlertTitle>
+      <AlertDescription>
+        There was a problem fetching the data for this report. Please try again later.
+      </AlertDescription>
+    </Alert>
+  )
+}
+
 export default function ContributionPage() {
     const params = useParams();
     const category = params.category as string;
@@ -51,7 +65,7 @@ export default function ContributionPage() {
     const { user: currentUser, isUserLoading: isCurrentUserLoading } = useUser();
     
     const currentUserRef = useMemoFirebase(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
-    const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
+    const { data: currentUserData, isLoading: isCurrentUserDataLoading, error: currentUserDataError } = useDoc(currentUserRef);
     const groupId = currentUserData?.groupId;
 
     const targetDate = monthParam ? parseISO(monthParam) : new Date();
@@ -80,17 +94,22 @@ export default function ContributionPage() {
         [firestore, groupId, monthDateRange, details]
     );
 
-    const { data: members, isLoading: areMembersLoading } = useCollection(membersQuery);
-    const { data: expenses, isLoading: areExpensesLoading } = useCollection<Expense>(expensesQuery);
+    const { data: members, isLoading: areMembersLoading, error: membersError } = useCollection(membersQuery);
+    const { data: expenses, isLoading: areExpensesLoading, error: expensesError } = useCollection<Expense>(expensesQuery);
 
     if (!details) {
         notFound();
     }
 
-    const dataLoading = isLoading || isCurrentUserLoading || isCurrentUserDataLoading || areMembersLoading || areExpensesLoading;
+    const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || areMembersLoading || areExpensesLoading;
+    const hasError = currentUserDataError || membersError || expensesError;
 
-    if (dataLoading) {
+    if (isLoading) {
         return <ContributionSkeleton />;
+    }
+
+    if (hasError) {
+      return <DataError />;
     }
     
     const contributions = (members || []).map(member => {

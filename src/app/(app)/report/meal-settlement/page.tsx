@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, Utensils, Users } from "lucide-react";
+import { ArrowLeft, Utensils, Users, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -14,12 +14,13 @@ import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/
 import { doc, collection, query, where } from "firebase/firestore";
 import type { Meal, Expense } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 function MealSettlementSkeleton() {
   return (
      <div className="space-y-6">
         <div className="flex items-center gap-4">
-            <Skeleton className="h-10 w-10" />
+            <Skeleton className="h-10 w-10 rounded-md" />
             <div>
               <Skeleton className="h-9 w-64 mb-2" />
               <Skeleton className="h-4 w-80" />
@@ -29,20 +30,32 @@ function MealSettlementSkeleton() {
             <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                     <span className="flex items-center gap-2">
-                        <Utensils className="h-5 w-5"/>
+                        <Utensils className="h-5 w-5 text-muted-foreground"/>
                         <Skeleton className="h-6 w-56" />
                     </span>
                     <div className="text-right">
-                        <p className="text-sm font-medium text-primary">Meal Rate</p>
+                        <Skeleton className="h-5 w-20" />
                         <Skeleton className="h-7 w-24 mt-1" />
                     </div>
                 </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
                 <Skeleton className="h-48 w-full" />
             </CardContent>
         </Card>
     </div>
+  )
+}
+
+function DataError() {
+  return (
+    <Alert variant="destructive">
+      <AlertTriangle className="h-4 w-4" />
+      <AlertTitle>Error Loading Report</AlertTitle>
+      <AlertDescription>
+        There was a problem fetching the data for this report. Please try again later.
+      </AlertDescription>
+    </Alert>
   )
 }
 
@@ -56,7 +69,7 @@ export default function MealSettlementPage() {
     const { user: currentUser, isUserLoading: isCurrentUserLoading } = useUser();
 
     const currentUserRef = useMemoFirebase(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
-    const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
+    const { data: currentUserData, isLoading: isCurrentUserDataLoading, error: currentUserDataError } = useDoc(currentUserRef);
     const groupId = currentUserData?.groupId;
 
     const monthDateRange = useMemo(() => {
@@ -90,14 +103,19 @@ export default function MealSettlementPage() {
         [firestore, groupId, monthDateRange]
     );
   
-    const { data: members, isLoading: areMembersLoading } = useCollection(membersQuery);
-    const { data: meals, isLoading: areMealsLoading } = useCollection<Meal>(mealsQuery);
-    const { data: expenses, isLoading: areExpensesLoading } = useCollection<Expense>(expensesQuery);
+    const { data: members, isLoading: areMembersLoading, error: membersError } = useCollection(membersQuery);
+    const { data: meals, isLoading: areMealsLoading, error: mealsError } = useCollection<Meal>(mealsQuery);
+    const { data: expenses, isLoading: areExpensesLoading, error: expensesError } = useCollection<Expense>(expensesQuery);
 
-    const dataLoading = isCurrentUserLoading || isCurrentUserDataLoading || areMembersLoading || areMealsLoading || areExpensesLoading;
+    const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || areMembersLoading || areMealsLoading || areExpensesLoading;
+    const hasError = currentUserDataError || membersError || mealsError || expensesError;
 
-    if (dataLoading) {
+    if (isLoading) {
         return <MealSettlementSkeleton />;
+    }
+    
+    if (hasError) {
+      return <DataError />;
     }
     
     if (!members) {

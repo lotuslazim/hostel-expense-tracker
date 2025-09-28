@@ -14,6 +14,21 @@ import { doc, collection, query, where } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { WelcomeCard } from "@/components/app/welcome-card";
 import { MonthlyExpenses } from "@/components/dashboard/monthly-expenses";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
+
+function DataError() {
+  return (
+    <Alert variant="destructive">
+      <AlertTriangle className="h-4 w-4" />
+      <AlertTitle>Error Loading Data</AlertTitle>
+      <AlertDescription>
+        There was a problem fetching your dashboard data from the server. Please try refreshing the page.
+      </AlertDescription>
+    </Alert>
+  )
+}
+
 
 function DashboardSkeleton() {
   return (
@@ -24,9 +39,9 @@ function DashboardSkeleton() {
           <Skeleton className="h-4 w-72 mt-2" />
         </div>
         <div className="flex items-center gap-2">
-            <Skeleton className="h-10 w-10" />
-            <Skeleton className="h-10 w-[240px]" />
-            <Skeleton className="h-10 w-10" />
+            <Skeleton className="h-10 w-10 rounded-md" />
+            <Skeleton className="h-10 w-[240px] rounded-md" />
+            <Skeleton className="h-10 w-10 rounded-md" />
         </div>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -34,7 +49,7 @@ function DashboardSkeleton() {
             <Skeleton className="h-72 w-full rounded-lg" />
             <Skeleton className="h-96 w-full rounded-lg" />
         </div>
-        <Skeleton className="h-96 w-full rounded-lg lg:col-span-2" />
+        <Skeleton className="h-[760px] w-full rounded-lg lg:col-span-2" />
       </div>
       <Skeleton className="h-96 w-full rounded-lg" />
     </div>
@@ -55,7 +70,7 @@ export default function DashboardPage() {
     () => (currentUser ? doc(firestore, "users", currentUser.uid) : null),
     [firestore, currentUser]
   );
-  const { data: currentUserData, isLoading: isCurrentUserDataLoading } =
+  const { data: currentUserData, isLoading: isCurrentUserDataLoading, error: currentUserDataError } =
     useDoc(currentUserRef);
   const groupId = currentUserData?.groupId;
 
@@ -120,12 +135,13 @@ export default function DashboardPage() {
   );
 
 
-  const { data: meals, isLoading: areMealsLoading } = useCollection<Meal>(mealsQuery);
-  const { data: expenses, isLoading: areExpensesLoading } = useCollection<Expense>(expensesQuery);
-  const { data: items, isLoading: areItemsLoading } = useCollection<PurchasedItem>(itemsQuery);
-  const { data: monthlyExpenses, isLoading: areMonthlyExpensesLoading } = useCollection<Expense>(monthlyExpensesQuery);
+  const { data: meals, isLoading: areMealsLoading, error: mealsError } = useCollection<Meal>(mealsQuery);
+  const { data: expenses, isLoading: areExpensesLoading, error: expensesError } = useCollection<Expense>(expensesQuery);
+  const { data: items, isLoading: areItemsLoading, error: itemsError } = useCollection<PurchasedItem>(itemsQuery);
+  const { data: monthlyExpenses, isLoading: areMonthlyExpensesLoading, error: monthlyExpensesError } = useCollection<Expense>(monthlyExpensesQuery);
 
-  const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || areMealsLoading || areExpensesLoading || areMonthlyExpensesLoading || areItemsLoading;
+  const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || (groupId && (areMealsLoading || areExpensesLoading || areMonthlyExpensesLoading || areItemsLoading));
+  const hasError = currentUserDataError || mealsError || expensesError || itemsError || monthlyExpensesError;
 
   if (isLoading) {
     return <DashboardSkeleton />;
@@ -133,6 +149,10 @@ export default function DashboardPage() {
   
   if (!groupId) {
     return <WelcomeCard />;
+  }
+
+  if (hasError) {
+    return <DataError />;
   }
 
   return (

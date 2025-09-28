@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, Users, ShoppingCart } from "lucide-react";
+import { ArrowLeft, Users, ShoppingCart, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useSearchParams } from "next/navigation";
@@ -13,12 +13,13 @@ import { useFirebase, useUser, useDoc, useCollection, useMemoFirebase } from "@/
 import { doc, collection, query, where } from "firebase/firestore";
 import type { PurchasedItem } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 function ItemsSkeleton() {
     return (
         <div className="space-y-6">
             <div className="flex items-center gap-4">
-                <Skeleton className="h-10 w-10" />
+                <Skeleton className="h-10 w-10 rounded-md" />
                 <div>
                     <Skeleton className="h-9 w-64 mb-2" />
                     <Skeleton className="h-4 w-80" />
@@ -27,27 +28,39 @@ function ItemsSkeleton() {
             <Card>
                 <CardHeader>
                      <CardTitle className="flex items-center gap-2">
-                        <Users className="h-5 w-5"/>
+                        <Users className="h-5 w-5 text-muted-foreground"/>
                         <Skeleton className="h-6 w-56" />
                     </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-6">
                     <Skeleton className="h-48 w-full" />
                 </CardContent>
             </Card>
             <Card>
                 <CardHeader>
                      <CardTitle className="flex items-center gap-2">
-                        <ShoppingCart className="h-5 w-5"/>
+                        <ShoppingCart className="h-5 w-5 text-muted-foreground"/>
                         <Skeleton className="h-6 w-56" />
                     </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-6">
                     <Skeleton className="h-48 w-full" />
                 </CardContent>
             </Card>
         </div>
     );
+}
+
+function DataError() {
+  return (
+    <Alert variant="destructive">
+      <AlertTriangle className="h-4 w-4" />
+      <AlertTitle>Error Loading Report</AlertTitle>
+      <AlertDescription>
+        There was a problem fetching the data for this report. Please try again later.
+      </AlertDescription>
+    </Alert>
+  )
 }
 
 export default function MonthlyItemsPage() {
@@ -58,7 +71,7 @@ export default function MonthlyItemsPage() {
     const { user: currentUser, isUserLoading: isCurrentUserLoading } = useUser();
     
     const currentUserRef = useMemoFirebase(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
-    const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
+    const { data: currentUserData, isLoading: isCurrentUserDataLoading, error: currentUserDataError } = useDoc(currentUserRef);
     const groupId = currentUserData?.groupId;
 
     const targetDate = monthParam ? parseISO(monthParam) : new Date();
@@ -83,13 +96,18 @@ export default function MonthlyItemsPage() {
         [firestore, groupId, monthDateRange]
     );
 
-    const { data: members, isLoading: areMembersLoading } = useCollection(membersQuery);
-    const { data: items, isLoading: areItemsLoading } = useCollection<PurchasedItem>(itemsQuery);
+    const { data: members, isLoading: areMembersLoading, error: membersError } = useCollection(membersQuery);
+    const { data: items, isLoading: areItemsLoading, error: itemsError } = useCollection<PurchasedItem>(itemsQuery);
     
-    const dataLoading = isCurrentUserLoading || isCurrentUserDataLoading || areMembersLoading || areItemsLoading;
+    const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || areMembersLoading || areItemsLoading;
+    const hasError = currentUserDataError || membersError || itemsError;
 
-    if (dataLoading) {
+    if (isLoading) {
         return <ItemsSkeleton />;
+    }
+
+    if (hasError) {
+      return <DataError />;
     }
 
     const monthQueryParam = monthParam ? `?month=${monthParam}` : '';
