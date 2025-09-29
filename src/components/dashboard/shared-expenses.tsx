@@ -1,14 +1,14 @@
 
 "use client";
 
-import { useCollection, type WithId } from "@/firebase";
+import { useCollection } from "@/firebase";
 import type { Expense } from "@/lib/types";
 import { Query } from "firebase/firestore";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle, ShoppingCart, Flame, Zap } from "lucide-react";
+import { AlertTriangle, ShoppingCart, Flame, Zap, Package } from "lucide-react";
 import { format } from 'date-fns';
 import { Badge } from "../ui/badge";
 
@@ -47,10 +47,10 @@ export function SharedExpenses({ expensesQuery }: SharedExpensesProps) {
   
   const getCategoryBadge = (category: Expense['category']) => {
     switch(category) {
-        case 'Food & Groceries': return <Badge variant='default'>{category}</Badge>;
-        case 'Electricity': return <Badge variant='secondary'><Zap className="mr-1 h-3 w-3"/>{category}</Badge>;
-        case 'Gas': return <Badge variant='secondary'><Flame className="mr-1 h-3 w-3"/>{category}</Badge>;
-        case 'Other': return <Badge variant='outline'>{category}</Badge>;
+        case 'Food & Groceries': return <Badge variant='secondary'><ShoppingCart className="mr-1 h-3 w-3"/>{category}</Badge>;
+        case 'Electricity': return <Badge variant='outline' className="border-yellow-500/50 text-yellow-600"><Zap className="mr-1 h-3 w-3"/>{category}</Badge>;
+        case 'Gas': return <Badge variant='outline' className="border-orange-500/50 text-orange-600"><Flame className="mr-1 h-3 w-3"/>{category}</Badge>;
+        case 'Other': return <Badge variant='outline'><Package className="mr-1 h-3 w-3"/>{category}</Badge>;
         default: return <Badge variant='secondary'>{category}</Badge>;
     }
   }
@@ -78,7 +78,7 @@ export function SharedExpenses({ expensesQuery }: SharedExpensesProps) {
                 <TableRow key={expense.id}>
                   <TableCell className="hidden sm:table-cell">{format(expense.date.toDate(), 'dd MMM yyyy')}</TableCell>
                    <TableCell className="sm:hidden table-cell">{format(expense.date.toDate(), 'dd/MM/yy')}</TableCell>
-                  <TableCell className="font-medium">{expense.description}</TableCell>
+                  <TableCell className="font-medium">{expense.description || expense.category}</TableCell>
                   <TableCell>
                       {getCategoryBadge(expense.category)}
                   </TableCell>
