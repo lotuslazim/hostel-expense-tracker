@@ -10,7 +10,15 @@
         "id": { "type": "string", "description": "Unique identifier for the group entity." },
         "groupName": { "type": "string", "description": "The name of the group or flat." },
         "invitationCode": { "type": "string", "description": "Unique code used for users to join the group." },
-        "adminId": { "type": "string", "description": "Reference to User who is the administrator of the group." }
+        "adminId": { "type": "string", "description": "Reference to User who is the administrator of the group." },
+        "settings": {
+          "type": "object",
+          "description": "Customizable settings for the group.",
+          "properties": {
+            "mealTypes": { "type": "array", "items": { "type": "string" }, "description": "List of available meal types for logging." },
+            "isMealItemNameRequired": { "type": "boolean", "description": "Whether the item name for a meal is mandatory." }
+          }
+        }
       },
       "required": ["id", "groupName", "invitationCode", "adminId"]
     },

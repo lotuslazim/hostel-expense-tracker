@@ -21,14 +21,7 @@ import { useFirebase, useUser, useDoc } from "@/firebase";
 import { doc, addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Utensils } from "lucide-react";
-
-const mealSchema = z.object({
-  mealType: z.enum(["lunch", "dinner"], {
-    required_error: "You need to select a meal type.",
-  }),
-  mealCount: z.coerce.number().min(1, "Meal count must be at least 1.").max(5, "Meal count cannot exceed 5."),
-  itemName: z.string().optional(),
-});
+import { Skeleton } from "../ui/skeleton";
 
 interface LogMealCardProps {
     selectedDate: Date;
@@ -44,7 +37,29 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
   const { data: currentUserData } = useDoc(currentUserRef);
   const groupId = currentUserData?.groupId;
 
-  const form = useForm<z.infer<typeof mealSchema>>({
+  const groupRef = useMemo(() => (groupId) ? doc(firestore, "groups", groupId) : null, [firestore, groupId]);
+  const { data: groupData, isLoading: isGroupDataLoading } = useDoc(groupRef);
+
+  const mealTypes = useMemo(() => groupData?.settings?.mealTypes ?? ["Lunch", "Dinner"], [groupData]);
+  const isMealItemNameRequired = useMemo(() => groupData?.settings?.isMealItemNameRequired ?? false, [groupData]);
+
+  const mealSchema = useMemo(() => {
+    const safeMealTypes = mealTypes.length > 0 ? mealTypes : ["dummy"];
+    
+    return z.object({
+        mealType: z.enum(safeMealTypes as [string, ...string[]], {
+            required_error: "You need to select a meal type.",
+        }),
+        mealCount: z.coerce.number().min(1, "Meal count must be at least 1.").max(5, "Meal count cannot exceed 5."),
+        itemName: isMealItemNameRequired 
+            ? z.string().min(1, "Item name is required.") 
+            : z.string().optional(),
+    });
+  }, [mealTypes, isMealItemNameRequired]);
+
+  type MealSchemaType = z.infer<typeof mealSchema>;
+
+  const form = useForm<MealSchemaType>({
     resolver: zodResolver(mealSchema),
     defaultValues: {
       mealCount: 1,
@@ -52,7 +67,11 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof mealSchema>) {
+  useEffect(() => {
+    form.reset({ mealCount: 1, itemName: "" });
+  }, [isMealItemNameRequired, mealTypes, form]);
+
+  async function onSubmit(values: MealSchemaType) {
     if (!currentUser || !groupId) {
       toast({
         variant: "destructive",
@@ -91,6 +110,20 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
       setIsSubmitting(false);
     }
   }
+  
+  if (isGroupDataLoading && groupId) {
+      return (
+          <Card>
+              <CardHeader>
+                  <CardTitle className="flex items-center gap-2"><Utensils /> Log a Meal</CardTitle>
+                  <CardDescription>Loading group settings...</CardDescription>
+              </CardHeader>
+              <CardContent>
+                  <Skeleton className="h-48 w-full" />
+              </CardContent>
+          </Card>
+      );
+  }
 
   return (
     <Card>
@@ -113,20 +146,16 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
                     <RadioGroup
                       onValueChange={field.onChange}
                       value={field.value}
-                      className="flex space-x-4"
+                      className="flex flex-wrap gap-x-4 gap-y-2"
                     >
-                      <FormItem className="flex items-center space-x-2 space-y-0">
-                        <FormControl>
-                          <RadioGroupItem value="lunch" />
-                        </FormControl>
-                        <FormLabel className="font-normal">Lunch</FormLabel>
-                      </FormItem>
-                      <FormItem className="flex items-center space-x-2 space-y-0">
-                        <FormControl>
-                          <RadioGroupItem value="dinner" />
-                        </FormControl>
-                        <FormLabel className="font-normal">Dinner</FormLabel>
-                      </FormItem>
+                      {mealTypes.length > 0 ? mealTypes.map((type: string) => (
+                          <FormItem key={type} className="flex items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <RadioGroupItem value={type} />
+                            </FormControl>
+                            <FormLabel className="font-normal capitalize">{type}</FormLabel>
+                          </FormItem>
+                        )) : <p className="text-sm text-muted-foreground">No meal types configured. Ask an admin to add one.</p>}
                     </RadioGroup>
                   </FormControl>
                   <FormMessage />
@@ -151,7 +180,7 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
               name="itemName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Item Name (Optional)</FormLabel>
+                  <FormLabel>Item Name {isMealItemNameRequired ? '' : '(Optional)'}</FormLabel>
                   <FormControl>
                     <Input placeholder="e.g., Chicken Curry" {...field} />
                   </FormControl>
@@ -159,7 +188,7 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
                 </FormItem>
               )}
             />
-            <Button type="submit" disabled={isSubmitting} className="w-full">
+            <Button type="submit" disabled={isSubmitting || mealTypes.length === 0} className="w-full">
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Log Meal
             </Button>
