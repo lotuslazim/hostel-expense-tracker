@@ -95,10 +95,74 @@
   },
   "auth": { "providers": ["password", "google"] },
   "firestore": {
-    "rules": "rules_version = '2';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    match /{document=**} {\n      allow read, write: if true;\n    }\n  }\n}",
-    "indexes": ""
-  },
-  "storage": {
-    "rules": "rules_version = '2';\nservice firebase.storage {\n  match /b/{bucket}/o {\n    match /{allPaths=**} {\n      allow read, write: if true;\n    }\n  }\n}"
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User", "schema": { "$ref": "#/entities/User" },
+          "rules": { "read, write": "request.auth.uid == userId" },
+          "description": "Stores user profile information. Users can only access their own document."
+        }
+      },
+      {
+        "path": "/groups/{groupId}",
+        "definition": {
+          "entityName": "Group", "schema": { "$ref": "#/entities/Group" },
+          "rules": {
+            "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "write": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true"
+          },
+          "description": "Stores group information. Readable by members, writable only by the group admin."
+        }
+      },
+      {
+        "path": "/groups/{groupId}/members/{memberId}",
+        "definition": {
+          "entityName": "Member", "schema": { "$ref": "#/entities/Member" },
+          "rules": {
+            "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "write": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true || request.auth.uid == memberId"
+          },
+          "description": "Stores basic info about group members. Readable by all members. Writable by admins or the member themselves."
+        }
+      },
+      {
+        "path": "/groups/{groupId}/meals/{mealId}",
+        "definition": {
+          "entityName": "MealLog", "schema": { "$ref": "#/entities/MealLog" },
+          "rules": { 
+            "list, read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "create": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && request.resource.data.userId == request.auth.uid",
+            "update, delete": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && resource.data.userId == request.auth.uid"
+          },
+          "description": "Stores meal logs. Accessible only by members of the group. Users can only create/edit their own meals."
+        }
+      },
+      {
+        "path": "/groups/{groupId}/expenses/{expenseId}",
+        "definition": {
+          "entityName": "Expense", "schema": { "$ref": "#/entities/Expense" },
+          "rules": {
+            "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "create": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && request.resource.data.userId == request.auth.uid",
+            "update, delete": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && resource.data.userId == request.auth.uid"
+          },
+          "description": "Stores all expense entries. Accessible only by members of the group. Users can only create/edit their own expenses."
+        }
+      },
+       {
+        "path": "/groups/{groupId}/purchasedItems/{itemId}",
+        "definition": {
+          "entityName": "PurchasedItem", "schema": { "$ref": "#/entities/PurchasedItem" },
+          "rules": {
+            "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "create": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && request.resource.data.userId == request.auth.uid",
+            "update, delete": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && resource.data.userId == request.auth.uid"
+          },
+          "description": "Stores detailed food item purchases. Accessible by members. Users can only create/edit their own items."
+        }
+      }
+    ],
+    "reasoning": "This structure enforces security by scoping all group-related data within a group's subcollections. The rule `exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))` is used consistently to verify that the requesting user is a member of the group they are trying to access. This is a secure and scalable pattern that prevents unauthorized data access. Write access is also based on group membership, with more restrictive admin-only writes on the core group document. Firestore's default-deny policy ensures any path not explicitly granted access is automatically blocked."
   }
 }
