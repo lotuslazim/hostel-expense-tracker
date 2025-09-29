@@ -138,7 +138,7 @@ export default function ProfilePage() {
   const inGroup = !!groupId;
   const isAdmin = currentUserData?.isAdmin ?? false;
 
-  const groupRef = useMemo(() => (currentUser && groupId) ? doc(firestore, "groups", groupId) : null, [firestore, currentUser, groupId]);
+  const groupRef = useMemo(() => (groupId) ? doc(firestore, "groups", groupId) : null, [firestore, groupId]);
   const { data: groupData, isLoading: isGroupDataLoading } = useDoc(groupRef);
 
 
