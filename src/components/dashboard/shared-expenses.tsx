@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle, ShoppingCart } from "lucide-react";
+import { AlertTriangle, ShoppingCart, Flame, Zap } from "lucide-react";
 import { format } from 'date-fns';
 import { Badge } from "../ui/badge";
 
@@ -45,12 +45,13 @@ export function SharedExpenses({ expensesQuery }: SharedExpensesProps) {
     );
   }
   
-  const getCategoryVariant = (category: Expense['category']) => {
+  const getCategoryBadge = (category: Expense['category']) => {
     switch(category) {
-        case 'Food & Groceries': return 'default';
-        case 'Utilities': return 'secondary';
-        case 'Other': return 'outline';
-        default: return 'secondary';
+        case 'Food & Groceries': return <Badge variant='default'>{category}</Badge>;
+        case 'Electricity': return <Badge variant='secondary'><Zap className="mr-1 h-3 w-3"/>{category}</Badge>;
+        case 'Gas': return <Badge variant='secondary'><Flame className="mr-1 h-3 w-3"/>{category}</Badge>;
+        case 'Other': return <Badge variant='outline'>{category}</Badge>;
+        default: return <Badge variant='secondary'>{category}</Badge>;
     }
   }
 
@@ -79,7 +80,7 @@ export function SharedExpenses({ expensesQuery }: SharedExpensesProps) {
                    <TableCell className="sm:hidden table-cell">{format(expense.date.toDate(), 'dd/MM/yy')}</TableCell>
                   <TableCell className="font-medium">{expense.description}</TableCell>
                   <TableCell>
-                      <Badge variant={getCategoryVariant(expense.category)}>{expense.category}</Badge>
+                      {getCategoryBadge(expense.category)}
                   </TableCell>
                   <TableCell>{expense.userName}</TableCell>
                   <TableCell className="text-right font-semibold">৳{expense.amount.toFixed(2)}</TableCell>
