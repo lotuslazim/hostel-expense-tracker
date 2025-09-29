@@ -21,9 +21,12 @@ function PageSkeleton() {
     return (
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div>
-                    <Skeleton className="h-9 w-72" />
-                    <Skeleton className="h-4 w-96 mt-2" />
+                <div className="flex items-center gap-4">
+                    <Skeleton className="h-10 w-10" />
+                    <div>
+                        <Skeleton className="h-9 w-72" />
+                        <Skeleton className="h-4 w-96 mt-2" />
+                    </div>
                 </div>
                  <Skeleton className="h-10 w-[330px]" />
             </div>
@@ -173,10 +176,16 @@ export default function FoodItemAnalysisPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight font-headline">Monthly Food Item Analysis</h1>
-                    <p className="text-muted-foreground">A detailed breakdown of food items purchased in {format(currentDate, "MMMM yyyy")}.</p>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                     <Button variant="outline" size="icon" onClick={() => router.back()}>
+                        <ChevronLeft className="h-4 w-4" />
+                        <span className="sr-only">Back</span>
+                    </Button>
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight font-headline">Monthly Food Item Analysis</h1>
+                        <p className="text-muted-foreground">A detailed breakdown of food items purchased in {format(currentDate, "MMMM yyyy")}.</p>
+                    </div>
                 </div>
                 <MonthSwitcher currentDate={currentDate} onMonthChange={handleMonthChange} />
             </div>
