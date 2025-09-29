@@ -3,7 +3,7 @@
 
 import { useState, useMemo } from "react";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
-import { doc, collection, query, where, orderBy } from "firebase/firestore";
+import { doc, collection, query, orderBy } from "firebase/firestore";
 import { WelcomeCard } from "@/components/app/welcome-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MealLogForm } from "@/components/dashboard/meal-log-form";
@@ -11,6 +11,8 @@ import { ExpenseLogForm } from "@/components/dashboard/expense-log-form";
 import { SharedExpenses } from "@/components/dashboard/shared-expenses";
 import { UtilityLogForm } from "@/components/dashboard/utility-log-form";
 import { DailySummary } from "@/components/dashboard/daily-summary";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Utensils, ShoppingCart, Receipt } from "lucide-react";
 
 function DashboardSkeleton() {
   return (
@@ -21,9 +23,7 @@ function DashboardSkeleton() {
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1 space-y-8">
-          <Skeleton className="h-64 w-full" />
-          <Skeleton className="h-72 w-full" />
-          <Skeleton className="h-80 w-full" />
+          <Skeleton className="h-96 w-full" />
         </div>
         <div className="lg:col-span-2">
           <Skeleton className="h-96 w-full" />
@@ -75,11 +75,24 @@ export default function DashboardPage() {
           onDateChange={setCurrentDate}
        />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         <div className="lg:col-span-1 space-y-8">
-          <MealLogForm selectedDate={currentDate} />
-          <ExpenseLogForm selectedDate={currentDate} />
-          <UtilityLogForm selectedDate={currentDate} />
+           <Tabs defaultValue="meal" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="meal"><Utensils className="mr-2 h-4 w-4"/>Meal</TabsTrigger>
+              <TabsTrigger value="expense"><ShoppingCart className="mr-2 h-4 w-4"/>Expense</TabsTrigger>
+              <TabsTrigger value="utility"><Receipt className="mr-2 h-4 w-4"/>Utility</TabsTrigger>
+            </TabsList>
+            <TabsContent value="meal">
+              <MealLogForm selectedDate={currentDate} />
+            </TabsContent>
+            <TabsContent value="expense">
+              <ExpenseLogForm selectedDate={currentDate} />
+            </TabsContent>
+            <TabsContent value="utility">
+              <UtilityLogForm selectedDate={currentDate} />
+            </TabsContent>
+          </Tabs>
         </div>
         <div className="lg:col-span-2">
           <SharedExpenses expensesQuery={expensesQuery} />
