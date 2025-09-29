@@ -90,10 +90,22 @@ export default function ElectricityContributionPage() {
     const { data: membersData, isLoading: areMembersLoading, error: membersError } = useCollection(membersQuery);
     const { data: expensesData, isLoading: areExpensesLoading, error: expensesError } = useCollection<Expense>(expensesQuery);
 
-    const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || (!!groupId && (areMembersLoading || areExpensesLoading));
+    const isLoading = isCurrentUserLoading || isCurrentUserDataLoading;
+    
+    if (isLoading) {
+        return <PageSkeleton />;
+    }
+    
+    if (!groupId) {
+        return <WelcomeCard />;
+    }
+
+    const isDataLoading = areMembersLoading || areExpensesLoading;
     const hasError = currentUserDataError || membersError || expensesError;
 
-
+    if(isDataLoading) return <PageSkeleton />;
+    if (hasError) return <DataError />;
+    
     const processedData = useMemo(() => {
         if (!membersData || !expensesData) return null;
 
@@ -116,20 +128,14 @@ export default function ElectricityContributionPage() {
         };
 
     }, [membersData, expensesData]);
-    
-    if (isLoading || (groupId && !processedData)) {
+
+    if (!processedData) {
+        // This can happen if data is still loading or there's an error handled above.
+        // Or if there's no data.
         return <PageSkeleton />;
     }
     
-    if (!groupId) {
-        return <WelcomeCard />;
-    }
-
-    if (hasError) {
-        return <DataError />;
-    }
-    
-    const { memberContributions, totalElectricityExpense } = processedData!;
+    const { memberContributions, totalElectricityExpense } = processedData;
 
     return (
         <div className="space-y-6">

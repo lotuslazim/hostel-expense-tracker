@@ -137,7 +137,7 @@ export default function AdminPage() {
     }));
   }, [membersCollection]);
 
-  const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || (!!groupId && (isGroupLoading || areMembersLoading));
+  const isLoading = isCurrentUserLoading || isCurrentUserDataLoading;
 
   if (isLoading) {
     return (
@@ -157,6 +157,29 @@ export default function AdminPage() {
   // If user is not in a group, show the new user panel
   if (!groupId || !currentUser) {
     return <NewUserAdminPanel />;
+  }
+
+  const isDataLoading = isGroupLoading || areMembersLoading;
+  
+  if (isDataLoading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight font-headline">Admin Panel</h1>
+          <p className="text-muted-foreground">
+            Manage your group members and settings.
+          </p>
+        </div>
+        <Card>
+            <CardHeader><Skeleton className="h-24 w-full" /></CardHeader>
+            <CardContent><Skeleton className="h-40 w-full" /></CardContent>
+        </Card>
+        <Card>
+            <CardHeader><Skeleton className="h-24 w-full" /></CardHeader>
+            <CardContent><Skeleton className="h-40 w-full" /></CardContent>
+        </Card>
+      </div>
+    );
   }
 
   if (!groupData) {

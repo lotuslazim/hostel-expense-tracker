@@ -44,7 +44,9 @@ export default function DashboardPage() {
   );
   const { data: currentUserData, isLoading: isCurrentUserDataLoading } =
     useDoc(currentUserRef);
+    
   const groupId = currentUserData?.groupId;
+  const userId = currentUser?.uid;
 
   const expensesQuery = useMemo(() => {
     if (!groupId) return null;
@@ -60,14 +62,14 @@ export default function DashboardPage() {
     return <DashboardSkeleton />;
   }
 
-  if (!groupId || !currentUser) {
+  if (!groupId || !userId) {
     return <WelcomeCard />;
   }
 
   return (
     <div className="space-y-6">
        <DailySummary 
-          userId={currentUser.uid} 
+          userId={userId} 
           groupId={groupId} 
           selectedDate={currentDate} 
           onDateChange={setCurrentDate}

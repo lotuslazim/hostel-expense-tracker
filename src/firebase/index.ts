@@ -9,7 +9,9 @@ import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYea
 
 // IMPORTANT: DO NOT MODIFY THIS FUNCTION
 export function initializeFirebase() {
-  const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+  // This is the recommended way to initialize firebase in a Next.js app
+  // to prevent re-initialization on hot reloads.
+  const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
   return getSdks(app);
 }
 

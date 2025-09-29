@@ -27,24 +27,26 @@ export function DailySummary({ userId, groupId, selectedDate, onDateChange }: Da
         };
     }, [selectedDate]);
 
-    const mealsQuery = useMemo(() =>
-        query(
+    const mealsQuery = useMemo(() => {
+        if (!userId || !groupId) return null;
+        return query(
             collection(firestore, `groups/${groupId}/meals`),
             where("userId", "==", userId),
             where("date", ">=", dateRange.start),
             where("date", "<=", dateRange.end)
-        ),
-        [firestore, groupId, userId, dateRange]
+        )
+    }, [firestore, groupId, userId, dateRange]
     );
 
-    const expensesQuery = useMemo(() =>
-        query(
+    const expensesQuery = useMemo(() => {
+        if (!userId || !groupId) return null;
+        return query(
             collection(firestore, `groups/${groupId}/expenses`),
             where("userId", "==", userId),
             where("date", ">=", dateRange.start),
             where("date", "<=", dateRange.end)
-        ),
-        [firestore, groupId, userId, dateRange]
+        )
+    }, [firestore, groupId, userId, dateRange]
     );
     
     const { data: mealsData, isLoading: areMealsLoading } = useCollection<MealLog>(mealsQuery);

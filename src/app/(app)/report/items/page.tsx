@@ -96,8 +96,21 @@ export default function FoodItemAnalysisPage() {
     const { data: membersData, isLoading: areMembersLoading, error: membersError } = useCollection(membersQuery);
     const { data: itemsData, isLoading: areItemsLoading, error: itemsError } = useCollection<PurchasedItem>(itemsQuery);
 
-    const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || (!!groupId && (areMembersLoading || areItemsLoading));
+    const isLoading = isCurrentUserLoading || isCurrentUserDataLoading;
+    
+    if (isLoading) {
+        return <PageSkeleton />;
+    }
+    
+    if (!groupId) {
+        return <WelcomeCard />;
+    }
+
+    const isDataLoading = areMembersLoading || areItemsLoading;
     const hasError = currentUserDataError || membersError || itemsError;
+    
+    if (isDataLoading) return <PageSkeleton />;
+    if (hasError) return <DataError />;
 
     const processedData = useMemo(() => {
         if (!membersData || !itemsData) return null;
@@ -130,19 +143,11 @@ export default function FoodItemAnalysisPage() {
 
     }, [itemsData, membersData]);
 
-    if (isLoading || (groupId && !processedData)) {
+    if (!processedData) {
         return <PageSkeleton />;
     }
     
-    if (!groupId) {
-        return <WelcomeCard />;
-    }
-
-    if (hasError) {
-        return <DataError />;
-    }
-    
-    const { memberContributions, aggregatedItems } = processedData!;
+    const { memberContributions, aggregatedItems } = processedData;
 
     return (
         <div className="space-y-6">
