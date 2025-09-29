@@ -23,18 +23,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { useFirebase, useUser, useDoc } from "@/firebase";
 import { doc, addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ShoppingCart } from "lucide-react";
-import type { ExpenseCategory } from "@/lib/types";
+import { Loader2, ShoppingCart, CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 const expenseSchema = z.object({
   amount: z.coerce.number().min(0.01, "Amount must be greater than 0."),
   description: z.string().optional(),
-  category: z.enum(["Food & Groceries", "Utility"], {
+  category: z.enum(["Food & Groceries", "Electricity", "Gas", "Other"], {
     required_error: "Please select a category.",
   }),
+  date: z.date(),
 });
 
 export function AddExpenseCard() {
@@ -52,6 +56,7 @@ export function AddExpenseCard() {
     defaultValues: {
       amount: 0,
       description: "",
+      date: new Date(),
     },
   });
 
@@ -72,8 +77,8 @@ export function AddExpenseCard() {
         description: values.description,
         category: values.category,
         userId: currentUser.uid,
-        userName: currentUser.displayName || currentUser.email,
-        date: new Date(),
+        userName: currentUser.displayName || currentUser.email?.split('@')[0],
+        date: values.date,
         createdAt: serverTimestamp(),
       });
 
@@ -81,7 +86,7 @@ export function AddExpenseCard() {
         title: "Expense Added",
         description: `Your ${values.category.toLowerCase()} expense of ৳${values.amount} has been logged.`,
       });
-      form.reset({ amount: 0, description: "", category: undefined });
+      form.reset({ amount: 0, description: "", category: undefined, date: new Date() });
     } catch (error) {
       console.error("Error adding expense:", error);
       toast({
@@ -99,7 +104,7 @@ export function AddExpenseCard() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><ShoppingCart /> Add an Expense</CardTitle>
           <CardDescription>
-            Log a personal expense for food, groceries, or utilities.
+            Log a personal expense for your group.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -119,7 +124,9 @@ export function AddExpenseCard() {
                         </FormControl>
                         <SelectContent>
                         <SelectItem value="Food & Groceries">Food & Groceries</SelectItem>
-                        <SelectItem value="Utility">Utility</SelectItem>
+                        <SelectItem value="Electricity">Electricity</SelectItem>
+                        <SelectItem value="Gas">Gas</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
                         </SelectContent>
                     </Select>
                     <FormMessage />
@@ -151,6 +158,47 @@ export function AddExpenseCard() {
                     <FormMessage />
                     </FormItem>
                 )}
+                />
+                 <FormField
+                  control={form.control}
+                  name="date"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Date</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-full pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span>Pick a date</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) =>
+                              date > new Date() || date < new Date("1900-01-01")
+                            }
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
                 <Button type="submit" disabled={isSubmitting} className="w-full">
                     {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

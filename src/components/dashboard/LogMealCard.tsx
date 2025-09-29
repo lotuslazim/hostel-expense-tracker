@@ -17,17 +17,22 @@ import {
 } from "@/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { useFirebase, useUser, useDoc } from "@/firebase";
 import { doc, addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Utensils } from "lucide-react";
-import type { MealType } from "@/lib/types";
+import { Loader2, Utensils, CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+
 
 const mealSchema = z.object({
   mealType: z.enum(["lunch", "dinner"], {
     required_error: "You need to select a meal type.",
   }),
   mealCount: z.coerce.number().min(1, "Meal count must be at least 1.").max(5, "Meal count cannot exceed 5."),
+  date: z.date(),
 });
 
 export function LogMealCard() {
@@ -44,6 +49,7 @@ export function LogMealCard() {
     resolver: zodResolver(mealSchema),
     defaultValues: {
       mealCount: 1,
+      date: new Date(),
     },
   });
 
@@ -63,9 +69,9 @@ export function LogMealCard() {
         mealType: values.mealType,
         mealNumber: values.mealCount,
         description: `${values.mealCount} ${values.mealType}(s) logged.`,
-        date: new Date(),
+        date: values.date,
         userId: currentUser.uid,
-        userName: currentUser.displayName || currentUser.email,
+        userName: currentUser.displayName || currentUser.email?.split('@')[0],
         createdAt: serverTimestamp(),
       });
 
@@ -73,7 +79,7 @@ export function LogMealCard() {
         title: "Meal Logged",
         description: `Your ${values.mealType} has been successfully logged.`,
       });
-      form.reset({ mealCount: 1, mealType: undefined });
+      form.reset({ mealCount: 1, mealType: undefined, date: new Date() });
     } catch (error) {
       console.error("Error logging meal:", error);
       toast({
@@ -91,7 +97,7 @@ export function LogMealCard() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2"><Utensils /> Log a Meal</CardTitle>
         <CardDescription>
-          Select the meal type and count for today.
+          Select the meal type, count, and date.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -136,6 +142,47 @@ export function LogMealCard() {
                   <FormControl>
                     <Input type="number" min="1" max="5" {...field} />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="date"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Date</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-full pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value ? (
+                            format(field.value, "PPP")
+                          ) : (
+                            <span>Pick a date</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        disabled={(date) =>
+                          date > new Date() || date < new Date("1900-01-01")
+                        }
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
                   <FormMessage />
                 </FormItem>
               )}
