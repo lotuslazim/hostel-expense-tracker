@@ -127,7 +127,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
 
       await addDoc(collection(firestore, `groups/${groupId}/expenses`), {
         amount: values.amount,
-        description: values.description,
+        description: values.description || "",
         category: values.category,
         receiptPhotoUrl: receiptPhotoUrl,
         userId: currentUser.uid,
