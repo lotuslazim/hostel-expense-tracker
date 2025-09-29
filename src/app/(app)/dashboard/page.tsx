@@ -90,48 +90,44 @@ export default function DashboardPage() {
 
 
   // Queries for meals and expenses
-  const mealsQuery = useMemo(() =>
-    currentUser && groupId
-      ? query(
-          collection(firestore, `groups/${groupId}/meals`),
-          where("date", ">=", dateRange.start),
-          where("date", "<=", dateRange.end)
-        )
-      : null,
-    [firestore, currentUser, groupId, dateRange]
+  const mealsQuery = useMemo(() => {
+    if (!groupId) return null;
+    return query(
+        collection(firestore, `groups/${groupId}/meals`),
+        where("date", ">=", dateRange.start),
+        where("date", "<=", dateRange.end)
+      )
+  }, [firestore, groupId, dateRange]
   );
 
-  const expensesQuery = useMemo(() =>
-    currentUser && groupId
-      ? query(
-          collection(firestore, `groups/${groupId}/expenses`),
-          where("date", ">=", dateRange.start),
-          where("date", "<=", dateRange.end)
-        )
-      : null,
-    [firestore, currentUser, groupId, dateRange]
+  const expensesQuery = useMemo(() => {
+    if (!groupId) return null;
+    return query(
+        collection(firestore, `groups/${groupId}/expenses`),
+        where("date", ">=", dateRange.start),
+        where("date", "<=", dateRange.end)
+      )
+  }, [firestore, groupId, dateRange]
   );
     
-  const itemsQuery = useMemo(() =>
-    currentUser && groupId
-      ? query(
-          collection(firestore, `groups/${groupId}/purchasedItems`),
-          where("date", ">=", dateRange.start),
-          where("date", "<=", dateRange.end)
-        )
-      : null,
-    [firestore, currentUser, groupId, dateRange]
+  const itemsQuery = useMemo(() => {
+    if (!groupId) return null;
+    return query(
+        collection(firestore, `groups/${groupId}/purchasedItems`),
+        where("date", ">=", dateRange.start),
+        where("date", "<=", dateRange.end)
+      )
+  }, [firestore, groupId, dateRange]
   );
   
-  const monthlyExpensesQuery = useMemo(() =>
-    currentUser && groupId
-      ? query(
-          collection(firestore, `groups/${groupId}/expenses`),
-          where("date", ">=", monthDateRange.start),
-          where("date", "<=", monthDateRange.end)
-        )
-      : null,
-    [firestore, currentUser, groupId, monthDateRange]
+  const monthlyExpensesQuery = useMemo(() => {
+    if (!groupId) return null;
+    return query(
+        collection(firestore, `groups/${groupId}/expenses`),
+        where("date", ">=", monthDateRange.start),
+        where("date", "<=", monthDateRange.end)
+      )
+  }, [firestore, groupId, monthDateRange]
   );
 
 
@@ -142,13 +138,19 @@ export default function DashboardPage() {
 
   const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || (!!groupId && (areMealsLoading || areExpensesLoading || areMonthlyExpensesLoading || areItemsLoading));
   const hasError = currentUserDataError || mealsError || expensesError || itemsError || monthlyExpensesError;
+  
+  const initialLoading = isCurrentUserLoading || isCurrentUserDataLoading;
 
-  if (isLoading) {
+  if (initialLoading) {
     return <DashboardSkeleton />;
   }
   
   if (!groupId) {
     return <WelcomeCard />;
+  }
+
+  if (isLoading) {
+    return <DashboardSkeleton />;
   }
 
   if (hasError) {
@@ -184,5 +186,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-    
