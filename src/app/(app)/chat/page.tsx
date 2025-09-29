@@ -36,6 +36,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import placeholderImages from "@/lib/placeholder-images.json";
 import { cn } from "@/lib/utils";
 import { WelcomeCard } from "@/components/app/welcome-card";
+import imageCompression from 'browser-image-compression';
+
 
 const chatSchema = z.object({
   message: z.string(),
@@ -82,15 +84,34 @@ export default function ChatPage() {
     },
   });
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      form.setValue("image", file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    // Show preview immediately
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    try {
+      const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1024,
+        useWebWorker: true,
+      }
+      const compressedFile = await imageCompression(file, options);
+      form.setValue("image", compressedFile);
+
+    } catch (error) {
+      console.error('Error compressing image:', error);
+      toast({
+        variant: "destructive",
+        title: "Image Error",
+        description: "Could not process image. Please try another one.",
+      });
+      clearImagePreview();
     }
   };
 
