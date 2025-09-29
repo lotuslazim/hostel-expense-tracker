@@ -59,6 +59,7 @@ function DataError() {
 
 
 export default function FoodItemAnalysisPage() {
+    // 1. ALL HOOKS MUST BE CALLED FIRST
     const searchParams = useSearchParams();
     const router = useRouter();
     const monthParam = searchParams.get('month');
@@ -97,7 +98,9 @@ export default function FoodItemAnalysisPage() {
     const { data: itemsData, isLoading: areItemsLoading, error: itemsError } = useCollection<PurchasedItem>(itemsQuery);
 
     const processedData = useMemo(() => {
-        if (!membersData || !itemsData) return null;
+        if (!membersData || !itemsData) {
+            return { memberContributions: [], aggregatedItems: [] };
+        };
 
         const memberContributions = membersData.map(member => {
             const totalSpent = itemsData
@@ -127,8 +130,8 @@ export default function FoodItemAnalysisPage() {
 
     }, [itemsData, membersData]);
 
+    // 2. CONDITIONAL RETURNS COME AFTER ALL HOOKS
     const isLoading = isCurrentUserLoading || isCurrentUserDataLoading;
-    
     if (isLoading) {
         return <PageSkeleton />;
     }
@@ -142,13 +145,10 @@ export default function FoodItemAnalysisPage() {
     
     if (isDataLoading) return <PageSkeleton />;
     if (hasError) return <DataError />;
-
-    if (!processedData) {
-        return <PageSkeleton />;
-    }
     
     const { memberContributions, aggregatedItems } = processedData;
 
+    // 3. RENDER JSX
     return (
         <div className="space-y-6">
             <div className="flex items-center gap-4">

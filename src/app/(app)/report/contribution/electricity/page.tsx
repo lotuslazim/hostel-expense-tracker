@@ -52,6 +52,7 @@ function DataError() {
 
 
 export default function ElectricityContributionPage() {
+    // 1. ALL HOOKS MUST BE CALLED FIRST - UNCONDITIONALLY
     const searchParams = useSearchParams();
     const router = useRouter();
     const monthParam = searchParams.get('month');
@@ -91,7 +92,9 @@ export default function ElectricityContributionPage() {
     const { data: expensesData, isLoading: areExpensesLoading, error: expensesError } = useCollection<Expense>(expensesQuery);
     
     const processedData = useMemo(() => {
-        if (!membersData || !expensesData) return null;
+        if (!membersData || !expensesData) {
+             return { memberContributions: [], totalElectricityExpense: 0 };
+        };
 
         const totalElectricityExpense = expensesData.reduce((sum, expense) => sum + expense.amount, 0);
 
@@ -112,9 +115,9 @@ export default function ElectricityContributionPage() {
         };
 
     }, [membersData, expensesData]);
-
-    const isLoading = isCurrentUserLoading || isCurrentUserDataLoading;
     
+    // 2. CONDITIONAL RETURNS COME AFTER ALL HOOKS
+    const isLoading = isCurrentUserLoading || isCurrentUserDataLoading;
     if (isLoading) {
         return <PageSkeleton />;
     }
@@ -126,17 +129,12 @@ export default function ElectricityContributionPage() {
     const isDataLoading = areMembersLoading || areExpensesLoading;
     const hasError = currentUserDataError || membersError || expensesError;
 
-    if(isDataLoading) return <PageSkeleton />;
+    if (isDataLoading) return <PageSkeleton />;
     if (hasError) return <DataError />;
-    
-    if (!processedData) {
-        // This can happen if data is still loading or there's an error handled above.
-        // Or if there's no data.
-        return <PageSkeleton />;
-    }
     
     const { memberContributions, totalElectricityExpense } = processedData;
 
+    // 3. RENDER JSX
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between gap-4">

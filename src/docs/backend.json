@@ -156,7 +156,7 @@
         "definition": {
           "entityName": "PurchasedItem", "schema": { "$ref": "#/entities/PurchasedItem" },
           "rules": {
-            "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "read, list": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
             "create": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && request.resource.data.userId == request.auth.uid",
             "update, delete": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && resource.data.userId == request.auth.uid"
           },
