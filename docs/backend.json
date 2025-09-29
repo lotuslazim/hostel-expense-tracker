@@ -131,8 +131,7 @@
         "definition": {
           "entityName": "MealLog", "schema": { "$ref": "#/entities/MealLog" },
           "rules": { 
-            "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
-            "write": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
+            "read, write": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
           },
           "description": "Stores meal logs. Accessible only by members of the group."
         }
@@ -142,8 +141,7 @@
         "definition": {
           "entityName": "Expense", "schema": { "$ref": "#/entities/Expense" },
           "rules": {
-            "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
-            "write": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
+            "read, write": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
           },
           "description": "Stores all expense entries, including food and utilities. Accessible only by members of the group."
         }
@@ -153,15 +151,12 @@
         "definition": {
           "entityName": "PurchasedItem", "schema": { "$ref": "#/entities/PurchasedItem" },
           "rules": {
-            "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
-            "write": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
+            "read, write": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
           },
           "description": "Stores detailed food item purchases. Accessible only by members of the group."
         }
       }
     ],
-    "reasoning": "This structure enforces security by scoping all group-related data within a group's subcollections. The rule `exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))` is used consistently to verify that the requesting user is a member of the group they are trying to access. This is a secure and scalable pattern that prevents unauthorized data access. Write access is also based on group membership, with more restrictive admin-only writes on the core group document."
+    "reasoning": "This structure enforces security by scoping all group-related data within a group's subcollections. The rule `exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))` is used consistently to verify that the requesting user is a member of the group they are trying to access. This is a secure and scalable pattern that prevents unauthorized data access. Write access is also based on group membership, with more restrictive admin-only writes on the core group document. Firestore's default-deny policy ensures any path not explicitly granted access is automatically blocked."
   }
 }
-
-    
