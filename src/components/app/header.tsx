@@ -3,6 +3,8 @@ import Link from "next/link";
 import { Logo } from "@/components/icons/logo";
 import { UserNav } from "@/components/app/user-nav";
 import { NavLink } from "./nav-link";
+import { Button } from "../ui/button";
+import { MessageSquare } from "lucide-react";
 
 export function AppHeader() {
   return (
@@ -14,11 +16,18 @@ export function AppHeader() {
         <nav className="flex items-center gap-6 text-sm font-medium">
             <NavLink href="/dashboard">Dashboard</NavLink>
             <NavLink href="/report">Monthly Report</NavLink>
+            <NavLink href="/chat">Chat</NavLink>
             <NavLink href="/profile">Profile</NavLink>
             <NavLink href="/admin">Admin</NavLink>
             <NavLink href="/settings">Settings</NavLink>
         </nav>
-        <div className="flex flex-1 items-center justify-end space-x-4">
+        <div className="flex flex-1 items-center justify-end space-x-2">
+          <Button variant="ghost" size="icon" asChild>
+              <Link href="/chat">
+                <MessageSquare />
+                <span className="sr-only">Open Chat</span>
+              </Link>
+          </Button>
           <UserNav />
         </div>
       </div>

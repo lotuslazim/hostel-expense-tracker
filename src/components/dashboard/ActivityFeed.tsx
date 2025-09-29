@@ -59,7 +59,7 @@ export function ActivityFeed({ meals, expenses }: ActivityFeedProps) {
   const hasActiveFilters = filterType !== 'all' || filterCategory !== 'all' || filterDate !== undefined;
 
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader>
         <div className="flex items-center justify-between">
             <div>
@@ -123,7 +123,7 @@ export function ActivityFeed({ meals, expenses }: ActivityFeedProps) {
         </div>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-96">
+        <ScrollArea className="h-[calc(85vh-100px)]">
           <div className="space-y-4 pr-4">
             {filteredFeed.length > 0 ? filteredFeed.map((item) => (
               <div key={`${item.type}-${item.id}`} className="flex items-start gap-4">
