@@ -15,6 +15,7 @@ import { AlertTriangle, ChevronLeft, Users, Utensils } from "lucide-react";
 import { WelcomeCard } from "@/components/app/welcome-card";
 import { Button } from "@/components/ui/button";
 import { MonthSwitcher } from "@/components/report/month-switcher";
+import Link from "next/link";
 
 // Define a specific type for member data used in this page
 interface Member {
@@ -161,6 +162,7 @@ export default function MealConsumptionPage() {
     if (hasError) return <DataError />;
     
     const { memberMeals } = processedData;
+    const monthQueryParam = format(currentDate, 'yyyy-MM');
 
     // 3. YOUR COMPONENT JSX
     return (
@@ -182,7 +184,7 @@ export default function MealConsumptionPage() {
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><Utensils className="h-5 w-5" /> Member Meal Counts</CardTitle>
-                    <CardDescription>Total number of meals logged by each member for the month.</CardDescription>
+                    <CardDescription>Total number of meals logged by each member for the month. Click a member for a detailed view.</CardDescription>
                 </CardHeader>
                 <CardContent>
                      <Table>
@@ -195,7 +197,11 @@ export default function MealConsumptionPage() {
                         <TableBody>
                             {memberMeals.length > 0 ? memberMeals.map(member => (
                                 <TableRow key={member.id}>
-                                    <TableCell className="font-medium">{member.name}</TableCell>
+                                    <TableCell className="font-medium">
+                                        <Link href={`/report/meals/${member.id}?month=${monthQueryParam}`} className="hover:underline">
+                                            {member.name}
+                                        </Link>
+                                    </TableCell>
                                     <TableCell className="text-right font-semibold">{member.totalMeals}</TableCell>
                                 </TableRow>
                             )) : (
