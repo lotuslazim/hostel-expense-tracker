@@ -14,13 +14,14 @@ export interface Meal {
   userName?: string;
 }
 
-export type ExpenseCategory = 'Food & Groceries' | 'Electricity' | 'Gas' | 'Other';
+export type ExpenseCategory = 'Food & Groceries' | 'Other';
 
 export interface Expense {
   id: string;
   description: string;
   amount: number;
   category: ExpenseCategory;
+  quantity?: number;
   date: Date | Timestamp;
   receiptPhotoUrl?: string;
   userId: string;

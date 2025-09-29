@@ -19,8 +19,8 @@ import type { ExpenseCategory } from "@/lib/types";
 const expenseSchema = z.object({
   description: z.string().min(1, "Description is required."),
   amount: z.coerce.number().min(0.01, "Amount must be greater than 0."),
-  category: z.enum(["Food & Groceries", "Electricity", "Gas", "Other"]),
-  receiptPhoto: z.any().optional(),
+  category: z.enum(["Food & Groceries", "Other"]),
+  quantity: z.coerce.number().min(0).optional(),
 });
 
 interface ExpenseLogFormProps {
@@ -31,7 +31,6 @@ export function ExpenseLogForm({ selectedDate }: ExpenseLogFormProps) {
   const { firestore } = useFirebase();
   const { user: currentUser } = useUser();
   const { toast } = useToast();
-  const [showReceipt, setShowReceipt] = useState(false);
 
   const form = useForm<z.infer<typeof expenseSchema>>({
     resolver: zodResolver(expenseSchema),
@@ -39,20 +38,11 @@ export function ExpenseLogForm({ selectedDate }: ExpenseLogFormProps) {
       description: "",
       amount: 0,
       category: "Food & Groceries",
+      quantity: 1,
     },
   });
 
   const { isSubmitting } = form.formState;
-  const category = form.watch("category");
-
-  useEffect(() => {
-    if (category === "Electricity" || category === "Gas") {
-      setShowReceipt(true);
-    } else {
-      setShowReceipt(false);
-    }
-  }, [category]);
-
 
   const onSubmit = async (values: z.infer<typeof expenseSchema>) => {
     if (!currentUser?.uid) {
@@ -72,22 +62,16 @@ export function ExpenseLogForm({ selectedDate }: ExpenseLogFormProps) {
         return;
       }
       
-      // Note: In a real app, you would handle file uploads to a service like Firebase Storage
-      // and save the URL here. For this prototype, we'll just log that a file was selected.
-      const { receiptPhoto, ...restOfValues } = values;
-      const hasReceipt = receiptPhoto && receiptPhoto.length > 0;
-
       await addDoc(collection(firestore, `groups/${groupId}/expenses`), {
-        ...restOfValues,
+        ...values,
         date: selectedDate,
         userId: currentUser.uid,
         userName,
-        receiptPhotoUrl: hasReceipt ? `receipts/placeholder-${Date.now()}` : null,
         createdAt: serverTimestamp(),
       });
 
-      toast({ title: "Success", description: `Expense logged successfully! ${hasReceipt ? '(with receipt)' : ''}` });
-      form.reset({ description: "", amount: 0, category: "Food & Groceries" });
+      toast({ title: "Success", description: `Expense logged successfully!` });
+      form.reset({ description: "", amount: 0, category: "Food & Groceries", quantity: 1 });
     } catch (error) {
       console.error("Error logging expense:", error);
       toast({ variant: "destructive", title: "Error", description: "Could not log expense. Please try again." });
@@ -129,7 +113,21 @@ export function ExpenseLogForm({ selectedDate }: ExpenseLogFormProps) {
                     </FormItem>
                     )}
                 />
-                <FormField
+                 <FormField
+                    control={form.control}
+                    name="quantity"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Quantity (Optional)</FormLabel>
+                        <FormControl>
+                        <Input type="number" step="1" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+            </div>
+             <FormField
                     control={form.control}
                     name="category"
                     render={({ field }) => (
@@ -143,8 +141,6 @@ export function ExpenseLogForm({ selectedDate }: ExpenseLogFormProps) {
                         </FormControl>
                         <SelectContent>
                             <SelectItem value="Food & Groceries"><Utensils className="mr-2"/>Food & Groceries</SelectItem>
-                            <SelectItem value="Electricity"><Zap className="mr-2"/>Electricity</SelectItem>
-                            <SelectItem value="Gas"><Flame className="mr-2"/>Gas</SelectItem>
                             <SelectItem value="Other"><Package className="mr-2"/>Other</SelectItem>
                         </SelectContent>
                         </Select>
@@ -152,24 +148,6 @@ export function ExpenseLogForm({ selectedDate }: ExpenseLogFormProps) {
                     </FormItem>
                     )}
                 />
-            </div>
-            {showReceipt && (
-                 <FormField
-                    control={form.control}
-                    name="receiptPhoto"
-                    render={({ field: { onChange, value, ...rest }}) => (
-                        <FormItem>
-                            <FormLabel className="flex items-center gap-2">
-                                <ImageIcon /> Receipt Photo (Optional)
-                            </FormLabel>
-                            <FormControl>
-                                <Input type="file" accept="image/*" onChange={(e) => onChange(e.target.files)} {...rest} />
-                            </FormControl>
-                             <FormMessage />
-                        </FormItem>
-                    )}
-                />
-            )}
             <Button type="submit" className="w-full" disabled={isSubmitting}>
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Log Expense
