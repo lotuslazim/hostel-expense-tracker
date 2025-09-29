@@ -91,47 +91,47 @@ export default function DashboardPage() {
 
   // Queries for meals and expenses
   const mealsQuery = useMemo(() =>
-    !isCurrentUserLoading && !isCurrentUserDataLoading && groupId
+    currentUser && groupId
       ? query(
           collection(firestore, `groups/${groupId}/meals`),
           where("date", ">=", dateRange.start),
           where("date", "<=", dateRange.end)
         )
       : null,
-    [firestore, groupId, dateRange, isCurrentUserLoading, isCurrentUserDataLoading]
+    [firestore, currentUser, groupId, dateRange]
   );
 
   const expensesQuery = useMemo(() =>
-    !isCurrentUserLoading && !isCurrentUserDataLoading && groupId
+    currentUser && groupId
       ? query(
           collection(firestore, `groups/${groupId}/expenses`),
           where("date", ">=", dateRange.start),
           where("date", "<=", dateRange.end)
         )
       : null,
-    [firestore, groupId, dateRange, isCurrentUserLoading, isCurrentUserDataLoading]
+    [firestore, currentUser, groupId, dateRange]
   );
     
   const itemsQuery = useMemo(() =>
-    !isCurrentUserLoading && !isCurrentUserDataLoading && groupId
+    currentUser && groupId
       ? query(
           collection(firestore, `groups/${groupId}/purchasedItems`),
           where("date", ">=", dateRange.start),
           where("date", "<=", dateRange.end)
         )
       : null,
-    [firestore, groupId, dateRange, isCurrentUserLoading, isCurrentUserDataLoading]
+    [firestore, currentUser, groupId, dateRange]
   );
   
   const monthlyExpensesQuery = useMemo(() =>
-    !isCurrentUserLoading && !isCurrentUserDataLoading && groupId
+    currentUser && groupId
       ? query(
           collection(firestore, `groups/${groupId}/expenses`),
           where("date", ">=", monthDateRange.start),
           where("date", "<=", monthDateRange.end)
         )
       : null,
-    [firestore, groupId, monthDateRange, isCurrentUserLoading, isCurrentUserDataLoading]
+    [firestore, currentUser, groupId, monthDateRange]
   );
 
 
@@ -140,7 +140,7 @@ export default function DashboardPage() {
   const { data: items, isLoading: areItemsLoading, error: itemsError } = useCollection<PurchasedItem>(itemsQuery);
   const { data: monthlyExpenses, isLoading: areMonthlyExpensesLoading, error: monthlyExpensesError } = useCollection<Expense>(monthlyExpensesQuery);
 
-  const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || (groupId && (areMealsLoading || areExpensesLoading || areMonthlyExpensesLoading || areItemsLoading));
+  const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || (!!groupId && (areMealsLoading || areExpensesLoading || areMonthlyExpensesLoading || areItemsLoading));
   const hasError = currentUserDataError || mealsError || expensesError || itemsError || monthlyExpensesError;
 
   if (isLoading) {
@@ -184,3 +184,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    

@@ -92,7 +92,7 @@ export function ItemLog({ items, currentDate }: { items: PurchasedItem[]; curren
           <CardTitle>Food Purchase Log</CardTitle>
           <CardDescription>Track individual food items bought.</CardDescription>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={(isOpen) => { if(!isOpen) resetForm(); setOpen(isOpen);}}>
           <DialogTrigger asChild>
             <Button>
               <PlusCircle className="mr-2 h-4 w-4" /> Add Item
@@ -159,3 +159,5 @@ export function ItemLog({ items, currentDate }: { items: PurchasedItem[]; curren
     </Card>
   );
 }
+
+    

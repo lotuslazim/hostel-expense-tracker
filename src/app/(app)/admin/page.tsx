@@ -109,7 +109,7 @@ function NewUserAdminPanel() {
 
 export default function AdminPage() {
   const { firestore } = useFirebase();
-  const { user: currentUser } = useUser();
+  const { user: currentUser, isUserLoading: isCurrentUserLoading } = useUser();
   const { toast } = useToast();
 
   const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
@@ -117,12 +117,12 @@ export default function AdminPage() {
 
   const groupId = currentUserData?.groupId;
 
-  const groupRef = useMemo(() => groupId ? doc(firestore, "groups", groupId) : null, [firestore, groupId]);
+  const groupRef = useMemo(() => (currentUser && groupId) ? doc(firestore, "groups", groupId) : null, [firestore, currentUser, groupId]);
   const { data: groupData, isLoading: isGroupLoading } = useDoc(groupRef);
 
   const membersQuery = useMemo(
-    () => (groupId ? collection(firestore, `groups/${groupId}/members`) : null),
-    [firestore, groupId]
+    () => (currentUser && groupId ? collection(firestore, `groups/${groupId}/members`) : null),
+    [firestore, currentUser, groupId]
   );
   const { data: membersCollection, isLoading: areMembersLoading, error: membersError } = useCollection(membersQuery);
   
@@ -137,7 +137,7 @@ export default function AdminPage() {
     }));
   }, [membersCollection]);
 
-  const isLoading = isCurrentUserDataLoading || (!!groupId && isGroupLoading);
+  const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || (!!groupId && (isGroupLoading || areMembersLoading));
 
   if (isLoading) {
     return (
@@ -155,7 +155,7 @@ export default function AdminPage() {
   }
 
   // If user is not in a group, show the new user panel
-  if (!groupId) {
+  if (!groupId || !currentUser) {
     return <NewUserAdminPanel />;
   }
 
@@ -272,3 +272,5 @@ export default function AdminPage() {
     </div>
   );
 }
+
+    

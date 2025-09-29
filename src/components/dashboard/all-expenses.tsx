@@ -214,7 +214,7 @@ export function AllExpenses({ expenses, currentDate }: { expenses: Expense[]; cu
           <CardTitle>Daily Expense Log</CardTitle>
           <CardDescription>Log and view all food and utility expenses for today.</CardDescription>
         </div>
-         <Dialog open={open} onOpenChange={setOpen}>
+         <Dialog open={open} onOpenChange={(isOpen) => { if(!isOpen) resetForm(); setOpen(isOpen);}}>
           <DialogTrigger asChild>
             <Button>
               <PlusCircle className="mr-2 h-4 w-4" /> Add Expense

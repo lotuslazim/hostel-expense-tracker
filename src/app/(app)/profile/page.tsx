@@ -138,7 +138,7 @@ export default function ProfilePage() {
   const inGroup = !!groupId;
   const isAdmin = currentUserData?.isAdmin ?? false;
 
-  const groupRef = useMemo(() => groupId ? doc(firestore, "groups", groupId) : null, [firestore, groupId]);
+  const groupRef = useMemo(() => (currentUser && groupId) ? doc(firestore, "groups", groupId) : null, [firestore, currentUser, groupId]);
   const { data: groupData, isLoading: isGroupDataLoading } = useDoc(groupRef);
 
 
@@ -191,6 +191,17 @@ export default function ProfilePage() {
   
   if (isLoading) {
     return <ProfileSkeleton />;
+  }
+  
+  if(!currentUser) {
+    // This case should ideally be handled by a higher-level auth guard
+    // but as a fallback, we can show a login prompt.
+    return (
+        <div className="text-center">
+            <p>Please log in to view your profile.</p>
+            <Button asChild><Link href="/login">Log In</Link></Button>
+        </div>
+    );
   }
 
   const userProfile = {
@@ -304,3 +315,5 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+    

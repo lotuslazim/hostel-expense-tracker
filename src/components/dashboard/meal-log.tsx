@@ -34,6 +34,11 @@ function LogMealDialog({ type, currentDate }: { type: MealType; currentDate: Dat
     const { data: currentUserData } = useDoc(currentUserRef);
     const groupId = currentUserData?.groupId;
 
+    const resetForm = () => {
+        setMealNumber("1");
+        setDescription("");
+    };
+
     const handleSaveMeal = async () => {
         if (parseFloat(mealNumber) <= 0 || !groupId || !currentUser) {
             toast({ variant: "destructive", title: "Error", description: "Meal number must be greater than zero." });
@@ -56,8 +61,7 @@ function LogMealDialog({ type, currentDate }: { type: MealType; currentDate: Dat
             const mealsCol = collection(firestore, `groups/${groupId}/meals`);
             await addDoc(mealsCol, mealData);
 
-            setMealNumber("1");
-            setDescription("");
+            resetForm();
             setOpen(false);
             toast({ title: "Success", description: "Meal logged successfully." });
 
@@ -70,7 +74,7 @@ function LogMealDialog({ type, currentDate }: { type: MealType; currentDate: Dat
     };
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={(isOpen) => { if(!isOpen) resetForm(); setOpen(isOpen);}}>
            <DialogTrigger asChild>
               <Button variant="ghost" size="sm">
                 <PlusCircle className="mr-2 h-4 w-4" /> Add Meal
@@ -155,3 +159,5 @@ export function MealLog({ meals, currentDate }: { meals: Meal[], currentDate: Da
     </Card>
   );
 }
+
+    

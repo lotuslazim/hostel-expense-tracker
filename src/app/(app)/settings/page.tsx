@@ -78,7 +78,7 @@ export default function SettingsPage() {
 
   const groupId = currentUserData?.groupId;
 
-  const groupRef = React.useMemo(() => groupId ? doc(firestore, "groups", groupId) : null, [firestore, groupId]);
+  const groupRef = React.useMemo(() => (currentUser && groupId) ? doc(firestore, "groups", groupId) : null, [firestore, currentUser, groupId]);
   const { data: groupData, isLoading: isGroupLoading } = useDoc(groupRef);
   
   const isGoogleUser = currentUser?.providerData.some(p => p.providerId === 'google.com');
@@ -151,7 +151,7 @@ export default function SettingsPage() {
   };
 
 
-  const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || isGroupLoading;
+  const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || (!!groupId && isGroupLoading);
 
   if (isLoading) {
     return (
@@ -532,3 +532,5 @@ export default function SettingsPage() {
     </div>
   );
 }
+
+    
