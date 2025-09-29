@@ -1,4 +1,5 @@
 
+      
 {
   "entities": {
     "Group": {
@@ -120,7 +121,7 @@
         "definition": {
           "entityName": "Member", "schema": { "$ref": "#/entities/Member" },
           "rules": {
-            "read, list": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
             "write": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true || request.auth.uid == memberId"
           },
           "description": "Stores basic info about group members. Readable by all members. Writable by admins or the member themselves."
@@ -155,7 +156,7 @@
         "definition": {
           "entityName": "PurchasedItem", "schema": { "$ref": "#/entities/PurchasedItem" },
           "rules": {
-            "read, list": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
             "create": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && request.resource.data.userId == request.auth.uid",
             "update, delete": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && resource.data.userId == request.auth.uid"
           },
