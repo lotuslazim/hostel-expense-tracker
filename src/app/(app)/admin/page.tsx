@@ -43,8 +43,7 @@ function NewUserAdminPanel() {
     try {
       const batch = writeBatch(firestore);
       const newGroupRef = doc(collection(firestore, "groups"));
-      const userRef = doc(firestore, "users", currentUser.uid);
-
+      
       batch.set(newGroupRef, {
         groupName,
         invitationCode: generateInviteCode(),
@@ -61,6 +60,7 @@ function NewUserAdminPanel() {
           id: currentUser.uid
       });
 
+      const userRef = doc(firestore, "users", currentUser.uid);
       batch.update(userRef, {
         groupId: newGroupRef.id,
         isAdmin: true,
