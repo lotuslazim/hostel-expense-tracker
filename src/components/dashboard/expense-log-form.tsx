@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { Loader2, Utensils, Zap, Package, Flame, Image as ImageIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { ExpenseCategory } from "@/lib/types";
 
 const expenseSchema = z.object({
@@ -42,17 +42,17 @@ export function ExpenseLogForm({ selectedDate }: ExpenseLogFormProps) {
     },
   });
 
-  const { isSubmitting, watch } = form.formState;
-  const category = watch("category");
+  const { isSubmitting } = form.formState;
+  const category = form.watch("category");
 
-  const handleCategoryChange = (value: ExpenseCategory) => {
-    form.setValue("category", value);
-    if (value === "Electricity" || value === "Gas") {
+  useEffect(() => {
+    if (category === "Electricity" || category === "Gas") {
       setShowReceipt(true);
     } else {
       setShowReceipt(false);
     }
-  };
+  }, [category]);
+
 
   const onSubmit = async (values: z.infer<typeof expenseSchema>) => {
     if (!currentUser?.uid) {
@@ -88,7 +88,6 @@ export function ExpenseLogForm({ selectedDate }: ExpenseLogFormProps) {
 
       toast({ title: "Success", description: `Expense logged successfully! ${hasReceipt ? '(with receipt)' : ''}` });
       form.reset({ description: "", amount: 0, category: "Food & Groceries" });
-      setShowReceipt(false);
     } catch (error) {
       console.error("Error logging expense:", error);
       toast({ variant: "destructive", title: "Error", description: "Could not log expense. Please try again." });
@@ -136,7 +135,7 @@ export function ExpenseLogForm({ selectedDate }: ExpenseLogFormProps) {
                     render={({ field }) => (
                     <FormItem>
                         <FormLabel>Category</FormLabel>
-                        <Select onValueChange={(value) => handleCategoryChange(value as ExpenseCategory)} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                             <SelectTrigger>
                             <SelectValue placeholder="Select a category" />
@@ -158,13 +157,13 @@ export function ExpenseLogForm({ selectedDate }: ExpenseLogFormProps) {
                  <FormField
                     control={form.control}
                     name="receiptPhoto"
-                    render={({ field }) => (
+                    render={({ field: { onChange, value, ...rest }}) => (
                         <FormItem>
                             <FormLabel className="flex items-center gap-2">
                                 <ImageIcon /> Receipt Photo (Optional)
                             </FormLabel>
                             <FormControl>
-                                <Input type="file" accept="image/*" onChange={(e) => field.onChange(e.target.files)} />
+                                <Input type="file" accept="image/*" onChange={(e) => onChange(e.target.files)} {...rest} />
                             </FormControl>
                              <FormMessage />
                         </FormItem>
