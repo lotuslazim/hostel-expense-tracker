@@ -56,7 +56,7 @@ function NewUserAdminPanel() {
           email: currentUser.email,
           role: 'admin',
           joinedAt: serverTimestamp(),
-          displayName: currentUser.displayName,
+          displayName: currentUser.displayName || currentUser.email?.split('@')[0],
           id: currentUser.uid
       });
 
@@ -272,3 +272,5 @@ export default function AdminPage() {
     </div>
   );
 }
+
+    

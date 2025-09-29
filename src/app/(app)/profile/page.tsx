@@ -56,7 +56,7 @@ function JoinGroupCard() {
         const memberRef = doc(firestore, `groups/${groupDoc.id}/members`, currentUser.uid);
         batch.set(memberRef, {
             email: currentUser.email,
-            displayName: currentUser.displayName,
+            displayName: currentUser.displayName || currentUser.email?.split('@')[0],
             role: 'member',
             joinedAt: serverTimestamp(),
             id: currentUser.uid,
