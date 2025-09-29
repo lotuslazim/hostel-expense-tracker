@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -17,15 +17,11 @@ import {
 } from "@/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
 import { useFirebase, useUser, useDoc } from "@/firebase";
 import { doc, addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Utensils, CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
-
 
 const mealSchema = z.object({
   mealType: z.enum(["lunch", "dinner"], {
@@ -35,7 +31,11 @@ const mealSchema = z.object({
   date: z.date(),
 });
 
-export function LogMealCard() {
+interface LogMealCardProps {
+    selectedDate: Date;
+}
+
+export function LogMealCard({ selectedDate }: LogMealCardProps) {
   const { firestore } = useFirebase();
   const { user: currentUser } = useUser();
   const { toast } = useToast();
@@ -49,9 +49,13 @@ export function LogMealCard() {
     resolver: zodResolver(mealSchema),
     defaultValues: {
       mealCount: 1,
-      date: new Date(),
+      date: selectedDate,
     },
   });
+
+  useEffect(() => {
+    form.setValue("date", selectedDate);
+  }, [selectedDate, form]);
 
   async function onSubmit(values: z.infer<typeof mealSchema>) {
     if (!currentUser || !groupId) {
@@ -79,7 +83,7 @@ export function LogMealCard() {
         title: "Meal Logged",
         description: `Your ${values.mealType} has been successfully logged.`,
       });
-      form.reset({ mealCount: 1, mealType: undefined, date: new Date() });
+      form.reset({ mealCount: 1, mealType: undefined, date: selectedDate });
     } catch (error) {
       console.error("Error logging meal:", error);
       toast({
@@ -97,7 +101,7 @@ export function LogMealCard() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2"><Utensils /> Log a Meal</CardTitle>
         <CardDescription>
-          Select the meal type, count, and date.
+          Select the meal type and count.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -152,37 +156,9 @@ export function LogMealCard() {
               render={({ field }) => (
                 <FormItem className="flex flex-col">
                   <FormLabel>Date</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "w-full pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, "PPP")
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) =>
-                          date > new Date() || date < new Date("1900-01-01")
-                        }
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
+                    <FormControl>
+                        <Input value={format(field.value, "PPP")} readOnly disabled />
+                    </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

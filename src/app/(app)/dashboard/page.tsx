@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
 import { doc, collection, query, where, orderBy } from "firebase/firestore";
 import { startOfMonth, endOfMonth } from "date-fns";
@@ -12,6 +12,7 @@ import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import type { MealLog, Expense } from "@/lib/types";
 import { LogMealCard } from "@/components/dashboard/LogMealCard";
 import { AddExpenseCard } from "@/components/dashboard/AddExpenseCard";
+import { DateCard } from "@/components/dashboard/DateCard";
 
 function DashboardSkeleton() {
   return (
@@ -33,6 +34,8 @@ function DashboardSkeleton() {
 export default function DashboardPage() {
   const { firestore } = useFirebase();
   const { user: currentUser, isUserLoading } = useUser();
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+
 
   const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
   const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
@@ -94,8 +97,9 @@ export default function DashboardPage() {
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-1 space-y-6">
-                <LogMealCard />
-                <AddExpenseCard />
+                <DateCard date={selectedDate} setDate={setSelectedDate} />
+                <LogMealCard selectedDate={selectedDate} />
+                <AddExpenseCard selectedDate={selectedDate} />
             </div>
             <div className="lg:col-span-2">
                 {isDataLoading ? (
