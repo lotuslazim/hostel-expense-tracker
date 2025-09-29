@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useFirebase, useUser } from "@/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { Loader2, Utensils, Zap, Package, Flame, Image as ImageIcon } from "lucide-react";
+import { Loader2, Utensils, Zap, Package, Flame, Image as ImageIcon, ShoppingCart } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { useState, useEffect } from "react";
 import type { ExpenseCategory } from "@/lib/types";
@@ -140,7 +140,7 @@ export function ExpenseLogForm({ selectedDate }: ExpenseLogFormProps) {
                             </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                            <SelectItem value="Food & Groceries"><Utensils className="mr-2"/>Food & Groceries</SelectItem>
+                            <SelectItem value="Food & Groceries"><ShoppingCart className="mr-2"/>Food & Groceries</SelectItem>
                             <SelectItem value="Other"><Package className="mr-2"/>Other</SelectItem>
                         </SelectContent>
                         </Select>
