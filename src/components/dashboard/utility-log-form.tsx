@@ -24,7 +24,7 @@ import {
 import { useFirebase, useUser } from "@/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { Loader2, Zap, Flame, Camera, Video, AlertTriangle } from "lucide-react";
+import { Loader2, Zap, Flame, Camera, Upload, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { useState, useEffect, useRef } from "react";
 import type { ExpenseCategory } from "@/lib/types";
@@ -51,6 +51,8 @@ export function UtilityLogForm({ selectedDate }: UtilityLogFormProps) {
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
 
   const form = useForm<z.infer<typeof utilityExpenseSchema>>({
     resolver: zodResolver(utilityExpenseSchema),
@@ -80,6 +82,20 @@ export function UtilityLogForm({ selectedDate }: UtilityLogFormProps) {
     };
     getCameraPermission();
   }, []);
+  
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const dataUrl = reader.result as string;
+        setCapturedImage(dataUrl);
+        form.setValue('receiptPhotoUrl', dataUrl);
+        setIsCameraOpen(false); // Close camera if it was open
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleTakePhoto = () => {
     if (videoRef.current && canvasRef.current) {
@@ -116,6 +132,11 @@ export function UtilityLogForm({ selectedDate }: UtilityLogFormProps) {
         return;
       }
 
+      // Here you would typically upload the image data `values.receiptPhotoUrl` 
+      // to a storage service like Firebase Storage and get a URL back.
+      // For this prototype, we are storing the data URL directly in Firestore.
+      // This is NOT recommended for production due to Firestore document size limits.
+
       await addDoc(collection(firestore, `groups/${groupId}/expenses`), {
         ...values,
         date: selectedDate,
@@ -125,7 +146,7 @@ export function UtilityLogForm({ selectedDate }: UtilityLogFormProps) {
       });
 
       toast({ title: "Success", description: "Utility expense logged successfully!" });
-      form.reset();
+      form.reset({ amount: 0, category: "Electricity", receiptPhotoUrl: undefined });
       setCapturedImage(null);
     } catch (error) {
       console.error("Error logging expense:", error);
@@ -193,7 +214,7 @@ export function UtilityLogForm({ selectedDate }: UtilityLogFormProps) {
                 <div className="space-y-2">
                     <FormLabel>Receipt Preview</FormLabel>
                     <div className="relative aspect-video w-full">
-                        <Image src={capturedImage} alt="Receipt preview" layout="fill" objectFit="contain" className="rounded-md border"/>
+                        <Image src={capturedImage} alt="Receipt preview" fill objectFit="contain" className="rounded-md border"/>
                     </div>
                 </div>
             )}
@@ -207,10 +228,23 @@ export function UtilityLogForm({ selectedDate }: UtilityLogFormProps) {
                     </Button>
                  </div>
             ) : (
-                <Button variant="outline" onClick={() => setIsCameraOpen(true)} className="w-full" disabled={!hasCameraPermission}>
-                    <Camera className="mr-2 h-4 w-4" />
-                    {capturedImage ? "Retake Receipt Photo" : "Take Receipt Photo"}
-                </Button>
+                <div className="grid grid-cols-2 gap-2">
+                    <Button variant="outline" onClick={() => setIsCameraOpen(true)} className="w-full" disabled={!hasCameraPermission}>
+                        <Camera className="mr-2 h-4 w-4" />
+                        {capturedImage ? "Retake Photo" : "Take Photo"}
+                    </Button>
+                    <Button variant="outline" onClick={() => fileInputRef.current?.click()} className="w-full">
+                        <Upload className="mr-2 h-4 w-4" />
+                        Upload Photo
+                    </Button>
+                     <input 
+                        type="file" 
+                        ref={fileInputRef} 
+                        onChange={handleFileSelect}
+                        className="hidden"
+                        accept="image/*"
+                     />
+                </div>
             )}
 
             {!hasCameraPermission && (
@@ -218,7 +252,7 @@ export function UtilityLogForm({ selectedDate }: UtilityLogFormProps) {
                     <AlertTriangle className="h-4 w-4 text-yellow-500" />
                     <AlertTitle>Camera Access Recommended</AlertTitle>
                     <AlertDescription>
-                        To upload receipts, please allow camera access in your browser settings.
+                        To take photos of receipts, please allow camera access in your browser settings.
                     </AlertDescription>
                 </Alert>
             )}
