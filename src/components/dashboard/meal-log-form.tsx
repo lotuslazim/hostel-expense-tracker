@@ -84,7 +84,7 @@ export function MealLogForm({ selectedDate }: MealLogFormProps) {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
             control={form.control}
             name="mealType"
@@ -95,7 +95,7 @@ export function MealLogForm({ selectedDate }: MealLogFormProps) {
                     <RadioGroup
                     onValueChange={field.onChange}
                     defaultValue={field.value}
-                    className="flex flex-wrap gap-4"
+                    className="flex flex-wrap gap-x-6 gap-y-2"
                     >
                     <FormItem className="flex items-center space-x-2 space-y-0">
                         <FormControl>
@@ -127,38 +127,32 @@ export function MealLogForm({ selectedDate }: MealLogFormProps) {
                 </FormItem>
             )}
             />
-            <div className="grid grid-cols-5 gap-4">
-                <div className="col-span-3">
-                    <FormField
-                        control={form.control}
-                        name="description"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Description (Optional)</FormLabel>
-                            <FormControl>
-                                <Input placeholder="e.g., Rice and curry" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                </div>
-                <div className="col-span-2">
-                     <FormField
-                        control={form.control}
-                        name="mealNumber"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Meal Count</FormLabel>
-                            <FormControl>
-                                <Input type="number" min="0" step="0.5" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                </div>
-            </div>
+            <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Description (Optional)</FormLabel>
+                    <FormControl>
+                        <Input placeholder="e.g., Rice and curry" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+            />
+             <FormField
+                control={form.control}
+                name="mealNumber"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Meal Count</FormLabel>
+                    <FormControl>
+                        <Input type="number" min="0" step="0.5" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+            />
 
             <Button type="submit" className="w-full" disabled={isSubmitting}>
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
