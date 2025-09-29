@@ -18,11 +18,11 @@ import { AuthCard } from "./auth-card";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
 import { useAuth, useFirebase } from "@/firebase";
-import { GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, updateProfile, type User } from "firebase/auth";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import { GoogleIcon } from "../icons/google";
 
 const formSchema = z.object({
@@ -43,10 +43,9 @@ export function SignupForm() {
     defaultValues: { name: "", email: "", password: "" },
   });
 
-  const createUserDocument = async (user: { uid: string, email: string | null, displayName: string | null }) => {
+  const createUserDocument = async (user: User) => {
     const userDocRef = doc(firestore, "users", user.uid);
     const userDoc = await getDoc(userDocRef);
-    // Create user document only if it doesn't exist
     if (!userDoc.exists()) {
         await setDoc(userDocRef, {
             id: user.uid,
@@ -65,11 +64,12 @@ export function SignupForm() {
       const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
       
-      // Update user's profile display name
       await updateProfile(user, { displayName: values.name });
-
-      // Create a user document in Firestore
-      await createUserDocument({ uid: user.uid, email: user.email, displayName: values.name });
+      
+      // We need to re-assign user to get the updated profile
+      if (auth.currentUser) {
+        await createUserDocument(auth.currentUser);
+      }
       
       router.push('/dashboard');
 
@@ -95,7 +95,6 @@ export function SignupForm() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       
-      // Create user document in Firestore if it doesn't exist
       await createUserDocument(user);
       
       router.push('/dashboard');
@@ -179,5 +178,3 @@ export function SignupForm() {
     </AuthCard>
   );
 }
-
-    

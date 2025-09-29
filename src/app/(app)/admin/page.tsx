@@ -121,8 +121,8 @@ export default function AdminPage() {
   const { data: groupData, isLoading: isGroupLoading } = useDoc(groupRef);
 
   const membersQuery = useMemo(
-    () => (groupId ? collection(firestore, `groups/${groupId}/members`) : null),
-    [firestore, groupId]
+    () => (currentUser && groupId ? collection(firestore, `groups/${groupId}/members`) : null),
+    [firestore, currentUser, groupId]
   );
   const { data: membersCollection, isLoading: areMembersLoading, error: membersError } = useCollection(membersQuery);
   
@@ -272,5 +272,3 @@ export default function AdminPage() {
     </div>
   );
 }
-
-    
