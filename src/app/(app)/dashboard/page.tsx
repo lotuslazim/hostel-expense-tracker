@@ -8,7 +8,7 @@ import { startOfMonth, endOfMonth } from "date-fns";
 import { WelcomeCard } from "@/components/app/welcome-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
-import type { MealLog, Expense } from "@/lib/types";
+import type { Expense } from "@/lib/types";
 import { LogMealCard } from "@/components/dashboard/LogMealCard";
 import { AddExpenseCard } from "@/components/dashboard/AddExpenseCard";
 import { DateCard } from "@/components/dashboard/DateCard";
@@ -45,16 +45,6 @@ export default function DashboardPage() {
     end: endOfMonth(new Date()),
   }), []);
 
-  const mealsQuery = useMemo(() => {
-    if (!groupId) return null;
-    return query(
-      collection(firestore, `groups/${groupId}/meals`),
-      where("date", ">=", dateRange.start),
-      where("date", "<=", dateRange.end),
-      orderBy("date", "desc")
-    );
-  }, [firestore, groupId, dateRange]);
-
   const expensesQuery = useMemo(() => {
     if (!groupId) return null;
     return query(
@@ -65,7 +55,6 @@ export default function DashboardPage() {
     );
   }, [firestore, groupId, dateRange]);
 
-  const { data: meals, isLoading: areMealsLoading } = useCollection<MealLog>(mealsQuery);
   const { data: expenses, isLoading: areExpensesLoading } = useCollection<Expense>(expensesQuery);
 
   const isLoading = isUserLoading || isCurrentUserDataLoading;
@@ -78,7 +67,6 @@ export default function DashboardPage() {
     return <WelcomeCard />;
   }
 
-  const isDataLoading = areMealsLoading || areExpensesLoading;
 
   return (
     <div className="space-y-6">
@@ -95,10 +83,10 @@ export default function DashboardPage() {
                 <AddExpenseCard selectedDate={selectedDate} />
             </div>
             <div className="lg:col-span-2">
-                {isDataLoading ? (
+                {areExpensesLoading ? (
                     <Skeleton className="h-[85vh] w-full" />
                 ) : (
-                    <ActivityFeed meals={meals || []} expenses={expenses || []} />
+                    <ActivityFeed expenses={expenses || []} />
                 )}
             </div>
         </div>
