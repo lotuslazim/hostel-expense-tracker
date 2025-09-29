@@ -124,17 +124,22 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
         const snapshot = await uploadBytes(imageRef, values.receipt);
         receiptPhotoUrl = await getDownloadURL(snapshot.ref);
       }
-
-      await addDoc(collection(firestore, `groups/${groupId}/expenses`), {
+      
+      const expenseData: any = {
         amount: values.amount,
         description: values.description || "",
         category: values.category,
-        receiptPhotoUrl: receiptPhotoUrl,
         userId: currentUser.uid,
         userName: currentUser.displayName || currentUser.email?.split('@')[0],
         date: selectedDate,
         createdAt: serverTimestamp(),
-      });
+      };
+
+      if (receiptPhotoUrl) {
+          expenseData.receiptPhotoUrl = receiptPhotoUrl;
+      }
+
+      await addDoc(collection(firestore, `groups/${groupId}/expenses`), expenseData);
 
       toast({
         title: "Expense Added",
