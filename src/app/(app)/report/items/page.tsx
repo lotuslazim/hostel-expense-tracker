@@ -2,8 +2,8 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { useMemo } from "react";
-import { parseISO, startOfMonth, endOfMonth, format } from "date-fns";
+import { useMemo, useState, useEffect } from "react";
+import { parseISO, startOfMonth, endOfMonth, format, addMonths, subMonths } from "date-fns";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
 import { doc, collection, query, where, type Timestamp } from "firebase/firestore";
 import type { PurchasedItem } from "@/lib/types";
@@ -14,16 +14,18 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle, Users, Package, ChevronLeft } from "lucide-react";
 import { WelcomeCard } from "@/components/app/welcome-card";
 import { Button } from "@/components/ui/button";
+import { MonthSwitcher } from "@/components/report/month-switcher";
+
 
 function PageSkeleton() {
     return (
         <div className="space-y-6">
-            <div className="flex items-center gap-4">
-                 <Skeleton className="h-10 w-10" />
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div>
                     <Skeleton className="h-9 w-72" />
                     <Skeleton className="h-4 w-96 mt-2" />
                 </div>
+                 <Skeleton className="h-10 w-[330px]" />
             </div>
             <Card>
                 <CardHeader>
@@ -59,16 +61,31 @@ function DataError() {
 
 
 export default function FoodItemAnalysisPage() {
-    // 1. ALL HOOKS MUST BE CALLED FIRST
     const searchParams = useSearchParams();
     const router = useRouter();
     const monthParam = searchParams.get('month');
 
+    const getInitialDate = () => {
+        if (monthParam) {
+            try {
+                return startOfMonth(parseISO(monthParam));
+            } catch (e) {
+                return startOfMonth(new Date());
+            }
+        }
+        return startOfMonth(new Date());
+    };
+
+    const [currentDate, setCurrentDate] = useState(getInitialDate);
     const { firestore } = useFirebase();
     const { user: currentUser, isUserLoading: isCurrentUserLoading } = useUser();
-
-    const month = useMemo(() => {
-        return monthParam ? startOfMonth(parseISO(monthParam)) : startOfMonth(new Date());
+    
+    useEffect(() => {
+        const newDate = getInitialDate();
+        if (newDate.getTime() !== currentDate.getTime()) {
+            setCurrentDate(newDate);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [monthParam]);
 
     const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
@@ -76,9 +93,9 @@ export default function FoodItemAnalysisPage() {
     const groupId = currentUserData?.groupId;
 
     const monthDateRange = useMemo(() => ({
-        start: startOfMonth(month),
-        end: endOfMonth(month),
-    }), [month]);
+        start: startOfMonth(currentDate),
+        end: endOfMonth(currentDate),
+    }), [currentDate]);
 
     const membersQuery = useMemo(() =>
         (groupId ? collection(firestore, `groups/${groupId}/members`) : null),
@@ -130,7 +147,13 @@ export default function FoodItemAnalysisPage() {
 
     }, [itemsData, membersData]);
 
-    // 2. CONDITIONAL RETURNS COME AFTER ALL HOOKS
+    const handleMonthChange = (direction: "next" | "prev") => {
+        const newDate = direction === "next" ? addMonths(currentDate, 1) : subMonths(currentDate, 1);
+        setCurrentDate(newDate);
+        const newUrl = `/report/items?month=${format(newDate, 'yyyy-MM')}`;
+        router.push(newUrl, { scroll: false });
+    };
+
     const isLoading = isCurrentUserLoading || isCurrentUserDataLoading;
     if (isLoading) {
         return <PageSkeleton />;
@@ -148,18 +171,14 @@ export default function FoodItemAnalysisPage() {
     
     const { memberContributions, aggregatedItems } = processedData;
 
-    // 3. RENDER JSX
     return (
         <div className="space-y-6">
-            <div className="flex items-center gap-4">
-                <Button variant="outline" size="icon" className="h-10 w-10" onClick={() => router.back()}>
-                    <ChevronLeft className="h-6 w-6" />
-                    <span className="sr-only">Back</span>
-                </Button>
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight font-headline">Monthly Food Item Analysis</h1>
-                    <p className="text-muted-foreground">A detailed breakdown of food items purchased in {format(month, "MMMM yyyy")}.</p>
+                    <p className="text-muted-foreground">A detailed breakdown of food items purchased in {format(currentDate, "MMMM yyyy")}.</p>
                 </div>
+                <MonthSwitcher currentDate={currentDate} onMonthChange={handleMonthChange} />
             </div>
 
             <Card>
@@ -198,6 +217,7 @@ export default function FoodItemAnalysisPage() {
             <Card>
                 <CardHeader>
                     <CardTitle>Aggregated Item Summary</CardTitle>
+                    <CardDescription>This card calculates the total quantity of each food item and their expense.</CardDescription>
                 </CardHeader>
                 <CardContent>
                      <Table>
