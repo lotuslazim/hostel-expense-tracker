@@ -91,13 +91,14 @@ export default function ElectricityContributionPage() {
     const { data: membersData, isLoading: areMembersLoading, error: membersError } = useCollection(membersQuery);
     const { data: expensesData, isLoading: areExpensesLoading, error: expensesError } = useCollection<Expense>(expensesQuery);
     
+    // ✅ ADD processedData useMemo HERE - BEFORE ANY CONDITIONALS
     const processedData = useMemo(() => {
         if (!membersData || !expensesData) {
              return { memberContributions: [], totalElectricityExpense: 0 };
         };
-
+    
         const totalElectricityExpense = expensesData.reduce((sum, expense) => sum + expense.amount, 0);
-
+    
         const memberContributions = membersData.map(member => {
             const totalSpent = expensesData
                 .filter(expense => expense.userId === member.id)
@@ -108,19 +109,20 @@ export default function ElectricityContributionPage() {
                 totalSpent,
             };
         });
-
+    
         return {
             memberContributions,
             totalElectricityExpense,
         };
-
     }, [membersData, expensesData]);
+    // ✅ END of processedData useMemo
     
-    // 2. CONDITIONAL RETURNS COME AFTER ALL HOOKS
+    // THEN your conditionals can start here:
     const isLoading = isCurrentUserLoading || isCurrentUserDataLoading;
     if (isLoading) {
         return <PageSkeleton />;
     }
+    // ... rest of your conditionals
     
     if (!groupId) {
         return <WelcomeCard />;
