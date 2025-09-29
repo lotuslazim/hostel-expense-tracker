@@ -11,7 +11,7 @@ import { doc, collection, query, where } from "firebase/firestore";
 import { useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format, startOfMonth, endOfMonth } from 'date-fns';
-import type { Meal, Expense } from "@/lib/types";
+import type { MealLog, Expense } from "@/lib/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 
@@ -106,7 +106,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
   );
   
   const { data: membersData, isLoading: areMembersLoading, error: membersError } = useCollection(membersQuery);
-  const { data: mealsData, isLoading: areMealsLoading, error: mealsError } = useCollection<Meal>(mealsQuery);
+  const { data: mealsData, isLoading: areMealsLoading, error: mealsError } = useCollection<MealLog>(mealsQuery);
   const { data: expensesData, isLoading: areExpensesLoading, error: expensesError } = useCollection<Expense>(expensesQuery);
 
   const isAnyLoading = isCurrentUserLoading || isCurrentUserDataLoading || (!!groupId && (areMembersLoading || areMealsLoading || areExpensesLoading));
@@ -122,7 +122,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
         const memberExpenses = expensesData.filter(e => e.userId === member.id);
         
         const totalMeals = memberMeals.reduce((sum, meal) => sum + (meal.mealNumber || 1), 0);
-        const foodExpenses = memberExpenses.filter(e => e.category === 'Food').reduce((sum, e) => sum + e.amount, 0);
+        const foodExpenses = memberExpenses.filter(e => e.category === 'Food & Groceries').reduce((sum, e) => sum + e.amount, 0);
         const electricityExpenses = memberExpenses.filter(e => e.category === 'Electricity').reduce((sum, e) => sum + e.amount, 0);
         const gasExpenses = memberExpenses.filter(e => e.category === 'Gas').reduce((sum, e) => sum + e.amount, 0);
           
@@ -352,5 +352,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     </div>
   );
 }
+
+    
 
     

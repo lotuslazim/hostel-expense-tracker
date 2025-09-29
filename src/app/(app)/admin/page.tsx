@@ -159,7 +159,7 @@ export default function AdminPage() {
     return <NewUserAdminPanel />;
   }
 
-  if (!groupData) {
+  if (!groupData || !membersCollection) {
      return <WelcomeCard />;
   }
 
@@ -272,5 +272,7 @@ export default function AdminPage() {
     </div>
   );
 }
+
+    
 
     

@@ -3,7 +3,7 @@ import type { Timestamp } from 'firebase/firestore';
 
 export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 
-export interface Meal {
+export interface MealLog {
   id: string;
   mealType: MealType;
   description: string;
@@ -40,3 +40,5 @@ export interface PurchasedItem {
   groupId: string;
   userName?: string;
 }
+
+    
