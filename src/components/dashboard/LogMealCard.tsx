@@ -20,15 +20,13 @@ import { Input } from "@/components/ui/input";
 import { useFirebase, useUser, useDoc } from "@/firebase";
 import { doc, addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Utensils, CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
+import { Loader2, Utensils } from "lucide-react";
 
 const mealSchema = z.object({
   mealType: z.enum(["lunch", "dinner"], {
     required_error: "You need to select a meal type.",
   }),
   mealCount: z.coerce.number().min(1, "Meal count must be at least 1.").max(5, "Meal count cannot exceed 5."),
-  date: z.date(),
 });
 
 interface LogMealCardProps {
@@ -49,13 +47,8 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
     resolver: zodResolver(mealSchema),
     defaultValues: {
       mealCount: 1,
-      date: selectedDate,
     },
   });
-
-  useEffect(() => {
-    form.setValue("date", selectedDate);
-  }, [selectedDate, form]);
 
   async function onSubmit(values: z.infer<typeof mealSchema>) {
     if (!currentUser || !groupId) {
@@ -73,7 +66,7 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
         mealType: values.mealType,
         mealNumber: values.mealCount,
         description: `${values.mealCount} ${values.mealType}(s) logged.`,
-        date: values.date,
+        date: selectedDate,
         userId: currentUser.uid,
         userName: currentUser.displayName || currentUser.email?.split('@')[0],
         createdAt: serverTimestamp(),
@@ -83,7 +76,7 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
         title: "Meal Logged",
         description: `Your ${values.mealType} has been successfully logged.`,
       });
-      form.reset({ mealCount: 1, mealType: undefined, date: selectedDate });
+      form.reset({ mealCount: 1, mealType: undefined });
     } catch (error) {
       console.error("Error logging meal:", error);
       toast({
@@ -146,19 +139,6 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
                   <FormControl>
                     <Input type="number" min="1" max="5" {...field} />
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="date"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Date</FormLabel>
-                    <FormControl>
-                        <Input value={format(field.value, "PPP")} readOnly disabled />
-                    </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

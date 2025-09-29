@@ -26,8 +26,7 @@ import {
 import { useFirebase, useUser, useDoc } from "@/firebase";
 import { doc, addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ShoppingCart, CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
+import { Loader2, ShoppingCart } from "lucide-react";
 
 const expenseSchema = z.object({
   amount: z.coerce.number().min(0.01, "Amount must be greater than 0."),
@@ -35,7 +34,6 @@ const expenseSchema = z.object({
   category: z.enum(["Food & Groceries", "Electricity", "Gas", "Other"], {
     required_error: "Please select a category.",
   }),
-  date: z.date(),
 });
 
 interface AddExpenseCardProps {
@@ -57,14 +55,9 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     defaultValues: {
       amount: 0,
       description: "",
-      date: selectedDate,
     },
   });
   
-  useEffect(() => {
-    form.setValue("date", selectedDate);
-  }, [selectedDate, form]);
-
   async function onSubmit(values: z.infer<typeof expenseSchema>) {
     if (!currentUser || !groupId) {
       toast({
@@ -83,7 +76,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
         category: values.category,
         userId: currentUser.uid,
         userName: currentUser.displayName || currentUser.email?.split('@')[0],
-        date: values.date,
+        date: selectedDate,
         createdAt: serverTimestamp(),
       });
 
@@ -91,7 +84,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
         title: "Expense Added",
         description: `Your ${values.category.toLowerCase()} expense of ৳${values.amount} has been logged.`,
       });
-      form.reset({ amount: 0, description: "", category: undefined, date: selectedDate });
+      form.reset({ amount: 0, description: "", category: undefined });
     } catch (error) {
       console.error("Error adding expense:", error);
       toast({
@@ -163,19 +156,6 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                     <FormMessage />
                     </FormItem>
                 )}
-                />
-                 <FormField
-                  control={form.control}
-                  name="date"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>Date</FormLabel>
-                        <FormControl>
-                           <Input value={format(field.value, "PPP")} readOnly disabled />
-                        </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
                 />
                 <Button type="submit" disabled={isSubmitting} className="w-full">
                     {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
