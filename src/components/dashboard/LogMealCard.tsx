@@ -27,6 +27,7 @@ const mealSchema = z.object({
     required_error: "You need to select a meal type.",
   }),
   mealCount: z.coerce.number().min(1, "Meal count must be at least 1.").max(5, "Meal count cannot exceed 5."),
+  itemName: z.string().optional(),
 });
 
 interface LogMealCardProps {
@@ -47,6 +48,7 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
     resolver: zodResolver(mealSchema),
     defaultValues: {
       mealCount: 1,
+      itemName: "",
     },
   });
 
@@ -65,18 +67,19 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
       await addDoc(collection(firestore, `groups/${groupId}/meals`), {
         mealType: values.mealType,
         mealNumber: values.mealCount,
-        description: `${values.mealCount} ${values.mealType}(s) logged.`,
+        description: `${values.mealCount} ${values.mealType}(s) logged. ${values.itemName ? `Item: ${values.itemName}` : ''}`,
         date: selectedDate,
         userId: currentUser.uid,
         userName: currentUser.displayName || currentUser.email?.split('@')[0],
         createdAt: serverTimestamp(),
+        itemName: values.itemName || null,
       });
 
       toast({
         title: "Meal Logged",
-        description: `Your ${values.mealType} has been successfully logged.`,
+        description: `Your ${values.mealType} ${values.itemName ? `(${values.itemName})` : ''} has been successfully logged.`,
       });
-      form.reset({ mealCount: 1, mealType: undefined });
+      form.reset({ mealCount: 1, mealType: undefined, itemName: "" });
     } catch (error) {
       console.error("Error logging meal:", error);
       toast({
@@ -138,6 +141,19 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
                   <FormLabel>Meal Count</FormLabel>
                   <FormControl>
                     <Input type="number" min="1" max="5" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="itemName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Item Name (Optional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., Chicken Curry" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
