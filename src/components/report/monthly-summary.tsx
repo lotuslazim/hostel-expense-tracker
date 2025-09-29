@@ -176,7 +176,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
       mealRate,
   } = processedData;
 
-  const monthQueryParam = format(month, 'yyyy-MM-dd');
+  const monthQueryParam = format(month, 'yyyy-MM');
 
   return (
     <div className="space-y-6">
@@ -219,14 +219,15 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                 ৳{totalGroupGas.toFixed(0)}
               </p>
             </Link>
-            <div
-              className="block p-4 bg-muted/50 rounded-lg"
+            <Link
+              href={`/report/meals?month=${monthQueryParam}`}
+              className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
             >
               <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1 whitespace-nowrap">
                 <Utensils className="h-4 w-4"/> Total Meals
               </p>
               <p className="text-2xl font-bold">{totalGroupMeals}</p>
-            </div>
+            </Link>
           </div>
           <div className="text-center p-4 bg-accent/20 rounded-lg mt-4">
             <p className="text-sm font-medium text-accent-foreground/80">
