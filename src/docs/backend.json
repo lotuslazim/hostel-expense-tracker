@@ -110,7 +110,7 @@
           "entityName": "Group", "schema": { "$ref": "#/entities/Group" },
           "rules": {
             "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
-            "write": "resource.data.adminId == request.auth.uid"
+            "write": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true"
           },
           "description": "Stores group information. Readable by members, writable only by the group admin."
         }
@@ -120,8 +120,8 @@
         "definition": {
           "entityName": "Member", "schema": { "$ref": "#/entities/Member" },
           "rules": {
-            "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
-            "write": "get(/databases/$(database)/documents/groups/$(groupId)).data.adminId == request.auth.uid || request.auth.uid == memberId"
+            "read, list": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "write": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true || request.auth.uid == memberId"
           },
           "description": "Stores basic info about group members. Readable by all members. Writable by admins or the member themselves."
         }
@@ -131,7 +131,7 @@
         "definition": {
           "entityName": "MealLog", "schema": { "$ref": "#/entities/MealLog" },
           "rules": { 
-            "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "read, list": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
             "create": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && request.resource.data.userId == request.auth.uid",
             "update, delete": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && resource.data.userId == request.auth.uid"
           },
@@ -143,7 +143,7 @@
         "definition": {
           "entityName": "Expense", "schema": { "$ref": "#/entities/Expense" },
           "rules": {
-            "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "read, list": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
             "create": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && request.resource.data.userId == request.auth.uid",
             "update, delete": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && resource.data.userId == request.auth.uid"
           },
@@ -155,7 +155,7 @@
         "definition": {
           "entityName": "PurchasedItem", "schema": { "$ref": "#/entities/PurchasedItem" },
           "rules": {
-            "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "read, list": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
             "create": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && request.resource.data.userId == request.auth.uid",
             "update, delete": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && resource.data.userId == request.auth.uid"
           },
@@ -166,3 +166,5 @@
     "reasoning": "This structure enforces security by scoping all group-related data within a group's subcollections. The rule `exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))` is used consistently to verify that the requesting user is a member of the group they are trying to access. This is a secure and scalable pattern that prevents unauthorized data access. Write access is also based on group membership, with more restrictive admin-only writes on the core group document. Firestore's default-deny policy ensures any path not explicitly granted access is automatically blocked."
   }
 }
+
+    
