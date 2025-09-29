@@ -8,6 +8,16 @@ import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
   Form,
   FormControl,
   FormField,
@@ -26,7 +36,7 @@ import {
 import { useFirebase, useUser, useDoc } from "@/firebase";
 import { doc, addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ShoppingCart, Paperclip, X } from "lucide-react";
+import { Loader2, ShoppingCart, Paperclip, X, Camera } from "lucide-react";
 import imageCompression from 'browser-image-compression';
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Image from "next/image";
@@ -51,6 +61,10 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [hasCameraPermission, setHasCameraPermission] = useState(false);
 
 
   const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
@@ -67,17 +81,40 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
 
   const selectedCategory = form.watch("category");
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  useEffect(() => {
+    if (isCameraOpen) {
+      const getCameraPermission = async () => {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          setHasCameraPermission(true);
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setReceiptPreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+          }
+        } catch (error) {
+          console.error('Error accessing camera:', error);
+          setHasCameraPermission(false);
+          toast({
+            variant: 'destructive',
+            title: 'Camera Access Denied',
+            description: 'Please enable camera permissions in your browser settings.',
+          });
+        }
+      };
+      getCameraPermission();
+    } else {
+      // Stop camera stream when dialog is closed
+      if (videoRef.current && videoRef.current.srcObject) {
+        const stream = videoRef.current.srcObject as MediaStream;
+        stream.getTracks().forEach(track => track.stop());
+        videoRef.current.srcObject = null;
+      }
+    }
+  }, [isCameraOpen, toast]);
 
-    try {
+
+  const processAndSetImage = async (file: File) => {
+     try {
       const options = {
         maxSizeMB: 1,
         maxWidthOrHeight: 1024,
@@ -85,6 +122,12 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
       }
       const compressedFile = await imageCompression(file, options);
       form.setValue("receipt", compressedFile);
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setReceiptPreview(reader.result as string);
+      };
+      reader.readAsDataURL(compressedFile);
 
     } catch (error) {
       console.error('Error compressing image:', error);
@@ -95,7 +138,34 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
       });
       clearReceiptPreview();
     }
+  }
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    await processAndSetImage(file);
   };
+  
+  const handleCapture = () => {
+    if (videoRef.current && canvasRef.current) {
+        const video = videoRef.current;
+        const canvas = canvasRef.current;
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const context = canvas.getContext('2d');
+        if (context) {
+            context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+            canvas.toBlob(async (blob) => {
+                if (blob) {
+                    const capturedFile = new File([blob], `receipt-${Date.now()}.jpg`, { type: 'image/jpeg' });
+                    await processAndSetImage(capturedFile);
+                    setIsCameraOpen(false); // Close dialog on capture
+                }
+            }, 'image/jpeg');
+        }
+    }
+  };
+
 
   const clearReceiptPreview = () => {
       setReceiptPreview(null);
@@ -145,7 +215,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
         title: "Expense Added",
         description: `Your ${values.category.toLowerCase()} expense of ৳${values.amount} has been logged.`,
       });
-      form.reset({ amount: 0, description: "", category: undefined });
+      form.reset({ amount: 0, description: "", category: values.category });
       clearReceiptPreview();
     } catch (error) {
       console.error("Error adding expense:", error);
@@ -161,6 +231,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
 
   return (
     <Card>
+        <canvas ref={canvasRef} className="hidden"></canvas>
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><ShoppingCart /> Add an Expense</CardTitle>
           <CardDescription>
@@ -234,6 +305,36 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                                     <span className="sr-only">Attach receipt</span>
                                 </Button>
                                 <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} className="hidden"/>
+
+                                <Dialog open={isCameraOpen} onOpenChange={setIsCameraOpen}>
+                                  <DialogTrigger asChild>
+                                    <Button type="button" variant="outline" size="icon">
+                                      <Camera className="h-4 w-4" />
+                                      <span className="sr-only">Use Camera</span>
+                                    </Button>
+                                  </DialogTrigger>
+                                  <DialogContent>
+                                    <DialogHeader>
+                                      <DialogTitle>Capture Receipt</DialogTitle>
+                                    </DialogHeader>
+                                    <div className="py-4">
+                                      <video ref={videoRef} className="w-full aspect-video rounded-md bg-muted" autoPlay muted playsInline />
+                                      {!hasCameraPermission && (
+                                        <Alert variant="destructive" className="mt-4">
+                                          <AlertTitle>Camera Access Required</AlertTitle>
+                                          <AlertDescription>
+                                            Please allow camera access to use this feature.
+                                          </AlertDescription>
+                                        </Alert>
+                                      )}
+                                    </div>
+                                    <DialogFooter>
+                                      <DialogClose asChild><Button variant="ghost">Cancel</Button></DialogClose>
+                                      <Button onClick={handleCapture} disabled={!hasCameraPermission}>Capture Photo</Button>
+                                    </DialogFooter>
+                                  </DialogContent>
+                                </Dialog>
+
                                 {receiptPreview && (
                                     <div className="relative">
                                         <Image src={receiptPreview} alt="Receipt preview" width={40} height={40} className="rounded-md object-cover"/>
@@ -260,3 +361,5 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     </Card>
   );
 }
+
+    
