@@ -80,17 +80,17 @@ export default function FoodItemAnalysisPage() {
     }), [month]);
 
     const membersQuery = useMemo(() =>
-        currentUser && groupId ? collection(firestore, `groups/${groupId}/members`) : null,
-        [firestore, currentUser, groupId]
+        (groupId ? collection(firestore, `groups/${groupId}/members`) : null),
+        [firestore, groupId]
     );
 
     const itemsQuery = useMemo(() =>
-        currentUser && groupId ? query(
+        (groupId ? query(
             collection(firestore, `groups/${groupId}/purchasedItems`),
             where("date", ">=", monthDateRange.start),
             where("date", "<=", monthDateRange.end)
-        ) : null,
-        [firestore, currentUser, groupId, monthDateRange]
+        ) : null),
+        [firestore, groupId, monthDateRange]
     );
 
     const { data: membersData, isLoading: areMembersLoading, error: membersError } = useCollection(membersQuery);
@@ -228,5 +228,3 @@ export default function FoodItemAnalysisPage() {
         </div>
     )
 }
-
-    

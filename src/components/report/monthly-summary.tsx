@@ -83,26 +83,26 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
   }, [month]);
 
   const membersQuery = useMemo(() =>
-    currentUser && groupId ? collection(firestore, `groups/${groupId}/members`) : null,
-    [firestore, currentUser, groupId]
+    (groupId ? collection(firestore, `groups/${groupId}/members`) : null),
+    [firestore, groupId]
   );
   
   const mealsQuery = useMemo(() =>
-    currentUser && groupId ? query(
+    (groupId ? query(
       collection(firestore, `groups/${groupId}/meals`),
       where("date", ">=", monthDateRange.start),
       where("date", "<=", monthDateRange.end)
-    ) : null,
-    [firestore, currentUser, groupId, monthDateRange]
+    ) : null),
+    [firestore, groupId, monthDateRange]
   );
 
   const expensesQuery = useMemo(() =>
-    currentUser && groupId ? query(
+    (groupId ? query(
       collection(firestore, `groups/${groupId}/expenses`),
       where("date", ">=", monthDateRange.start),
       where("date", "<=", monthDateRange.end)
-    ) : null,
-    [firestore, currentUser, groupId, monthDateRange]
+    ) : null),
+    [firestore, groupId, monthDateRange]
   );
   
   const { data: membersData, isLoading: areMembersLoading, error: membersError } = useCollection(membersQuery);
@@ -352,7 +352,3 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     </div>
   );
 }
-
-    
-
-    

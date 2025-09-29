@@ -121,8 +121,8 @@ export default function AdminPage() {
   const { data: groupData, isLoading: isGroupLoading } = useDoc(groupRef);
 
   const membersQuery = useMemo(
-    () => (currentUser && groupId ? collection(firestore, `groups/${groupId}/members`) : null),
-    [firestore, currentUser, groupId]
+    () => (groupId ? collection(firestore, `groups/${groupId}/members`) : null),
+    [firestore, groupId]
   );
   const { data: membersCollection, isLoading: areMembersLoading, error: membersError } = useCollection(membersQuery);
   
@@ -159,7 +159,7 @@ export default function AdminPage() {
     return <NewUserAdminPanel />;
   }
 
-  if (!groupData || !membersCollection) {
+  if (!groupData) {
      return <WelcomeCard />;
   }
 
@@ -272,7 +272,3 @@ export default function AdminPage() {
     </div>
   );
 }
-
-    
-
-    

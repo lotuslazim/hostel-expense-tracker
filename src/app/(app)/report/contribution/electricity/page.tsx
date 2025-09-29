@@ -73,18 +73,18 @@ export default function ElectricityContributionPage() {
     }), [month]);
 
     const membersQuery = useMemo(() =>
-        currentUser && groupId ? collection(firestore, `groups/${groupId}/members`) : null,
-        [firestore, currentUser, groupId]
+        (groupId ? collection(firestore, `groups/${groupId}/members`) : null),
+        [firestore, groupId]
     );
 
     const expensesQuery = useMemo(() =>
-        currentUser && groupId ? query(
+        (groupId ? query(
             collection(firestore, `groups/${groupId}/expenses`),
             where("date", ">=", monthDateRange.start),
             where("date", "<=", monthDateRange.end),
             where("category", "==", "Electricity")
-        ) : null,
-        [firestore, currentUser, groupId, monthDateRange]
+        ) : null),
+        [firestore, groupId, monthDateRange]
     );
 
     const { data: membersData, isLoading: areMembersLoading, error: membersError } = useCollection(membersQuery);
@@ -194,5 +194,3 @@ export default function ElectricityContributionPage() {
         </div>
     )
 }
-
-    
