@@ -7,7 +7,6 @@ import { doc, collection, query, where, orderBy } from "firebase/firestore";
 import { startOfMonth, endOfMonth } from "date-fns";
 import { WelcomeCard } from "@/components/app/welcome-card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MonthlyOverviewChart } from "@/components/dashboard/MonthlyOverviewChart";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import type { MealLog, Expense } from "@/lib/types";
 import { LogMealCard } from "@/components/dashboard/LogMealCard";
@@ -17,10 +16,9 @@ import { DateCard } from "@/components/dashboard/DateCard";
 function DashboardSkeleton() {
   return (
     <div className="space-y-6">
-      <Skeleton className="h-72 w-full" />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1 space-y-6">
-          <Skeleton className="h-96 w-full" />
+          <Skeleton className="h-40 w-full" />
           <Skeleton className="h-96 w-full" />
         </div>
         <div className="lg:col-span-2">
@@ -89,12 +87,6 @@ export default function DashboardPage() {
       </div>
 
       <div className="space-y-8">
-         {isDataLoading ? (
-            <Skeleton className="h-72 w-full" />
-        ) : (
-            <MonthlyOverviewChart meals={meals || []} expenses={expenses || []} />
-        )}
-        
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-1 space-y-6">
                 <DateCard date={selectedDate} setDate={setSelectedDate} />
