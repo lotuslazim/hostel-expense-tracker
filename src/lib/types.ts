@@ -1,7 +1,7 @@
 
 import type { Timestamp } from 'firebase/firestore';
 
-export type MealType = 'lunch' | 'dinner';
+export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 
 export interface Meal {
   id: string;
