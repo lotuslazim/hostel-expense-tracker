@@ -91,6 +91,21 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "groupId", "userId", "userName", "name", "quantity", "unit", "cost", "date", "createdAt"]
+    },
+    "ChatMessage": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ChatMessage",
+      "type": "object",
+      "description": "Represents a chat message within a group.",
+      "properties": {
+        "id": { "type": "string" },
+        "groupId": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "text": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "groupId", "userId", "userName", "text", "createdAt"]
     }
   },
   "auth": { "providers": ["password", "google"] },
@@ -161,8 +176,21 @@
           },
           "description": "Stores detailed food item purchases. Accessible by members. Users can only create/edit their own items."
         }
+      },
+      {
+        "path": "/groups/{groupId}/messages/{messageId}",
+        "definition": {
+          "entityName": "ChatMessage", "schema": { "$ref": "#/entities/ChatMessage" },
+          "rules": {
+            "list, read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "create": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && request.resource.data.userId == request.auth.uid"
+          },
+          "description": "Stores chat messages. Accessible only by members of the group. Users can only create their own messages."
+        }
       }
     ],
     "reasoning": "This structure enforces security by scoping all group-related data within a group's subcollections. The rule `exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))` is used consistently to verify that the requesting user is a member of the group they are trying to access. This is a secure and scalable pattern that prevents unauthorized data access. Write access is also based on group membership, with more restrictive admin-only writes on the core group document. Firestore's default-deny policy ensures any path not explicitly granted access is automatically blocked."
   }
 }
+
+    

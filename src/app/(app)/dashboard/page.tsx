@@ -12,6 +12,7 @@ import type { MealLog, Expense } from "@/lib/types";
 import { LogMealCard } from "@/components/dashboard/LogMealCard";
 import { AddExpenseCard } from "@/components/dashboard/AddExpenseCard";
 import { DateCard } from "@/components/dashboard/DateCard";
+import { GroupChatCard } from "@/components/dashboard/GroupChatCard";
 
 function DashboardSkeleton() {
   return (
@@ -21,8 +22,9 @@ function DashboardSkeleton() {
           <Skeleton className="h-40 w-full" />
           <Skeleton className="h-96 w-full" />
         </div>
-        <div className="lg:col-span-2">
-           <Skeleton className="h-[70vh] w-full" />
+        <div className="lg:col-span-2 space-y-6">
+           <Skeleton className="h-[45vh] w-full" />
+           <Skeleton className="h-[45vh] w-full" />
         </div>
       </div>
     </div>
@@ -38,7 +40,6 @@ export default function DashboardPage() {
   const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
   const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
   
-  // This is now safer because it will only be truthy if currentUserData is loaded and has the property.
   const groupId = currentUserData?.groupId;
 
   const dateRange = useMemo(() => ({
@@ -75,7 +76,6 @@ export default function DashboardPage() {
     return <DashboardSkeleton />;
   }
 
-  // It's possible currentUserData is null even if not loading, so we must check for it.
   if (!groupId) {
     return <WelcomeCard />;
   }
@@ -96,7 +96,8 @@ export default function DashboardPage() {
                 <LogMealCard selectedDate={selectedDate} />
                 <AddExpenseCard selectedDate={selectedDate} />
             </div>
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2 space-y-6">
+                <GroupChatCard />
                 {isDataLoading ? (
                     <Skeleton className="h-96 w-full" />
                 ) : (
@@ -108,3 +109,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    
