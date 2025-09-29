@@ -103,12 +103,22 @@
         "userId": { "type": "string" },
         "userName": { "type": "string" },
         "text": { "type": "string" },
+        "imageUrl": { "type": "string", "format": "uri" },
         "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["id", "groupId", "userId", "userName", "text", "createdAt"]
+      "required": ["id", "groupId", "userId", "userName", "createdAt"]
     }
   },
   "auth": { "providers": ["password", "google"] },
+  "storage": {
+    "rules": {
+      "chatImages/{groupId}/{imageId}": {
+        "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+        "write": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
+      }
+    },
+    "reasoning": "Storage rules are set to allow any authenticated member of a group to read and write images to a `chatImages` folder that is scoped to their specific `groupId`. This prevents users from one group from accessing the images of another group."
+  },
   "firestore": {
     "structure": [
       {
@@ -192,5 +202,3 @@
     "reasoning": "This structure enforces security by scoping all group-related data within a group's subcollections. The rule `exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))` is used consistently to verify that the requesting user is a member of the group they are trying to access. This is a secure and scalable pattern that prevents unauthorized data access. Write access is also based on group membership, with more restrictive admin-only writes on the core group document. Firestore's default-deny policy ensures any path not explicitly granted access is automatically blocked."
   }
 }
-
-    

@@ -43,7 +43,8 @@ export interface PurchasedItem {
 
 export interface ChatMessage {
   id: string;
-  text: string;
+  text?: string;
+  imageUrl?: string;
   createdAt: Timestamp;
   userId: string;
   userName: string;

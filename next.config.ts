@@ -35,6 +35,12 @@ const nextConfig: NextConfig = {
         hostname: 'media.tenor.com',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'firebasestorage.googleapis.com',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
