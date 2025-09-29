@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -26,7 +26,10 @@ import {
 import { useFirebase, useUser, useDoc } from "@/firebase";
 import { doc, addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ShoppingCart } from "lucide-react";
+import { Loader2, ShoppingCart, Paperclip, X } from "lucide-react";
+import imageCompression from 'browser-image-compression';
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import Image from "next/image";
 
 const expenseSchema = z.object({
   amount: z.coerce.number().min(0.01, "Amount must be greater than 0."),
@@ -34,6 +37,7 @@ const expenseSchema = z.object({
   category: z.enum(["Food & Groceries", "Electricity", "Gas", "Other"], {
     required_error: "Please select a category.",
   }),
+  receipt: z.instanceof(File).optional(),
 });
 
 interface AddExpenseCardProps {
@@ -41,10 +45,13 @@ interface AddExpenseCardProps {
 }
 
 export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
-  const { firestore } = useFirebase();
+  const { firestore, storage } = useFirebase();
   const { user: currentUser } = useUser();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
 
   const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
   const { data: currentUserData } = useDoc(currentUserRef);
@@ -57,6 +64,46 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
       description: "",
     },
   });
+
+  const selectedCategory = form.watch("category");
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setReceiptPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    try {
+      const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1024,
+        useWebWorker: true,
+      }
+      const compressedFile = await imageCompression(file, options);
+      form.setValue("receipt", compressedFile);
+
+    } catch (error) {
+      console.error('Error compressing image:', error);
+      toast({
+        variant: "destructive",
+        title: "Image Error",
+        description: "Could not process image. Please try another one.",
+      });
+      clearReceiptPreview();
+    }
+  };
+
+  const clearReceiptPreview = () => {
+      setReceiptPreview(null);
+      form.setValue("receipt", undefined);
+      if(fileInputRef.current) {
+          fileInputRef.current.value = "";
+      }
+  }
   
   async function onSubmit(values: z.infer<typeof expenseSchema>) {
     if (!currentUser || !groupId) {
@@ -69,11 +116,20 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     }
 
     setIsSubmitting(true);
+    let receiptPhotoUrl: string | undefined = undefined;
+
     try {
+      if (values.receipt) {
+        const imageRef = ref(storage, `receipts/${groupId}/${Date.now()}_${values.receipt.name}`);
+        const snapshot = await uploadBytes(imageRef, values.receipt);
+        receiptPhotoUrl = await getDownloadURL(snapshot.ref);
+      }
+
       await addDoc(collection(firestore, `groups/${groupId}/expenses`), {
         amount: values.amount,
         description: values.description,
         category: values.category,
+        receiptPhotoUrl: receiptPhotoUrl,
         userId: currentUser.uid,
         userName: currentUser.displayName || currentUser.email?.split('@')[0],
         date: selectedDate,
@@ -85,6 +141,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
         description: `Your ${values.category.toLowerCase()} expense of ৳${values.amount} has been logged.`,
       });
       form.reset({ amount: 0, description: "", category: undefined });
+      clearReceiptPreview();
     } catch (error) {
       console.error("Error adding expense:", error);
       toast({
@@ -157,6 +214,37 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                     </FormItem>
                 )}
                 />
+
+                {(selectedCategory === 'Electricity' || selectedCategory === 'Gas') && (
+                    <FormField
+                    control={form.control}
+                    name="receipt"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Receipt (Optional)</FormLabel>
+                        <FormControl>
+                             <div className="flex items-center gap-2">
+                                <Button type="button" variant="outline" size="icon" onClick={() => fileInputRef.current?.click()}>
+                                    <Paperclip className="h-4 w-4"/>
+                                    <span className="sr-only">Attach receipt</span>
+                                </Button>
+                                <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} className="hidden"/>
+                                {receiptPreview && (
+                                    <div className="relative">
+                                        <Image src={receiptPreview} alt="Receipt preview" width={40} height={40} className="rounded-md object-cover"/>
+                                        <Button variant="ghost" size="icon" className="absolute -top-2 -right-2 h-6 w-6 bg-black/50 hover:bg-black/75 text-white rounded-full" onClick={clearReceiptPreview}>
+                                            <X className="h-4 w-4"/>
+                                        </Button>
+                                    </div>
+                                )}
+                            </div>
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                )}
+
                 <Button type="submit" disabled={isSubmitting} className="w-full">
                     {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Add Expense

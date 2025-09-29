@@ -115,9 +115,13 @@
       "chatImages/{groupId}/{imageId}": {
         "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
         "write": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
+      },
+       "receipts/{groupId}/{receiptId}": {
+        "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+        "write": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
       }
     },
-    "reasoning": "Storage rules are set to allow any authenticated member of a group to read and write images to a `chatImages` folder that is scoped to their specific `groupId`. This prevents users from one group from accessing the images of another group."
+    "reasoning": "Storage rules are set to allow any authenticated member of a group to read and write images to folders scoped to their specific `groupId`. This prevents users from one group from accessing the images of another group."
   },
   "firestore": {
     "structure": [
