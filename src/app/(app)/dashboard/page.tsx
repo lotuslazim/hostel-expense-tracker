@@ -1,28 +1,26 @@
 
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
 import { doc, collection, query, where, orderBy } from "firebase/firestore";
 import { startOfMonth, endOfMonth } from "date-fns";
 import { WelcomeCard } from "@/components/app/welcome-card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ActionToolbar } from "@/components/dashboard/ActionToolbar";
 import { MonthlyOverviewChart } from "@/components/dashboard/MonthlyOverviewChart";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import type { MealLog, Expense } from "@/lib/types";
+import { LogMealCard } from "@/components/dashboard/LogMealCard";
+import { AddExpenseCard } from "@/components/dashboard/AddExpenseCard";
 
 function DashboardSkeleton() {
   return (
     <div className="space-y-6">
-      <Skeleton className="h-10 w-64" />
+      <Skeleton className="h-72 w-full" />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          <Skeleton className="h-72 w-full" />
-        </div>
-        <div className="lg:col-span-1 space-y-6">
-          <Skeleton className="h-96 w-full" />
-        </div>
+        <Skeleton className="h-96 w-full" />
+        <Skeleton className="h-96 w-full" />
+        <Skeleton className="h-96 w-full" />
       </div>
     </div>
   );
@@ -31,8 +29,6 @@ function DashboardSkeleton() {
 export default function DashboardPage() {
   const { firestore } = useFirebase();
   const { user: currentUser, isUserLoading } = useUser();
-  const [isLogMealOpen, setIsLogMealOpen] = useState(false);
-  const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
 
   const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
   const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
@@ -58,7 +54,7 @@ export default function DashboardPage() {
     return query(
       collection(firestore, `groups/${groupId}/expenses`),
       where("date", ">=", dateRange.start),
-      where("date", "<=", dateRange.end),
+      where("date", "<=", date.end),
       orderBy("date", "desc")
     );
   }, [firestore, groupId, dateRange]);
@@ -80,31 +76,30 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <ActionToolbar
-        onLogMealClick={() => setIsLogMealOpen(true)}
-        onAddExpenseClick={() => setIsAddExpenseOpen(true)}
-        isLogMealOpen={isLogMealOpen}
-        setIsLogMealOpen={setIsLogMealOpen}
-        isAddExpenseOpen={isAddExpenseOpen}
-        setIsAddExpenseOpen={setIsAddExpenseOpen}
-      />
+       <div>
+        <h1 className="text-3xl font-bold tracking-tight font-headline">Dashboard</h1>
+        <p className="text-muted-foreground">Log your meals and expenses for the day.</p>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-        <div className="lg:col-span-3">
-            <h2 className="text-2xl font-bold tracking-tight mb-4 font-headline">Monthly Overview</h2>
-            {isDataLoading ? (
-                <Skeleton className="h-72 w-full" />
-            ) : (
-                <MonthlyOverviewChart meals={meals || []} expenses={expenses || []} />
-            )}
-        </div>
-        <div className="lg:col-span-2">
-            <h2 className="text-2xl font-bold tracking-tight mb-4 font-headline">Group Activity</h2>
-             {isDataLoading ? (
-                <Skeleton className="h-96 w-full" />
-            ) : (
-                <ActivityFeed meals={meals || []} expenses={expenses || []} />
-            )}
+      <div className="space-y-8">
+         {isDataLoading ? (
+            <Skeleton className="h-72 w-full" />
+        ) : (
+            <MonthlyOverviewChart meals={meals || []} expenses={expenses || []} />
+        )}
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-1 space-y-6">
+                <LogMealCard />
+                <AddExpenseCard />
+            </div>
+            <div className="lg:col-span-2">
+                {isDataLoading ? (
+                    <Skeleton className="h-96 w-full" />
+                ) : (
+                    <ActivityFeed meals={meals || []} expenses={expenses || []} />
+                )}
+            </div>
         </div>
       </div>
     </div>

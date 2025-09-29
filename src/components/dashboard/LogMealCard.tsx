@@ -6,14 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -27,13 +20,8 @@ import { Input } from "@/components/ui/input";
 import { useFirebase, useUser, useDoc } from "@/firebase";
 import { doc, addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, Utensils } from "lucide-react";
 import type { MealType } from "@/lib/types";
-
-interface LogMealDialogProps {
-  isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void;
-}
 
 const mealSchema = z.object({
   mealType: z.enum(["lunch", "dinner"], {
@@ -42,7 +30,7 @@ const mealSchema = z.object({
   mealCount: z.coerce.number().min(1, "Meal count must be at least 1.").max(5, "Meal count cannot exceed 5."),
 });
 
-export function LogMealDialog({ isOpen, setIsOpen }: LogMealDialogProps) {
+export function LogMealCard() {
   const { firestore } = useFirebase();
   const { user: currentUser } = useUser();
   const { toast } = useToast();
@@ -85,8 +73,7 @@ export function LogMealDialog({ isOpen, setIsOpen }: LogMealDialogProps) {
         title: "Meal Logged",
         description: `Your ${values.mealType} has been successfully logged.`,
       });
-      form.reset({ mealCount: 1 });
-      setIsOpen(false);
+      form.reset({ mealCount: 1, mealType: undefined });
     } catch (error) {
       console.error("Error logging meal:", error);
       toast({
@@ -100,16 +87,16 @@ export function LogMealDialog({ isOpen, setIsOpen }: LogMealDialogProps) {
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Log a Meal</DialogTitle>
-          <DialogDescription>
-            Select the meal type and count for today.
-          </DialogDescription>
-        </DialogHeader>
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2"><Utensils /> Log a Meal</CardTitle>
+        <CardDescription>
+          Select the meal type and count for today.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 py-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
               name="mealType"
@@ -119,7 +106,7 @@ export function LogMealDialog({ isOpen, setIsOpen }: LogMealDialogProps) {
                   <FormControl>
                     <RadioGroup
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
+                      value={field.value}
                       className="flex space-x-4"
                     >
                       <FormItem className="flex items-center space-x-2 space-y-0">
@@ -153,15 +140,13 @@ export function LogMealDialog({ isOpen, setIsOpen }: LogMealDialogProps) {
                 </FormItem>
               )}
             />
-            <DialogFooter>
-              <Button type="submit" disabled={isSubmitting} className="w-full">
-                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Log Meal
-              </Button>
-            </DialogFooter>
+            <Button type="submit" disabled={isSubmitting} className="w-full">
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Log Meal
+            </Button>
           </form>
         </Form>
-      </DialogContent>
-    </Dialog>
+      </CardContent>
+    </Card>
   );
 }

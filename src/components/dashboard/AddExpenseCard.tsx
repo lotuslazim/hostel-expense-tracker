@@ -6,14 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -33,13 +26,8 @@ import {
 import { useFirebase, useUser, useDoc } from "@/firebase";
 import { doc, addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, ShoppingCart } from "lucide-react";
 import type { ExpenseCategory } from "@/lib/types";
-
-interface AddExpenseDialogProps {
-  isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void;
-}
 
 const expenseSchema = z.object({
   amount: z.coerce.number().min(0.01, "Amount must be greater than 0."),
@@ -49,7 +37,7 @@ const expenseSchema = z.object({
   }),
 });
 
-export function AddExpenseDialog({ isOpen, setIsOpen }: AddExpenseDialogProps) {
+export function AddExpenseCard() {
   const { firestore } = useFirebase();
   const { user: currentUser } = useUser();
   const { toast } = useToast();
@@ -93,8 +81,7 @@ export function AddExpenseDialog({ isOpen, setIsOpen }: AddExpenseDialogProps) {
         title: "Expense Added",
         description: `Your ${values.category.toLowerCase()} expense of ৳${values.amount} has been logged.`,
       });
-      form.reset();
-      setIsOpen(false);
+      form.reset({ amount: 0, description: "", category: undefined });
     } catch (error) {
       console.error("Error adding expense:", error);
       toast({
@@ -108,72 +95,70 @@ export function AddExpenseDialog({ isOpen, setIsOpen }: AddExpenseDialogProps) {
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Add an Expense</DialogTitle>
-          <DialogDescription>
+    <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><ShoppingCart /> Add an Expense</CardTitle>
+          <CardDescription>
             Log a personal expense for food, groceries, or utilities.
-          </DialogDescription>
-        </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-            <FormField
-              control={form.control}
-              name="category"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Category</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+            <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Category</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select an expense category" />
+                        </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                        <SelectItem value="Food & Groceries">Food & Groceries</SelectItem>
+                        <SelectItem value="Utility">Utility</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+                <FormField
+                control={form.control}
+                name="amount"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Amount (৳)</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select an expense category" />
-                      </SelectTrigger>
+                        <Input type="number" placeholder="0.00" {...field} />
                     </FormControl>
-                    <SelectContent>
-                      <SelectItem value="Food & Groceries">Food & Groceries</SelectItem>
-                      <SelectItem value="Utility">Utility</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="amount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Amount (৳)</FormLabel>
-                  <FormControl>
-                    <Input type="number" placeholder="0.00" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-             <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description (Optional)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., Weekly groceries" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <DialogFooter>
-              <Button type="submit" disabled={isSubmitting} className="w-full">
-                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Add Expense
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+                <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Description (Optional)</FormLabel>
+                    <FormControl>
+                        <Input placeholder="e.g., Weekly groceries" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+                <Button type="submit" disabled={isSubmitting} className="w-full">
+                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Add Expense
+                </Button>
+            </form>
+            </Form>
+        </CardContent>
+    </Card>
   );
 }
