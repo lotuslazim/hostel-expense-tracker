@@ -81,21 +81,17 @@ export default function DashboardPage() {
         <p className="text-muted-foreground">Log your meals and expenses for the day.</p>
       </div>
 
+       <div className="flex items-center gap-2 pt-2">
+          <DateSwitcher
+              currentDate={currentDate}
+              onDateChange={setCurrentDate}
+            />
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1 space-y-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>Log Your Activity</CardTitle>
-                 <DateSwitcher
-                    currentDate={currentDate}
-                    onDateChange={setCurrentDate}
-                  />
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <MealLogForm selectedDate={currentDate} />
-                <ExpenseLogForm selectedDate={currentDate} />
-              </CardContent>
-            </Card>
+            <MealLogForm selectedDate={currentDate} />
+            <ExpenseLogForm selectedDate={currentDate} />
         </div>
         <div className="lg:col-span-2">
             <SharedExpenses expensesQuery={expensesQuery} />

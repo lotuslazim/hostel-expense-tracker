@@ -12,6 +12,7 @@ import { useFirebase, useUser } from "@/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { Loader2 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 
 const mealSchema = z.object({
   mealType: z.enum(["breakfast", "lunch", "dinner", "snack"], {
@@ -77,8 +78,11 @@ export function MealLogForm({ selectedDate }: MealLogFormProps) {
   };
 
   return (
-     <div className="space-y-4">
-        <h3 className="font-semibold text-lg">Log a Meal</h3>
+    <Card>
+      <CardHeader>
+        <CardTitle>Log a Meal</CardTitle>
+      </CardHeader>
+      <CardContent>
         <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -162,6 +166,7 @@ export function MealLogForm({ selectedDate }: MealLogFormProps) {
             </Button>
         </form>
         </Form>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

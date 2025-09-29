@@ -12,7 +12,7 @@ import { useFirebase, useUser } from "@/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { Loader2, Utensils, Zap, Package } from "lucide-react";
-import { Separator } from "../ui/separator";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 
 const expenseSchema = z.object({
   description: z.string().min(1, "Description is required."),
@@ -75,9 +75,11 @@ export function ExpenseLogForm({ selectedDate }: ExpenseLogFormProps) {
   };
 
   return (
-    <div className="space-y-4">
-        <Separator />
-        <h3 className="font-semibold text-lg">Log an Expense</h3>
+    <Card>
+      <CardHeader>
+        <CardTitle>Log an Expense</CardTitle>
+      </CardHeader>
+      <CardContent>
         <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -136,6 +138,7 @@ export function ExpenseLogForm({ selectedDate }: ExpenseLogFormProps) {
             </Button>
         </form>
         </Form>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
