@@ -12,7 +12,7 @@ export function AppHeader() {
            <Logo />
         </div>
         <nav className="flex items-center gap-6 text-sm font-medium">
-            <NavLink href="/report">Dashboard</NavLink>
+            <NavLink href="/dashboard">Dashboard</NavLink>
             <NavLink href="/report">Monthly Report</NavLink>
             <NavLink href="/profile">Profile</NavLink>
             <NavLink href="/admin">Admin</NavLink>
