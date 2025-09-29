@@ -37,6 +37,8 @@ export default function DashboardPage() {
 
   const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
   const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
+  
+  // This is now safer because it will only be truthy if currentUserData is loaded and has the property.
   const groupId = currentUserData?.groupId;
 
   const dateRange = useMemo(() => ({
@@ -73,6 +75,7 @@ export default function DashboardPage() {
     return <DashboardSkeleton />;
   }
 
+  // It's possible currentUserData is null even if not loading, so we must check for it.
   if (!groupId) {
     return <WelcomeCard />;
   }
