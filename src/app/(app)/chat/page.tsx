@@ -271,14 +271,12 @@ export default function ChatPage() {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <>
-                        <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} className="hidden"/>
-                        <Button type="button" variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()}>
-                            <Paperclip className="h-4 w-4"/>
-                            <span className="sr-only">Attach image</span>
-                        </Button>
-                    </>
+                    <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} className="hidden"/>
                   </FormControl>
+                  <Button type="button" variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()}>
+                      <Paperclip className="h-4 w-4"/>
+                      <span className="sr-only">Attach image</span>
+                  </Button>
                 </FormItem>
               )}
             />
