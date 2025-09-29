@@ -110,7 +110,7 @@
           "entityName": "Group", "schema": { "$ref": "#/entities/Group" },
           "rules": {
             "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
-            "write": "get(/databases/$(database)/documents/groups/$(groupId)).data.adminId == request.auth.uid"
+            "write": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true"
           },
           "description": "Stores group information. Readable by members, writable only by the group admin."
         }
@@ -121,7 +121,7 @@
           "entityName": "Member", "schema": { "$ref": "#/entities/Member" },
           "rules": {
             "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
-            "write": "get(/databases/$(database)/documents/groups/$(groupId)).data.adminId == request.auth.uid || request.auth.uid == memberId"
+            "write": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true || request.auth.uid == memberId"
           },
           "description": "Stores basic info about group members. Readable by all members. Writable by admins or the member themselves."
         }
@@ -131,9 +131,11 @@
         "definition": {
           "entityName": "MealLog", "schema": { "$ref": "#/entities/MealLog" },
           "rules": { 
-            "read, write": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
+            "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "create": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && request.resource.data.userId == request.auth.uid",
+            "update, delete": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && resource.data.userId == request.auth.uid"
           },
-          "description": "Stores meal logs. Accessible only by members of the group."
+          "description": "Stores meal logs. Accessible only by members of the group. Users can only create/edit their own meals."
         }
       },
       {
@@ -141,9 +143,11 @@
         "definition": {
           "entityName": "Expense", "schema": { "$ref": "#/entities/Expense" },
           "rules": {
-            "read, write": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
+            "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "create": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && request.resource.data.userId == request.auth.uid",
+            "update, delete": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && resource.data.userId == request.auth.uid"
           },
-          "description": "Stores all expense entries, including food and utilities. Accessible only by members of the group."
+          "description": "Stores all expense entries. Accessible only by members of the group. Users can only create/edit their own expenses."
         }
       },
        {
@@ -151,9 +155,11 @@
         "definition": {
           "entityName": "PurchasedItem", "schema": { "$ref": "#/entities/PurchasedItem" },
           "rules": {
-            "read, write": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
+            "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "create": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && request.resource.data.userId == request.auth.uid",
+            "update, delete": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && resource.data.userId == request.auth.uid"
           },
-          "description": "Stores detailed food item purchases. Accessible only by members of the group."
+          "description": "Stores detailed food item purchases. Accessible by members. Users can only create/edit their own items."
         }
       }
     ],
