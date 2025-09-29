@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useFirebase, useUser } from "@/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { Loader2, Utensils, Zap, Package } from "lucide-reacT";
+import { Loader2, Utensils, Zap, Package } from "lucide-react";
 import { Separator } from "../ui/separator";
 
 const expenseSchema = z.object({
