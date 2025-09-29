@@ -2,16 +2,15 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useFirebase, useUser, useDoc } from "@/firebase";
+import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
 import { doc, collection, query, where, orderBy } from "firebase/firestore";
-import { addMonths, subMonths } from "date-fns";
 import { WelcomeCard } from "@/components/app/welcome-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MealLogForm } from "@/components/dashboard/meal-log-form";
 import { ExpenseLogForm } from "@/components/dashboard/expense-log-form";
 import { SharedExpenses } from "@/components/dashboard/shared-expenses";
-import { DateSwitcher } from "@/components/dashboard/date-switcher";
 import { UtilityLogForm } from "@/components/dashboard/utility-log-form";
+import { DailySummary } from "@/components/dashboard/daily-summary";
 
 function DashboardSkeleton() {
   return (
@@ -61,24 +60,18 @@ export default function DashboardPage() {
     return <DashboardSkeleton />;
   }
 
-  if (!groupId) {
+  if (!groupId || !currentUser) {
     return <WelcomeCard />;
   }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight font-headline">
-          Dashboard
-        </h1>
-        <p className="text-muted-foreground">
-          Log your meals and expenses for the day.
-        </p>
-      </div>
-
-      <div className="flex items-center gap-2 pt-2">
-        <DateSwitcher currentDate={currentDate} onDateChange={setCurrentDate} />
-      </div>
+       <DailySummary 
+          userId={currentUser.uid} 
+          groupId={groupId} 
+          selectedDate={currentDate} 
+          onDateChange={setCurrentDate}
+       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1 space-y-8">
@@ -93,5 +86,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-    
