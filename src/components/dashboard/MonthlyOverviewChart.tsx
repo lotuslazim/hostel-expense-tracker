@@ -4,7 +4,7 @@
 import { useMemo } from "react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { eachDayOfInterval, startOfMonth, endOfMonth, format, parseISO } from "date-fns";
+import { eachDayOfInterval, startOfMonth, endOfMonth, format } from "date-fns";
 import type { MealLog, Expense } from "@/lib/types";
 
 interface MonthlyOverviewChartProps {

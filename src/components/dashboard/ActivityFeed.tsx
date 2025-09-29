@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Utensils, ShoppingCart, Filter, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -99,7 +99,9 @@ export function ActivityFeed({ meals, expenses }: ActivityFeedProps) {
                                 </>}
                                 {filterType === 'expense' && <>
                                     <SelectItem value="Food & Groceries">Food & Groceries</SelectItem>
-                                    <SelectItem value="Utility">Utility</SelectItem>
+                                    <SelectItem value="Electricity">Electricity</SelectItem>
+                                    <SelectItem value="Gas">Gas</SelectItem>
+                                    <SelectItem value="Other">Other</SelectItem>
                                 </>}
                             </SelectContent>
                         </Select>

@@ -14,7 +14,7 @@ export interface MealLog {
   userName?: string;
 }
 
-export type ExpenseCategory = 'Food & Groceries' | 'Utility' | 'Other';
+export type ExpenseCategory = 'Food & Groceries' | 'Electricity' | 'Gas' | 'Other';
 
 export interface Expense {
   id: string;
