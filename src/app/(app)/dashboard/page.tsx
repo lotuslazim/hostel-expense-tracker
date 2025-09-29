@@ -54,7 +54,7 @@ export default function DashboardPage() {
     return query(
       collection(firestore, `groups/${groupId}/expenses`),
       where("date", ">=", dateRange.start),
-      where("date", "<=", date.end),
+      where("date", "<=", dateRange.end),
       orderBy("date", "desc")
     );
   }, [firestore, groupId, dateRange]);
