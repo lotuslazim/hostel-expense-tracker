@@ -9,23 +9,8 @@ import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYea
 
 // IMPORTANT: DO NOT MODIFY THIS FUNCTION
 export function initializeFirebase() {
-  let firebaseApp: FirebaseApp;
-  
-  try {
-    // This will throw if the app is not already initialized.
-    firebaseApp = getApp();
-  } catch (e) {
-    // If getApp() throws, it means we need to initialize.
-    try {
-      // First, try to initialize using App Hosting's auto-configuration.
-      firebaseApp = initializeApp();
-    } catch (e) {
-      // If that fails, fall back to the explicit config (for local dev).
-      firebaseApp = initializeApp(firebaseConfig);
-    }
-  }
-
-  return getSdks(firebaseApp);
+  const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+  return getSdks(app);
 }
 
 export function getSdks(firebaseApp: FirebaseApp) {
