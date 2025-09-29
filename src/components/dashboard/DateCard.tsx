@@ -6,7 +6,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { format, addDays, subDays } from "date-fns";
+import { format, addDays, subDays, isToday } from "date-fns";
 
 interface DateCardProps {
     date: Date;
@@ -20,10 +20,14 @@ export function DateCard({ date, setDate }: DateCardProps) {
 
     const handleNextDay = () => {
         const nextDay = addDays(date, 1);
-        if (nextDay <= new Date()) {
-            setDate(nextDay);
+        if (nextDay > new Date()) {
+            return; // Don't allow future dates
         }
+        setDate(nextDay);
     }
+    
+    const isDateInFuture = date >= new Date() && !isToday(date);
+    const isNextButtonDisabled = isToday(date) || isDateInFuture;
 
     return (
         <Card>
@@ -56,7 +60,7 @@ export function DateCard({ date, setDate }: DateCardProps) {
                         />
                     </PopoverContent>
                 </Popover>
-                <Button variant="outline" size="icon" onClick={handleNextDay} disabled={date >= new Date()}>
+                <Button variant="outline" size="icon" onClick={handleNextDay} disabled={isNextButtonDisabled}>
                     <ChevronRight className="h-4 w-4" />
                     <span className="sr-only">Next day</span>
                 </Button>
