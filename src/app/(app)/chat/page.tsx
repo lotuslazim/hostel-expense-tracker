@@ -34,7 +34,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { format } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import placeholderImages from "@/lib/placeholder-images.json";
-import { cn } from "@/lib/utils";
+import { cn, sanitizeFirestoreData } from "@/lib/utils";
 import { WelcomeCard } from "@/components/app/welcome-card";
 import imageCompression from 'browser-image-compression';
 
@@ -143,7 +143,7 @@ export default function ChatPage() {
         imageUrl = await getDownloadURL(snapshot.ref);
       }
 
-      await addDoc(collection(firestore, `groups/${groupId}/messages`), {
+      const messageData = sanitizeFirestoreData({
         text: values.message || "",
         imageUrl: imageUrl,
         userId: currentUser.uid,
@@ -151,6 +151,8 @@ export default function ChatPage() {
         groupId: groupId,
         createdAt: serverTimestamp(),
       });
+
+      await addDoc(collection(firestore, `groups/${groupId}/messages`), messageData);
       form.reset();
       clearImagePreview();
     } catch (error) {

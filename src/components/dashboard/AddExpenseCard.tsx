@@ -40,6 +40,7 @@ import { Loader2, ShoppingCart, Paperclip, X, Camera } from "lucide-react";
 import imageCompression from 'browser-image-compression';
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Image from "next/image";
+import { sanitizeFirestoreData } from "@/lib/utils";
 
 const expenseSchema = z.object({
   amount: z.coerce.number().min(0.01, "Amount must be greater than 0."),
@@ -195,7 +196,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
         receiptPhotoUrl = await getDownloadURL(snapshot.ref);
       }
       
-      const expenseData: any = {
+      const expenseData = sanitizeFirestoreData({
         amount: values.amount,
         description: values.description || "",
         category: values.category,
@@ -203,11 +204,8 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
         userName: currentUser.displayName || currentUser.email?.split('@')[0],
         date: selectedDate,
         createdAt: serverTimestamp(),
-      };
-
-      if (receiptPhotoUrl) {
-          expenseData.receiptPhotoUrl = receiptPhotoUrl;
-      }
+        receiptPhotoUrl: receiptPhotoUrl,
+      });
 
       await addDoc(collection(firestore, `groups/${groupId}/expenses`), expenseData);
 
@@ -361,5 +359,3 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     </Card>
   );
 }
-
-    
