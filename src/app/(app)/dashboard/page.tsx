@@ -3,8 +3,8 @@
 
 import { useMemo, useState } from "react";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
-import { doc, collection, query, where, orderBy, startOfMonth, endOfMonth } from "firebase/firestore";
-import { addMonths, subMonths } from "date-fns";
+import { doc, collection, query, where, orderBy } from "firebase/firestore";
+import { addMonths, subMonths, startOfMonth, endOfMonth } from "date-fns";
 import { WelcomeCard } from "@/components/app/welcome-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
