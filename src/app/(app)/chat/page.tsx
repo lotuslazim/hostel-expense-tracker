@@ -33,7 +33,6 @@ import type { ChatMessage } from "@/lib/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { format } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import placeholderImages from "@/lib/placeholder-images.json";
 import { cn, sanitizeFirestoreData } from "@/lib/utils";
 import { WelcomeCard } from "@/components/app/welcome-card";
 import imageCompression from 'browser-image-compression';
@@ -148,6 +147,7 @@ export default function ChatPage() {
         imageUrl: imageUrl,
         userId: currentUser.uid,
         userName: currentUser.displayName || currentUser.email?.split("@")[0],
+        userPhotoURL: currentUserData?.photoURL,
         groupId: groupId,
         createdAt: serverTimestamp(),
       });
@@ -220,13 +220,7 @@ export default function ChatPage() {
                 >
                   {!isCurrentUser && (
                     <Avatar className="h-8 w-8">
-                      <AvatarImage
-                        src={
-                          placeholderImages.placeholderImages.find(
-                            (p) => p.id === "user-avatar-2"
-                          )?.imageUrl
-                        }
-                      />
+                      <AvatarImage src={msg.userPhotoURL} />
                       <AvatarFallback>{msg.userName.charAt(0)}</AvatarFallback>
                     </Avatar>
                   )}
@@ -258,13 +252,7 @@ export default function ChatPage() {
                   </div>
                   {isCurrentUser && (
                     <Avatar className="h-8 w-8">
-                      <AvatarImage
-                        src={
-                          placeholderImages.placeholderImages.find(
-                            (p) => p.id === "user-avatar"
-                          )?.imageUrl
-                        }
-                      />
+                      <AvatarImage src={currentUserData?.photoURL} />
                       <AvatarFallback>{msg.userName.charAt(0)}</AvatarFallback>
                     </Avatar>
                   )}

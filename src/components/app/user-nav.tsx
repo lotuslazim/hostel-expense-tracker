@@ -43,11 +43,13 @@ export function UserNav() {
     }
   };
 
-  if (isUserLoading || isCurrentUserDataLoading) {
+  const isLoading = isUserLoading || isCurrentUserDataLoading;
+
+  if (isLoading) {
     return <Skeleton className="h-9 w-9 rounded-full" />;
   }
 
-  const userName = user?.displayName || user?.email?.split('@')[0] || "User";
+  const userName = currentUserData?.displayName || user?.displayName || user?.email?.split('@')[0] || "User";
   const userEmail = user?.email || "user@example.com";
   const avatarFallback = userName.charAt(0).toUpperCase();
   const photoURL = currentUserData?.photoURL || user?.photoURL;
@@ -95,5 +97,3 @@ export function UserNav() {
     </DropdownMenu>
   );
 }
-
-    

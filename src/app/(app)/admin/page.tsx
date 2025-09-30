@@ -32,6 +32,7 @@ interface Member {
   id: string;
   email?: string;
   displayName?: string;
+  photoURL?: string;
   role: string;
 }
 
@@ -40,7 +41,7 @@ interface ProcessedMember {
   name: string;
   email: string;
   role: string;
-  avatarId: string;
+  photoURL?: string;
 }
 
 function NewUserAdminPanel() {
@@ -85,6 +86,7 @@ function NewUserAdminPanel() {
         role: 'admin',
         joinedAt: serverTimestamp(),
         displayName: currentUser.displayName || currentUser.email?.split('@')[0],
+        photoURL: currentUser.photoURL,
         id: currentUser.uid
       });
 
@@ -192,14 +194,12 @@ export default function AdminPage() {
         name = member.email.split('@')[0];
       }
       
-      const avatarId = `user-avatar-${member.id.substring(0, 4)}`;
-
       return {
         id: member.id,
         name,
         email: member.email || 'No email',
         role: member.role === 'admin' ? 'Admin' : 'Member',
-        avatarId,
+        photoURL: member.photoURL,
       };
     });
   }, [membersCollection]);
@@ -419,7 +419,7 @@ export default function AdminPage() {
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <Avatar>
-                          <AvatarImage src={`https://picsum.photos/seed/${member.id.substring(0,6)}/40/40`} />
+                          <AvatarImage src={member.photoURL} />
                           <AvatarFallback>{member.name.charAt(0).toUpperCase()}</AvatarFallback>
                         </Avatar>
                         <div>
@@ -603,5 +603,3 @@ export default function AdminPage() {
     </div>
   );
 }
-
-    

@@ -18,6 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { updateProfile } from "firebase/auth";
 import { useRouter } from "next/navigation";
+import imageCompression from "browser-image-compression";
 
 
 function JoinGroupCard() {
@@ -58,6 +59,7 @@ function JoinGroupCard() {
         batch.set(memberRef, {
             email: currentUser.email,
             displayName: currentUser.displayName || currentUser.email?.split('@')[0],
+            photoURL: currentUser.photoURL,
             role: 'member',
             joinedAt: serverTimestamp(),
             id: currentUser.uid
@@ -107,7 +109,6 @@ export default function ProfilePage() {
   const [name, setName] = useState(currentUser?.displayName || "");
   const [isEditing, setIsEditing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [imageFile, setImageFile] = useState<File | null>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
 
   const groupId = currentUserData?.groupId;
@@ -138,6 +139,40 @@ export default function ProfilePage() {
           setIsEditing(false);
       }
   }
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!currentUser) return;
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+        const compressedFile = await imageCompression(file, { maxSizeMB: 0.5, maxWidthOrHeight: 800 });
+
+        const storageRef = ref(storage, `profilePictures/${currentUser.uid}/${compressedFile.name}`);
+        await uploadBytes(storageRef, compressedFile);
+        const photoURL = await getDownloadURL(storageRef);
+        
+        await updateProfile(currentUser, { photoURL });
+
+        const batch = writeBatch(firestore);
+        const userDocRef = doc(firestore, "users", currentUser.uid);
+        batch.update(userDocRef, { photoURL });
+        if(groupId) {
+            const memberDocRef = doc(firestore, `groups/${groupId}/members`, currentUser.uid);
+            batch.update(memberDocRef, { photoURL });
+        }
+        await batch.commit();
+
+        toast({ title: "Success", description: "Profile picture updated!" });
+    } catch (error) {
+        console.error(error);
+        toast({ variant: "destructive", title: "Upload Failed", description: "Could not upload image." });
+    } finally {
+        setIsUploading(false);
+    }
+  };
+
 
   const handleLeaveGroup = async () => {
     if (!currentUser || !groupId) return;
@@ -185,8 +220,9 @@ export default function ProfilePage() {
   }
 
   const userProfile = {
-    name: currentUser?.displayName || currentUser?.email?.split('@')[0] || "User",
+    name: currentUserData?.displayName || currentUser?.displayName || currentUser?.email?.split('@')[0] || "User",
     email: currentUser?.email || "No email",
+    photoURL: currentUserData?.photoURL || currentUser?.photoURL,
     role: inGroup ? (currentUserData?.isAdmin ? "Admin" : "Member") : "Not in a group"
   };
 
@@ -202,10 +238,21 @@ export default function ProfilePage() {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-4">
-            <Avatar className="h-16 w-16">
-              <AvatarImage src={currentUser.photoURL || undefined} />
-              <AvatarFallback>{userProfile.name.charAt(0)}</AvatarFallback>
-            </Avatar>
+            <div className="relative">
+                <Avatar className="h-16 w-16">
+                    <AvatarImage src={userProfile.photoURL} />
+                    <AvatarFallback>{userProfile.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <input type="file" ref={imageInputRef} onChange={handleImageUpload} accept="image/*" className="hidden" />
+                 <Button 
+                    size="icon" 
+                    className="absolute bottom-0 right-0 h-6 w-6 rounded-full" 
+                    onClick={() => imageInputRef.current?.click()}
+                    disabled={isUploading}
+                    >
+                    {isUploading ? <Loader2 className="h-3 w-3 animate-spin"/> : <Camera className="h-3 w-3" />}
+                 </Button>
+            </div>
             <div>
               <CardTitle className="text-2xl">{userProfile.name}</CardTitle>
               <CardDescription>{userProfile.email}</CardDescription>
@@ -284,5 +331,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
-    

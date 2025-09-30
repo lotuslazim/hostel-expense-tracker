@@ -49,5 +49,6 @@ export interface ChatMessage {
   createdAt: Timestamp;
   userId: string;
   userName: string;
+  userPhotoURL?: string;
   groupId: string;
 }
