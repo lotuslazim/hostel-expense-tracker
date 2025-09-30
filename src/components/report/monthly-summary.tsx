@@ -206,19 +206,19 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
        <Card className="lg:col-span-1 flex flex-col">
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><Zap/> Utility Payments</CardTitle>
-           <CardDescription>A summary of who paid the utility bills this month. Click to expand.</CardDescription>
+           <CardDescription>Click a member to see their detailed payments.</CardDescription>
         </CardHeader>
         <CardContent>
-           {processedMembers.length > 0 ? (
+          {processedMembers.length > 0 ? (
             processedMembers.map((member) => (
               <Collapsible key={member.id} className="border-b last:border-b-0 py-2">
                 <CollapsibleTrigger className="flex justify-between items-center w-full group">
                   <span className="font-medium">{member.name}</span>
                   <div className="flex items-center gap-4">
                     <span className="text-muted-foreground font-semibold">৳{member.utilityExpensesPaid.toFixed(2)}</span>
-                    <Button variant="ghost" size="sm" className="w-9 p-0">
-                      <ChevronDown className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                    </Button>
+                    <div className="w-9 p-0 flex items-center justify-center">
+                        <ChevronDown className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                    </div>
                   </div>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
@@ -317,6 +317,4 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     </div>
   );
 }
-
-
 
