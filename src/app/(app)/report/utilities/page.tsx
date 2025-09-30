@@ -100,11 +100,8 @@ export default function UtilityExpensesPage() {
 
     const processedData = useMemo(() => {
         if (!membersData || !expensesData) {
-            return { memberContributions: [], totalElectricity: 0, totalGas: 0 };
+            return { memberContributions: [] };
         }
-
-        const totalElectricity = expensesData.filter(e => e.category === 'Electricity').reduce((sum, e) => sum + e.amount, 0);
-        const totalGas = expensesData.filter(e => e.category === 'Gas').reduce((sum, e) => sum + e.amount, 0);
 
         const memberContributions = membersData.map(member => {
             const electricityPaid = expensesData
@@ -122,7 +119,7 @@ export default function UtilityExpensesPage() {
             };
         });
 
-        return { memberContributions, totalElectricity, totalGas };
+        return { memberContributions };
 
     }, [expensesData, membersData]);
 
@@ -147,35 +144,16 @@ export default function UtilityExpensesPage() {
     if (isDataLoading) return <PageSkeleton />;
     if (hasError) return <DataError />;
     
-    const { memberContributions, totalElectricity, totalGas } = processedData;
+    const { memberContributions } = processedData;
 
     return (
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight font-headline">Monthly Utility Expenses</h1>
-                    <p className="text-muted-foreground">A breakdown of utility bills paid in {format(currentDate, "MMMM yyyy")}.</p>
+                    <p className="text-muted-foreground">A breakdown of utility bills paid by each member in {format(currentDate, "MMMM yyyy")}.</p>
                 </div>
                 <MonthSwitcher currentDate={currentDate} onMonthChange={handleMonthChange} />
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><Zap /> Total Electricity Bill</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-4xl font-bold">৳{totalElectricity.toFixed(2)}</p>
-                    </CardContent>
-                </Card>
-                 <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><Flame /> Total Gas Bill</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-4xl font-bold">৳{totalGas.toFixed(2)}</p>
-                    </CardContent>
-                </Card>
             </div>
 
             <Card>
