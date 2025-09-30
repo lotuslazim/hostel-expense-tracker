@@ -9,7 +9,6 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState, useMemo } from "react";
-import placeholderImages from "@/lib/placeholder-images.json";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
 import { doc, collection, writeBatch, updateDoc, serverTimestamp, deleteDoc } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -137,7 +136,7 @@ function NewUserAdminPanel() {
           <Button 
             className="w-full" 
             onClick={handleCreateGroup} 
-            disabled={isCreating || !groupName}
+            disabled={isCreating || !groupName.trim()}
           >
             {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Create Group
@@ -200,11 +199,12 @@ export default function AdminPage() {
     });
   }, [membersCollection]);
 
-  const handleUpdateSettings = async (newSettings: GroupSettings) => {
-    if (!groupRef) return;
+  const handleUpdateSettings = async (newSettings: Partial<GroupSettings>) => {
+    if (!groupRef || !groupData) return;
     setIsUpdatingSettings(true);
     try {
-      await updateDoc(groupRef, { settings: newSettings });
+      const updatedSettings = { ...groupData.settings, ...newSettings };
+      await updateDoc(groupRef, { settings: updatedSettings });
       toast({ title: "Settings Updated", description: "Your group settings have been saved." });
     } catch (error) {
       console.error("Error updating settings:", error);
@@ -225,43 +225,24 @@ export default function AdminPage() {
     }
     
     const updatedMealTypes = [...currentMealTypes, newMealType.trim()];
-    const updatedSettings: GroupSettings = {
-      ...groupData.settings,
-      mealTypes: updatedMealTypes
-    };
     
     setNewMealType("");
-    await handleUpdateSettings(updatedSettings);
+    await handleUpdateSettings({ mealTypes: updatedMealTypes });
   };
 
   const handleRemoveMealType = async (mealToRemove: string) => {
     if (!groupData?.settings) return;
     
     const updatedMealTypes = groupData.settings.mealTypes.filter((m: string) => m !== mealToRemove);
-    const updatedSettings: GroupSettings = {
-      ...groupData.settings,
-      mealTypes: updatedMealTypes
-    };
-    
-    await handleUpdateSettings(updatedSettings);
+    await handleUpdateSettings({ mealTypes: updatedMealTypes });
   };
 
   const handleToggleIsMealItemNameRequired = async (checked: boolean) => {
-    if (!groupData?.settings) return;
-    const updatedSettings: GroupSettings = {
-      ...groupData.settings,
-      isMealItemNameRequired: checked
-    };
-    await handleUpdateSettings(updatedSettings);
+    await handleUpdateSettings({ isMealItemNameRequired: checked });
   };
 
   const handleToggleIsExpenseDescriptionRequired = async (checked: boolean) => {
-    if (!groupData?.settings) return;
-    const updatedSettings: GroupSettings = {
-      ...groupData.settings,
-      isExpenseDescriptionRequired: checked
-    };
-    await handleUpdateSettings(updatedSettings);
+    await handleUpdateSettings({ isExpenseDescriptionRequired: checked });
   };
 
   const handleRemoveMember = async (memberId: string) => {
@@ -588,5 +569,3 @@ export default function AdminPage() {
     </div>
   );
 }
-
-    
