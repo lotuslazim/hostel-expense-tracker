@@ -151,26 +151,6 @@ function NewUserAdminPanel() {
   );
 }
 
-function AccessDenied() {
-    return (
-        <div>
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold tracking-tight font-headline">Admin Panel</h1>
-                <p className="text-muted-foreground">
-                    You do not have permission to access this page.
-                </p>
-            </div>
-            <Alert variant="destructive">
-                <ShieldAlert className="h-4 w-4" />
-                <AlertTitle>Access Denied</AlertTitle>
-                <AlertDescription>
-                    This page is for group administrators only. If you believe this is a mistake, please contact your group admin.
-                </AlertDescription>
-            </Alert>
-        </div>
-    );
-}
-
 export default function AdminPage() {
   const { firestore } = useFirebase();
   const { user: currentUser, isUserLoading: isCurrentUserLoading } = useUser();
@@ -187,6 +167,7 @@ export default function AdminPage() {
   const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
 
   const groupId = currentUserData?.groupId;
+  const isCurrentUserAdmin = currentUserData?.isAdmin ?? false;
 
   const groupRef = useMemo(() => 
     groupId ? doc(firestore, "groups", groupId) : null, 
@@ -224,7 +205,7 @@ export default function AdminPage() {
   }, [membersCollection]);
 
   const handleUpdateSettings = async (newSettings: Partial<GroupSettings>) => {
-    if (!groupRef || !groupData) return;
+    if (!groupRef || !groupData || !isCurrentUserAdmin) return;
     setIsUpdatingSettings(true);
     try {
       const updatedSettings = { ...groupData.settings, ...newSettings };
@@ -239,7 +220,7 @@ export default function AdminPage() {
   };
 
   const handleAddMealType = async () => {
-    if (!newMealType.trim() || !groupData?.settings) return;
+    if (!newMealType.trim() || !groupData?.settings || !isCurrentUserAdmin) return;
     
     const currentMealTypes = groupData.settings.mealTypes || [];
     
@@ -255,27 +236,30 @@ export default function AdminPage() {
   };
 
   const handleRemoveMealType = async (mealToRemove: string) => {
-    if (!groupData?.settings) return;
+    if (!groupData?.settings || !isCurrentUserAdmin) return;
     
     const updatedMealTypes = groupData.settings.mealTypes.filter((m: string) => m !== mealToRemove);
     await handleUpdateSettings({ mealTypes: updatedMealTypes });
   };
 
   const handleToggleIsMealItemNameRequired = async (checked: boolean) => {
+    if (!isCurrentUserAdmin) return;
     await handleUpdateSettings({ isMealItemNameRequired: checked });
   };
 
   const handleToggleIsExpenseDescriptionRequired = async (checked: boolean) => {
+    if (!isCurrentUserAdmin) return;
     await handleUpdateSettings({ isExpenseDescriptionRequired: checked });
   };
   
   const handleToggleIsUtilityReceiptRequired = async (checked: boolean) => {
+    if (!isCurrentUserAdmin) return;
     await handleUpdateSettings({ isUtilityReceiptRequired: checked });
   };
 
   const handleRemoveMember = async (memberId: string) => {
-    if (!groupId) {
-        toast({ variant: "destructive", title: "Error", description: "Group not found." });
+    if (!groupId || !isCurrentUserAdmin) {
+        toast({ variant: "destructive", title: "Error", description: "Group not found or you don't have permission." });
         return;
     }
 
@@ -322,17 +306,13 @@ export default function AdminPage() {
     return <NewUserAdminPanel />;
   }
 
-  if (!currentUserData?.isAdmin) {
-      return <AccessDenied />;
-  }
-
   const isDataLoading = isGroupLoading || areMembersLoading;
 
   if (isDataLoading) {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight font-headline">Admin Panel</h1>
+          <h1 className="text-3xl font-bold tracking-tight font-headline">Group Settings</h1>
           <p className="text-muted-foreground">
             Manage your group members and settings.
           </p>
@@ -356,9 +336,9 @@ export default function AdminPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight font-headline">Admin Panel</h1>
+        <h1 className="text-3xl font-bold tracking-tight font-headline">Group Settings</h1>
         <p className="text-muted-foreground">
-          Manage your group members and settings.
+          {isCurrentUserAdmin ? "Manage your group members and settings." : "View your group's current settings."}
         </p>
       </div>
 
@@ -430,7 +410,7 @@ export default function AdminPage() {
                 <TableRow>
                   <TableHead>Member</TableHead>
                   <TableHead className="hidden sm:table-cell">Role</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  {isCurrentUserAdmin && <TableHead className="text-right">Actions</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -461,39 +441,41 @@ export default function AdminPage() {
                         </Badge>
                       )}
                     </TableCell>
-                    <TableCell className="text-right">
-                      {member.id !== currentUser?.uid && currentUserData?.isAdmin && (
-                         <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                             <Button 
-                                variant="ghost" 
-                                size="icon" 
-                              >
-                                <Trash2 className="h-4 w-4" />
-                                <span className="sr-only">Remove member</span>
-                              </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Are you sure you want to remove {member.name}?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This will permanently remove them from the group. They will have to rejoin using the invite code.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleRemoveMember(member.id)} className="bg-destructive hover:bg-destructive/90">
-                                Remove
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      )}
-                    </TableCell>
+                    {isCurrentUserAdmin && (
+                      <TableCell className="text-right">
+                        {member.id !== currentUser?.uid && (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                  <span className="sr-only">Remove member</span>
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Are you sure you want to remove {member.name}?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This will permanently remove them from the group. They will have to rejoin using the invite code.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleRemoveMember(member.id)} className="bg-destructive hover:bg-destructive/90">
+                                  Remove
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        )}
+                      </TableCell>
+                    )}
                   </TableRow>
                 )) : (
                   <TableRow>
-                    <TableCell colSpan={3} className="text-center h-24">
+                    <TableCell colSpan={isCurrentUserAdmin ? 3 : 2} className="text-center h-24">
                       No members found in this group.
                     </TableCell>
                   </TableRow>
@@ -520,15 +502,17 @@ export default function AdminPage() {
               {groupData?.settings?.mealTypes?.map((meal: string) => (
                 <div key={meal} className="flex items-center justify-between p-2 bg-muted/50 rounded-md">
                   <span>{meal}</span>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-7 w-7" 
-                    onClick={() => handleRemoveMealType(meal)} 
-                    disabled={isUpdatingSettings}
-                  >
-                    <X className="h-4 w-4"/>
-                  </Button>
+                  {isCurrentUserAdmin && (
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-7 w-7" 
+                      onClick={() => handleRemoveMealType(meal)} 
+                      disabled={isUpdatingSettings}
+                    >
+                      <X className="h-4 w-4"/>
+                    </Button>
+                  )}
                 </div>
               ))}
               {(!groupData?.settings?.mealTypes || groupData.settings.mealTypes.length === 0) && (
@@ -537,26 +521,28 @@ export default function AdminPage() {
                 </p>
               )}
             </div>
-            <div className="flex gap-2">
-              <Input 
-                placeholder="Add new meal type..." 
-                value={newMealType} 
-                onChange={(e) => setNewMealType(e.target.value)} 
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !isUpdatingSettings && newMealType.trim()) {
-                    handleAddMealType();
-                  }
-                }}
-                disabled={isUpdatingSettings}
-              />
-              <Button 
-                onClick={handleAddMealType} 
-                disabled={isUpdatingSettings || !newMealType.trim()}
-              >
-                {isUpdatingSettings && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Add
-              </Button>
-            </div>
+            {isCurrentUserAdmin && (
+              <div className="flex gap-2">
+                <Input 
+                  placeholder="Add new meal type..." 
+                  value={newMealType} 
+                  onChange={(e) => setNewMealType(e.target.value)} 
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !isUpdatingSettings && newMealType.trim()) {
+                      handleAddMealType();
+                    }
+                  }}
+                  disabled={isUpdatingSettings}
+                />
+                <Button 
+                  onClick={handleAddMealType} 
+                  disabled={isUpdatingSettings || !newMealType.trim()}
+                >
+                  {isUpdatingSettings && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Add
+                </Button>
+              </div>
+            )}
           </div>
           
           <div className="space-y-4">
@@ -576,7 +562,7 @@ export default function AdminPage() {
                 id="require-item-name"
                 checked={groupData?.settings?.isMealItemNameRequired ?? false}
                 onCheckedChange={handleToggleIsMealItemNameRequired}
-                disabled={isUpdatingSettings}
+                disabled={isUpdatingSettings || !isCurrentUserAdmin}
               />
             </div>
             <div className="flex items-center justify-between p-3 border rounded-md">
@@ -592,7 +578,7 @@ export default function AdminPage() {
                 id="require-expense-desc"
                 checked={groupData?.settings?.isExpenseDescriptionRequired ?? false}
                 onCheckedChange={handleToggleIsExpenseDescriptionRequired}
-                disabled={isUpdatingSettings}
+                disabled={isUpdatingSettings || !isCurrentUserAdmin}
               />
             </div>
              <div className="flex items-center justify-between p-3 border rounded-md">
@@ -608,7 +594,7 @@ export default function AdminPage() {
                 id="require-utility-receipt"
                 checked={groupData?.settings?.isUtilityReceiptRequired ?? false}
                 onCheckedChange={handleToggleIsUtilityReceiptRequired}
-                disabled={isUpdatingSettings}
+                disabled={isUpdatingSettings || !isCurrentUserAdmin}
               />
             </div>
           </div>
@@ -617,3 +603,5 @@ export default function AdminPage() {
     </div>
   );
 }
+
+    
