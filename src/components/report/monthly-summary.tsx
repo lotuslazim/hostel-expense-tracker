@@ -98,15 +98,14 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     if (!membersData || !mealsData || !expensesData) {
       return null;
     }
-
-    const utilityExpenses = expensesData
-        .filter(e => e.category === 'Electricity' || e.category === 'Gas')
-        .sort((a, b) => (b.date as Timestamp).toDate().getTime() - (a.date as Timestamp).toDate().getTime());
     
     const totalGroupExpenses = expensesData.reduce((sum, e) => sum + e.amount, 0);
 
     const processedMembers = membersData.map(member => {
-        const memberMeals = mealsData.filter(m => m.userId === member.id);
+        const memberMeals = mealsData
+          .filter(m => m.userId === member.id)
+          .sort((a, b) => (b.date as Timestamp).toDate().getTime() - (a.date as Timestamp).toDate().getTime());
+          
         const memberExpenses = expensesData.filter(e => e.userId === member.id);
         
         const totalMeals = memberMeals.reduce((sum, meal) => sum + (meal.mealNumber || 1), 0);
@@ -124,6 +123,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
           id: member.id,
           name: member.displayName || member.email.split('@')[0],
           meals: totalMeals,
+          memberMeals,
           foodExpenses: foodExpenses,
           utilityExpensesPaid: utilityExpensesPaid,
           memberUtilityExpenses,
@@ -136,9 +136,6 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     const totalGroupMeals = processedMembers.reduce((acc, member) => acc + member.meals, 0);
     const memberCount = processedMembers.length > 0 ? processedMembers.length : 1;
     const mealRate = totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
-    
-    const totalGroupElectricityExpenses = utilityExpenses.filter(e => e.category === 'Electricity').reduce((acc, e) => acc + e.amount, 0);
-    const totalGroupGasExpenses = utilityExpenses.filter(e => e.category === 'Gas').reduce((acc, e) => acc + e.amount, 0);
 
     return {
         processedMembers,
@@ -146,9 +143,6 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
         totalGroupMeals,
         memberCount,
         mealRate,
-        utilityExpenses,
-        totalGroupElectricityExpenses,
-        totalGroupGasExpenses,
         totalGroupExpenses
     }
   }, [membersData, mealsData, expensesData]);
@@ -171,8 +165,6 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
       totalGroupMeals,
       memberCount,
       mealRate,
-      totalGroupElectricityExpenses,
-      totalGroupGasExpenses,
       totalGroupExpenses
   } = processedData;
 
@@ -260,7 +252,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
             <Scale /> Final Settlement
           </CardTitle>
           <CardDescription>
-            A summary of who owes what, including all food, utility, and other costs for the month.
+            A summary of who owes what, including all food, utility, and other costs for the month. Click a member to see their meal history.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -279,27 +271,72 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                   const finalBalance = member.totalPaid - perMemberShare;
 
                   return (
-                    <TableRow key={member.id}>
-                      <TableCell className="font-medium">
-                        {member.name}
-                      </TableCell>
-                       <TableCell>
-                        ৳{member.totalPaid.toFixed(2)}
-                      </TableCell>
-                      <TableCell>
-                        ৳{perMemberShare.toFixed(2)}
-                      </TableCell>
-                      <TableCell
-                        className={cn(
-                          "text-right font-bold",
-                          finalBalance >= 0 ? "text-green-600" : "text-red-600"
-                        )}
-                      >
-                        {finalBalance >= 0
-                          ? `Gets: ৳${finalBalance.toFixed(2)}`
-                          : `Owes: ৳${Math.abs(finalBalance).toFixed(2)}`}
-                      </TableCell>
-                    </TableRow>
+                     <Collapsible asChild key={member.id}>
+                      <>
+                        <TableRow className="align-middle">
+                          <TableCell className="font-medium flex items-center gap-2">
+                             <CollapsibleTrigger asChild>
+                               <Button variant="ghost" size="icon" className="h-8 w-8">
+                                 <ChevronDown className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                               </Button>
+                             </CollapsibleTrigger>
+                            {member.name}
+                          </TableCell>
+                          <TableCell>
+                            ৳{member.totalPaid.toFixed(2)}
+                          </TableCell>
+                          <TableCell>
+                            ৳{perMemberShare.toFixed(2)}
+                          </TableCell>
+                          <TableCell
+                            className={cn(
+                              "text-right font-bold",
+                              finalBalance >= 0 ? "text-green-600" : "text-red-600"
+                            )}
+                          >
+                            {finalBalance >= 0
+                              ? `Gets: ৳${finalBalance.toFixed(2)}`
+                              : `Owes: ৳${Math.abs(finalBalance).toFixed(2)}`}
+                          </TableCell>
+                        </TableRow>
+
+                        <CollapsibleContent asChild>
+                          <tr className="bg-muted/50">
+                            <td colSpan={4} className="p-0">
+                               <div className="p-4">
+                                {member.memberMeals.length > 0 ? (
+                                  <>
+                                    <h4 className="font-semibold mb-2 text-sm">Meal History for {member.name} ({member.meals} total meals)</h4>
+                                    <Table>
+                                      <TableHeader>
+                                        <TableRow>
+                                          <TableHead>Date</TableHead>
+                                          <TableHead>Meal Type</TableHead>
+                                          <TableHead>Count</TableHead>
+                                          <TableHead>Item Name</TableHead>
+                                        </TableRow>
+                                      </TableHeader>
+                                      <TableBody>
+                                        {member.memberMeals.map(meal => (
+                                          <TableRow key={meal.id}>
+                                            <TableCell>{format((meal.date as Timestamp).toDate(), 'MMM d, yyyy')}</TableCell>
+                                            <TableCell className="capitalize">{meal.mealType}</TableCell>
+                                            <TableCell>{meal.mealNumber}</TableCell>
+                                            <TableCell>{meal.itemName || "N/A"}</TableCell>
+                                          </TableRow>
+                                        ))}
+                                      </TableBody>
+                                    </Table>
+                                  </>
+                                  ) : (
+                                    <p className="text-sm text-muted-foreground text-center py-4">No meals logged by this member.</p>
+                                  )}
+                               </div>
+                            </td>
+                          </tr>
+                        </CollapsibleContent>
+                      </>
+                    </Collapsible>
                   );
                 })
               ) : (
@@ -317,4 +354,3 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     </div>
   );
 }
-
