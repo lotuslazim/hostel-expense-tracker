@@ -41,15 +41,8 @@ import imageCompression from 'browser-image-compression';
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Image from "next/image";
 import { sanitizeFirestoreData } from "@/lib/utils";
+import { Skeleton } from "../ui/skeleton";
 
-const expenseSchema = z.object({
-  amount: z.coerce.number().min(0.01, "Amount must be greater than 0."),
-  description: z.string().optional(),
-  category: z.enum(["Food & Groceries", "Electricity", "Gas", "Other"], {
-    required_error: "Please select a category.",
-  }),
-  receipt: z.instanceof(File).optional(),
-});
 
 interface AddExpenseCardProps {
   selectedDate: Date;
@@ -71,6 +64,24 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
   const { data: currentUserData } = useDoc(currentUserRef);
   const groupId = currentUserData?.groupId;
+
+  const groupRef = useMemo(() => (groupId ? doc(firestore, "groups", groupId) : null), [firestore, groupId]);
+  const { data: groupData, isLoading: isGroupDataLoading } = useDoc(groupRef);
+
+  const isExpenseDescriptionRequired = useMemo(() => groupData?.settings?.isExpenseDescriptionRequired ?? false, [groupData]);
+
+  const expenseSchema = useMemo(() => {
+    return z.object({
+        amount: z.coerce.number().min(0.01, "Amount must be greater than 0."),
+        description: isExpenseDescriptionRequired
+            ? z.string().min(1, "Description is required.")
+            : z.string().optional(),
+        category: z.enum(["Food & Groceries", "Electricity", "Gas", "Other"], {
+            required_error: "Please select a category.",
+        }),
+        receipt: z.instanceof(File).optional(),
+    });
+  }, [isExpenseDescriptionRequired]);
 
   const form = useForm<z.infer<typeof expenseSchema>>({
     resolver: zodResolver(expenseSchema),
@@ -213,7 +224,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
         title: "Expense Added",
         description: `Your ${values.category.toLowerCase()} expense of ৳${values.amount} has been logged.`,
       });
-      form.reset({ amount: 0, description: "", category: values.category });
+      form.reset({ amount: 0, description: "" });
       clearReceiptPreview();
     } catch (error) {
       console.error("Error adding expense:", error);
@@ -225,6 +236,20 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     } finally {
       setIsSubmitting(false);
     }
+  }
+  
+  if (isGroupDataLoading && groupId) {
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2"><ShoppingCart /> Add an Expense</CardTitle>
+                <CardDescription>Loading group settings...</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Skeleton className="h-48 w-full" />
+            </CardContent>
+        </Card>
+    );
   }
 
   return (
@@ -280,7 +305,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                 name="description"
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Description (Optional)</FormLabel>
+                    <FormLabel>Description {isExpenseDescriptionRequired ? '' : '(Optional)'}</FormLabel>
                     <FormControl>
                         <Input placeholder="e.g., Weekly groceries" {...field} />
                     </FormControl>
