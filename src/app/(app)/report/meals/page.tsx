@@ -5,11 +5,11 @@ import { useMemo } from "react";
 import { parseISO, startOfMonth, endOfMonth, format, addMonths, subMonths } from "date-fns";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
 import { doc, collection, query, where, type Timestamp } from "firebase/firestore";
-import type { MealLog } from "@/lib/types";
+import type { MealLog, Expense } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle, ChevronLeft, Users, Utensils, ChevronDown } from "lucide-react";
+import { AlertTriangle, ChevronLeft, Users, Utensils, ChevronDown, ShoppingCart } from "lucide-react";
 import { WelcomeCard } from "@/components/app/welcome-card";
 import { Button } from "@/components/ui/button";
 import { MonthSwitcher } from "@/components/report/month-switcher";
@@ -31,6 +31,7 @@ interface MemberMealInfo {
     id: string;
     name: string;
     totalMeals: number;
+    totalFoodExpense: number;
     dailyMeals: DailyMealInfo[];
 }
 
@@ -119,31 +120,48 @@ export default function MealConsumptionPage() {
         ) : null),
         [firestore, groupId, monthDateRange]
     );
+    
+    const expensesQuery = useMemo(() =>
+        (groupId ? query(
+            collection(firestore, `groups/${groupId}/expenses`),
+            where("date", ">=", monthDateRange.start),
+            where("date", "<=", monthDateRange.end),
+            where("category", "==", "Food & Groceries")
+        ) : null),
+        [firestore, groupId, monthDateRange]
+    );
 
     const { data: membersData, isLoading: areMembersLoading, error: membersError } = useCollection<Member>(membersQuery);
     const { data: mealsData, isLoading: areMealsLoading, error: mealsError } = useCollection<MealLog>(mealsQuery);
+    const { data: expensesData, isLoading: areExpensesLoading, error: expensesError } = useCollection<Expense>(expensesQuery);
 
-    // 🚀 OPTIMIZED: Group meals by userId first for O(n) performance instead of O(n*m)
+
     const processedData: MemberMealInfo[] = useMemo(() => {
-        if (!membersData || !mealsData) {
+        if (!membersData || !mealsData || !expensesData) {
             return [];
         }
 
-        // 1️⃣ Group meals by userId first - O(n) operation
         const mealsByUser = new Map<string, MealLog[]>();
-        for (let i = 0; i < mealsData.length; i++) {
-            const meal = mealsData[i];
+        mealsData.forEach(meal => {
             const userMeals = mealsByUser.get(meal.userId) || [];
             userMeals.push(meal);
             mealsByUser.set(meal.userId, userMeals);
-        }
+        });
+        
+        const expensesByUser = new Map<string, Expense[]>();
+        expensesData.forEach(expense => {
+            const userExpenses = expensesByUser.get(expense.userId) || [];
+            userExpenses.push(expense);
+            expensesByUser.set(expense.userId, userExpenses);
+        });
 
-        // 2️⃣ Process each member using pre-grouped meals - O(m) operation
         return membersData.map((member) => {
             const memberMeals = mealsByUser.get(member.id) || [];
             const totalMeals = memberMeals.reduce((sum, meal) => sum + (meal.mealNumber || 1), 0);
             
-            // ✅ FIXED: Safe date handling for both Date and Timestamp types
+            const memberExpenses = expensesByUser.get(member.id) || [];
+            const totalFoodExpense = memberExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+
             const mealCountsByDay = memberMeals.reduce((acc, meal) => {
                 const dateObj = meal.date instanceof Date 
                     ? meal.date 
@@ -164,11 +182,12 @@ export default function MealConsumptionPage() {
                 id: member.id,
                 name: member.displayName || member.email?.split('@')[0] || 'Unknown Member',
                 totalMeals,
+                totalFoodExpense,
                 dailyMeals,
             };
         });
 
-    }, [mealsData, membersData]);
+    }, [mealsData, membersData, expensesData]);
 
     const handleMonthChange = (direction: "next" | "prev") => {
         const newDate = direction === "next" ? addMonths(currentDate, 1) : subMonths(currentDate, 1);
@@ -176,7 +195,6 @@ export default function MealConsumptionPage() {
         router.push(newUrl, { scroll: false });
     };
 
-    // ✅ FIXED: Better back button with fallback
     const handleBack = () => {
         if (window.history.length > 1) {
             router.back();
@@ -194,8 +212,8 @@ export default function MealConsumptionPage() {
         return <WelcomeCard />;
     }
 
-    const isDataLoading = areMembersLoading || areMealsLoading;
-    const hasError = currentUserDataError || membersError || mealsError;
+    const isDataLoading = areMembersLoading || areMealsLoading || areExpensesLoading;
+    const hasError = currentUserDataError || membersError || mealsError || expensesError;
     
     if (isDataLoading) return <PageSkeleton />;
     if (hasError) return <DataError />;
@@ -211,7 +229,7 @@ export default function MealConsumptionPage() {
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight font-headline">Meal Consumption Report</h1>
                         <p className="text-muted-foreground">
-                            A summary of meals logged by each member in {format(currentDate, "MMMM yyyy")}.
+                            A summary of meals and food expenses by each member in {format(currentDate, "MMMM yyyy")}.
                         </p>
                     </div>
                 </div>
@@ -221,23 +239,29 @@ export default function MealConsumptionPage() {
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                        <Utensils className="h-5 w-5" /> 
-                        Member Meal Counts
+                        <Users className="h-5 w-5" /> 
+                        Member Summary
                     </CardTitle>
                     <CardDescription>
-                        Total number of meals logged by each member for the month. Click the arrow to see daily breakdown.
+                        Total meals and food expenses logged by each member for the month. Click to see daily meal breakdown.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-4">
                         {processedData.length > 0 ? processedData.map(member => (
-                            // ✅ FIXED: Added group class for chevron rotation
                             <Collapsible key={member.id} className="border rounded-lg bg-card group">
-                                <div className="flex items-center justify-between p-4">
-                                    <div className="flex-1">
-                                        <div className="flex justify-between items-center">
-                                            <span className="font-medium text-lg">{member.name}</span>
-                                            <span className="font-semibold text-lg">{member.totalMeals} meals</span>
+                                <div className="flex items-center p-4">
+                                    <div className="flex-1 space-y-1">
+                                        <p className="font-medium text-lg">{member.name}</p>
+                                        <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-muted-foreground">
+                                            <div className="flex items-center gap-1.5">
+                                                <Utensils className="h-4 w-4 text-primary" />
+                                                <span className="font-semibold">{member.totalMeals} meals</span>
+                                            </div>
+                                            <div className="flex items-center gap-1.5">
+                                                <ShoppingCart className="h-4 w-4 text-primary" />
+                                                <span className="font-semibold">৳{member.totalFoodExpense.toFixed(2)} spent</span>
+                                            </div>
                                         </div>
                                     </div>
                                     <CollapsibleTrigger asChild>
@@ -270,7 +294,6 @@ export default function MealConsumptionPage() {
                                                         </div>
                                                     ))}
                                                 </div>
-                                                {/* ✅ FIXED: Prevent division by zero */}
                                                 {member.dailyMeals.length > 0 && (
                                                     <div className="pt-2 border-t">
                                                         <p className="text-sm text-muted-foreground text-center">
@@ -294,10 +317,10 @@ export default function MealConsumptionPage() {
                             <div className="text-center py-12">
                                 <Users className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
                                 <h3 className="text-lg font-medium text-muted-foreground mb-2">
-                                    No Meals Logged
+                                    No Data Available
                                 </h3>
                                 <p className="text-muted-foreground">
-                                    No meals have been logged by any member for {format(currentDate, "MMMM yyyy")}.
+                                    No meals or expenses have been logged by any member for {format(currentDate, "MMMM yyyy")}.
                                 </p>
                             </div>
                         )}
@@ -307,3 +330,5 @@ export default function MealConsumptionPage() {
         </div>
     );
 }
+
+    
