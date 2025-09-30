@@ -8,7 +8,7 @@ import { User, Home, Utensils, ShoppingCart, Pencil, Camera, LogIn, Loader2, Plu
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useFirebase, useUser, useDoc } from "@/firebase";
+import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
 import { doc, collection, query, where, writeBatch, getDocs, serverTimestamp, updateDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -20,6 +20,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { updateProfile } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import imageCompression from "browser-image-compression";
+import { startOfMonth, endOfMonth } from "date-fns";
+import type { MealLog, Expense } from "@/lib/types";
+
 
 function JoinGroupCard() {
   const { firestore } = useFirebase();
@@ -148,6 +151,40 @@ export default function ProfilePage() {
   const groupRef = useMemo(() => (groupId) ? doc(firestore, "groups", groupId) : null, [firestore, groupId]);
   const { data: groupData, isLoading: isGroupDataLoading } = useDoc(groupRef);
 
+  const dateRange = useMemo(() => ({
+    start: startOfMonth(new Date()),
+    end: endOfMonth(new Date()),
+  }), []);
+
+  const mealsQuery = useMemo(() => {
+    if (!groupId || !currentUser) return null;
+    return query(
+      collection(firestore, `groups/${groupId}/meals`),
+      where("userId", "==", currentUser.uid),
+      where("date", ">=", dateRange.start),
+      where("date", "<=", dateRange.end)
+    );
+  }, [firestore, groupId, currentUser, dateRange]);
+
+  const expensesQuery = useMemo(() => {
+    if (!groupId || !currentUser) return null;
+    return query(
+      collection(firestore, `groups/${groupId}/expenses`),
+      where("userId", "==", currentUser.uid),
+      where("date", ">=", dateRange.start),
+      where("date", "<=", dateRange.end)
+    );
+  }, [firestore, groupId, currentUser, dateRange]);
+
+  const { data: userMeals, isLoading: areMealsLoading } = useCollection<MealLog>(mealsQuery);
+  const { data: userExpenses, isLoading: areExpensesLoading } = useCollection<Expense>(expensesQuery);
+
+  const contributionStats = useMemo(() => {
+    const totalMeals = userMeals?.reduce((sum, meal) => sum + (meal.mealNumber || 1), 0) ?? 0;
+    const totalExpenses = userExpenses?.reduce((sum, expense) => sum + expense.amount, 0) ?? 0;
+    return { totalMeals, totalExpenses };
+  }, [userMeals, userExpenses]);
+
 
   const handleNameUpdate = async () => {
       if (!currentUser || !name) {
@@ -242,15 +279,13 @@ export default function ProfilePage() {
   };
 
 
-  const isLoading = isUserLoading || isCurrentUserDataLoading || (inGroup && isGroupDataLoading);
+  const isLoading = isUserLoading || isCurrentUserDataLoading || (inGroup && (isGroupDataLoading || areMealsLoading || areExpensesLoading));
   
   if (isLoading) {
     return <ProfileSkeleton />;
   }
   
   if(!currentUser) {
-    // This case should ideally be handled by a higher-level auth guard
-    // but as a fallback, we can show a login prompt.
     return (
         <div className="text-center">
             <p>Please log in to view your profile.</p>
@@ -371,6 +406,25 @@ export default function ProfilePage() {
                       </div>
                   </CardContent>
                 </Card>
+
+                {inGroup && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-lg"><Utensils className="h-5 w-5" /> Your Contributions</CardTitle>
+                      <CardDescription>Your activity for the current month.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                       <div className="flex justify-between items-center p-3 bg-muted/50 rounded-md">
+                        <span className="text-muted-foreground">Total Meals Logged</span>
+                        <span className="font-bold text-lg">{contributionStats.totalMeals}</span>
+                      </div>
+                       <div className="flex justify-between items-center p-3 bg-muted/50 rounded-md">
+                        <span className="text-muted-foreground">Total Expenses Paid</span>
+                        <span className="font-bold text-lg">৳{contributionStats.totalExpenses.toFixed(2)}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
                 <Card>
                    {inGroup ? (
