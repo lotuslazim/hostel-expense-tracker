@@ -485,7 +485,7 @@ export default function AdminPage() {
               <Utensils className="h-4 w-4" /> Manage Meal Types
             </h3>
             <div className="space-y-2">
-              {groupData.settings?.mealTypes?.map((meal: string) => (
+              {groupData?.settings?.mealTypes?.map((meal: string) => (
                 <div key={meal} className="flex items-center justify-between p-2 bg-muted/50 rounded-md">
                   <span>{meal}</span>
                   <Button 
@@ -499,7 +499,7 @@ export default function AdminPage() {
                   </Button>
                 </div>
               ))}
-              {(!groupData.settings?.mealTypes || groupData.settings.mealTypes.length === 0) && (
+              {(!groupData?.settings?.mealTypes || groupData.settings.mealTypes.length === 0) && (
                 <p className="text-sm text-muted-foreground text-center py-2">
                   No meal types defined. Add one below.
                 </p>
@@ -542,7 +542,7 @@ export default function AdminPage() {
               </div>
               <Switch
                 id="require-item-name"
-                checked={groupData.settings?.isMealItemNameRequired ?? false}
+                checked={groupData?.settings?.isMealItemNameRequired ?? false}
                 onCheckedChange={handleToggleIsMealItemNameRequired}
                 disabled={isUpdatingSettings}
               />
@@ -558,7 +558,7 @@ export default function AdminPage() {
               </div>
               <Switch
                 id="require-expense-desc"
-                checked={groupData.settings?.isExpenseDescriptionRequired ?? false}
+                checked={groupData?.settings?.isExpenseDescriptionRequired ?? false}
                 onCheckedChange={handleToggleIsExpenseDescriptionRequired}
                 disabled={isUpdatingSettings}
               />
