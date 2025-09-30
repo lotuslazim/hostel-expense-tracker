@@ -2,7 +2,7 @@
 "use client";
 
 import { MonthlySummary } from "@/components/report/monthly-summary";
-import { useState, useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { useSearchParams, useRouter } from 'next/navigation';
 import { startOfMonth, format, addMonths, subMonths, parseISO } from "date-fns";
 import { MonthSwitcher } from "@/components/report/month-switcher";

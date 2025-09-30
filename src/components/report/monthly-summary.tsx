@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { Flame, Zap, Utensils, Scale, Users, FileText, AlertTriangle } from "lucide-react";
+import { Flame, Zap, Utensils, Scale, Users, FileText, AlertTriangle, ArrowRight } from "lucide-react";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
 import { doc, collection, query, where } from "firebase/firestore";
 import { useMemo } from "react";
@@ -22,21 +22,12 @@ interface MonthlySummaryProps {
 function SummarySkeleton() {
   return (
     <div className="space-y-6">
-        <Card>
-            <CardHeader>
-                <CardTitle><Skeleton className="h-7 w-48"/></CardTitle>
-            </CardHeader>
-            <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                    <Skeleton className="h-24 w-full rounded-lg" />
-                    <Skeleton className="h-24 w-full rounded-lg" />
-                </div>
-                 <div className="text-center p-4 mt-4 bg-accent/20 rounded-lg">
-                    <Skeleton className="h-5 w-1/3 mx-auto rounded-lg" />
-                    <Skeleton className="h-8 w-1/4 mx-auto mt-2 rounded-lg" />
-                </div>
-            </CardContent>
-        </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Skeleton className="h-36 w-full rounded-lg" />
+            <Skeleton className="h-36 w-full rounded-lg" />
+            <Skeleton className="h-36 w-full rounded-lg" />
+        </div>
+
         <Card>
             <CardHeader>
                 <CardTitle><Skeleton className="h-7 w-40"/></CardTitle>
@@ -121,26 +112,31 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
         
         const totalMeals = memberMeals.reduce((sum, meal) => sum + (meal.mealNumber || 1), 0);
         const foodExpenses = memberExpenses.filter(e => e.category === 'Food & Groceries').reduce((sum, e) => sum + e.amount, 0);
+        const electricityExpenses = memberExpenses.filter(e => e.category === 'Electricity').reduce((sum, e) => sum + e.amount, 0);
+        const gasExpenses = memberExpenses.filter(e => e.category === 'Gas').reduce((sum, e) => sum + e.amount, 0);
         const otherExpenses = memberExpenses.filter(e => e.category === 'Other').reduce((sum, e) => sum + e.amount, 0);
           
         return {
           id: member.id,
           name: member.displayName || member.email.split('@')[0],
           meals: totalMeals,
-          expenses: { food: foodExpenses, other: otherExpenses }
+          expenses: { food: foodExpenses, electricity: electricityExpenses, gas: gasExpenses, other: otherExpenses }
         };
     });
 
     const totalGroupFoodExpenses = processedMembers.reduce((acc, member) => acc + member.expenses.food, 0);
+    const totalGroupElectricityExpenses = processedMembers.reduce((acc, member) => acc + member.expenses.electricity, 0);
+    const totalGroupGasExpenses = processedMembers.reduce((acc, member) => acc + member.expenses.gas, 0);
     const totalGroupMeals = processedMembers.reduce((acc, member) => acc + member.meals, 0);
     const memberCount = processedMembers.length;
     
-    // Prevent division by zero
     const mealRate = totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
 
     return {
         processedMembers,
         totalGroupFoodExpenses,
+        totalGroupElectricityExpenses,
+        totalGroupGasExpenses,
         totalGroupMeals,
         memberCount,
         mealRate,
@@ -162,6 +158,8 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
   const {
       processedMembers,
       totalGroupFoodExpenses,
+      totalGroupElectricityExpenses,
+      totalGroupGasExpenses,
       totalGroupMeals,
       memberCount,
       mealRate,
@@ -171,51 +169,62 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Overall Summary</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-            <Link
-              href={`/report/items?month=${monthQueryParam}`}
-              className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
-            >
-              <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1 whitespace-nowrap">
-                <FileText className="h-4 w-4"/> Food Expenses
-              </p>
-              <p className="text-2xl font-bold">
-                ৳{totalGroupFoodExpenses.toFixed(0)}
-              </p>
-            </Link>
-            <Link
-              href={`/report/meals?month=${monthQueryParam}`}
-              className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
-            >
-              <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1 whitespace-nowrap">
-                <Utensils className="h-4 w-4"/> Total Meals
-              </p>
-              <p className="text-2xl font-bold">{totalGroupMeals}</p>
-            </Link>
-          </div>
-          <div className="text-center p-4 bg-accent/20 rounded-lg mt-4">
-            <p className="text-sm font-medium text-accent-foreground/80">
-              Calculated Meal Rate
-            </p>
-            <p className="text-2xl font-bold text-accent-foreground">
-              ৳{mealRate.toFixed(2)} / meal
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <Card className="flex flex-col">
+              <CardHeader>
+                  <CardTitle className="flex items-center gap-2"><Utensils/> Food & Meals</CardTitle>
+              </CardHeader>
+              <CardContent className="flex-grow space-y-2">
+                  <p className="text-3xl font-bold">৳{totalGroupFoodExpenses.toFixed(0)}</p>
+                  <p className="text-sm text-muted-foreground">Total food expenses</p>
+                   <p className="text-3xl font-bold">{totalGroupMeals}</p>
+                  <p className="text-sm text-muted-foreground">Total meals consumed</p>
+              </CardContent>
+              <CardContent>
+                 <div className="text-center p-3 bg-accent/20 rounded-lg">
+                    <p className="text-sm font-medium text-accent-foreground/80">Calculated Meal Rate</p>
+                    <p className="text-xl font-bold text-accent-foreground">৳{mealRate.toFixed(2)} / meal</p>
+                </div>
+              </CardContent>
+          </Card>
+           <Card className="flex flex-col">
+              <CardHeader>
+                  <CardTitle className="flex items-center gap-2"><Zap/> Utility Expenses</CardTitle>
+              </CardHeader>
+              <CardContent className="flex-grow space-y-2">
+                  <p className="text-3xl font-bold">৳{totalGroupElectricityExpenses.toFixed(0)}</p>
+                  <p className="text-sm text-muted-foreground">Total electricity bill</p>
+                  <p className="text-3xl font-bold">৳{totalGroupGasExpenses.toFixed(0)}</p>
+                  <p className="text-sm text-muted-foreground">Total gas bill</p>
+              </CardContent>
+              <CardContent>
+                  <Link href={`/report/utilities?month=${monthQueryParam}`} className="block text-sm font-medium text-primary hover:underline">
+                      View Utility Breakdown <ArrowRight className="inline h-4 w-4"/>
+                  </Link>
+              </CardContent>
+          </Card>
+           <Card className="flex flex-col">
+              <CardHeader>
+                  <CardTitle className="flex items-center gap-2"><FileText/> Detailed Reports</CardTitle>
+              </CardHeader>
+              <CardContent className="flex-grow flex flex-col justify-center gap-4">
+                  <Link href={`/report/items?month=${monthQueryParam}`} className="block text-sm font-medium text-primary hover:underline">
+                      View Food Item Analysis <ArrowRight className="inline h-4 w-4"/>
+                  </Link>
+                  <Link href={`/report/meals?month=${monthQueryParam}`} className="block text-sm font-medium text-primary hover:underline">
+                      View Meal Consumption Report <ArrowRight className="inline h-4 w-4"/>
+                  </Link>
+              </CardContent>
+          </Card>
+      </div>
 
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Scale /> Final Settlement
+            <Scale /> Final Food Settlement
           </CardTitle>
           <CardDescription>
-            A summary of who owes what for food costs for the month.
+            A summary of who owes what for food costs for the month. Utility bills are handled separately.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -224,7 +233,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
               <TableRow>
                 <TableHead>Member</TableHead>
                 <TableHead className="text-right">Food Paid</TableHead>
-                <TableHead className="text-right">Food Eaten</TableHead>
+                <TableHead className="text-right">Food Eaten (at meal rate)</TableHead>
                 <TableHead className="text-right">Final Balance</TableHead>
               </TableRow>
             </TableHeader>
