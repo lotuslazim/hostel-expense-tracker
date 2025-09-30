@@ -11,10 +11,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle, ChevronLeft, Users, Utensils } from "lucide-react";
+import { AlertTriangle, ChevronLeft, Users, Utensils, ChevronDown } from "lucide-react";
 import { WelcomeCard } from "@/components/app/welcome-card";
 import { Button } from "@/components/ui/button";
 import { MonthSwitcher } from "@/components/report/month-switcher";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import Link from "next/link";
 
 // Define a specific type for member data used in this page
@@ -22,6 +23,18 @@ interface Member {
   id: string;
   displayName?: string;
   email: string;
+}
+
+interface DailyMealInfo {
+    day: Date;
+    count: number;
+}
+
+interface MemberMealInfo {
+    id: string;
+    name: string;
+    totalMeals: number;
+    dailyMeals: DailyMealInfo[];
 }
 
 function PageSkeleton() {
@@ -110,24 +123,35 @@ export default function MealConsumptionPage() {
     const { data: membersData, isLoading: areMembersLoading, error: membersError } = useCollection<Member>(membersQuery);
     const { data: mealsData, isLoading: areMealsLoading, error: mealsError } = useCollection<MealLog>(mealsQuery);
 
-    const processedData = useMemo(() => {
+    const processedData: MemberMealInfo[] = useMemo(() => {
         if (!membersData || !mealsData) {
-            return { memberMeals: [] };
+            return [];
         }
 
-        const memberMeals = membersData.map(member => {
-            const totalMeals = mealsData
-                .filter(meal => meal.userId === member.id)
-                .reduce((sum, meal) => sum + (meal.mealNumber || 1), 0);
+        return membersData.map(member => {
+            const memberMeals = mealsData.filter(meal => meal.userId === member.id);
+            const totalMeals = memberMeals.reduce((sum, meal) => sum + (meal.mealNumber || 1), 0);
             
+            const mealCountsByDay = memberMeals.reduce((acc, meal) => {
+                const day = format((meal.date as Timestamp).toDate(), 'yyyy-MM-dd');
+                if (!acc[day]) {
+                    acc[day] = 0;
+                }
+                acc[day] += meal.mealNumber || 1;
+                return acc;
+            }, {} as Record<string, number>);
+
+            const dailyMeals = Object.entries(mealCountsByDay)
+                .map(([day, count]) => ({ day: parseISO(day), count }))
+                .sort((a, b) => a.day.getTime() - b.day.getTime());
+
             return {
                 id: member.id,
                 name: member.displayName || member.email.split('@')[0],
                 totalMeals,
+                dailyMeals,
             };
         });
-
-        return { memberMeals };
 
     }, [mealsData, membersData]);
 
@@ -152,7 +176,6 @@ export default function MealConsumptionPage() {
     if (isDataLoading) return <PageSkeleton />;
     if (hasError) return <DataError />;
     
-    const { memberMeals } = processedData;
     const monthQueryParam = format(currentDate, 'yyyy-MM');
 
     return (
@@ -182,21 +205,60 @@ export default function MealConsumptionPage() {
                             <TableRow>
                                 <TableHead>Member</TableHead>
                                 <TableHead className="text-right">Total Meals</TableHead>
+                                <TableHead className="w-12 p-0"></TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {memberMeals.length > 0 ? memberMeals.map(member => (
-                                <TableRow key={member.id}>
-                                    <TableCell className="font-medium">
-                                        <Link href={`/report/meals/${member.id}?month=${monthQueryParam}`} className="hover:underline">
-                                            {member.name}
-                                        </Link>
-                                    </TableCell>
-                                    <TableCell className="text-right font-semibold">{member.totalMeals}</TableCell>
-                                </TableRow>
+                            {processedData.length > 0 ? processedData.map(member => (
+                                <Collapsible asChild key={member.id}>
+                                    <>
+                                        <TableRow>
+                                            <TableCell className="font-medium">
+                                                {member.name}
+                                            </TableCell>
+                                            <TableCell className="text-right font-semibold">{member.totalMeals}</TableCell>
+                                            <TableCell>
+                                                <CollapsibleTrigger asChild>
+                                                    <Button variant="ghost" size="icon">
+                                                        <ChevronDown className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                                                        <span className="sr-only">Expand</span>
+                                                    </Button>
+                                                </CollapsibleTrigger>
+                                            </TableCell>
+                                        </TableRow>
+                                        <CollapsibleContent asChild>
+                                            <tr>
+                                                <td colSpan={3} className="p-0">
+                                                   <div className="p-4 bg-muted/50">
+                                                    {member.dailyMeals.length > 0 ? (
+                                                      <Table>
+                                                          <TableHeader>
+                                                              <TableRow>
+                                                                  <TableHead>Date</TableHead>
+                                                                  <TableHead className="text-right">Total Meals</TableHead>
+                                                              </TableRow>
+                                                          </TableHeader>
+                                                          <TableBody>
+                                                              {member.dailyMeals.map(({day, count}) => (
+                                                                  <TableRow key={day.toString()}>
+                                                                      <TableCell>{format(day, 'MMMM d, yyyy')}</TableCell>
+                                                                      <TableCell className="text-right">{count}</TableCell>
+                                                                  </TableRow>
+                                                              ))}
+                                                          </TableBody>
+                                                      </Table>
+                                                    ) : (
+                                                        <p className="text-center text-sm text-muted-foreground py-4">No meals logged by {member.name} this month.</p>
+                                                    )}
+                                                   </div>
+                                                </td>
+                                            </tr>
+                                        </CollapsibleContent>
+                                    </>
+                                </Collapsible>
                             )) : (
                                 <TableRow>
-                                    <TableCell colSpan={2} className="h-24 text-center">
+                                    <TableCell colSpan={3} className="h-24 text-center">
                                          <div className="flex flex-col items-center gap-2">
                                             <Users className="h-8 w-8 text-muted-foreground" />
                                             <p className="text-muted-foreground">No meals logged by any member this month.</p>
