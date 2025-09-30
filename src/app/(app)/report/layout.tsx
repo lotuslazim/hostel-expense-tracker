@@ -29,10 +29,11 @@ export default function ReportLayout({
   return (
     <div className="space-y-6">
         <Tabs value={pathname} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
                 <ReportNavLink href="/report">Overall</ReportNavLink>
                 <ReportNavLink href="/report/items">Food Items</ReportNavLink>
                 <ReportNavLink href="/report/meals">Meals</ReportNavLink>
+                <ReportNavLink href="/report/utilities">Utilities</ReportNavLink>
             </TabsList>
         </Tabs>
         {children}
