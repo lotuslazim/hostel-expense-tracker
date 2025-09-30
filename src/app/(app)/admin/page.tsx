@@ -69,7 +69,7 @@ function NewUserAdminPanel() {
         adminId: currentUser.uid,
         createdAt: serverTimestamp(),
         settings: {
-          mealTypes: ["Lunch", "Dinner"],
+          mealTypes: ["Breakfast", "Lunch", "Dinner", "Snack"],
           isMealItemNameRequired: false,
           isExpenseDescriptionRequired: false,
         }
@@ -107,7 +107,7 @@ function NewUserAdminPanel() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight font-headline">Admin Panel</h1>
         <p className="text-muted-foreground">
-          You&apos;re not part of a group yet. Create one or go to your profile to join one.
+          You're not part of a group yet. Create one or go to your profile to join one.
         </p>
       </div>
       <Card className="max-w-lg">
