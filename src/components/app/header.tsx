@@ -4,23 +4,17 @@ import { Logo } from "@/components/icons/logo";
 import { UserNav } from "@/components/app/user-nav";
 import { NavLink } from "./nav-link";
 import { Button } from "../ui/button";
-import { MessageSquare } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Menu, MessageSquare } from "lucide-react";
 
 export function AppHeader() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
-        <div className="mr-8 flex">
+        <div className="mr-auto flex">
            <Logo />
         </div>
-        <nav className="flex items-center gap-6 text-sm font-medium">
-            <NavLink href="/dashboard">Dashboard</NavLink>
-            <NavLink href="/report">Monthly Report</NavLink>
-            <NavLink href="/chat">Chat</NavLink>
-            <NavLink href="/profile">Profile</NavLink>
-            <NavLink href="/admin">Admin</NavLink>
-            <NavLink href="/settings">Settings</NavLink>
-        </nav>
+        
         <div className="flex flex-1 items-center justify-end space-x-2">
           <Button variant="ghost" size="icon" asChild>
               <Link href="/chat">
@@ -28,6 +22,23 @@ export function AppHeader() {
                 <span className="sr-only">Open Chat</span>
               </Link>
           </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Menu />
+                <span className="sr-only">Open navigation menu</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild><Link href="/dashboard">Dashboard</Link></DropdownMenuItem>
+              <DropdownMenuItem asChild><Link href="/report">Monthly Report</Link></DropdownMenuItem>
+              <DropdownMenuItem asChild><Link href="/profile">Profile</Link></DropdownMenuItem>
+              <DropdownMenuItem asChild><Link href="/admin">Admin</Link></DropdownMenuItem>
+              <DropdownMenuItem asChild><Link href="/settings">Settings</Link></DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           <UserNav />
         </div>
       </div>
