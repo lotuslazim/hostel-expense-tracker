@@ -193,7 +193,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
             <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Utensils/> Food & Meals</CardTitle>
             </CardHeader>
-            <CardContent className="flex-grow space-y-4">
+            <CardContent className="flex-grow grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Total food expenses</p>
                   <p className="text-2xl font-bold">৳{totalGroupFoodExpenses.toFixed(0)}</p>
@@ -204,9 +204,9 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                 </div>
             </CardContent>
             <CardContent>
-                <div className="text-center p-3 bg-accent/20 rounded-lg">
-                  <p className="text-sm font-medium text-accent-foreground/80">Calculated Meal Rate</p>
-                  <p className="text-xl font-bold text-accent-foreground">৳{mealRate.toFixed(2)} / meal</p>
+                <div className="text-center p-3 bg-primary/10 rounded-lg">
+                  <p className="text-sm font-medium text-primary/80">Calculated Meal Rate</p>
+                  <p className="text-xl font-bold text-primary">৳{mealRate.toFixed(2)} / meal</p>
               </div>
             </CardContent>
         </Card>
@@ -216,7 +216,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
           <CardTitle className="flex items-center gap-2"><Zap/> Utility Payments</CardTitle>
            <CardDescription>Click a member to see their detailed payments.</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex-grow">
           {processedMembers.length > 0 ? (
             processedMembers.map((member) => (
               <Collapsible key={member.id} className="group border-b last:border-b-0 py-2">
@@ -224,7 +224,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                   <span className="font-medium">{member.name}</span>
                   <div className="flex items-center gap-4">
                     <span className="text-muted-foreground font-semibold">৳{member.utilityExpensesPaid.toFixed(2)}</span>
-                    <div className="w-9 p-0 flex items-center justify-center">
+                     <div className="w-9 h-9 p-0 flex items-center justify-center">
                         <ChevronDown className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
                     </div>
                   </div>
@@ -287,7 +287,8 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                   const finalBalance = member.totalPaid - perMemberShare;
 
                   return (
-                    <Collapsible key={member.id} className="group">
+                    <Collapsible key={member.id} asChild>
+                      <>
                       {/* Main member row */}
                       <TableRow>
                         <TableCell className="font-medium flex items-center gap-2">
@@ -361,6 +362,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                           </CollapsibleContent>
                         </TableCell>
                       </TableRow>
+                      </>
                     </Collapsible>
                   );
                 })
