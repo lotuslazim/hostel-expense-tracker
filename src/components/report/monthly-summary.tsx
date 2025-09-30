@@ -29,7 +29,7 @@ function SummarySkeleton() {
           <Skeleton className="h-64 w-full rounded-lg" />
           <Skeleton className="h-64 w-full rounded-lg" />
       </div>
-       <Skeleton className="h-64 w-full rounded-lg" />
+       <Skeleton className="h-96 w-full rounded-lg" />
     </div>
   );
 }
@@ -111,7 +111,12 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
         
         const totalMeals = memberMeals.reduce((sum, meal) => sum + (meal.mealNumber || 1), 0);
         const foodExpenses = memberExpenses.filter(e => e.category === 'Food & Groceries').reduce((sum, e) => sum + e.amount, 0);
-        const utilityExpensesPaid = memberExpenses.filter(e => e.category === 'Electricity' || e.category === 'Gas').reduce((sum, e) => sum + e.amount, 0);
+        
+        const memberUtilityExpenses = memberExpenses
+          .filter(e => e.category === 'Electricity' || e.category === 'Gas')
+          .sort((a, b) => (b.date as Timestamp).toDate().getTime() - (a.date as Timestamp).toDate().getTime());
+          
+        const utilityExpensesPaid = memberUtilityExpenses.reduce((sum, e) => sum + e.amount, 0);
         const otherExpenses = memberExpenses.filter(e => e.category === 'Other').reduce((sum, e) => sum + e.amount, 0);
         const totalPaid = memberExpenses.reduce((sum, e) => sum + e.amount, 0);
 
@@ -121,6 +126,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
           meals: totalMeals,
           foodExpenses: foodExpenses,
           utilityExpensesPaid: utilityExpensesPaid,
+          memberUtilityExpenses,
           otherExpenses: otherExpenses,
           totalPaid,
         };
@@ -200,32 +206,51 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
        <Card className="lg:col-span-1 flex flex-col">
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><Zap/> Utility Payments</CardTitle>
-           <CardDescription>A summary of who paid the utility bills this month.</CardDescription>
+           <CardDescription>A summary of who paid the utility bills this month. Click to expand.</CardDescription>
         </CardHeader>
         <CardContent>
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>Member</TableHead>
-                        <TableHead className="text-right">Amount Paid</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {processedMembers.length > 0 ? (
-                        processedMembers.map(member => (
-                            <TableRow key={member.id}>
-                                <TableCell className="font-medium">{member.name}</TableCell>
-                                <TableCell className="text-right font-semibold">৳{member.utilityExpensesPaid.toFixed(2)}</TableCell>
-                            </TableRow>
-                        ))
-                    ) : (
+           {processedMembers.length > 0 ? (
+            processedMembers.map((member) => (
+              <Collapsible key={member.id} className="border-b last:border-b-0 py-2">
+                <CollapsibleTrigger className="flex justify-between items-center w-full group">
+                  <span className="font-medium">{member.name}</span>
+                  <div className="flex items-center gap-4">
+                    <span className="text-muted-foreground font-semibold">৳{member.utilityExpensesPaid.toFixed(2)}</span>
+                    <Button variant="ghost" size="sm" className="w-9 p-0">
+                      <ChevronDown className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                    </Button>
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  {member.memberUtilityExpenses.length > 0 ? (
+                    <Table className="mt-2 bg-muted/50 rounded">
+                      <TableHeader>
                         <TableRow>
-                            <TableCell colSpan={2} className="text-center h-24">No utility payments logged.</TableCell>
+                          <TableHead className="w-[100px]">Date</TableHead>
+                          <TableHead>Category</TableHead>
+                          <TableHead className="text-right">Amount</TableHead>
                         </TableRow>
-                    )}
-                </TableBody>
-            </Table>
-          </CardContent>
+                      </TableHeader>
+                      <TableBody>
+                        {member.memberUtilityExpenses.map(expense => (
+                          <TableRow key={expense.id}>
+                            <TableCell>{format((expense.date as Timestamp).toDate(), 'MMM d')}</TableCell>
+                            <TableCell><Badge variant="outline">{expense.category}</Badge></TableCell>
+                            <TableCell className="text-right">৳{expense.amount.toFixed(2)}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">No utility expenses paid by this member.</p>
+                  )}
+                </CollapsibleContent>
+              </Collapsible>
+            ))
+          ) : (
+            <p className="text-center text-muted-foreground py-4">No utility data available.</p>
+          )}
+        </CardContent>
       </Card>
       </div>
 
@@ -235,7 +260,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
             <Scale /> Final Settlement
           </CardTitle>
           <CardDescription>
-            A summary of who owes what, including all food and utility costs for the month.
+            A summary of who owes what, including all food, utility, and other costs for the month.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -292,5 +317,6 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     </div>
   );
 }
+
 
 
