@@ -3,7 +3,7 @@
 
 import { useMemo, useState } from "react";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
-import { doc, collection, query, where, orderBy } from "firebase/firestore";
+import { doc, collection, query, where, orderBy, startOfDay, endOfDay } from "firebase/firestore";
 import { startOfMonth, endOfMonth } from "date-fns";
 import { WelcomeCard } from "@/components/app/welcome-card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -40,20 +40,21 @@ export default function DashboardPage() {
   
   const groupId = currentUserData?.groupId;
 
-  const dateRange = useMemo(() => ({
-    start: startOfMonth(new Date()),
-    end: endOfMonth(new Date()),
-  }), []);
+  // We still fetch for the whole month for potential future use or other components
+  const monthDateRange = useMemo(() => ({
+    start: startOfMonth(selectedDate),
+    end: endOfMonth(selectedDate),
+  }), [selectedDate]);
 
   const expensesQuery = useMemo(() => {
     if (!groupId) return null;
     return query(
       collection(firestore, `groups/${groupId}/expenses`),
-      where("date", ">=", dateRange.start),
-      where("date", "<=", dateRange.end),
+      where("date", ">=", monthDateRange.start),
+      where("date", "<=", monthDateRange.end),
       orderBy("date", "desc")
     );
-  }, [firestore, groupId, dateRange]);
+  }, [firestore, groupId, monthDateRange]);
 
   const { data: expenses, isLoading: areExpensesLoading } = useCollection<Expense>(expensesQuery);
 
@@ -86,7 +87,7 @@ export default function DashboardPage() {
                 {areExpensesLoading ? (
                     <Skeleton className="h-[85vh] w-full" />
                 ) : (
-                    <ActivityFeed expenses={expenses || []} />
+                    <ActivityFeed expenses={expenses || []} selectedDate={selectedDate} />
                 )}
             </div>
         </div>

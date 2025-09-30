@@ -2,7 +2,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { format } from "date-fns";
+import { format, isSameDay } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ShoppingCart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -12,14 +12,17 @@ import type { Expense } from "@/lib/types";
 
 interface ActivityFeedProps {
   expenses: Expense[];
+  selectedDate: Date;
 }
 
-export function ActivityFeed({ expenses }: ActivityFeedProps) {
+export function ActivityFeed({ expenses, selectedDate }: ActivityFeedProps) {
 
-  const sortedExpenses = useMemo(() => {
+  const dailyExpenses = useMemo(() => {
     if (!expenses) return [];
-    return [...expenses].sort((a, b) => (b.date as any).toDate() - (a.date as any).toDate());
-  }, [expenses]);
+    return expenses
+      .filter(expense => isSameDay((expense.date as any).toDate(), selectedDate))
+      .sort((a, b) => (b.date as any).toDate() - (a.date as any).toDate());
+  }, [expenses, selectedDate]);
 
 
   return (
@@ -27,18 +30,19 @@ export function ActivityFeed({ expenses }: ActivityFeedProps) {
       <CardHeader>
         <div className="flex items-center justify-between">
             <div>
-                <CardTitle>Monthly Expense Feed</CardTitle>
-                <CardDescription>Recent group expenses.</CardDescription>
+                <CardTitle>Daily Expense Feed</CardTitle>
+                <CardDescription>
+                  Showing expenses for {format(selectedDate, "PPP")}.
+                </CardDescription>
             </div>
         </div>
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-[calc(85vh-100px)]">
-            {sortedExpenses.length > 0 ? (
+            {dailyExpenses.length > 0 ? (
                  <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Date</TableHead>
                             <TableHead>Member</TableHead>
                             <TableHead>Description</TableHead>
                             <TableHead>Category</TableHead>
@@ -46,9 +50,8 @@ export function ActivityFeed({ expenses }: ActivityFeedProps) {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {sortedExpenses.map((item) => (
+                        {dailyExpenses.map((item) => (
                             <TableRow key={`expense-${item.id}`}>
-                                <TableCell className="whitespace-nowrap">{format((item.date as any).toDate(), "MMM d, yy")}</TableCell>
                                 <TableCell>{item.userName}</TableCell>
                                 <TableCell>{item.description || "N/A"}</TableCell>
                                 <TableCell><Badge variant="secondary">{item.category}</Badge></TableCell>
@@ -60,7 +63,7 @@ export function ActivityFeed({ expenses }: ActivityFeedProps) {
             ) : (
                 <div className="text-center py-16 text-muted-foreground flex flex-col items-center justify-center h-[calc(85vh-100px)]">
                     <ShoppingCart className="h-10 w-10 mb-2" />
-                    <p>No expenses logged this month.</p>
+                    <p>No expenses logged for this day.</p>
                 </div>
             )}
         </ScrollArea>
