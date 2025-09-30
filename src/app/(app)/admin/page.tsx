@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -23,6 +24,7 @@ interface GroupSettings {
   mealTypes: string[];
   isMealItemNameRequired: boolean;
   isExpenseDescriptionRequired: boolean;
+  isUtilityReceiptRequired: boolean;
 }
 
 interface Member {
@@ -72,6 +74,7 @@ function NewUserAdminPanel() {
           mealTypes: ["Breakfast", "Lunch", "Dinner", "Snack"],
           isMealItemNameRequired: false,
           isExpenseDescriptionRequired: false,
+          isUtilityReceiptRequired: false,
         }
       });
 
@@ -243,6 +246,10 @@ export default function AdminPage() {
 
   const handleToggleIsExpenseDescriptionRequired = async (checked: boolean) => {
     await handleUpdateSettings({ isExpenseDescriptionRequired: checked });
+  };
+  
+  const handleToggleIsUtilityReceiptRequired = async (checked: boolean) => {
+    await handleUpdateSettings({ isUtilityReceiptRequired: checked });
   };
 
   const handleRemoveMember = async (memberId: string) => {
@@ -563,9 +570,27 @@ export default function AdminPage() {
                 disabled={isUpdatingSettings}
               />
             </div>
+             <div className="flex items-center justify-between p-3 border rounded-md">
+              <div>
+                <Label htmlFor="require-utility-receipt" className="font-medium">
+                  Make Receipt Upload Mandatory for Utilities
+                </Label>
+                <p className="text-sm text-muted-foreground">
+                  If enabled, members must upload a receipt for Gas & Electricity expenses.
+                </p>
+              </div>
+              <Switch
+                id="require-utility-receipt"
+                checked={groupData?.settings?.isUtilityReceiptRequired ?? false}
+                onCheckedChange={handleToggleIsUtilityReceiptRequired}
+                disabled={isUpdatingSettings}
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
     </div>
   );
 }
+
+    

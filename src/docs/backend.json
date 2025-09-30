@@ -18,7 +18,8 @@
           "properties": {
             "mealTypes": { "type": "array", "items": { "type": "string" }, "description": "List of available meal types for logging." },
             "isMealItemNameRequired": { "type": "boolean", "description": "Whether the item name for a meal is mandatory." },
-            "isExpenseDescriptionRequired": { "type": "boolean", "description": "Whether the description for an expense is mandatory." }
+            "isExpenseDescriptionRequired": { "type": "boolean", "description": "Whether the description for an expense is mandatory." },
+            "isUtilityReceiptRequired": { "type": "boolean", "description": "Whether a receipt upload is mandatory for utility expenses." }
           }
         }
       },
@@ -217,3 +218,5 @@
     "reasoning": "This structure enforces security by scoping all group-related data within a group's subcollections. The rule `exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))` is used consistently to verify that the requesting user is a member of the group they are trying to access. This is a secure and scalable pattern that prevents unauthorized data access. Write access is also based on group membership, with more restrictive admin-only writes on the core group document. Firestore's default-deny policy ensures any path not explicitly granted access is automatically blocked."
   }
 }
+
+    
