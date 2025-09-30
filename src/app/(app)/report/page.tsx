@@ -43,6 +43,7 @@ export default function ReportPage() {
   
   useEffect(() => {
     const newDate = getInitialDate();
+    // Check if date is actually different to avoid infinite loop
     if (newDate.getTime() !== currentDate.getTime()) {
       setCurrentDate(newDate);
     }

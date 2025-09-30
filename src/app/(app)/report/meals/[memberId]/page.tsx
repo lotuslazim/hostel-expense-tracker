@@ -64,7 +64,7 @@ export default function MemberMealDetailsPage() {
     const memberId = params.memberId as string;
     const monthParam = searchParams.get('month');
 
-    const currentDate = useMemo(() => {
+    const getInitialDate = () => {
         if (monthParam) {
             try {
                 // Appends '-01' to handle 'yyyy-MM' format from URL
@@ -74,7 +74,18 @@ export default function MemberMealDetailsPage() {
             }
         }
         return startOfMonth(new Date());
+    };
+    
+    const [currentDate, setCurrentDate] = useState(getInitialDate);
+
+    useEffect(() => {
+        const newDate = getInitialDate();
+        if (newDate.getTime() !== currentDate.getTime()) {
+            setCurrentDate(newDate);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [monthParam]);
+
 
     const { firestore } = useFirebase();
     const { user: currentUser, isUserLoading: isCurrentUserLoading } = useUser();
