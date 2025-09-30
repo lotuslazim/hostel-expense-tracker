@@ -68,30 +68,23 @@ export default function FoodItemAnalysisPage() {
     const router = useRouter();
     const monthParam = searchParams.get('month');
 
-    const getInitialDate = () => {
-        if (monthParam) {
-            try {
-                // Appends '-01' to handle 'yyyy-MM' format from URL
-                return startOfMonth(parseISO(`${monthParam}-01`));
-            } catch (e) {
-                return startOfMonth(new Date());
-            }
+    const currentDate = useMemo(() => {
+      if (monthParam) {
+        try {
+          const parsedDate = parseISO(`${monthParam}-01`);
+          if (!isNaN(parsedDate.getTime())) {
+            return startOfMonth(parsedDate);
+          }
+        } catch (e) {
+          console.warn("Invalid date in URL, defaulting to current month.", e);
         }
-        return startOfMonth(new Date());
-    };
+      }
+      return startOfMonth(new Date());
+    }, [monthParam]);
 
-    const [currentDate, setCurrentDate] = useState(getInitialDate);
     const { firestore } = useFirebase();
     const { user: currentUser, isUserLoading: isCurrentUserLoading } = useUser();
     
-    useEffect(() => {
-        const newDate = getInitialDate();
-        if (newDate.getTime() !== currentDate.getTime()) {
-            setCurrentDate(newDate);
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [monthParam]);
-
     const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
     const { data: currentUserData, isLoading: isCurrentUserDataLoading, error: currentUserDataError } = useDoc(currentUserRef);
     const groupId = currentUserData?.groupId;
@@ -153,7 +146,6 @@ export default function FoodItemAnalysisPage() {
 
     const handleMonthChange = (direction: "next" | "prev") => {
         const newDate = direction === "next" ? addMonths(currentDate, 1) : subMonths(currentDate, 1);
-        setCurrentDate(newDate);
         const newUrl = `/report/items?month=${format(newDate, 'yyyy-MM')}`;
         router.push(newUrl, { scroll: false });
     };

@@ -3,7 +3,7 @@
 
 import { useSearchParams, useRouter, useParams } from "next/navigation";
 import { useMemo, useState, useEffect } from "react";
-import { parseISO, startOfMonth, endOfMonth, format } from "date-fns";
+import { parseISO, startOfMonth, endOfMonth, format, addMonths, subMonths } from "date-fns";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
 import { doc, collection, query, where, type Timestamp } from "firebase/firestore";
 import type { MealLog } from "@/lib/types";
@@ -64,28 +64,19 @@ export default function MemberMealDetailsPage() {
     const memberId = params.memberId as string;
     const monthParam = searchParams.get('month');
 
-    const getInitialDate = () => {
-        if (monthParam) {
-            try {
-                // Appends '-01' to handle 'yyyy-MM' format from URL
-                return startOfMonth(parseISO(`${monthParam}-01`));
-            } catch (e) {
-                return startOfMonth(new Date());
-            }
+    const currentDate = useMemo(() => {
+      if (monthParam) {
+        try {
+          const parsedDate = parseISO(`${monthParam}-01`);
+          if (!isNaN(parsedDate.getTime())) {
+            return startOfMonth(parsedDate);
+          }
+        } catch (e) {
+          console.warn("Invalid date in URL, defaulting to current month.", e);
         }
-        return startOfMonth(new Date());
-    };
-    
-    const [currentDate, setCurrentDate] = useState(getInitialDate);
-
-    useEffect(() => {
-        const newDate = getInitialDate();
-        if (newDate.getTime() !== currentDate.getTime()) {
-            setCurrentDate(newDate);
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+      }
+      return startOfMonth(new Date());
     }, [monthParam]);
-
 
     const { firestore } = useFirebase();
     const { user: currentUser, isUserLoading: isCurrentUserLoading } = useUser();

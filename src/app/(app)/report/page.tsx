@@ -16,20 +16,20 @@ export default function ReportPage() {
   const router = useRouter();
   const monthParam = searchParams.get('month');
   
-  const getInitialDate = () => {
+  const currentDate = useMemo(() => {
     if (monthParam) {
       try {
-        // Appends '-01' to handle 'yyyy-MM' format from URL
-        return startOfMonth(parseISO(`${monthParam}-01`));
+        const parsedDate = parseISO(`${monthParam}-01`);
+        if (!isNaN(parsedDate.getTime())) {
+          return startOfMonth(parsedDate);
+        }
       } catch (e) {
         console.warn("Invalid date in URL, defaulting to current month.", e);
-        return startOfMonth(new Date());
       }
     }
     return startOfMonth(new Date());
-  };
+  }, [monthParam]);
 
-  const [currentDate, setCurrentDate] = useState(getInitialDate);
   const { firestore } = useFirebase();
   const { user: currentUser, isUserLoading: isCurrentUserLoading } = useUser();
 
@@ -41,19 +41,8 @@ export default function ReportPage() {
     useDoc(currentUserRef);
   const groupId = currentUserData?.groupId;
   
-  useEffect(() => {
-    const newDate = getInitialDate();
-    // Check if date is actually different to avoid infinite loop
-    if (newDate.getTime() !== currentDate.getTime()) {
-      setCurrentDate(newDate);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [monthParam]);
-
-
   const handleMonthChange = (direction: "next" | "prev") => {
     const newDate = direction === "next" ? addMonths(currentDate, 1) : subMonths(currentDate, 1);
-    setCurrentDate(newDate);
     const newUrl = `/report?month=${format(newDate, 'yyyy-MM')}`;
     router.push(newUrl, { scroll: false });
   };
