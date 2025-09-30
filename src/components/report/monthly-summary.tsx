@@ -22,8 +22,7 @@ interface MonthlySummaryProps {
 function SummarySkeleton() {
   return (
     <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <Skeleton className="h-36 w-full rounded-lg" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
             <Skeleton className="h-36 w-full rounded-lg" />
             <Skeleton className="h-36 w-full rounded-lg" />
         </div>
@@ -112,21 +111,17 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
         
         const totalMeals = memberMeals.reduce((sum, meal) => sum + (meal.mealNumber || 1), 0);
         const foodExpenses = memberExpenses.filter(e => e.category === 'Food & Groceries').reduce((sum, e) => sum + e.amount, 0);
-        const electricityExpenses = memberExpenses.filter(e => e.category === 'Electricity').reduce((sum, e) => sum + e.amount, 0);
-        const gasExpenses = memberExpenses.filter(e => e.category === 'Gas').reduce((sum, e) => sum + e.amount, 0);
         const otherExpenses = memberExpenses.filter(e => e.category === 'Other').reduce((sum, e) => sum + e.amount, 0);
           
         return {
           id: member.id,
           name: member.displayName || member.email.split('@')[0],
           meals: totalMeals,
-          expenses: { food: foodExpenses, electricity: electricityExpenses, gas: gasExpenses, other: otherExpenses }
+          expenses: { food: foodExpenses, other: otherExpenses }
         };
     });
 
     const totalGroupFoodExpenses = processedMembers.reduce((acc, member) => acc + member.expenses.food, 0);
-    const totalGroupElectricityExpenses = processedMembers.reduce((acc, member) => acc + member.expenses.electricity, 0);
-    const totalGroupGasExpenses = processedMembers.reduce((acc, member) => acc + member.expenses.gas, 0);
     const totalGroupMeals = processedMembers.reduce((acc, member) => acc + member.meals, 0);
     const memberCount = processedMembers.length;
     
@@ -135,8 +130,6 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     return {
         processedMembers,
         totalGroupFoodExpenses,
-        totalGroupElectricityExpenses,
-        totalGroupGasExpenses,
         totalGroupMeals,
         memberCount,
         mealRate,
@@ -158,8 +151,6 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
   const {
       processedMembers,
       totalGroupFoodExpenses,
-      totalGroupElectricityExpenses,
-      totalGroupGasExpenses,
       totalGroupMeals,
       memberCount,
       mealRate,
@@ -169,7 +160,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card className="flex flex-col">
               <CardHeader>
                   <CardTitle className="flex items-center gap-2"><Utensils/> Food & Meals</CardTitle>
@@ -185,22 +176,6 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                     <p className="text-sm font-medium text-accent-foreground/80">Calculated Meal Rate</p>
                     <p className="text-xl font-bold text-accent-foreground">৳{mealRate.toFixed(2)} / meal</p>
                 </div>
-              </CardContent>
-          </Card>
-           <Card className="flex flex-col">
-              <CardHeader>
-                  <CardTitle className="flex items-center gap-2"><Zap/> Utility Expenses</CardTitle>
-              </CardHeader>
-              <CardContent className="flex-grow space-y-2">
-                  <p className="text-3xl font-bold">৳{totalGroupElectricityExpenses.toFixed(0)}</p>
-                  <p className="text-sm text-muted-foreground">Total electricity bill</p>
-                  <p className="text-3xl font-bold">৳{totalGroupGasExpenses.toFixed(0)}</p>
-                  <p className="text-sm text-muted-foreground">Total gas bill</p>
-              </CardContent>
-              <CardContent>
-                  <Link href={`/report/utilities?month=${monthQueryParam}`} className="block text-sm font-medium text-primary hover:underline">
-                      View Utility Breakdown <ArrowRight className="inline h-4 w-4"/>
-                  </Link>
               </CardContent>
           </Card>
            <Card className="flex flex-col">
@@ -224,7 +199,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
             <Scale /> Final Food Settlement
           </CardTitle>
           <CardDescription>
-            A summary of who owes what for food costs for the month. Utility bills are handled separately.
+            A summary of who owes what for food costs for the month. Other expenses are not included here.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -286,5 +261,3 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     </div>
   );
 }
-
-    

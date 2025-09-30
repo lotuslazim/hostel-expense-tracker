@@ -15,7 +15,7 @@ export interface MealLog {
   itemName?: string | null;
 }
 
-export type ExpenseCategory = 'Food & Groceries' | 'Electricity' | 'Gas' | 'Other';
+export type ExpenseCategory = 'Food & Groceries' | 'Other';
 
 export interface Expense {
   id: string;
@@ -51,5 +51,3 @@ export interface ChatMessage {
   userName: string;
   groupId: string;
 }
-
-    
