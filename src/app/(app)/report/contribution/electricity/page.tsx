@@ -78,7 +78,8 @@ export default function ElectricityContributionPage() {
     const getInitialDate = () => {
         if (monthParam) {
             try {
-                return startOfMonth(parseISO(monthParam));
+                // Appends '-01' to handle 'yyyy-MM' format from URL
+                return startOfMonth(parseISO(`${monthParam}-01`));
             } catch (e) {
                 return startOfMonth(new Date());
             }
