@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { Flame, Zap, Utensils, Scale, Users, FileText, AlertTriangle, ArrowRight } from "lucide-react";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
-import { doc, collection, query, where } from "firebase/firestore";
+import { doc, collection, query, where, type Timestamp } from "firebase/firestore";
 import { useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format, startOfMonth, endOfMonth } from 'date-fns';
@@ -100,34 +100,36 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
         
         const totalMeals = memberMeals.reduce((sum, meal) => sum + (meal.mealNumber || 1), 0);
         const foodExpenses = memberExpenses.filter(e => e.category === 'Food & Groceries').reduce((sum, e) => sum + e.amount, 0);
-        const electricityExpenses = memberExpenses.filter(e => e.category === 'Electricity').reduce((sum, e) => sum + e.amount, 0);
-        const gasExpenses = memberExpenses.filter(e => e.category === 'Gas').reduce((sum, e) => sum + e.amount, 0);
-
+        
         return {
           id: member.id,
           name: member.displayName || member.email.split('@')[0],
           meals: totalMeals,
-          expenses: { food: foodExpenses, electricity: electricityExpenses, gas: gasExpenses }
+          foodExpenses: foodExpenses,
         };
     });
 
-    const totalGroupFoodExpenses = processedMembers.reduce((acc, member) => acc + member.expenses.food, 0);
-    const totalGroupElectricityExpenses = processedMembers.reduce((acc, member) => acc + member.expenses.electricity, 0);
-    const totalGroupGasExpenses = processedMembers.reduce((acc, member) => acc + member.expenses.gas, 0);
-
+    const totalGroupFoodExpenses = processedMembers.reduce((acc, member) => acc + member.foodExpenses, 0);
     const totalGroupMeals = processedMembers.reduce((acc, member) => acc + member.meals, 0);
     const memberCount = processedMembers.length;
-    
     const mealRate = totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
+    
+    const utilityExpenses = expensesData
+        .filter(e => e.category === 'Electricity' || e.category === 'Gas')
+        .sort((a, b) => (b.date as Timestamp).toDate().getTime() - (a.date as Timestamp).toDate().getTime());
+
+    const totalGroupElectricityExpenses = utilityExpenses.filter(e => e.category === 'Electricity').reduce((acc, e) => acc + e.amount, 0);
+    const totalGroupGasExpenses = utilityExpenses.filter(e => e.category === 'Gas').reduce((acc, e) => acc + e.amount, 0);
 
     return {
         processedMembers,
         totalGroupFoodExpenses,
-        totalGroupElectricityExpenses,
-        totalGroupGasExpenses,
         totalGroupMeals,
         memberCount,
         mealRate,
+        utilityExpenses,
+        totalGroupElectricityExpenses,
+        totalGroupGasExpenses,
     }
   }, [membersData, mealsData, expensesData]);
 
@@ -146,11 +148,12 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
   const {
       processedMembers,
       totalGroupFoodExpenses,
-      totalGroupElectricityExpenses,
-      totalGroupGasExpenses,
       totalGroupMeals,
       memberCount,
       mealRate,
+      utilityExpenses,
+      totalGroupElectricityExpenses,
+      totalGroupGasExpenses,
   } = processedData;
 
   const monthQueryParam = format(month, 'yyyy-MM');
@@ -185,34 +188,38 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
           <CardTitle className="flex items-center gap-2"><Zap/> Utility Contributions</CardTitle>
         </CardHeader>
         <CardContent className="flex-grow space-y-4">
-          <div>
+          <div className="flex justify-between">
             <p className="text-sm text-muted-foreground">Total Electricity Bill</p>
-            <p className="text-2xl font-bold">৳{totalGroupElectricityExpenses.toFixed(0)}</p>
+            <p className="text-lg font-bold">৳{totalGroupElectricityExpenses.toFixed(0)}</p>
           </div>
-          <div>
+          <div className="flex justify-between">
             <p className="text-sm text-muted-foreground">Total Gas Bill</p>
-            <p className="text-2xl font-bold">৳{totalGroupGasExpenses.toFixed(0)}</p>
+            <p className="text-lg font-bold">৳{totalGroupGasExpenses.toFixed(0)}</p>
           </div>
         </CardContent>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Date</TableHead>
                 <TableHead>Member</TableHead>
+                <TableHead>Category</TableHead>
                 <TableHead className="text-right">Paid</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {memberCount > 0 ? (
-                processedMembers.map((member) => (
-                  <TableRow key={member.id}>
-                    <TableCell>{member.name}</TableCell>
-                    <TableCell className="text-right">৳{(member.expenses.electricity + member.expenses.gas).toFixed(2)}</TableCell>
+              {utilityExpenses.length > 0 ? (
+                utilityExpenses.map((expense) => (
+                  <TableRow key={expense.id}>
+                    <TableCell>{format((expense.date as Timestamp).toDate(), "MMM d")}</TableCell>
+                    <TableCell>{expense.userName}</TableCell>
+                    <TableCell>{expense.category}</TableCell>
+                    <TableCell className="text-right">৳{expense.amount.toFixed(2)}</TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={2} className="text-center h-24 text-muted-foreground">No utility data.</TableCell>
+                  <TableCell colSpan={4} className="text-center h-24 text-muted-foreground">No utility data.</TableCell>
                 </TableRow>
               )}
             </TableBody>
@@ -226,7 +233,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
             <Scale /> Final Food Settlement
           </CardTitle>
           <CardDescription>
-            Summary of who owes what for food. Utilities are separate.
+            A summary of who owes what for food costs for the month. Other expenses are not included here.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex-grow">
@@ -234,23 +241,27 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
             <TableHeader>
               <TableRow>
                 <TableHead>Member</TableHead>
-                <TableHead className="text-right">Paid</TableHead>
-                <TableHead className="text-right">Balance</TableHead>
+                <TableHead>Food Paid</TableHead>
+                <TableHead>Food Eaten</TableHead>
+                <TableHead className="text-right">Final Balance</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {memberCount > 0 ? (
                 processedMembers.map((member) => {
                   const mealShare = member.meals * mealRate;
-                  const finalBalance = member.expenses.food - mealShare;
+                  const finalBalance = member.foodExpenses - mealShare;
 
                   return (
                     <TableRow key={member.id}>
                       <TableCell className="font-medium">
                         {member.name}
                       </TableCell>
-                      <TableCell className="text-right">
-                        ৳{member.expenses.food.toFixed(2)}
+                       <TableCell>
+                        ৳{member.foodExpenses.toFixed(2)}
+                      </TableCell>
+                      <TableCell>
+                        ৳{mealShare.toFixed(2)}
                       </TableCell>
                       <TableCell
                         className={cn(
@@ -267,7 +278,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                 })
               ) : (
                 <TableRow>
-                  <TableCell colSpan={3} className="text-center h-24">
+                  <TableCell colSpan={4} className="text-center h-24">
                      <Users className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
                      <p className="text-muted-foreground">No members found.</p>
                   </TableCell>
