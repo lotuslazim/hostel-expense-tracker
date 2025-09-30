@@ -4,7 +4,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { User, Home, Utensils, ShoppingCart, Pencil, Camera, LogIn, Loader2, PlusCircle, LogOut, Upload } from "lucide-react";
+import { User, Home, Utensils, ShoppingCart, Pencil, Camera, LogIn, Loader2, PlusCircle, LogOut, Upload, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -77,22 +77,22 @@ function JoinGroupCard() {
   };
 
   return (
-    <Card className="max-w-lg">
-        <CardHeader>
-            <CardTitle className="flex items-center gap-2"><LogIn/> Join an Existing Group</CardTitle>
-            <CardDescription>Enter an invitation code to join a group.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="inviteCode">Invitation Code</Label>
-                <Input id="inviteCode" placeholder="e.g., ABC123" value={inviteCode} onChange={(e) => setInviteCode(e.target.value)} disabled={isJoining}/>
-            </div>
-            <Button className="w-full" onClick={handleJoinGroup} disabled={isJoining || !inviteCode}>
-                {isJoining && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
-                Join Group
-            </Button>
-        </CardContent>
-    </Card>
+    <>
+      <CardHeader>
+          <CardTitle className="flex items-center gap-2"><LogIn/> Join an Existing Group</CardTitle>
+          <CardDescription>Enter an invitation code to join a group.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="inviteCode">Invitation Code</Label>
+              <Input id="inviteCode" placeholder="e.g., ABC123" value={inviteCode} onChange={(e) => setInviteCode(e.target.value)} disabled={isJoining}/>
+          </div>
+          <Button className="w-full" onClick={handleJoinGroup} disabled={isJoining || !inviteCode}>
+              {isJoining && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+              Join Group
+          </Button>
+      </CardContent>
+    </>
   );
 }
 
@@ -330,30 +330,32 @@ export default function ProfilePage() {
               </Card>
 
               {inGroup && (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-base"><Home className="h-4 w-4" /> Group Info</CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-3">
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground text-sm">Group</span>
-                          <span className="font-medium text-sm">{groupData?.groupName}</span>
-                        </div>
-                        {isAdmin && (
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground text-sm">Code</span>
-                            <span className="font-mono text-sm bg-muted px-2 py-1 rounded">{groupData?.invitationCode}</span>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="destructive" className="w-full justify-start">
+                          <LogOut className="mr-2 h-4 w-4" /> Leave Group
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you sure you want to leave?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            You will lose access to all group data. This action can only be undone by being re-invited.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={handleLeaveGroup} className="bg-destructive hover:bg-destructive/90">Leave Group</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                 )}
             </div>
 
             <div className="md:col-span-2 space-y-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Account Details</CardTitle>
+                    <CardTitle className="flex items-center gap-2 text-lg"><User className="h-5 w-5"/> Account Details</CardTitle>
                     <CardDescription>Manage your personal settings.</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -368,40 +370,64 @@ export default function ProfilePage() {
                         </div>
                       </div>
                   </CardContent>
-                  <CardHeader>
-                    <CardTitle>Group Settings</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {inGroup ? (
-                         <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="destructive" className="w-full justify-start">
-                              <LogOut className="mr-2 h-4 w-4" /> Leave Group
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Are you sure you want to leave?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                You will lose access to all group data. This action can only be undone by being re-invited.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={handleLeaveGroup} className="bg-destructive hover:bg-destructive/90">Leave Group</AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
+                </Card>
+
+                <Card>
+                   {inGroup ? (
+                        <>
+                         <CardHeader>
+                            <CardTitle className="flex items-center gap-2 text-lg"><Home className="h-5 w-5"/> Group Information</CardTitle>
+                             <CardDescription>Details about your current group.</CardDescription>
+                          </CardHeader>
+                          <CardContent className="space-y-3">
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Group Name</span>
+                              <span className="font-medium">{groupData?.groupName}</span>
+                            </div>
+                             {isAdmin && (
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Invite Code</span>
+                                <span className="font-mono text-sm bg-muted px-2 py-1 rounded">{groupData?.invitationCode}</span>
+                              </div>
+                            )}
+                          </CardContent>
+                        </>
                     ) : (
-                        <JoinGroupCard />
+                        <>
+                          <CardHeader>
+                             <CardTitle className="flex items-center gap-2 text-lg"><Users className="h-5 w-5"/> Join a Group</CardTitle>
+                             <CardDescription>You are not currently in a group. Join one or create a new one.</CardDescription>
+                          </CardHeader>
+                          <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="p-4 border rounded-lg">
+                              <h3 className="font-semibold mb-2">Join an Existing Group</h3>
+                              <p className="text-sm text-muted-foreground mb-4">Enter an invitation code to join your flatmates.</p>
+                               <Dialog>
+                                <DialogTrigger asChild>
+                                    <Button className="w-full">
+                                        <LogIn className="mr-2 h-4 w-4" /> Join Group
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <JoinGroupCard />
+                                </DialogContent>
+                            </Dialog>
+                            </div>
+                            <div className="p-4 border rounded-lg">
+                               <h3 className="font-semibold mb-2">Create a New Group</h3>
+                               <p className="text-sm text-muted-foreground mb-4">Start a new group and invite others to join you.</p>
+                               <Button variant="outline" className="w-full" asChild>
+                                  <Link href="/admin">
+                                    <PlusCircle className="mr-2 h-4 w-4" /> Create Group
+                                  </Link>
+                               </Button>
+                            </div>
+                          </CardContent>
+                        </>
                     )}
-                  </CardContent>
                 </Card>
             </div>
         </div>
     </div>
   );
 }
-
-    
-    
