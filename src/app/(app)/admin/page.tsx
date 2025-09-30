@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Trash2, User, Copy, Loader2, Shield, Utensils, X, SlidersHorizontal, ToggleRight, Check } from "lucide-react";
+import { PlusCircle, Trash2, User, Copy, Loader2, Shield, Utensils, X, SlidersHorizontal, ToggleRight, Check, ShieldAlert } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +18,7 @@ import { WelcomeCard } from "@/components/app/welcome-card";
 import { useRouter } from "next/navigation";
 import { Switch } from "@/components/ui/switch";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 // TypeScript Interfaces
 interface GroupSettings {
@@ -148,6 +149,26 @@ function NewUserAdminPanel() {
       </Card>
     </div>
   );
+}
+
+function AccessDenied() {
+    return (
+        <div>
+            <div className="mb-8">
+                <h1 className="text-3xl font-bold tracking-tight font-headline">Admin Panel</h1>
+                <p className="text-muted-foreground">
+                    You do not have permission to access this page.
+                </p>
+            </div>
+            <Alert variant="destructive">
+                <ShieldAlert className="h-4 w-4" />
+                <AlertTitle>Access Denied</AlertTitle>
+                <AlertDescription>
+                    This page is for group administrators only. If you believe this is a mistake, please contact your group admin.
+                </AlertDescription>
+            </Alert>
+        </div>
+    );
 }
 
 export default function AdminPage() {
@@ -299,6 +320,10 @@ export default function AdminPage() {
 
   if (!groupId || !currentUser) {
     return <NewUserAdminPanel />;
+  }
+
+  if (!currentUserData?.isAdmin) {
+      return <AccessDenied />;
   }
 
   const isDataLoading = isGroupLoading || areMembersLoading;
@@ -592,5 +617,3 @@ export default function AdminPage() {
     </div>
   );
 }
-
-    
