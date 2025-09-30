@@ -2,7 +2,7 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, Fragment } from "react";
 import { parseISO, startOfMonth, endOfMonth, format, addMonths, subMonths } from "date-fns";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
 import { doc, collection, query, where, type Timestamp } from "firebase/firestore";
@@ -211,7 +211,7 @@ export default function MealConsumptionPage() {
                         <TableBody>
                             {processedData.length > 0 ? processedData.map(member => (
                                 <Collapsible asChild key={member.id}>
-                                    <>
+                                    <Fragment>
                                         <TableRow>
                                             <TableCell className="font-medium">
                                                 {member.name}
@@ -254,7 +254,7 @@ export default function MealConsumptionPage() {
                                                 </td>
                                             </tr>
                                         </CollapsibleContent>
-                                    </>
+                                    </Fragment>
                                 </Collapsible>
                             )) : (
                                 <TableRow>
