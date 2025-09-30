@@ -276,7 +276,8 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
             <TableHeader>
               <TableRow>
                 <TableHead>Member</TableHead>
-                <TableHead>Total Paid</TableHead>
+                <TableHead>Food Paid</TableHead>
+                <TableHead>Utilities Paid</TableHead>
                 <TableHead>Share of Costs</TableHead>
                 <TableHead className="text-right">Final Balance</TableHead>
               </TableRow>
@@ -290,7 +291,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                     <Collapsible key={member.id} asChild>
                       <>
                       {/* Main member row */}
-                      <TableRow>
+                      <TableRow className="group" data-state={open ? 'open' : 'closed'}>
                         <TableCell className="font-medium flex items-center gap-2">
                           <CollapsibleTrigger asChild>
                             <Button
@@ -304,7 +305,8 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                           </CollapsibleTrigger>
                           {member.name}
                         </TableCell>
-                        <TableCell>৳{member.totalPaid.toFixed(2)}</TableCell>
+                        <TableCell>৳{member.foodExpenses.toFixed(2)}</TableCell>
+                        <TableCell>৳{member.utilityExpensesPaid.toFixed(2)}</TableCell>
                         <TableCell>৳{perMemberShare.toFixed(2)}</TableCell>
                         <TableCell
                           className={cn(
@@ -320,7 +322,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
 
                       {/* Collapsible content row */}
                       <TableRow className="data-[state=closed]:hidden">
-                        <TableCell colSpan={4} className="p-0 bg-muted/50">
+                        <TableCell colSpan={5} className="p-0 bg-muted/50">
                           <CollapsibleContent asChild>
                             <div className="p-4">
                               {member.memberMeals.length > 0 ? (
@@ -368,7 +370,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                 })
               ) : (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center h-24">
+                  <TableCell colSpan={5} className="text-center h-24">
                     <Users className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
                     <p className="text-muted-foreground">No members found.</p>
                   </TableCell>
