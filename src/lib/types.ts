@@ -12,9 +12,10 @@ export interface MealLog {
   userId: string;
   groupId: string;
   userName?: string;
+  itemName?: string | null;
 }
 
-export type ExpenseCategory = 'Food & Groceries' | 'Other';
+export type ExpenseCategory = 'Food & Groceries' | 'Electricity' | 'Gas' | 'Other';
 
 export interface Expense {
   id: string;

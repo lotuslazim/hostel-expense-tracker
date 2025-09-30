@@ -62,7 +62,8 @@
         "date": { "type": "string", "format": "date-time" },
         "description": { "type": "string" },
         "mealNumber": { "type": "number" },
-        "createdAt": { "type": "string", "format": "date-time" }
+        "createdAt": { "type": "string", "format": "date-time" },
+        "itemName": { "type": ["string", "null"] }
       },
       "required": ["id", "groupId", "userId", "userName", "mealType", "date", "description", "mealNumber", "createdAt"]
     },
