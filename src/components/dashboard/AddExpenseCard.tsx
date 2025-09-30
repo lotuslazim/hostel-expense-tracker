@@ -56,7 +56,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
         description: isExpenseDescriptionRequired
             ? z.string().min(1, "Description is required.")
             : z.string().optional(),
-        category: z.enum(["Food & Groceries", "Electricity", "Gas", "Other"], {
+        category: z.enum(["Food & Groceries", "Other"], {
             required_error: "Please select a category.",
         }),
     });
@@ -151,8 +151,6 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                         </FormControl>
                         <SelectContent>
                         <SelectItem value="Food & Groceries">Food & Groceries</SelectItem>
-                        <SelectItem value="Electricity">Electricity</SelectItem>
-                        <SelectItem value="Gas">Gas</SelectItem>
                         <SelectItem value="Other">Other</SelectItem>
                         </SelectContent>
                     </Select>
