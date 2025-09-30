@@ -30,8 +30,6 @@ function SummarySkeleton() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                     <Skeleton className="h-24 w-full rounded-lg" />
                     <Skeleton className="h-24 w-full rounded-lg" />
-                    <Skeleton className="h-24 w-full rounded-lg" />
-                    <Skeleton className="h-24 w-full rounded-lg" />
                 </div>
                  <div className="text-center p-4 mt-4 bg-accent/20 rounded-lg">
                     <Skeleton className="h-5 w-1/3 mx-auto rounded-lg" />
@@ -123,20 +121,17 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
         
         const totalMeals = memberMeals.reduce((sum, meal) => sum + (meal.mealNumber || 1), 0);
         const foodExpenses = memberExpenses.filter(e => e.category === 'Food & Groceries').reduce((sum, e) => sum + e.amount, 0);
-        const electricityExpenses = memberExpenses.filter(e => e.category === 'Electricity').reduce((sum, e) => sum + e.amount, 0);
-        const gasExpenses = memberExpenses.filter(e => e.category === 'Gas').reduce((sum, e) => sum + e.amount, 0);
+        const otherExpenses = memberExpenses.filter(e => e.category === 'Other').reduce((sum, e) => sum + e.amount, 0);
           
         return {
           id: member.id,
           name: member.displayName || member.email.split('@')[0],
           meals: totalMeals,
-          expenses: { food: foodExpenses, electricity: electricityExpenses, gas: gasExpenses }
+          expenses: { food: foodExpenses, other: otherExpenses }
         };
     });
 
     const totalGroupFoodExpenses = processedMembers.reduce((acc, member) => acc + member.expenses.food, 0);
-    const totalGroupElectricity = processedMembers.reduce((acc, member) => acc + member.expenses.electricity, 0);
-    const totalGroupGas = processedMembers.reduce((acc, member) => acc + member.expenses.gas, 0);
     const totalGroupMeals = processedMembers.reduce((acc, member) => acc + member.meals, 0);
     const memberCount = processedMembers.length;
     
@@ -146,8 +141,6 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     return {
         processedMembers,
         totalGroupFoodExpenses,
-        totalGroupElectricity,
-        totalGroupGas,
         totalGroupMeals,
         memberCount,
         mealRate,
@@ -169,8 +162,6 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
   const {
       processedMembers,
       totalGroupFoodExpenses,
-      totalGroupElectricity,
-      totalGroupGas,
       totalGroupMeals,
       memberCount,
       mealRate,
@@ -185,7 +176,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
           <CardTitle>Overall Summary</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+          <div className="grid grid-cols-2 gap-4 text-center">
             <Link
               href={`/report/items?month=${monthQueryParam}`}
               className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
@@ -195,28 +186,6 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
               </p>
               <p className="text-2xl font-bold">
                 ৳{totalGroupFoodExpenses.toFixed(0)}
-              </p>
-            </Link>
-             <Link
-              href={`/report/contribution/electricity?month=${monthQueryParam}`}
-              className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
-            >
-              <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1 whitespace-nowrap">
-                <Zap className="h-4 w-4"/> Electricity
-              </p>
-              <p className="text-2xl font-bold">
-                ৳{totalGroupElectricity.toFixed(0)}
-              </p>
-            </Link>
-            <Link
-              href={`/report/contribution/gas?month=${monthQueryParam}`}
-              className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
-            >
-              <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-1 whitespace-nowrap">
-                <Flame className="h-4 w-4"/> Gas
-              </p>
-              <p className="text-2xl font-bold">
-                ৳{totalGroupGas.toFixed(0)}
               </p>
             </Link>
             <Link
@@ -246,7 +215,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
             <Scale /> Final Settlement
           </CardTitle>
           <CardDescription>
-            A summary of who owes what for the month.
+            A summary of who owes what for food costs for the month.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -254,24 +223,16 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
             <TableHeader>
               <TableRow>
                 <TableHead>Member</TableHead>
-                <TableHead className="text-right">Total Paid</TableHead>
+                <TableHead className="text-right">Food Paid</TableHead>
+                <TableHead className="text-right">Food Eaten</TableHead>
                 <TableHead className="text-right">Final Balance</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {memberCount > 0 ? (
                 processedMembers.map((member) => {
-                  const utilitySharePerMember =
-                    memberCount > 0
-                      ? (totalGroupElectricity + totalGroupGas) / memberCount
-                      : 0;
                   const mealShare = member.meals * mealRate;
-                  const mealBalance = member.expenses.food - mealShare;
-                  const utilityPaid =
-                    member.expenses.electricity + member.expenses.gas;
-                  const utilityBalance = utilityPaid - utilitySharePerMember;
-                  const finalBalance = mealBalance + utilityBalance;
-                  const totalPaid = member.expenses.food + utilityPaid;
+                  const finalBalance = member.expenses.food - mealShare;
 
                   return (
                     <TableRow key={member.id}>
@@ -279,7 +240,10 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                         {member.name}
                       </TableCell>
                       <TableCell className="text-right font-semibold">
-                        ৳{totalPaid.toFixed(2)}
+                        ৳{member.expenses.food.toFixed(2)}
+                      </TableCell>
+                       <TableCell className="text-right">
+                        ৳{mealShare.toFixed(2)}
                       </TableCell>
                       <TableCell
                         className={cn(
@@ -296,7 +260,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                 })
               ) : (
                 <TableRow>
-                  <TableCell colSpan={3} className="text-center h-24">
+                  <TableCell colSpan={4} className="text-center h-24">
                     <div className="flex flex-col items-center gap-2">
                       <Users className="h-8 w-8 text-muted-foreground" />
                       <p className="text-muted-foreground">
@@ -313,3 +277,5 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     </div>
   );
 }
+
+    

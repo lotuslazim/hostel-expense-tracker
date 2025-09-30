@@ -1,3 +1,4 @@
+
 import {z} from 'genkit';
 
 const MemberDataSchema = z.object({
@@ -6,8 +7,6 @@ const MemberDataSchema = z.object({
   meals: z.number(),
   expenses: z.object({
     food: z.number(),
-    electricity: z.number(),
-    gas: z.number(),
   }),
 });
 
@@ -24,8 +23,6 @@ export const DailyLogSchema = z.object({
   meals: z.number(),
   expenses: z.object({
     food: z.number(),
-    electricity: z.number(),
-    gas: z.number(),
   }),
 });
 export type DailyLog = z.infer<typeof DailyLogSchema>;
@@ -34,3 +31,5 @@ export const MemberDailyDataSchema = z.object({
     dailyData: z.array(DailyLogSchema),
 });
 export type MemberDailyData = z.infer<typeof MemberDailyDataSchema>;
+
+    
