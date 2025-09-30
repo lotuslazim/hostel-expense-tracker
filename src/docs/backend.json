@@ -80,7 +80,7 @@
         "description": { "type": "string", "description": "A description of the expense (e.g., 'Groceries' or 'September Electricity Bill')." }, 
         "amount": { "type": "number", "description": "The total amount of the expense." }, 
         "date": { "type": "string", "format": "date-time", "description": "The date the expense was incurred." },
-        "category": { "type": "string", "enum": ["Food & Groceries", "Electricity", "Gas", "Other"], "description": "The category of the expense." },
+        "category": { "type": "string", "enum": ["Food & Groceries", "Other"], "description": "The category of the expense." },
         "receiptPhotoUrl": { "type": "string", "format": "uri", "description": "An optional URL for a photo of the receipt." },
         "createdAt": { "type": "string", "format": "date-time", "description": "The timestamp when the expense was logged." }
       },
