@@ -1,14 +1,12 @@
-
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { useMemo, useState, useEffect, Fragment } from "react";
+import { useMemo } from "react";
 import { parseISO, startOfMonth, endOfMonth, format, addMonths, subMonths } from "date-fns";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
 import { doc, collection, query, where, type Timestamp } from "firebase/firestore";
 import type { MealLog } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle, ChevronLeft, Users, Utensils, ChevronDown } from "lucide-react";
@@ -16,7 +14,6 @@ import { WelcomeCard } from "@/components/app/welcome-card";
 import { Button } from "@/components/ui/button";
 import { MonthSwitcher } from "@/components/report/month-switcher";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import Link from "next/link";
 
 // Define a specific type for member data used in this page
 interface Member {
@@ -55,7 +52,11 @@ function PageSkeleton() {
                     <Skeleton className="h-6 w-1/4" />
                 </CardHeader>
                 <CardContent>
-                    <Skeleton className="h-48 w-full" />
+                    <div className="space-y-4">
+                        <Skeleton className="h-20 w-full" />
+                        <Skeleton className="h-20 w-full" />
+                        <Skeleton className="h-20 w-full" />
+                    </div>
                 </CardContent>
             </Card>
         </div>
@@ -73,7 +74,6 @@ function DataError() {
     </Alert>
   );
 }
-
 
 export default function MealConsumptionPage() {
     const searchParams = useSearchParams();
@@ -123,17 +123,32 @@ export default function MealConsumptionPage() {
     const { data: membersData, isLoading: areMembersLoading, error: membersError } = useCollection<Member>(membersQuery);
     const { data: mealsData, isLoading: areMealsLoading, error: mealsError } = useCollection<MealLog>(mealsQuery);
 
+    // 🚀 OPTIMIZED: Group meals by userId first for O(n) performance instead of O(n*m)
     const processedData: MemberMealInfo[] = useMemo(() => {
         if (!membersData || !mealsData) {
             return [];
         }
 
-        return membersData.map(member => {
-            const memberMeals = mealsData.filter(meal => meal.userId === member.id);
+        // 1️⃣ Group meals by userId first - O(n) operation
+        const mealsByUser = new Map<string, MealLog[]>();
+        for (let i = 0; i < mealsData.length; i++) {
+            const meal = mealsData[i];
+            const userMeals = mealsByUser.get(meal.userId) || [];
+            userMeals.push(meal);
+            mealsByUser.set(meal.userId, userMeals);
+        }
+
+        // 2️⃣ Process each member using pre-grouped meals - O(m) operation
+        return membersData.map((member) => {
+            const memberMeals = mealsByUser.get(member.id) || [];
             const totalMeals = memberMeals.reduce((sum, meal) => sum + (meal.mealNumber || 1), 0);
             
+            // ✅ FIXED: Safe date handling for both Date and Timestamp types
             const mealCountsByDay = memberMeals.reduce((acc, meal) => {
-                const day = format((meal.date as Timestamp).toDate(), 'yyyy-MM-dd');
+                const dateObj = meal.date instanceof Date 
+                    ? meal.date 
+                    : (meal.date as Timestamp).toDate();
+                const day = format(dateObj, 'yyyy-MM-dd');
                 if (!acc[day]) {
                     acc[day] = 0;
                 }
@@ -147,7 +162,7 @@ export default function MealConsumptionPage() {
 
             return {
                 id: member.id,
-                name: member.displayName || member.email.split('@')[0],
+                name: member.displayName || member.email?.split('@')[0] || 'Unknown Member',
                 totalMeals,
                 dailyMeals,
             };
@@ -159,6 +174,15 @@ export default function MealConsumptionPage() {
         const newDate = direction === "next" ? addMonths(currentDate, 1) : subMonths(currentDate, 1);
         const newUrl = `/report/meals?month=${format(newDate, 'yyyy-MM')}`;
         router.push(newUrl, { scroll: false });
+    };
+
+    // ✅ FIXED: Better back button with fallback
+    const handleBack = () => {
+        if (window.history.length > 1) {
+            router.back();
+        } else {
+            router.push('/dashboard');
+        }
     };
 
     const isLoading = isCurrentUserLoading || isCurrentUserDataLoading;
@@ -175,20 +199,20 @@ export default function MealConsumptionPage() {
     
     if (isDataLoading) return <PageSkeleton />;
     if (hasError) return <DataError />;
-    
-    const monthQueryParam = format(currentDate, 'yyyy-MM');
 
     return (
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                     <Button variant="outline" size="icon" onClick={() => router.back()}>
+                     <Button variant="outline" size="icon" onClick={handleBack}>
                         <ChevronLeft className="h-4 w-4" />
                         <span className="sr-only">Back</span>
                     </Button>
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight font-headline">Meal Consumption Report</h1>
-                        <p className="text-muted-foreground">A summary of meals logged by each member in {format(currentDate, "MMMM yyyy")}.</p>
+                        <p className="text-muted-foreground">
+                            A summary of meals logged by each member in {format(currentDate, "MMMM yyyy")}.
+                        </p>
                     </div>
                 </div>
                 <MonthSwitcher currentDate={currentDate} onMonthChange={handleMonthChange} />
@@ -196,81 +220,90 @@ export default function MealConsumptionPage() {
 
             <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><Utensils className="h-5 w-5" /> Member Meal Counts</CardTitle>
-                    <CardDescription>Total number of meals logged by each member for the month. Click a member for a detailed view.</CardDescription>
+                    <CardTitle className="flex items-center gap-2">
+                        <Utensils className="h-5 w-5" /> 
+                        Member Meal Counts
+                    </CardTitle>
+                    <CardDescription>
+                        Total number of meals logged by each member for the month. Click the arrow to see daily breakdown.
+                    </CardDescription>
                 </CardHeader>
                 <CardContent>
-                     <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Member</TableHead>
-                                <TableHead className="text-right">Total Meals</TableHead>
-                                <TableHead className="w-12 p-0"></TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {processedData.length > 0 ? processedData.map(member => (
-                                <Collapsible asChild key={member.id}>
-                                    <Fragment>
-                                        <TableRow>
-                                            <TableCell className="font-medium">
-                                                {member.name}
-                                            </TableCell>
-                                            <TableCell className="text-right font-semibold">{member.totalMeals}</TableCell>
-                                            <TableCell>
-                                                <CollapsibleTrigger asChild>
-                                                    <Button variant="ghost" size="icon">
-                                                        <ChevronDown className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                                                        <span className="sr-only">Expand</span>
-                                                    </Button>
-                                                </CollapsibleTrigger>
-                                            </TableCell>
-                                        </TableRow>
-                                        <CollapsibleContent asChild>
-                                            <tr>
-                                                <td colSpan={3} className="p-0">
-                                                   <div className="p-4 bg-muted/50">
-                                                    {member.dailyMeals.length > 0 ? (
-                                                      <Table>
-                                                          <TableHeader>
-                                                              <TableRow>
-                                                                  <TableHead>Date</TableHead>
-                                                                  <TableHead className="text-right">Total Meals</TableHead>
-                                                              </TableRow>
-                                                          </TableHeader>
-                                                          <TableBody>
-                                                              {member.dailyMeals.map(({day, count}) => (
-                                                                  <TableRow key={day.toString()}>
-                                                                      <TableCell>{format(day, 'MMMM d, yyyy')}</TableCell>
-                                                                      <TableCell className="text-right">{count}</TableCell>
-                                                                  </TableRow>
-                                                              ))}
-                                                          </TableBody>
-                                                      </Table>
-                                                    ) : (
-                                                        <p className="text-center text-sm text-muted-foreground py-4">No meals logged by {member.name} this month.</p>
-                                                    )}
-                                                   </div>
-                                                </td>
-                                            </tr>
-                                        </CollapsibleContent>
-                                    </Fragment>
-                                </Collapsible>
-                            )) : (
-                                <TableRow>
-                                    <TableCell colSpan={3} className="h-24 text-center">
-                                         <div className="flex flex-col items-center gap-2">
-                                            <Users className="h-8 w-8 text-muted-foreground" />
-                                            <p className="text-muted-foreground">No meals logged by any member this month.</p>
+                    <div className="space-y-4">
+                        {processedData.length > 0 ? processedData.map(member => (
+                            // ✅ FIXED: Added group class for chevron rotation
+                            <Collapsible key={member.id} className="border rounded-lg bg-card group">
+                                <div className="flex items-center justify-between p-4">
+                                    <div className="flex-1">
+                                        <div className="flex justify-between items-center">
+                                            <span className="font-medium text-lg">{member.name}</span>
+                                            <span className="font-semibold text-lg">{member.totalMeals} meals</span>
                                         </div>
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
+                                    </div>
+                                    <CollapsibleTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="ml-2">
+                                            <ChevronDown className="h-5 w-5 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                                            <span className="sr-only">Toggle daily meals</span>
+                                        </Button>
+                                    </CollapsibleTrigger>
+                                </div>
+                                
+                                <CollapsibleContent>
+                                    <div className="p-4 bg-muted/50 border-t">
+                                        {member.dailyMeals.length > 0 ? (
+                                            <div className="space-y-3">
+                                                <h4 className="font-medium text-sm text-muted-foreground">
+                                                    Daily Meal History for {format(currentDate, "MMMM yyyy")}:
+                                                </h4>
+                                                <div className="grid gap-2">
+                                                    {member.dailyMeals.map(({day, count}) => (
+                                                        <div 
+                                                            key={day.toString()} 
+                                                            className="flex justify-between items-center py-2 px-3 bg-background rounded-md border"
+                                                        >
+                                                            <span className="font-medium">
+                                                                {format(day, 'EEEE, MMMM d')}
+                                                            </span>
+                                                            <span className="font-semibold text-primary">
+                                                                {count} {count === 1 ? 'meal' : 'meals'}
+                                                            </span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                                {/* ✅ FIXED: Prevent division by zero */}
+                                                {member.dailyMeals.length > 0 && (
+                                                    <div className="pt-2 border-t">
+                                                        <p className="text-sm text-muted-foreground text-center">
+                                                            Average: {(member.totalMeals / member.dailyMeals.length).toFixed(1)} meals per day
+                                                        </p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <div className="text-center py-6">
+                                                <Utensils className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                                                <p className="text-muted-foreground">
+                                                    No meals logged by {member.name} in {format(currentDate, "MMMM yyyy")}.
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </CollapsibleContent>
+                            </Collapsible>
+                        )) : (
+                            <div className="text-center py-12">
+                                <Users className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                                <h3 className="text-lg font-medium text-muted-foreground mb-2">
+                                    No Meals Logged
+                                </h3>
+                                <p className="text-muted-foreground">
+                                    No meals have been logged by any member for {format(currentDate, "MMMM yyyy")}.
+                                </p>
+                            </div>
+                        )}
+                    </div>
                 </CardContent>
             </Card>
-
         </div>
-    )
+    );
 }
