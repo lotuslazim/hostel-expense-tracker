@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { Flame, Zap, Utensils, Scale, Users, FileText, AlertTriangle, ArrowRight } from "lucide-react";
+import { Flame, Zap, Utensils, Scale, Users, FileText, ArrowRight } from "lucide-react";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
 import { doc, collection, query, where, type Timestamp } from "firebase/firestore";
 import { useMemo } from "react";
@@ -94,18 +94,23 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
       return null;
     }
 
+    const utilityExpenses = expensesData
+        .filter(e => e.category === 'Electricity' || e.category === 'Gas');
+
     const processedMembers = membersData.map(member => {
         const memberMeals = mealsData.filter(m => m.userId === member.id);
         const memberExpenses = expensesData.filter(e => e.userId === member.id);
         
         const totalMeals = memberMeals.reduce((sum, meal) => sum + (meal.mealNumber || 1), 0);
         const foodExpenses = memberExpenses.filter(e => e.category === 'Food & Groceries').reduce((sum, e) => sum + e.amount, 0);
-        
+        const utilityExpensesPaid = memberExpenses.filter(e => e.category === 'Electricity' || e.category === 'Gas').reduce((sum, e) => sum + e.amount, 0);
+
         return {
           id: member.id,
           name: member.displayName || member.email.split('@')[0],
           meals: totalMeals,
           foodExpenses: foodExpenses,
+          utilityExpensesPaid: utilityExpensesPaid,
         };
     });
 
@@ -114,10 +119,6 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     const memberCount = processedMembers.length;
     const mealRate = totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
     
-    const utilityExpenses = expensesData
-        .filter(e => e.category === 'Electricity' || e.category === 'Gas')
-        .sort((a, b) => (b.date as Timestamp).toDate().getTime() - (a.date as Timestamp).toDate().getTime());
-
     const totalGroupElectricityExpenses = utilityExpenses.filter(e => e.category === 'Electricity').reduce((acc, e) => acc + e.amount, 0);
     const totalGroupGasExpenses = utilityExpenses.filter(e => e.category === 'Gas').reduce((acc, e) => acc + e.amount, 0);
 
@@ -127,7 +128,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
         totalGroupMeals,
         memberCount,
         mealRate,
-        utilityExpenses,
+        utilityExpenses: utilityExpenses.sort((a, b) => (b.date as Timestamp).toDate().getTime() - (a.date as Timestamp).toDate().getTime()),
         totalGroupElectricityExpenses,
         totalGroupGasExpenses,
     }
@@ -201,25 +202,21 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Date</TableHead>
                 <TableHead>Member</TableHead>
-                <TableHead>Category</TableHead>
                 <TableHead className="text-right">Paid</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {utilityExpenses.length > 0 ? (
-                utilityExpenses.map((expense) => (
-                  <TableRow key={expense.id}>
-                    <TableCell>{format((expense.date as Timestamp).toDate(), "MMM d")}</TableCell>
-                    <TableCell>{expense.userName}</TableCell>
-                    <TableCell>{expense.category}</TableCell>
-                    <TableCell className="text-right">৳{expense.amount.toFixed(2)}</TableCell>
+              {processedMembers.length > 0 ? (
+                processedMembers.map((member) => (
+                  <TableRow key={member.id}>
+                    <TableCell>{member.name}</TableCell>
+                    <TableCell className="text-right">৳{member.utilityExpensesPaid.toFixed(2)}</TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center h-24 text-muted-foreground">No utility data.</TableCell>
+                  <TableCell colSpan={2} className="text-center h-24 text-muted-foreground">No utility data.</TableCell>
                 </TableRow>
               )}
             </TableBody>
@@ -291,3 +288,5 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     </div>
   );
 }
+
+    
