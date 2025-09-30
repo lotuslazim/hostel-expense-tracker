@@ -187,6 +187,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
       <Card className="lg:col-span-1 flex flex-col">
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><Zap/> Utility Contributions</CardTitle>
+           <CardDescription>Total spent on utilities this month. Click a member for details.</CardDescription>
         </CardHeader>
         <CardContent className="flex-grow space-y-4">
           <div className="flex justify-between">
@@ -210,7 +211,11 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
               {processedMembers.length > 0 ? (
                 processedMembers.map((member) => (
                   <TableRow key={member.id}>
-                    <TableCell>{member.name}</TableCell>
+                    <TableCell>
+                      <Link href={`/report/utilities/${member.id}?month=${monthQueryParam}`} className="font-medium hover:underline">
+                        {member.name}
+                      </Link>
+                    </TableCell>
                     <TableCell className="text-right">৳{member.utilityExpensesPaid.toFixed(2)}</TableCell>
                   </TableRow>
                 ))
@@ -288,5 +293,3 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     </div>
   );
 }
-
-    

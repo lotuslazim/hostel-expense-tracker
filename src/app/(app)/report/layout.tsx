@@ -8,7 +8,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 function ReportNavLink({ href, children }: { href: string, children: React.ReactNode }) {
     const pathname = usePathname();
-    const isActive = pathname === href;
+    const isActive = pathname.startsWith(href) && (href !== '/report' || pathname === '/report');
+
 
     return (
         <Link href={href} className="w-full">
@@ -25,14 +26,22 @@ export default function ReportLayout({
   children: React.ReactNode
 }) {
   const pathname = usePathname();
+  
+  const getActiveTab = () => {
+    if (pathname.startsWith('/report/meals')) return '/report/meals';
+    if (pathname.startsWith('/report/items')) return '/report/items';
+    if (pathname.startsWith('/report/utilities')) return '/report/utilities';
+    return '/report';
+  }
 
   return (
     <div className="space-y-6">
-        <Tabs value={pathname} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+        <Tabs value={getActiveTab()} className="w-full">
+            <TabsList className="grid w-full grid-cols-4">
                 <ReportNavLink href="/report">Overall</ReportNavLink>
                 <ReportNavLink href="/report/items">Food Items</ReportNavLink>
                 <ReportNavLink href="/report/meals">Meals</ReportNavLink>
+                <ReportNavLink href="/report/utilities">Utilities</ReportNavLink>
             </TabsList>
         </Tabs>
         {children}
