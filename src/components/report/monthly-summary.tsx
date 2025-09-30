@@ -21,22 +21,10 @@ interface MonthlySummaryProps {
 
 function SummarySkeleton() {
   return (
-    <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <Skeleton className="h-36 w-full rounded-lg" />
-            <Skeleton className="h-36 w-full rounded-lg" />
-            <Skeleton className="h-36 w-full rounded-lg" />
-        </div>
-
-        <Card>
-            <CardHeader>
-                <CardTitle><Skeleton className="h-7 w-40"/></CardTitle>
-                <CardDescription><Skeleton className="h-4 w-80"/></CardDescription>
-            </CardHeader>
-            <CardContent>
-                <Skeleton className="h-40 w-full rounded-lg" />
-            </CardContent>
-        </Card>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <Skeleton className="h-64 w-full rounded-lg" />
+        <Skeleton className="h-64 w-full rounded-lg" />
+        <Skeleton className="h-64 w-full rounded-lg" />
     </div>
   );
 }
@@ -112,16 +100,21 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
         
         const totalMeals = memberMeals.reduce((sum, meal) => sum + (meal.mealNumber || 1), 0);
         const foodExpenses = memberExpenses.filter(e => e.category === 'Food & Groceries').reduce((sum, e) => sum + e.amount, 0);
-        
+        const electricityExpenses = memberExpenses.filter(e => e.category === 'Electricity').reduce((sum, e) => sum + e.amount, 0);
+        const gasExpenses = memberExpenses.filter(e => e.category === 'Gas').reduce((sum, e) => sum + e.amount, 0);
+
         return {
           id: member.id,
           name: member.displayName || member.email.split('@')[0],
           meals: totalMeals,
-          expenses: { food: foodExpenses }
+          expenses: { food: foodExpenses, electricity: electricityExpenses, gas: gasExpenses }
         };
     });
 
     const totalGroupFoodExpenses = processedMembers.reduce((acc, member) => acc + member.expenses.food, 0);
+    const totalGroupElectricityExpenses = processedMembers.reduce((acc, member) => acc + member.expenses.electricity, 0);
+    const totalGroupGasExpenses = processedMembers.reduce((acc, member) => acc + member.expenses.gas, 0);
+
     const totalGroupMeals = processedMembers.reduce((acc, member) => acc + member.meals, 0);
     const memberCount = processedMembers.length;
     
@@ -130,6 +123,8 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     return {
         processedMembers,
         totalGroupFoodExpenses,
+        totalGroupElectricityExpenses,
+        totalGroupGasExpenses,
         totalGroupMeals,
         memberCount,
         mealRate,
@@ -151,6 +146,8 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
   const {
       processedMembers,
       totalGroupFoodExpenses,
+      totalGroupElectricityExpenses,
+      totalGroupGasExpenses,
       totalGroupMeals,
       memberCount,
       mealRate,
@@ -159,57 +156,86 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
   const monthQueryParam = format(month, 'yyyy-MM');
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="flex flex-col">
-              <CardHeader>
-                  <CardTitle className="flex items-center gap-2"><Utensils/> Food & Meals</CardTitle>
-              </CardHeader>
-              <CardContent className="flex-grow space-y-2">
-                  <p className="text-3xl font-bold">৳{totalGroupFoodExpenses.toFixed(0)}</p>
-                  <p className="text-sm text-muted-foreground">Total food expenses</p>
-                   <p className="text-3xl font-bold">{totalGroupMeals}</p>
-                  <p className="text-sm text-muted-foreground">Total meals consumed</p>
-              </CardContent>
-              <CardContent>
-                 <div className="text-center p-3 bg-accent/20 rounded-lg">
-                    <p className="text-sm font-medium text-accent-foreground/80">Calculated Meal Rate</p>
-                    <p className="text-xl font-bold text-accent-foreground">৳{mealRate.toFixed(2)} / meal</p>
-                </div>
-              </CardContent>
-          </Card>
-           <Card className="flex flex-col">
-              <CardHeader>
-                  <CardTitle className="flex items-center gap-2"><FileText/> Detailed Reports</CardTitle>
-              </CardHeader>
-              <CardContent className="flex-grow flex flex-col justify-center gap-4">
-                  <Link href={`/report/items?month=${monthQueryParam}`} className="block text-sm font-medium text-primary hover:underline">
-                      View Food Item Analysis <ArrowRight className="inline h-4 w-4"/>
-                  </Link>
-                  <Link href={`/report/meals?month=${monthQueryParam}`} className="block text-sm font-medium text-primary hover:underline">
-                      View Meal Consumption Report <ArrowRight className="inline h-4 w-4"/>
-                  </Link>
-              </CardContent>
-          </Card>
-      </div>
-
-      <Card>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <Card className="lg:col-span-1 flex flex-col">
+          <CardHeader>
+              <CardTitle className="flex items-center gap-2"><Utensils/> Food & Meals</CardTitle>
+          </CardHeader>
+          <CardContent className="flex-grow space-y-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Total food expenses</p>
+                <p className="text-2xl font-bold">৳{totalGroupFoodExpenses.toFixed(0)}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Total meals consumed</p>
+                <p className="text-2xl font-bold">{totalGroupMeals}</p>
+              </div>
+          </CardContent>
+          <CardContent>
+              <div className="text-center p-3 bg-accent/20 rounded-lg">
+                <p className="text-sm font-medium text-accent-foreground/80">Calculated Meal Rate</p>
+                <p className="text-xl font-bold text-accent-foreground">৳{mealRate.toFixed(2)} / meal</p>
+            </div>
+          </CardContent>
+      </Card>
+      
+      <Card className="lg:col-span-1 flex flex-col">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Scale /> Final Food Settlement
-          </CardTitle>
-          <CardDescription>
-            A summary of who owes what for food costs for the month. Other expenses are not included here.
-          </CardDescription>
+          <CardTitle className="flex items-center gap-2"><Zap/> Utility Contributions</CardTitle>
         </CardHeader>
+        <CardContent className="flex-grow space-y-4">
+          <div>
+            <p className="text-sm text-muted-foreground">Total Electricity Bill</p>
+            <p className="text-2xl font-bold">৳{totalGroupElectricityExpenses.toFixed(0)}</p>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Total Gas Bill</p>
+            <p className="text-2xl font-bold">৳{totalGroupGasExpenses.toFixed(0)}</p>
+          </div>
+        </CardContent>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Member</TableHead>
-                <TableHead className="text-right">Food Paid</TableHead>
-                <TableHead className="text-right">Food Eaten (at meal rate)</TableHead>
-                <TableHead className="text-right">Final Balance</TableHead>
+                <TableHead className="text-right">Paid</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {memberCount > 0 ? (
+                processedMembers.map((member) => (
+                  <TableRow key={member.id}>
+                    <TableCell>{member.name}</TableCell>
+                    <TableCell className="text-right">৳{(member.expenses.electricity + member.expenses.gas).toFixed(2)}</TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={2} className="text-center h-24 text-muted-foreground">No utility data.</TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      <Card className="lg:col-span-1 flex flex-col">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Scale /> Final Food Settlement
+          </CardTitle>
+          <CardDescription>
+            Summary of who owes what for food. Utilities are separate.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex-grow">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Member</TableHead>
+                <TableHead className="text-right">Paid</TableHead>
+                <TableHead className="text-right">Balance</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -223,11 +249,8 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                       <TableCell className="font-medium">
                         {member.name}
                       </TableCell>
-                      <TableCell className="text-right font-semibold">
+                      <TableCell className="text-right">
                         ৳{member.expenses.food.toFixed(2)}
-                      </TableCell>
-                       <TableCell className="text-right">
-                        ৳{mealShare.toFixed(2)}
                       </TableCell>
                       <TableCell
                         className={cn(
@@ -236,21 +259,17 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                         )}
                       >
                         {finalBalance >= 0
-                          ? `Gets Back: ৳${finalBalance.toFixed(2)}`
-                          : `Owes: ৳${Math.abs(finalBalance).toFixed(2)}`}
+                          ? `+ ৳${finalBalance.toFixed(2)}`
+                          : `- ৳${Math.abs(finalBalance).toFixed(2)}`}
                       </TableCell>
                     </TableRow>
                   );
                 })
               ) : (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center h-24">
-                    <div className="flex flex-col items-center gap-2">
-                      <Users className="h-8 w-8 text-muted-foreground" />
-                      <p className="text-muted-foreground">
-                        No members found for this month.
-                      </p>
-                    </div>
+                  <TableCell colSpan={3} className="text-center h-24">
+                     <Users className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                     <p className="text-muted-foreground">No members found.</p>
                   </TableCell>
                 </TableRow>
               )}
