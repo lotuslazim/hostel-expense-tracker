@@ -51,6 +51,7 @@ export function SignupForm() {
             id: user.uid,
             email: user.email,
             displayName: user.displayName,
+            photoURL: user.photoURL,
             groupId: null,
             isAdmin: false,
         });
@@ -178,3 +179,5 @@ export function SignupForm() {
     </AuthCard>
   );
 }
+
+    

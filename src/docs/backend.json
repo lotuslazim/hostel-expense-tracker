@@ -34,6 +34,7 @@
         "id": { "type": "string", "description": "Unique identifier for the user entity." },
         "email": { "type": "string", "description": "The user's email address.", "format": "email" },
         "displayName": { "type": "string", "description": "The user's display name." },
+        "photoURL": { "type": "string", "format": "uri", "description": "URL of the user's profile picture." },
         "groupId": { "type": ["string", "null"], "description": "Reference to Group that the user belongs to." },
         "isAdmin": { "type": "boolean", "description": "Indicates whether the user is an administrator of a group." }
       },
@@ -48,6 +49,7 @@
         "id": { "type": "string" },
         "email": { "type": "string", "description": "The member's email address.", "format": "email" },
         "displayName": { "type": "string", "description": "The user's display name." },
+        "photoURL": { "type": "string", "format": "uri", "description": "URL of the member's profile picture." },
         "role": { "type": "string", "description": "The role of the member within the group (e.g., 'admin', 'member')." },
         "joinedAt": { "type": "string", "description": "The timestamp when the member joined the group.", "format": "date-time" }
       },
@@ -124,6 +126,10 @@
   "auth": { "providers": ["password", "google"] },
   "storage": {
     "rules": {
+      "profilePictures/{userId}": {
+        "read": "allow read",
+        "write": "request.auth.uid == userId"
+      },
       "chatImages/{groupId}/{imageId}": {
         "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
         "write": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
@@ -133,7 +139,7 @@
         "write": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
       }
     },
-    "reasoning": "Storage rules are set to allow any authenticated member of a group to read and write images to folders scoped to their specific `groupId`. This prevents users from one group from accessing the images of another group."
+    "reasoning": "Storage rules are set to allow any authenticated member of a group to read and write images to folders scoped to their specific `groupId`. Profile pictures are public to read but can only be written by the owner of that profile. This prevents users from one group from accessing the images of another group and users from editing other users profile pictures."
   },
   "firestore": {
     "structure": [
@@ -219,4 +225,5 @@
   }
 }
 
+    
     

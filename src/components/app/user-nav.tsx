@@ -17,18 +17,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
-import placeholderImages from "@/lib/placeholder-images.json";
-import { useAuth, useUser } from "@/firebase";
+import { useAuth, useUser, useDoc, useFirebase } from "@/firebase";
 import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "../ui/skeleton";
 import { LogOut, User, Shield, Settings } from "lucide-react";
+import { useMemo } from "react";
+import { doc } from "firebase/firestore";
 
 export function UserNav() {
-  const avatarImage = placeholderImages.placeholderImages.find(p => p.id === "user-avatar");
   const { user, isUserLoading } = useUser();
-  const auth = useAuth();
+  const { auth, firestore } = useFirebase();
   const router = useRouter();
+
+  const currentUserRef = useMemo(() => user ? doc(firestore, "users", user.uid) : null, [firestore, user]);
+  const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
+
 
   const handleLogout = async () => {
     try {
@@ -39,26 +43,24 @@ export function UserNav() {
     }
   };
 
-  if (isUserLoading) {
+  if (isUserLoading || isCurrentUserDataLoading) {
     return <Skeleton className="h-9 w-9 rounded-full" />;
   }
 
   const userName = user?.displayName || user?.email?.split('@')[0] || "User";
   const userEmail = user?.email || "user@example.com";
   const avatarFallback = userName.charAt(0).toUpperCase();
+  const photoURL = currentUserData?.photoURL || user?.photoURL;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-9 w-9">
-            {avatarImage && (
-              <AvatarImage 
-                src={avatarImage.imageUrl}
+             <AvatarImage 
+                src={photoURL}
                 alt="User avatar" 
-                data-ai-hint={avatarImage.imageHint}
               />
-            )}
             <AvatarFallback>{avatarFallback}</AvatarFallback>
           </Avatar>
         </Button>
@@ -93,3 +95,5 @@ export function UserNav() {
     </DropdownMenu>
   );
 }
+
+    

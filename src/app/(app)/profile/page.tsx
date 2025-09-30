@@ -4,20 +4,22 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import placeholderImages from "@/lib/placeholder-images.json";
-import { User, Home, Utensils, ShoppingCart, Pencil, Camera, LogIn, Loader2, PlusCircle, LogOut } from "lucide-react";
+import { User, Home, Utensils, ShoppingCart, Pencil, Camera, LogIn, Loader2, PlusCircle, LogOut, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useFirebase, useUser, useDoc } from "@/firebase";
 import { doc, collection, query, where, writeBatch, getDocs, serverTimestamp, updateDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { updateProfile } from "firebase/auth";
 import { useRouter } from "next/navigation";
+import imageCompression from "browser-image-compression";
 
 function JoinGroupCard() {
   const { firestore } = useFirebase();
@@ -124,7 +126,7 @@ function ProfileSkeleton() {
 
 
 export default function ProfilePage() {
-  const { firestore, auth } = useFirebase();
+  const { firestore, storage, auth } = useFirebase();
   const { user: currentUser, isUserLoading } = useUser();
   const { toast } = useToast();
   
@@ -133,6 +135,11 @@ export default function ProfilePage() {
 
   const [name, setName] = useState(currentUser?.displayName || "");
   const [isEditingName, setIsEditingName] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const groupId = currentUserData?.groupId;
   const inGroup = !!groupId;
@@ -187,6 +194,54 @@ export default function ProfilePage() {
     }
   };
 
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handlePictureUpdate = async () => {
+    if (!currentUser || !imageFile) {
+      toast({ variant: "destructive", title: "No image selected" });
+      return;
+    }
+    setIsUploading(true);
+    
+    try {
+      const compressedFile = await imageCompression(imageFile, {
+        maxSizeMB: 0.5, // Compress to 500KB
+        maxWidthOrHeight: 800,
+      });
+
+      const storageRef = ref(storage, `profilePictures/${currentUser.uid}`);
+      const snapshot = await uploadBytes(storageRef, compressedFile);
+      const photoURL = await getDownloadURL(snapshot.ref);
+
+      await updateProfile(currentUser, { photoURL });
+      
+      const userDocRef = doc(firestore, "users", currentUser.uid);
+      await updateDoc(userDocRef, { photoURL });
+      
+      if(groupId) {
+          const memberDocRef = doc(firestore, `groups/${groupId}/members`, currentUser.uid);
+          await updateDoc(memberDocRef, { photoURL });
+      }
+
+      toast({ title: "Success", description: "Profile picture updated." });
+      setUploadDialogOpen(false);
+      setImageFile(null);
+      setImagePreview(null);
+    } catch(error) {
+      console.error("Error updating profile picture: ", error);
+      toast({ variant: "destructive", title: "Error", description: "Could not update profile picture." });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+
   const isLoading = isUserLoading || isCurrentUserDataLoading || (inGroup && isGroupDataLoading);
   
   if (isLoading) {
@@ -208,10 +263,9 @@ export default function ProfilePage() {
     name: currentUser?.displayName || currentUser?.email?.split('@')[0] || "User",
     email: currentUser?.email || "No email",
     role: inGroup ? (isAdmin ? "Admin" : "Member") : "Not in a group",
-    profilePictureId: "user-avatar"
+    photoURL: currentUserData?.photoURL || currentUser?.photoURL
   };
 
-  const avatarImage = placeholderImages.placeholderImages.find(p => p.id === userProfile.profilePictureId);
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
@@ -226,12 +280,45 @@ export default function ProfilePage() {
             <div className="md:col-span-1 space-y-6">
               <Card>
                 <CardHeader className="items-center">
-                  <div className="relative w-24 h-24 mx-auto">
-                    <Avatar className="h-24 w-24">
-                      {avatarImage && <AvatarImage src={avatarImage.imageUrl} alt="User avatar" data-ai-hint={avatarImage.imageHint} />}
-                      <AvatarFallback>{userProfile.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                  </div>
+                  <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
+                    <DialogTrigger asChild>
+                      <div className="relative w-24 h-24 mx-auto group cursor-pointer">
+                        <Avatar className="h-24 w-24">
+                          <AvatarImage src={userProfile.photoURL} alt="User avatar" />
+                          <AvatarFallback>{userProfile.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                         <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Camera className="text-white h-8 w-8" />
+                        </div>
+                      </div>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Update Profile Picture</DialogTitle>
+                        <DialogDescription>Select a new image to use as your avatar.</DialogDescription>
+                      </DialogHeader>
+                      <div className="py-4 space-y-4">
+                        {imagePreview ? (
+                          <div className="w-32 h-32 mx-auto rounded-full overflow-hidden">
+                            <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                          </div>
+                        ) : (
+                          <div className="w-32 h-32 mx-auto rounded-full bg-muted flex items-center justify-center">
+                            <User className="h-16 w-16 text-muted-foreground"/>
+                          </div>
+                        )}
+                        <Button variant="outline" className="w-full" onClick={() => fileInputRef.current?.click()}>
+                          <Upload className="mr-2 h-4 w-4" />
+                          Choose Image
+                        </Button>
+                        <input type="file" ref={fileInputRef} accept="image/*" className="hidden" onChange={handleFileChange} />
+                         <Button className="w-full" onClick={handlePictureUpdate} disabled={isUploading || !imageFile}>
+                          {isUploading && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+                          Save Picture
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                   <div className="text-center mt-4">
                     <CardTitle className="text-2xl break-all">{userProfile.name}</CardTitle>
                     <CardDescription className="break-all">{userProfile.email}</CardDescription>
@@ -316,4 +403,5 @@ export default function ProfilePage() {
   );
 }
 
+    
     
