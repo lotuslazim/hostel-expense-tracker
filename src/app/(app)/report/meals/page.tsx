@@ -5,11 +5,11 @@ import { useMemo } from "react";
 import { parseISO, startOfMonth, endOfMonth, format, addMonths, subMonths } from "date-fns";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
 import { doc, collection, query, where, type Timestamp } from "firebase/firestore";
-import type { MealLog, Expense } from "@/lib/types";
+import type { MealLog } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle, ChevronLeft, Users, Utensils, ChevronDown, ShoppingCart } from "lucide-react";
+import { AlertTriangle, ChevronLeft, Users, Utensils, ChevronDown } from "lucide-react";
 import { WelcomeCard } from "@/components/app/welcome-card";
 import { Button } from "@/components/ui/button";
 import { MonthSwitcher } from "@/components/report/month-switcher";
@@ -31,7 +31,6 @@ interface MemberMealInfo {
     id: string;
     name: string;
     totalMeals: number;
-    totalFoodExpense: number;
     dailyMeals: DailyMealInfo[];
 }
 
@@ -120,24 +119,13 @@ export default function MealConsumptionPage() {
         ) : null),
         [firestore, groupId, monthDateRange]
     );
-    
-    const expensesQuery = useMemo(() =>
-        (groupId ? query(
-            collection(firestore, `groups/${groupId}/expenses`),
-            where("date", ">=", monthDateRange.start),
-            where("date", "<=", monthDateRange.end),
-            where("category", "==", "Food & Groceries")
-        ) : null),
-        [firestore, groupId, monthDateRange]
-    );
 
     const { data: membersData, isLoading: areMembersLoading, error: membersError } = useCollection<Member>(membersQuery);
     const { data: mealsData, isLoading: areMealsLoading, error: mealsError } = useCollection<MealLog>(mealsQuery);
-    const { data: expensesData, isLoading: areExpensesLoading, error: expensesError } = useCollection<Expense>(expensesQuery);
 
 
     const processedData: MemberMealInfo[] = useMemo(() => {
-        if (!membersData || !mealsData || !expensesData) {
+        if (!membersData || !mealsData) {
             return [];
         }
 
@@ -147,20 +135,10 @@ export default function MealConsumptionPage() {
             userMeals.push(meal);
             mealsByUser.set(meal.userId, userMeals);
         });
-        
-        const expensesByUser = new Map<string, Expense[]>();
-        expensesData.forEach(expense => {
-            const userExpenses = expensesByUser.get(expense.userId) || [];
-            userExpenses.push(expense);
-            expensesByUser.set(expense.userId, userExpenses);
-        });
 
         return membersData.map((member) => {
             const memberMeals = mealsByUser.get(member.id) || [];
             const totalMeals = memberMeals.reduce((sum, meal) => sum + (meal.mealNumber || 1), 0);
-            
-            const memberExpenses = expensesByUser.get(member.id) || [];
-            const totalFoodExpense = memberExpenses.reduce((sum, expense) => sum + expense.amount, 0);
 
             const mealCountsByDay = memberMeals.reduce((acc, meal) => {
                 const dateObj = meal.date instanceof Date 
@@ -182,12 +160,11 @@ export default function MealConsumptionPage() {
                 id: member.id,
                 name: member.displayName || member.email?.split('@')[0] || 'Unknown Member',
                 totalMeals,
-                totalFoodExpense,
                 dailyMeals,
             };
         });
 
-    }, [mealsData, membersData, expensesData]);
+    }, [mealsData, membersData]);
 
     const handleMonthChange = (direction: "next" | "prev") => {
         const newDate = direction === "next" ? addMonths(currentDate, 1) : subMonths(currentDate, 1);
@@ -212,8 +189,8 @@ export default function MealConsumptionPage() {
         return <WelcomeCard />;
     }
 
-    const isDataLoading = areMembersLoading || areMealsLoading || areExpensesLoading;
-    const hasError = currentUserDataError || membersError || mealsError || expensesError;
+    const isDataLoading = areMembersLoading || areMealsLoading;
+    const hasError = currentUserDataError || membersError || mealsError;
     
     if (isDataLoading) return <PageSkeleton />;
     if (hasError) return <DataError />;
@@ -229,7 +206,7 @@ export default function MealConsumptionPage() {
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight font-headline">Meal Consumption Report</h1>
                         <p className="text-muted-foreground">
-                            A summary of meals and food expenses by each member in {format(currentDate, "MMMM yyyy")}.
+                            A summary of meals logged by each member in {format(currentDate, "MMMM yyyy")}.
                         </p>
                     </div>
                 </div>
@@ -240,10 +217,10 @@ export default function MealConsumptionPage() {
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Users className="h-5 w-5" /> 
-                        Member Summary
+                        Member Meal Counts
                     </CardTitle>
                     <CardDescription>
-                        Total meals and food expenses logged by each member for the month. Click to see daily meal breakdown.
+                        Total meals logged by each member for the month. Click to see daily meal breakdown.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -253,15 +230,9 @@ export default function MealConsumptionPage() {
                                 <div className="flex items-center p-4">
                                     <div className="flex-1 space-y-1">
                                         <p className="font-medium text-lg">{member.name}</p>
-                                        <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-muted-foreground">
-                                            <div className="flex items-center gap-1.5">
-                                                <Utensils className="h-4 w-4 text-primary" />
-                                                <span className="font-semibold">{member.totalMeals} meals</span>
-                                            </div>
-                                            <div className="flex items-center gap-1.5">
-                                                <ShoppingCart className="h-4 w-4 text-primary" />
-                                                <span className="font-semibold">৳{member.totalFoodExpense.toFixed(2)} spent</span>
-                                            </div>
+                                        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                                            <Utensils className="h-4 w-4 text-primary" />
+                                            <span className="font-semibold">{member.totalMeals} meals</span>
                                         </div>
                                     </div>
                                     <CollapsibleTrigger asChild>
@@ -320,7 +291,7 @@ export default function MealConsumptionPage() {
                                     No Data Available
                                 </h3>
                                 <p className="text-muted-foreground">
-                                    No meals or expenses have been logged by any member for {format(currentDate, "MMMM yyyy")}.
+                                    No meals have been logged by any member for {format(currentDate, "MMMM yyyy")}.
                                 </p>
                             </div>
                         )}
@@ -330,5 +301,3 @@ export default function MealConsumptionPage() {
         </div>
     );
 }
-
-    
