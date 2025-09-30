@@ -9,13 +9,16 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { Expense } from "@/lib/types";
+import { MonthSwitcher } from "../report/month-switcher";
 
 interface ActivityFeedProps {
   expenses: Expense[];
   selectedDate: Date;
+  currentMonth: Date;
+  onMonthChange: (direction: "next" | "prev") => void;
 }
 
-export function ActivityFeed({ expenses, selectedDate }: ActivityFeedProps) {
+export function ActivityFeed({ expenses, selectedDate, currentMonth, onMonthChange }: ActivityFeedProps) {
 
   const dailyExpenses = useMemo(() => {
     if (!expenses) return [];
@@ -28,13 +31,17 @@ export function ActivityFeed({ expenses, selectedDate }: ActivityFeedProps) {
   return (
     <Card className="h-full">
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
                 <CardTitle>Daily Expense Feed</CardTitle>
                 <CardDescription>
                   Showing expenses for {format(selectedDate, "PPP")}.
                 </CardDescription>
             </div>
+             <MonthSwitcher 
+                currentDate={currentMonth}
+                onMonthChange={onMonthChange}
+            />
         </div>
       </CardHeader>
       <CardContent>

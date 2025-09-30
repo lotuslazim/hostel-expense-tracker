@@ -4,7 +4,7 @@
 import { useMemo, useState } from "react";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
 import { doc, collection, query, where, orderBy, startOfDay, endOfDay } from "firebase/firestore";
-import { startOfMonth, endOfMonth } from "date-fns";
+import { startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns";
 import { WelcomeCard } from "@/components/app/welcome-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
@@ -33,6 +33,7 @@ export default function DashboardPage() {
   const { firestore } = useFirebase();
   const { user: currentUser, isUserLoading } = useUser();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [currentMonth, setCurrentMonth] = useState(startOfMonth(new Date()));
 
 
   const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
@@ -42,9 +43,9 @@ export default function DashboardPage() {
 
   // We still fetch for the whole month for potential future use or other components
   const monthDateRange = useMemo(() => ({
-    start: startOfMonth(selectedDate),
-    end: endOfMonth(selectedDate),
-  }), [selectedDate]);
+    start: startOfMonth(currentMonth),
+    end: endOfMonth(currentMonth),
+  }), [currentMonth]);
 
   const expensesQuery = useMemo(() => {
     if (!groupId) return null;
@@ -57,6 +58,10 @@ export default function DashboardPage() {
   }, [firestore, groupId, monthDateRange]);
 
   const { data: expenses, isLoading: areExpensesLoading } = useCollection<Expense>(expensesQuery);
+
+  const handleMonthChange = (direction: "next" | "prev") => {
+    setCurrentMonth(prev => direction === 'next' ? addMonths(prev, 1) : subMonths(prev, 1));
+  }
 
   const isLoading = isUserLoading || isCurrentUserDataLoading;
 
@@ -87,7 +92,12 @@ export default function DashboardPage() {
                 {areExpensesLoading ? (
                     <Skeleton className="h-[85vh] w-full" />
                 ) : (
-                    <ActivityFeed expenses={expenses || []} selectedDate={selectedDate} />
+                    <ActivityFeed 
+                      expenses={expenses || []} 
+                      selectedDate={selectedDate} 
+                      currentMonth={currentMonth}
+                      onMonthChange={handleMonthChange}
+                    />
                 )}
             </div>
         </div>
