@@ -2,10 +2,10 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo } from "react";
 import { parseISO, startOfMonth, endOfMonth, format, addMonths, subMonths } from "date-fns";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
-import { doc, collection, query, where, type Timestamp } from "firebase/firestore";
+import { doc, collection, query, where, Timestamp } from "firebase/firestore";
 import type { PurchasedItem, Expense } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -15,7 +15,6 @@ import { AlertTriangle, Users, Package, ChevronLeft } from "lucide-react";
 import { WelcomeCard } from "@/components/app/welcome-card";
 import { Button } from "@/components/ui/button";
 import { MonthSwitcher } from "@/components/report/month-switcher";
-
 
 function PageSkeleton() {
     return (
@@ -62,7 +61,6 @@ function DataError() {
   );
 }
 
-
 export default function FoodItemAnalysisPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -94,6 +92,12 @@ export default function FoodItemAnalysisPage() {
         end: endOfMonth(currentDate),
     }), [currentDate]);
 
+    // Convert Date objects to Firestore Timestamps
+    const monthStartTimestamp = useMemo(() => 
+        Timestamp.fromDate(monthDateRange.start), [monthDateRange.start]);
+    const monthEndTimestamp = useMemo(() => 
+        Timestamp.fromDate(monthDateRange.end), [monthDateRange.end]);
+
     const membersQuery = useMemo(() =>
         (groupId ? collection(firestore, `groups/${groupId}/members`) : null),
         [firestore, groupId]
@@ -102,26 +106,25 @@ export default function FoodItemAnalysisPage() {
     const itemsQuery = useMemo(() =>
         (groupId ? query(
             collection(firestore, `groups/${groupId}/purchasedItems`),
-            where("date", ">=", monthDateRange.start),
-            where("date", "<=", monthDateRange.end)
+            where("date", ">=", monthStartTimestamp),
+            where("date", "<=", monthEndTimestamp)
         ) : null),
-        [firestore, groupId, monthDateRange]
+        [firestore, groupId, monthStartTimestamp, monthEndTimestamp]
     );
 
     const expensesQuery = useMemo(() =>
         (groupId ? query(
             collection(firestore, `groups/${groupId}/expenses`),
-            where("date", ">=", monthDateRange.start),
-            where("date", "<=", monthDateRange.end),
+            where("date", ">=", monthStartTimestamp),
+            where("date", "<=", monthEndTimestamp),
             where("category", "==", "Food & Groceries")
         ) : null),
-        [firestore, groupId, monthDateRange]
+        [firestore, groupId, monthStartTimestamp, monthEndTimestamp]
     );
 
     const { data: membersData, isLoading: areMembersLoading, error: membersError } = useCollection(membersQuery);
     const { data: itemsData, isLoading: areItemsLoading, error: itemsError } = useCollection<PurchasedItem>(itemsQuery);
     const { data: expensesData, isLoading: areExpensesLoading, error: expensesError } = useCollection<Expense>(expensesQuery);
-
 
     const processedData = useMemo(() => {
         if (!membersData || !itemsData || !expensesData) {
@@ -263,7 +266,6 @@ export default function FoodItemAnalysisPage() {
                     </Table>
                 </CardContent>
             </Card>
-
         </div>
-    )
+    );
 }

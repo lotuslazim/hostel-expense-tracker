@@ -3,7 +3,7 @@
 
 import { useMemo, useState } from "react";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
-import { doc, collection, query, where, orderBy } from "firebase/firestore";
+import { doc, collection, query, where, orderBy, Timestamp } from "firebase/firestore";
 import { addMonths, subMonths, startOfMonth, endOfMonth } from "date-fns";
 import { WelcomeCard } from "@/components/app/welcome-card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -51,8 +51,8 @@ export default function DashboardPage() {
     if (!groupId) return null;
     return query(
       collection(firestore, `groups/${groupId}/expenses`),
-      where("date", ">=", monthDateRange.start),
-      where("date", "<=", monthDateRange.end),
+      where("date", ">=", Timestamp.fromDate(monthDateRange.start)),
+      where("date", "<=", Timestamp.fromDate(monthDateRange.end)),
       orderBy("date", "desc")
     );
   }, [firestore, groupId, monthDateRange]);

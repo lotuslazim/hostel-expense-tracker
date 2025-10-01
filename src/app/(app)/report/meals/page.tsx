@@ -1,10 +1,11 @@
+
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { parseISO, startOfMonth, endOfMonth, format, addMonths, subMonths } from "date-fns";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
-import { doc, collection, query, where, type Timestamp } from "firebase/firestore";
+import { doc, collection, query, where, Timestamp } from "firebase/firestore";
 import type { MealLog } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -114,8 +115,8 @@ export default function MealConsumptionPage() {
     const mealsQuery = useMemo(() =>
         (groupId ? query(
             collection(firestore, `groups/${groupId}/meals`),
-            where("date", ">=", monthDateRange.start),
-            where("date", "<=", monthDateRange.end)
+            where("date", ">=", Timestamp.fromDate(monthDateRange.start)),
+            where("date", "<=", Timestamp.fromDate(monthDateRange.end))
         ) : null),
         [firestore, groupId, monthDateRange]
     );

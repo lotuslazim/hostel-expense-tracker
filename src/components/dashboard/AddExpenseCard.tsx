@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useFirebase, useUser, useDoc } from "@/firebase";
-import { doc, addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { doc, addDoc, collection, serverTimestamp, Timestamp } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, ShoppingCart, Camera, Upload, X, Paperclip } from "lucide-react";
@@ -202,7 +202,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
         receiptPhotoUrl: receiptUrl,
         userId: currentUser.uid,
         userName: currentUser.displayName || currentUser.email?.split('@')[0],
-        date: selectedDate,
+        date: Timestamp.fromDate(selectedDate),
         createdAt: serverTimestamp(),
       });
 
@@ -364,5 +364,3 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     </Card>
   );
 }
-
-    

@@ -18,7 +18,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
 import { useFirebase, useUser, useDoc } from "@/firebase";
-import { doc, addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { doc, addDoc, collection, serverTimestamp, Timestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Utensils } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
@@ -87,7 +87,7 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
         mealType: values.mealType,
         mealNumber: values.mealCount,
         description: `${values.mealCount} ${values.mealType}(s) logged. ${values.itemName ? `Item: ${values.itemName}` : ''}`,
-        date: selectedDate,
+        date: Timestamp.fromDate(selectedDate),
         userId: currentUser.uid,
         userName: currentUser.displayName || currentUser.email?.split('@')[0],
         createdAt: serverTimestamp(),
