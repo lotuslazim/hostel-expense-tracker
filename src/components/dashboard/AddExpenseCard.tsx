@@ -255,17 +255,15 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
             receiptUrl = await getDownloadURL(snapshot.ref);
         }
 
-        // Generate description for Food & Groceries if not provided
+        // --- Corrected Description Logic ---
         let finalDescription = values.description || "";
-        if (values.category === 'Food & Groceries' && !finalDescription && values.purchasedItems && values.purchasedItems.length > 0) {
-            finalDescription = values.purchasedItems.map(item => item.name).join(', ');
-            if (finalDescription.length > 100) { // Keep it reasonably short
-                finalDescription = finalDescription.substring(0, 100) + '...';
-            }
+        if (values.category === 'Food & Groceries' && values.purchasedItems && values.purchasedItems.length > 0) {
+            const itemNames = values.purchasedItems.map(item => item.name).join(', ');
+            finalDescription = itemNames.substring(0, 100) + (itemNames.length > 100 ? '...' : '');
         } else if (values.category === 'Food & Groceries' && !finalDescription) {
             finalDescription = "Groceries";
         }
-
+        // --- End of Corrected Logic ---
 
         const expenseRef = doc(collection(firestore, `groups/${groupId}/expenses`));
         const expenseData = sanitizeFirestoreData({
