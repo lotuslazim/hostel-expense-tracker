@@ -15,6 +15,7 @@ import { AlertTriangle, Users, Package, ChevronLeft } from "lucide-react";
 import { WelcomeCard } from "@/components/app/welcome-card";
 import { Button } from "@/components/ui/button";
 import { MonthSwitcher } from "@/components/report/month-switcher";
+import { AddPurchasedItemCard } from "@/components/report/AddPurchasedItemCard";
 
 function PageSkeleton() {
     return (
@@ -29,22 +30,15 @@ function PageSkeleton() {
                 </div>
                  <Skeleton className="h-10 w-[330px]" />
             </div>
-            <Card>
-                <CardHeader>
-                    <Skeleton className="h-6 w-1/3" />
-                </CardHeader>
-                <CardContent>
-                    <Skeleton className="h-32 w-full" />
-                </CardContent>
-            </Card>
-            <Card>
-                <CardHeader>
-                    <Skeleton className="h-6 w-1/4" />
-                </CardHeader>
-                <CardContent>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-1 space-y-6">
+                    <Skeleton className="h-96 w-full" />
+                </div>
+                <div className="lg:col-span-2 space-y-6">
                     <Skeleton className="h-48 w-full" />
-                </CardContent>
-            </Card>
+                    <Skeleton className="h-96 w-full" />
+                </div>
+            </div>
         </div>
     );
 }
@@ -198,74 +192,81 @@ export default function FoodItemAnalysisPage() {
                 <MonthSwitcher currentDate={currentDate} onMonthChange={handleMonthChange} />
             </div>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>Food Expense by Member</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Member</TableHead>
-                                <TableHead className="text-right">Total Spent on Food</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                           {memberContributions.length > 0 ? memberContributions.map(member => (
-                               <TableRow key={member.id}>
-                                   <TableCell className="font-medium">{member.name}</TableCell>
-                                   <TableCell className="text-right font-semibold">৳{member.totalSpent.toFixed(2)}</TableCell>
-                               </TableRow>
-                           )) : (
-                                <TableRow>
-                                    <TableCell colSpan={2} className="h-24 text-center">
-                                        <div className="flex flex-col items-center gap-2">
-                                            <Users className="h-8 w-8 text-muted-foreground" />
-                                            <p className="text-muted-foreground">No member data available.</p>
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
-                           )}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-1 space-y-6">
+                    <AddPurchasedItemCard />
+                </div>
+                 <div className="lg:col-span-2 space-y-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Food Expense by Member</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Member</TableHead>
+                                        <TableHead className="text-right">Total Spent on Food</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                {memberContributions.length > 0 ? memberContributions.map(member => (
+                                    <TableRow key={member.id}>
+                                        <TableCell className="font-medium">{member.name}</TableCell>
+                                        <TableCell className="text-right font-semibold">৳{member.totalSpent.toFixed(2)}</TableCell>
+                                    </TableRow>
+                                )) : (
+                                        <TableRow>
+                                            <TableCell colSpan={2} className="h-24 text-center">
+                                                <div className="flex flex-col items-center gap-2">
+                                                    <Users className="h-8 w-8 text-muted-foreground" />
+                                                    <p className="text-muted-foreground">No member data available.</p>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                )}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>Aggregated Item Summary</CardTitle>
-                    <CardDescription>This card calculates the total quantity of each food item and their expense.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                     <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Item</TableHead>
-                                <TableHead>Total Quantity</TableHead>
-                                <TableHead className="text-right">Total Cost</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {aggregatedItems.length > 0 ? aggregatedItems.map(item => (
-                                <TableRow key={item.name}>
-                                    <TableCell className="font-medium">{item.name}</TableCell>
-                                    <TableCell>{item.totalQuantity.toFixed(2)} {Array.from(item.units).join(', ')}</TableCell>
-                                    <TableCell className="text-right font-semibold">৳{item.totalCost.toFixed(2)}</TableCell>
-                                </TableRow>
-                            )) : (
-                                <TableRow>
-                                    <TableCell colSpan={3} className="h-24 text-center">
-                                         <div className="flex flex-col items-center gap-2">
-                                            <Package className="h-8 w-8 text-muted-foreground" />
-                                            <p className="text-muted-foreground">No food items were purchased this month.</p>
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Aggregated Item Summary</CardTitle>
+                            <CardDescription>This card calculates the total quantity of each food item and their expense.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Item</TableHead>
+                                        <TableHead>Total Quantity</TableHead>
+                                        <TableHead className="text-right">Total Cost</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {aggregatedItems.length > 0 ? aggregatedItems.map(item => (
+                                        <TableRow key={item.name}>
+                                            <TableCell className="font-medium">{item.name}</TableCell>
+                                            <TableCell>{item.totalQuantity.toFixed(2)} {Array.from(item.units).join(', ')}</TableCell>
+                                            <TableCell className="text-right font-semibold">৳{item.totalCost.toFixed(2)}</TableCell>
+                                        </TableRow>
+                                    )) : (
+                                        <TableRow>
+                                            <TableCell colSpan={3} className="h-24 text-center">
+                                                <div className="flex flex-col items-center gap-2">
+                                                    <Package className="h-8 w-8 text-muted-foreground" />
+                                                    <p className="text-muted-foreground">No food items were purchased this month.</p>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
         </div>
     );
 }
