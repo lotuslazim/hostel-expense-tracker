@@ -6,7 +6,7 @@ import { useMemo, useState, useEffect } from "react";
 import { parseISO, startOfMonth, endOfMonth, format, addMonths, subMonths } from "date-fns";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
 import { doc, collection, query, where, type Timestamp } from "firebase/firestore";
-import type { PurchasedItem } from "@/lib/types";
+import type { PurchasedItem, Expense } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -108,18 +108,30 @@ export default function FoodItemAnalysisPage() {
         [firestore, groupId, monthDateRange]
     );
 
+    const expensesQuery = useMemo(() =>
+        (groupId ? query(
+            collection(firestore, `groups/${groupId}/expenses`),
+            where("date", ">=", monthDateRange.start),
+            where("date", "<=", monthDateRange.end),
+            where("category", "==", "Food & Groceries")
+        ) : null),
+        [firestore, groupId, monthDateRange]
+    );
+
     const { data: membersData, isLoading: areMembersLoading, error: membersError } = useCollection(membersQuery);
     const { data: itemsData, isLoading: areItemsLoading, error: itemsError } = useCollection<PurchasedItem>(itemsQuery);
+    const { data: expensesData, isLoading: areExpensesLoading, error: expensesError } = useCollection<Expense>(expensesQuery);
+
 
     const processedData = useMemo(() => {
-        if (!membersData || !itemsData) {
+        if (!membersData || !itemsData || !expensesData) {
             return { memberContributions: [], aggregatedItems: [] };
         };
 
         const memberContributions = membersData.map(member => {
-            const totalSpent = itemsData
-                .filter(item => item.userId === member.id)
-                .reduce((sum, item) => sum + item.cost, 0);
+            const totalSpent = expensesData
+                .filter(expense => expense.userId === member.id)
+                .reduce((sum, expense) => sum + expense.amount, 0);
             return {
                 id: member.id,
                 name: member.displayName || member.email.split('@')[0],
@@ -142,7 +154,7 @@ export default function FoodItemAnalysisPage() {
             aggregatedItems: Object.values(aggregatedItems).sort((a, b) => b.totalCost - a.totalCost),
         };
 
-    }, [itemsData, membersData]);
+    }, [itemsData, membersData, expensesData]);
 
     const handleMonthChange = (direction: "next" | "prev") => {
         const newDate = direction === "next" ? addMonths(currentDate, 1) : subMonths(currentDate, 1);
@@ -159,8 +171,8 @@ export default function FoodItemAnalysisPage() {
         return <WelcomeCard />;
     }
 
-    const isDataLoading = areMembersLoading || areItemsLoading;
-    const hasError = currentUserDataError || membersError || itemsError;
+    const isDataLoading = areMembersLoading || areItemsLoading || areExpensesLoading;
+    const hasError = currentUserDataError || membersError || itemsError || expensesError;
     
     if (isDataLoading) return <PageSkeleton />;
     if (hasError) return <DataError />;
