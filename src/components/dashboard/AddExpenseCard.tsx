@@ -115,7 +115,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   const form = useForm<z.infer<typeof expenseSchema>>({
     resolver: zodResolver(expenseSchema),
     defaultValues: {
-      amount: "" as unknown as number, // Initialize with an empty string to make it a controlled component
+      amount: "" as unknown as number,
       description: "",
       purchasedItems: [],
     },
@@ -255,10 +255,22 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
             receiptUrl = await getDownloadURL(snapshot.ref);
         }
 
+        // Generate description for Food & Groceries if not provided
+        let finalDescription = values.description || "";
+        if (values.category === 'Food & Groceries' && !finalDescription && values.purchasedItems && values.purchasedItems.length > 0) {
+            finalDescription = values.purchasedItems.map(item => item.name).join(', ');
+            if (finalDescription.length > 100) { // Keep it reasonably short
+                finalDescription = finalDescription.substring(0, 100) + '...';
+            }
+        } else if (values.category === 'Food & Groceries' && !finalDescription) {
+            finalDescription = "Groceries";
+        }
+
+
         const expenseRef = doc(collection(firestore, `groups/${groupId}/expenses`));
         const expenseData = sanitizeFirestoreData({
             amount: values.amount,
-            description: values.description || "",
+            description: finalDescription,
             category: values.category,
             receiptPhotoUrl: receiptUrl,
             userId: currentUser.uid,
@@ -532,3 +544,5 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     </Card>
   );
 }
+
+    
