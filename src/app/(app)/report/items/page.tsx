@@ -6,12 +6,12 @@ import { useMemo } from "react";
 import { parseISO, startOfMonth, endOfMonth, format, addMonths, subMonths } from "date-fns";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
 import { doc, collection, query, where, Timestamp } from "firebase/firestore";
-import type { PurchasedItem, Expense } from "@/lib/types";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import type { PurchasedItem } from "@/lib/types";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle, Users, Package, ChevronLeft } from "lucide-react";
+import { AlertTriangle, Users, ChevronLeft } from "lucide-react";
 import { WelcomeCard } from "@/components/app/welcome-card";
 import { Button } from "@/components/ui/button";
 import { MonthSwitcher } from "@/components/report/month-switcher";
@@ -30,14 +30,9 @@ function PageSkeleton() {
                 </div>
                  <Skeleton className="h-10 w-[330px]" />
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-1 space-y-6">
-                    <Skeleton className="h-96 w-full" />
-                </div>
-                <div className="lg:col-span-2 space-y-6">
-                    <Skeleton className="h-48 w-full" />
-                    <Skeleton className="h-96 w-full" />
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <Skeleton className="h-96 w-full" />
+                <Skeleton className="h-96 w-full" />
             </div>
         </div>
     );
@@ -105,35 +100,18 @@ export default function FoodItemAnalysisPage() {
         [firestore, groupId, monthStartTimestamp, monthEndTimestamp]
     );
     
-    const expensesQuery = useMemo(() =>
-        (groupId ? query(
-            collection(firestore, `groups/${groupId}/expenses`),
-            where("date", ">=", monthStartTimestamp),
-            where("date", "<=", monthEndTimestamp),
-            where("category", "in", ["Food & Groceries", "Other"])
-        ) : null),
-        [firestore, groupId, monthStartTimestamp, monthEndTimestamp]
-    );
-
     const { data: membersData, isLoading: areMembersLoading, error: membersError } = useCollection(membersQuery);
     const { data: itemsData, isLoading: areItemsLoading, error: itemsError } = useCollection<PurchasedItem>(itemsQuery);
-    const { data: expensesData, isLoading: areExpensesLoading, error: expensesError } = useCollection<Expense>(expensesQuery);
 
     const processedData = useMemo(() => {
-        if (!membersData) {
-            return { memberContributions: [], aggregatedItems: [] };
+        if (!membersData || !itemsData) {
+            return { memberContributions: [] };
         }
 
         const memberContributions = membersData.map(member => {
-            const itemsCost = (itemsData || [])
+            const totalSpent = itemsData
                 .filter(item => item.userId === member.id)
                 .reduce((sum, item) => sum + item.cost, 0);
-            
-            const expensesCost = (expensesData || [])
-                .filter(expense => expense.userId === member.id)
-                .reduce((sum, expense) => sum + expense.amount, 0);
-
-            const totalSpent = itemsCost + expensesCost;
 
             return {
                 id: member.id,
@@ -142,26 +120,8 @@ export default function FoodItemAnalysisPage() {
             };
         });
 
-        const aggregatedItems = Object.values(
-            (itemsData || []).reduce((acc, item) => {
-                if (!acc[item.name]) {
-                    acc[item.name] = {
-                        name: item.name,
-                        totalQuantity: 0,
-                        totalCost: 0,
-                        units: new Set<string>()
-                    };
-                }
-                acc[item.name].totalQuantity += item.quantity;
-                acc[item.name].totalCost += item.cost;
-                acc[item.name].units.add(item.unit);
-                return acc;
-            }, {} as Record<string, { name: string; totalQuantity: number; totalCost: number; units: Set<string> }>)
-        ).sort((a, b) => b.totalCost - a.totalCost);
-
-        return { memberContributions, aggregatedItems };
-    }, [membersData, itemsData, expensesData]);
-
+        return { memberContributions };
+    }, [membersData, itemsData]);
 
     const handleMonthChange = (direction: "next" | "prev") => {
         const newDate = direction === "next" ? addMonths(currentDate, 1) : subMonths(currentDate, 1);
@@ -178,13 +138,13 @@ export default function FoodItemAnalysisPage() {
         return <WelcomeCard />;
     }
 
-    const isDataLoading = areMembersLoading || areItemsLoading || areExpensesLoading;
-    const hasError = currentUserDataError || membersError || itemsError || expensesError;
+    const isDataLoading = areMembersLoading || areItemsLoading;
+    const hasError = currentUserDataError || membersError || itemsError;
     
     if (isDataLoading) return <PageSkeleton />;
     if (hasError) return <DataError />;
     
-    const { memberContributions, aggregatedItems } = processedData;
+    const { memberContributions } = processedData;
 
     return (
         <div className="space-y-6">
@@ -202,83 +162,43 @@ export default function FoodItemAnalysisPage() {
                 <MonthSwitcher currentDate={currentDate} onMonthChange={handleMonthChange} />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-1 space-y-6">
-                    <AddPurchasedItemCard />
-                </div>
-                 <div className="lg:col-span-2 space-y-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Food Expense by Member</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <Table>
-                                <TableHeader>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <AddPurchasedItemCard />
+                
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Food Expense by Member</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Member</TableHead>
+                                    <TableHead className="text-right">Total Spent on Food Items</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                            {memberContributions.length > 0 ? memberContributions.map(member => (
+                                <TableRow key={member.id}>
+                                    <TableCell className="font-medium">{member.name}</TableCell>
+                                    <TableCell className="text-right font-semibold">৳{member.totalSpent.toFixed(2)}</TableCell>
+                                </TableRow>
+                            )) : (
                                     <TableRow>
-                                        <TableHead>Member</TableHead>
-                                        <TableHead className="text-right">Total Spent on Food</TableHead>
+                                        <TableCell colSpan={2} className="h-24 text-center">
+                                            <div className="flex flex-col items-center gap-2">
+                                                <Users className="h-8 w-8 text-muted-foreground" />
+                                                <p className="text-muted-foreground">No member data available.</p>
+                                            </div>
+                                        </TableCell>
                                     </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                {memberContributions.length > 0 ? memberContributions.map(member => (
-                                    <TableRow key={member.id}>
-                                        <TableCell className="font-medium">{member.name}</TableCell>
-                                        <TableCell className="text-right font-semibold">৳{member.totalSpent.toFixed(2)}</TableCell>
-                                    </TableRow>
-                                )) : (
-                                        <TableRow>
-                                            <TableCell colSpan={2} className="h-24 text-center">
-                                                <div className="flex flex-col items-center gap-2">
-                                                    <Users className="h-8 w-8 text-muted-foreground" />
-                                                    <p className="text-muted-foreground">No member data available.</p>
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
-                                )}
-                                </TableBody>
-                            </Table>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Aggregated Item Summary</CardTitle>
-                            <CardDescription>This card calculates the total quantity of each food item and their expense.</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Item</TableHead>
-                                        <TableHead>Total Quantity</TableHead>
-                                        <TableHead className="text-right">Total Cost</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {aggregatedItems.length > 0 ? aggregatedItems.map(item => (
-                                        <TableRow key={item.name}>
-                                            <TableCell className="font-medium">{item.name}</TableCell>
-                                            <TableCell>{item.totalQuantity.toFixed(2)} {Array.from(item.units).join(', ')}</TableCell>
-                                            <TableCell className="text-right font-semibold">৳{item.totalCost.toFixed(2)}</TableCell>
-                                        </TableRow>
-                                    )) : (
-                                        <TableRow>
-                                            <TableCell colSpan={3} className="h-24 text-center">
-                                                <div className="flex flex-col items-center gap-2">
-                                                    <Package className="h-8 w-8 text-muted-foreground" />
-                                                    <p className="text-muted-foreground">No food items were purchased this month.</p>
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
-                                    )}
-                                </TableBody>
-                            </Table>
-                        </CardContent>
-                    </Card>
-                </div>
+                            )}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
             </div>
         </div>
     );
 }
 
-    
