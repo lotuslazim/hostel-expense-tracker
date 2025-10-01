@@ -255,15 +255,13 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
             receiptUrl = await getDownloadURL(snapshot.ref);
         }
 
-        // --- Corrected Description Logic ---
-        let finalDescription = values.description || "";
+        let finalDescription: string;
         if (values.category === 'Food & Groceries' && values.purchasedItems && values.purchasedItems.length > 0) {
             const itemNames = values.purchasedItems.map(item => item.name).join(', ');
             finalDescription = itemNames.substring(0, 100) + (itemNames.length > 100 ? '...' : '');
-        } else if (values.category === 'Food & Groceries' && !finalDescription) {
-            finalDescription = "Groceries";
+        } else {
+            finalDescription = values.description || (values.category === 'Food & Groceries' ? 'Groceries' : 'N/A');
         }
-        // --- End of Corrected Logic ---
 
         const expenseRef = doc(collection(firestore, `groups/${groupId}/expenses`));
         const expenseData = sanitizeFirestoreData({
@@ -542,5 +540,3 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     </Card>
   );
 }
-
-    
