@@ -29,16 +29,14 @@ export default function ReportLayout({
   
   const getActiveTab = () => {
     if (pathname.startsWith('/report/meals')) return '/report/meals';
-    if (pathname.startsWith('/report/items')) return '/report/items';
     return '/report';
   }
 
   return (
     <div className="space-y-6">
         <Tabs value={getActiveTab()} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-2">
                 <ReportNavLink href="/report">Overall</ReportNavLink>
-                <ReportNavLink href="/report/items">Food Items</ReportNavLink>
                 <ReportNavLink href="/report/meals">Meals</ReportNavLink>
             </TabsList>
         </Tabs>
