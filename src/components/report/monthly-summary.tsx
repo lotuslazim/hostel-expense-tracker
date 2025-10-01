@@ -39,6 +39,7 @@ interface ProcessedData {
   memberCount: number;
   mealRate: number;
   totalGroupExpenses: number;
+  totalUtilityExpenses: number;
 }
 
 // Reusable utility functions
@@ -131,7 +132,7 @@ function CollapsibleMemberRow({
         <TableCell
           className={cn(
             "text-right font-bold",
-            finalBalance >= 0 ? "text-green-600" : "text-red-600"
+            finalBalance >= 0 ? "text-green-800" : "text-red-800"
           )}
         >
           {finalBalance >= 0
@@ -252,8 +253,8 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
 
   const monthDateRange = useMemo(() => {
     return {
-      start: startOfMonth(month),
-      end: endOfMonth(month),
+      start: Timestamp.fromDate(startOfMonth(month)),
+      end: Timestamp.fromDate(endOfMonth(month)),
     };
   }, [month]);
 
@@ -265,8 +266,8 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
   const mealsQuery = useMemo(() =>
     (groupId ? query(
       collection(firestore, `groups/${groupId}/meals`),
-      where("date", ">=", Timestamp.fromDate(monthDateRange.start)),
-      where("date", "<=", Timestamp.fromDate(monthDateRange.end))
+      where("date", ">=", monthDateRange.start),
+      where("date", "<=", monthDateRange.end)
     ) : null),
     [firestore, groupId, monthDateRange]
   );
@@ -274,8 +275,8 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
   const expensesQuery = useMemo(() =>
     (groupId ? query(
       collection(firestore, `groups/${groupId}/expenses`),
-      where("date", ">=", Timestamp.fromDate(monthDateRange.start)),
-      where("date", "<=", Timestamp.fromDate(monthDateRange.end))
+      where("date", ">=", monthDateRange.start),
+      where("date", "<=", monthDateRange.end)
     ) : null),
     [firestore, groupId, monthDateRange]
   );
@@ -287,13 +288,11 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
   const isAnyLoading = isCurrentUserLoading || isCurrentUserDataLoading || (!!groupId && (areMembersLoading || areMealsLoading || areExpensesLoading));
   const hasAnyErrors = currentUserDataError || membersError || mealsError || expensesError;
   
-  // OPTIMIZED data processing with pre-grouping
   const processedData = useMemo((): ProcessedData | null => {
     if (!membersData || !mealsData || !expensesData) {
       return null;
     }
 
-    // Pre-group data for O(1) lookups instead of O(n) filtering
     const mealsByUser = mealsData.reduce((acc, meal) => {
       acc[meal.userId] = [...(acc[meal.userId] || []), meal];
       return acc;
@@ -343,6 +342,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     const totalGroupMeals = processedMembers.reduce((acc, member) => acc + (member.meals || 0), 0);
     const memberCount = processedMembers.length > 0 ? processedMembers.length : 1;
     const mealRate = totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
+    const totalUtilityExpenses = expensesData.filter(e => e.category === 'Electricity' || e.category === 'Gas').reduce((sum, e) => sum + (e.amount || 0), 0);
     const totalGroupExpenses = expensesData.reduce((sum, e) => sum + (e.amount || 0), 0);
 
     return {
@@ -351,7 +351,8 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
       totalGroupMeals,
       memberCount,
       mealRate: mealRate || 0,
-      totalGroupExpenses: totalGroupExpenses || 0
+      totalGroupExpenses: totalGroupExpenses || 0,
+      totalUtilityExpenses: totalUtilityExpenses || 0
     };
   }, [membersData, mealsData, expensesData]);
 
@@ -373,7 +374,8 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
       totalGroupMeals,
       memberCount,
       mealRate,
-      totalGroupExpenses
+      totalGroupExpenses,
+      totalUtilityExpenses
   } = processedData;
 
   const perMemberShare = totalGroupExpenses / (memberCount || 1);
@@ -405,20 +407,27 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
         
        <Card className="lg:col-span-1 flex flex-col">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2"><Zap/> Utility Payments</CardTitle>
-           <CardDescription>Click a member to see their detailed payments.</CardDescription>
+          <CardTitle className="flex items-center gap-2"><Zap/> Utilities Breakdown</CardTitle>
+           <CardDescription>A summary of monthly utility payments.</CardDescription>
         </CardHeader>
-        <CardContent>
-          {processedMembers.length > 0 ? (
-            processedMembers.map((member) => (
-              <CollapsibleUtilityItem 
-                key={member.id} 
-                member={member}
-              />
-            ))
-          ) : (
-            <EmptyState icon={Users} message="No utility data available." />
-          )}
+        <CardContent className="flex-grow space-y-4">
+             <div>
+                <p className="text-sm text-muted-foreground">Total Utility Expenses</p>
+                <p className="text-2xl font-bold">৳{(totalUtilityExpenses || 0).toFixed(0)}</p>
+            </div>
+            <div className="space-y-2 pt-2">
+                <p className="text-sm font-medium">Member Contributions</p>
+                 {processedMembers.length > 0 ? (
+                    processedMembers.map((member) => (
+                    <CollapsibleUtilityItem 
+                        key={member.id} 
+                        member={member}
+                    />
+                    ))
+                ) : (
+                    <EmptyState icon={Users} message="No utility data available." />
+                )}
+            </div>
         </CardContent>
       </Card>
       </div>
@@ -473,3 +482,5 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     </div>
   );
 }
+
+    
