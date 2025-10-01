@@ -94,7 +94,9 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
       return null;
     }
     
-    const totalGroupExpenses = expensesData.reduce((sum, e) => sum + e.amount, 0);
+    const totalFoodAndOtherExpenses = expensesData
+      .filter(e => e.category === 'Food & Groceries' || e.category === 'Other')
+      .reduce((sum, e) => sum + e.amount, 0);
 
     const processedMembers = membersData.map(member => {
         const memberMeals = mealsData
@@ -106,31 +108,40 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
           });
           
         const memberExpenses = expensesData.filter(e => e.userId === member.id);
+        
         const totalPaid = memberExpenses.reduce((sum, e) => sum + e.amount, 0);
         
         return {
           id: member.id,
           name: member.displayName || member.email.split('@')[0],
           meals: memberMeals,
+          totalMeals: memberMeals.reduce((s, m) => s + m.mealNumber, 0),
           totalPaid,
         };
     });
 
-    const totalGroupMeals = processedMembers.reduce((acc, member) => acc + member.meals.reduce((s, m) => s + m.mealNumber, 0), 0);
-    const memberCount = processedMembers.length > 0 ? processedMembers.length : 1;
-    
-    const totalFoodExpenses = expensesData
-      .filter(e => e.category === 'Food & Groceries' || e.category === 'Other')
-      .reduce((sum, e) => sum + e.amount, 0);
-    
-    const mealRate = totalGroupMeals > 0 ? totalFoodExpenses / totalGroupMeals : 0;
+    const totalGroupMeals = processedMembers.reduce((acc, member) => acc + member.totalMeals, 0);
+    const mealRate = totalGroupMeals > 0 ? totalFoodAndOtherExpenses / totalGroupMeals : 0;
+
+    const finalMembers = processedMembers.map(member => {
+        const mealCost = member.totalMeals * mealRate;
+        const totalShare = mealCost;
+        const balance = member.totalPaid - totalShare;
+
+        return {
+            ...member,
+            mealCost,
+            totalShare,
+            balance
+        }
+    });
 
     return {
-        processedMembers,
+        processedMembers: finalMembers,
         totalGroupMeals,
-        memberCount,
         mealRate,
-        totalGroupExpenses
+        totalGroupExpenses: expensesData.reduce((sum, e) => sum + e.amount, 0),
+        totalFoodAndOtherExpenses,
     }
   }, [membersData, mealsData, expensesData]);
 
@@ -149,14 +160,11 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
   const {
       processedMembers,
       totalGroupMeals,
-      memberCount,
       mealRate,
-      totalGroupExpenses
+      totalGroupExpenses,
+      totalFoodAndOtherExpenses,
   } = processedData;
 
-  const perMemberShare = totalGroupExpenses / memberCount;
-
-  // Safe date formatting helper
   const formatDateSafe = (date: Date | Timestamp | undefined): string => {
     if (!date) return "N/A";
     const jsDate = date instanceof Date ? date : (date as Timestamp)?.toDate?.();
@@ -193,8 +201,8 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
               <p className="text-2xl font-bold">৳{totalGroupExpenses.toFixed(2)}</p>
             </div>
             <div className="text-right">
-              <p className="text-sm text-muted-foreground">Share Per Member</p>
-              <p className="text-2xl font-bold text-primary">৳{perMemberShare.toFixed(2)}</p>
+              <p className="text-sm text-muted-foreground">Food & Other Expenses</p>
+              <p className="text-2xl font-bold">৳{totalFoodAndOtherExpenses.toFixed(2)}</p>
             </div>
         </CardContent>
       </Card>
@@ -206,7 +214,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
             <Scale /> Final Settlement
           </CardTitle>
           <CardDescription>
-            A summary of who owes what for all costs for the month. Click a member to see their meal history.
+            A summary of who owes what for food costs for the month. Click a member to see their meal history.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -222,12 +230,9 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
             <TableBody>
               {processedMembers.length > 0 ? (
                 processedMembers.map((member) => {
-                  const finalBalance = member.totalPaid - perMemberShare;
-
                   return (
                     <Collapsible key={member.id} asChild>
                       <>
-                      {/* Main member row */}
                       <TableRow className="group" data-state={open ? 'open' : 'closed'}>
                         <TableCell className="font-medium flex items-center gap-2">
                           <CollapsibleTrigger asChild>
@@ -243,20 +248,18 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                           {member.name}
                         </TableCell>
                         <TableCell>৳{member.totalPaid.toFixed(2)}</TableCell>
-                        <TableCell>৳{perMemberShare.toFixed(2)}</TableCell>
+                        <TableCell>৳{member.totalShare.toFixed(2)}</TableCell>
                         <TableCell
                           className={cn(
                             "text-right font-bold",
-                            finalBalance >= 0 ? "text-green-600" : "text-red-600"
+                            member.balance >= 0 ? "text-green-600" : "text-red-600"
                           )}
                         >
-                          {finalBalance >= 0
-                            ? `Gets: ৳${finalBalance.toFixed(2)}`
-                            : `Owes: ৳${Math.abs(finalBalance).toFixed(2)}`}
+                          {member.balance >= 0
+                            ? `Gets: ৳${member.balance.toFixed(2)}`
+                            : `Owes: ৳${Math.abs(member.balance).toFixed(2)}`}
                         </TableCell>
                       </TableRow>
-
-                      {/* Collapsible content row */}
                       <TableRow className="data-[state=closed]:hidden">
                         <TableCell colSpan={5} className="p-0 bg-muted/50">
                           <CollapsibleContent asChild>
@@ -264,7 +267,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                               {member.meals.length > 0 ? (
                                 <>
                                   <h4 className="font-semibold mb-2 text-sm">
-                                    Meal History for {member.name} ({member.meals.reduce((s, m) => s + m.mealNumber, 0)} total meals)
+                                    Meal History for {member.name} ({member.totalMeals} total meals)
                                   </h4>
                                   <Table>
                                     <TableHeader>
