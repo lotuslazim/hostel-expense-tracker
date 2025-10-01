@@ -103,15 +103,13 @@ export default function FoodItemAnalysisPage() {
     const { data: membersData, isLoading: areMembersLoading, error: membersError } = useCollection(membersQuery);
     const { data: itemsData, isLoading: areItemsLoading, error: itemsError } = useCollection<PurchasedItem>(itemsQuery);
 
-    const processedData = useMemo(() => {
-        if (!membersData || !itemsData) {
-            return { memberContributions: [], aggregatedItems: [] };
-        }
+    const memberContributions = useMemo(() => {
+        if (!membersData || !itemsData) return [];
 
-        const memberContributions = membersData.map(member => {
+        return membersData.map(member => {
             const totalSpent = itemsData
-            .filter(item => item.userId === member.id)
-            .reduce((sum, item) => sum + (item.cost || 0), 0);
+                .filter(item => item.userId === member.id)
+                .reduce((sum, item) => sum + (item.cost || 0), 0);
 
             return {
                 id: member.id,
@@ -119,26 +117,30 @@ export default function FoodItemAnalysisPage() {
                 totalSpent
             };
         });
-
-        const aggregatedItems = Object.values(
-            itemsData.reduce((acc, item) => {
-                if (!acc[item.name]) {
-                    acc[item.name] = { 
-                        name: item.name, 
-                        totalQuantity: 0, 
-                        totalCost: 0, 
-                        units: new Set<string>() 
-                    };
-                }
-                acc[item.name].totalQuantity += item.quantity || 0;
-                acc[item.name].totalCost += item.cost || 0;
-                acc[item.name].units.add(item.unit);
-                return acc;
-            }, {} as Record<string, { name: string; totalQuantity: number; totalCost: number; units: Set<string> }> )
-        ).sort((a, b) => b.totalCost - a.totalCost);
-
-        return { memberContributions, aggregatedItems };
     }, [membersData, itemsData]);
+
+    const aggregatedItems = useMemo(() => {
+        if (!itemsData) return [];
+
+        const itemMap = itemsData.reduce((acc, item) => {
+            const existingItem = acc.get(item.name);
+            if (existingItem) {
+                existingItem.totalQuantity += item.quantity || 0;
+                existingItem.totalCost += item.cost || 0;
+                existingItem.units.add(item.unit);
+            } else {
+                acc.set(item.name, {
+                    name: item.name,
+                    totalQuantity: item.quantity || 0,
+                    totalCost: item.cost || 0,
+                    units: new Set<string>([item.unit]),
+                });
+            }
+            return acc;
+        }, new Map<string, { name: string; totalQuantity: number; totalCost: number; units: Set<string> }>());
+
+        return Array.from(itemMap.values()).sort((a, b) => b.totalCost - a.totalCost);
+    }, [itemsData]);
 
     const handleMonthChange = (direction: "next" | "prev") => {
         const newDate = direction === "next" ? addMonths(currentDate, 1) : subMonths(currentDate, 1);
@@ -161,7 +163,6 @@ export default function FoodItemAnalysisPage() {
     if (isDataLoading) return <PageSkeleton />;
     if (hasError) return <DataError />;
     
-    const { memberContributions, aggregatedItems } = processedData;
 
     return (
         <div className="space-y-6">
@@ -267,3 +268,5 @@ export default function FoodItemAnalysisPage() {
         </div>
     );
 }
+
+    
