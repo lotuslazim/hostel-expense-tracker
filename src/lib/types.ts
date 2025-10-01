@@ -30,18 +30,6 @@ export interface Expense {
   userName?: string;
 }
 
-export interface PurchasedItem {
-  id: string;
-  name: string;
-  quantity: number;
-  unit: string;
-  cost: number;
-  date: Date | Timestamp;
-  userId: string;
-  groupId: string;
-  userName?: string;
-}
-
 export interface ChatMessage {
   id: string;
   text?: string;
@@ -51,4 +39,27 @@ export interface ChatMessage {
   userName: string;
   userPhotoURL?: string;
   groupId: string;
+}
+
+export interface FoodItem {
+    id: string;
+    name: string;
+    requiredQuantity: number;
+    unit: string;
+    category: string;
+    groupId: string;
+    createdAt: Timestamp;
+}
+
+export interface Purchase {
+    id: string;
+    itemId: string;
+    itemName: string;
+    quantity: number;
+    cost: number;
+    unitPrice: number;
+    date: Timestamp;
+    userId: string;
+    userName: string;
+    groupId: string;
 }

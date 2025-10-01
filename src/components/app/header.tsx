@@ -33,6 +33,7 @@ export function AppHeader() {
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild><Link href="/dashboard">Dashboard</Link></DropdownMenuItem>
               <DropdownMenuItem asChild><Link href="/report">Monthly Report</Link></DropdownMenuItem>
+              <DropdownMenuItem asChild><Link href="/inventory">Inventory</Link></DropdownMenuItem>
               <DropdownMenuItem asChild><Link href="/profile">Profile</Link></DropdownMenuItem>
               <DropdownMenuItem asChild><Link href="/admin">Admin</Link></DropdownMenuItem>
               <DropdownMenuItem asChild><Link href="/settings">Settings</Link></DropdownMenuItem>
