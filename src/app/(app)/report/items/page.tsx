@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
@@ -7,11 +6,11 @@ import { parseISO, startOfMonth, endOfMonth, format, addMonths, subMonths } from
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
 import { doc, collection, query, where, Timestamp } from "firebase/firestore";
 import type { PurchasedItem } from "@/lib/types";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle, Users, ChevronLeft } from "lucide-react";
+import { AlertTriangle, Users, ChevronLeft, ShoppingBag } from "lucide-react";
 import { WelcomeCard } from "@/components/app/welcome-card";
 import { Button } from "@/components/ui/button";
 import { MonthSwitcher } from "@/components/report/month-switcher";
@@ -77,14 +76,9 @@ export default function FoodItemAnalysisPage() {
     const groupId = currentUserData?.groupId;
 
     const monthDateRange = useMemo(() => ({
-        start: startOfMonth(currentDate),
-        end: endOfMonth(currentDate),
+        start: Timestamp.fromDate(startOfMonth(currentDate)),
+        end: Timestamp.fromDate(endOfMonth(currentDate)),
     }), [currentDate]);
-
-    const monthStartTimestamp = useMemo(() => 
-        Timestamp.fromDate(monthDateRange.start), [monthDateRange.start]);
-    const monthEndTimestamp = useMemo(() => 
-        Timestamp.fromDate(monthDateRange.end), [monthDateRange.end]);
 
     const membersQuery = useMemo(() =>
         (groupId ? collection(firestore, `groups/${groupId}/members`) : null),
@@ -94,10 +88,10 @@ export default function FoodItemAnalysisPage() {
     const itemsQuery = useMemo(() =>
         (groupId ? query(
             collection(firestore, `groups/${groupId}/purchasedItems`),
-            where("date", ">=", monthStartTimestamp),
-            where("date", "<=", monthEndTimestamp)
+            where("date", ">=", monthDateRange.start),
+            where("date", "<=", monthDateRange.end)
         ) : null),
-        [firestore, groupId, monthStartTimestamp, monthEndTimestamp]
+        [firestore, groupId, monthDateRange]
     );
     
     const { data: membersData, isLoading: areMembersLoading, error: membersError } = useCollection(membersQuery);
@@ -167,14 +161,19 @@ export default function FoodItemAnalysisPage() {
                 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Food Expense by Member</CardTitle>
+                         <CardTitle className="flex items-center gap-2">
+                           <ShoppingBag /> Member Spending on Items
+                        </CardTitle>
+                        <CardDescription>
+                            Total amount spent by each member on individually logged food items this month.
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <Table>
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>Member</TableHead>
-                                    <TableHead className="text-right">Total Spent on Food Items</TableHead>
+                                    <TableHead className="text-right">Total Spent</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -188,7 +187,7 @@ export default function FoodItemAnalysisPage() {
                                         <TableCell colSpan={2} className="h-24 text-center">
                                             <div className="flex flex-col items-center gap-2">
                                                 <Users className="h-8 w-8 text-muted-foreground" />
-                                                <p className="text-muted-foreground">No member data available.</p>
+                                                <p className="text-muted-foreground">No items purchased this month.</p>
                                             </div>
                                         </TableCell>
                                     </TableRow>
@@ -201,4 +200,3 @@ export default function FoodItemAnalysisPage() {
         </div>
     );
 }
-
