@@ -4,7 +4,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { Utensils, Scale, Users, ChevronDown, AlertTriangle, Zap } from "lucide-react";
+import { Utensils, Scale, Users, ChevronDown, AlertTriangle, Zap, Bolt, Flame } from "lucide-react";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
 import { doc, collection, query, where, type Timestamp } from "firebase/firestore";
 import { useMemo } from "react";
@@ -14,6 +14,7 @@ import type { MealLog, Expense } from "@/lib/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 interface MonthlySummaryProps {
   month: Date;
@@ -94,9 +95,13 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
       return null;
     }
     
-    const totalFoodAndOtherExpenses = expensesData
-      .filter(e => e.category === 'Food & Groceries' || e.category === 'Other')
-      .reduce((sum, e) => sum + e.amount, 0);
+    const foodAndOtherExpenses = expensesData.filter(e => e.category === 'Food & Groceries' || e.category === 'Other');
+    const totalFoodAndOtherExpenses = foodAndOtherExpenses.reduce((sum, e) => sum + e.amount, 0);
+
+    const utilityExpenses = expensesData.filter(e => e.category === 'Electricity' || e.category === 'Gas');
+    const totalElectricity = utilityExpenses.filter(e => e.category === 'Electricity').reduce((s, e) => s + e.amount, 0);
+    const totalGas = utilityExpenses.filter(e => e.category === 'Gas').reduce((s, e) => s + e.amount, 0);
+    const totalUtilities = totalElectricity + totalGas;
 
     const processedMembers = membersData.map(member => {
         const memberMeals = mealsData
@@ -107,31 +112,39 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
             return dateB.getTime() - dateA.getTime();
           });
           
-        const memberExpenses = expensesData.filter(e => e.userId === member.id);
+        const memberFoodAndOtherExpenses = foodAndOtherExpenses.filter(e => e.userId === member.id);
+        const memberUtilityExpenses = utilityExpenses.filter(e => e.userId === member.id);
         
-        const totalPaid = memberExpenses.reduce((sum, e) => sum + e.amount, 0);
+        const paidForFood = memberFoodAndOtherExpenses.reduce((sum, e) => sum + e.amount, 0);
+        const paidForUtilities = memberUtilityExpenses.reduce((sum, e) => sum + e.amount, 0);
         
         return {
           id: member.id,
           name: member.displayName || member.email.split('@')[0],
           meals: memberMeals,
           totalMeals: memberMeals.reduce((s, m) => s + m.mealNumber, 0),
-          totalPaid,
+          paidForFood,
+          paidForUtilities,
+          utilityExpenses: memberUtilityExpenses
         };
     });
 
     const totalGroupMeals = processedMembers.reduce((acc, member) => acc + member.totalMeals, 0);
     const mealRate = totalGroupMeals > 0 ? totalFoodAndOtherExpenses / totalGroupMeals : 0;
+    const utilityShare = membersData.length > 0 ? totalUtilities / membersData.length : 0;
 
     const finalMembers = processedMembers.map(member => {
         const mealCost = member.totalMeals * mealRate;
-        const totalShare = mealCost;
-        const balance = member.totalPaid - totalShare;
+        const totalShare = mealCost + utilityShare;
+        const totalPaid = member.paidForFood + member.paidForUtilities;
+        const balance = totalPaid - totalShare;
 
         return {
             ...member,
             mealCost,
+            utilityShare,
             totalShare,
+            totalPaid,
             balance
         }
     });
@@ -140,8 +153,10 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
         processedMembers: finalMembers,
         totalGroupMeals,
         mealRate,
-        totalGroupExpenses: expensesData.reduce((sum, e) => sum + e.amount, 0),
         totalFoodAndOtherExpenses,
+        totalElectricity,
+        totalGas,
+        totalUtilities
     }
   }, [membersData, mealsData, expensesData]);
 
@@ -161,8 +176,10 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
       processedMembers,
       totalGroupMeals,
       mealRate,
-      totalGroupExpenses,
       totalFoodAndOtherExpenses,
+      totalElectricity,
+      totalGas,
+      totalUtilities
   } = processedData;
 
   const formatDateSafe = (date: Date | Timestamp | undefined): string => {
@@ -179,33 +196,72 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
             <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Utensils/> Meals & Rate</CardTitle>
             </CardHeader>
-            <CardContent className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Total meals consumed</p>
-                  <p className="text-2xl font-bold">{totalGroupMeals}</p>
+            <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <p className="text-sm text-muted-foreground">Total meals consumed</p>
+                        <p className="text-2xl font-bold">{totalGroupMeals}</p>
+                    </div>
+                    <div className="text-right">
+                        <p className="text-sm text-muted-foreground">Food & Other Expenses</p>
+                        <p className="text-2xl font-bold">৳{totalFoodAndOtherExpenses.toFixed(2)}</p>
+                    </div>
                 </div>
-                 <div className="text-right">
+                <div className="text-center p-4 bg-muted/50 rounded-lg">
                   <p className="text-sm text-muted-foreground">Calculated Meal Rate</p>
-                  <p className="text-2xl font-bold text-primary">৳{mealRate.toFixed(2)}</p>
-              </div>
+                  <p className="text-3xl font-bold text-primary">৳{mealRate.toFixed(2)}</p>
+                </div>
             </CardContent>
         </Card>
         
        <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2"><Zap/> Expenses Overview</CardTitle>
-        </CardHeader>
-        <CardContent className="grid grid-cols-2 gap-4">
-           <div>
-              <p className="text-sm text-muted-foreground">Total Group Expenses</p>
-              <p className="text-2xl font-bold">৳{totalGroupExpenses.toFixed(2)}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-sm text-muted-foreground">Food & Other Expenses</p>
-              <p className="text-2xl font-bold">৳{totalFoodAndOtherExpenses.toFixed(2)}</p>
-            </div>
-        </CardContent>
-      </Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Zap/> Utilities Breakdown</CardTitle>
+                <CardDescription>A summary of who paid for utilities this month.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                 <div className="grid grid-cols-2 gap-4 text-center">
+                    <div className="p-3 bg-muted/50 rounded-lg">
+                        <p className="text-sm text-muted-foreground flex items-center justify-center gap-1"><Bolt className="h-4 w-4"/>Total Electricity</p>
+                        <p className="text-xl font-bold">৳{totalElectricity.toFixed(2)}</p>
+                    </div>
+                    <div className="p-3 bg-muted/50 rounded-lg">
+                        <p className="text-sm text-muted-foreground flex items-center justify-center gap-1"><Flame className="h-4 w-4"/>Total Gas</p>
+                        <p className="text-xl font-bold">৳{totalGas.toFixed(2)}</p>
+                    </div>
+                </div>
+                {processedMembers.map((member) => (
+                    <Collapsible key={member.id} className="border rounded-lg group">
+                        <CollapsibleTrigger asChild>
+                            <div className="flex items-center p-3 cursor-pointer">
+                                <span className="font-medium flex-1">{member.name}</span>
+                                <span className="text-sm text-muted-foreground mr-4">Paid: <span className="font-semibold text-foreground">৳{member.paidForUtilities.toFixed(2)}</span></span>
+                                <Button variant="ghost" size="icon" className="h-7 w-7">
+                                    <ChevronDown className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                                </Button>
+                            </div>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                            <div className="p-3 bg-muted/50 border-t">
+                                {member.utilityExpenses.length > 0 ? (
+                                    <div className="space-y-2">
+                                        {member.utilityExpenses.map(expense => (
+                                            <div key={expense.id} className="flex justify-between items-center text-sm">
+                                                <Badge variant={expense.category === 'Electricity' ? 'default' : 'secondary'} className="capitalize">{expense.category}</Badge>
+                                                <span>৳{expense.amount.toFixed(2)}</span>
+                                                <span className="text-muted-foreground">{formatDateSafe(expense.date)}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="text-sm text-center text-muted-foreground py-2">No utilities paid by this member.</p>
+                                )}
+                            </div>
+                        </CollapsibleContent>
+                    </Collapsible>
+                ))}
+            </CardContent>
+        </Card>
       </div>
 
       <Card>
@@ -214,7 +270,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
             <Scale /> Final Settlement
           </CardTitle>
           <CardDescription>
-            A summary of who owes what for food costs for the month. Click a member to see their meal history.
+            A summary of who owes what for all shared costs. Click a member to see their meal history.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -223,7 +279,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
               <TableRow>
                 <TableHead>Member</TableHead>
                 <TableHead>Total Paid</TableHead>
-                <TableHead>Share of Costs</TableHead>
+                <TableHead>Total Share</TableHead>
                 <TableHead className="text-right">Final Balance</TableHead>
               </TableRow>
             </TableHeader>
