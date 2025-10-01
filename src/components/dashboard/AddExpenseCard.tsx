@@ -112,7 +112,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   const form = useForm<z.infer<typeof expenseSchema>>({
     resolver: zodResolver(expenseSchema),
     defaultValues: {
-      amount: undefined,
+      amount: "" as unknown as number, // Initialize with an empty string to make it a controlled component
       description: "",
       purchasedItems: [],
     },
@@ -133,8 +133,8 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   }, [purchasedItemsValue]);
 
   const remainingToLog = useMemo(() => {
-      if(amountValue === undefined) return 0;
-      return amountValue - itemsTotal;
+      if(!amountValue) return 0;
+      return Number(amountValue) - itemsTotal;
   }, [amountValue, itemsTotal])
 
   useEffect(() => {
@@ -293,7 +293,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
             title: "Expense Added",
             description: `Your ${values.category.toLowerCase()} expense of ৳${values.amount} has been logged.`,
         });
-        form.reset({ amount: undefined, description: "", category: undefined, receipt: undefined, purchasedItems: [] });
+        form.reset({ amount: "" as unknown as number, description: "", category: undefined, receipt: undefined, purchasedItems: [] });
         clearImage();
 
     } catch (error) {
@@ -524,5 +524,3 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     </Card>
   );
 }
-
-    
