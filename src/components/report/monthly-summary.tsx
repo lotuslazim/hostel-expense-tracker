@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -25,16 +24,15 @@ interface ProcessedMember {
   name: string;
   meals: number;
   memberMeals: MealLog[];
-  foodExpenses: number;
+  foodAndOtherExpenses: number;
   utilityExpensesPaid: number;
   memberUtilityExpenses: Expense[];
-  otherExpenses: number;
   totalPaid: number;
 }
 
 interface ProcessedData {
   processedMembers: ProcessedMember[];
-  totalGroupFoodExpenses: number;
+  totalGroupFoodAndOtherExpenses: number;
   totalGroupMeals: number;
   memberCount: number;
   mealRate: number;
@@ -105,12 +103,11 @@ function CollapsibleMemberRow({
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const finalBalance = member.totalPaid - perMemberShare;
-  const balanceClass = finalBalance >= 0 ? "bg-green-50 hover:bg-green-100" : "bg-red-50 hover:bg-red-100";
 
   return (
     <>
       {/* Main member row */}
-      <TableRow className={cn(balanceClass, "transition-colors")}>
+      <TableRow className="transition-colors">
         <TableCell className="font-medium flex items-center gap-2">
           <Button
             variant="ghost"
@@ -131,13 +128,14 @@ function CollapsibleMemberRow({
         <TableCell>৳{(perMemberShare || 0).toFixed(2)}</TableCell>
         <TableCell
           className={cn(
-            "text-right font-bold",
-            finalBalance >= 0 ? "text-green-800" : "text-red-800"
+            "text-right font-bold p-0",
           )}
         >
-          {finalBalance >= 0
-            ? `Gets: ৳${(finalBalance || 0).toFixed(2)}`
-            : `Owes: ৳${Math.abs(finalBalance || 0).toFixed(2)}`}
+          <div className={cn("px-4 py-4 rounded-md", finalBalance >= 0 ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800")}>
+            {finalBalance >= 0
+              ? `Gets: ৳${(finalBalance || 0).toFixed(2)}`
+              : `Owes: ৳${Math.abs(finalBalance || 0).toFixed(2)}`}
+          </div>
         </TableCell>
       </TableRow>
 
@@ -309,8 +307,8 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
 
       const totalMeals = memberMeals.reduce((sum, meal) => sum + (meal.mealNumber || 1), 0);
       
-      const foodExpenses = memberExpenses
-        .filter(e => e.category === 'Food & Groceries')
+      const foodAndOtherExpenses = memberExpenses
+        .filter(e => e.category === 'Food & Groceries' || e.category === 'Other')
         .reduce((sum, e) => sum + (e.amount || 0), 0);
       
       const memberUtilityExpenses = memberExpenses
@@ -319,10 +317,6 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
       
       const utilityExpensesPaid = memberUtilityExpenses.reduce((sum, e) => sum + (e.amount || 0), 0);
       
-      const otherExpenses = memberExpenses
-        .filter(e => e.category === 'Other')
-        .reduce((sum, e) => sum + (e.amount || 0), 0);
-      
       const totalPaid = memberExpenses.reduce((sum, e) => sum + (e.amount || 0), 0);
 
       return {
@@ -330,24 +324,23 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
         name: member.displayName || member.email?.split('@')[0] || 'Unknown User',
         meals: totalMeals,
         memberMeals,
-        foodExpenses,
+        foodAndOtherExpenses,
         utilityExpensesPaid,
         memberUtilityExpenses,
-        otherExpenses,
         totalPaid,
       } as ProcessedMember;
     });
 
-    const totalGroupFoodExpenses = processedMembers.reduce((acc, member) => acc + (member.foodExpenses || 0), 0);
+    const totalGroupFoodAndOtherExpenses = processedMembers.reduce((acc, member) => acc + (member.foodAndOtherExpenses || 0), 0);
     const totalGroupMeals = processedMembers.reduce((acc, member) => acc + (member.meals || 0), 0);
     const memberCount = processedMembers.length > 0 ? processedMembers.length : 1;
-    const mealRate = totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
+    const mealRate = totalGroupMeals > 0 ? totalGroupFoodAndOtherExpenses / totalGroupMeals : 0;
     const totalUtilityExpenses = expensesData.filter(e => e.category === 'Electricity' || e.category === 'Gas').reduce((sum, e) => sum + (e.amount || 0), 0);
     const totalGroupExpenses = expensesData.reduce((sum, e) => sum + (e.amount || 0), 0);
 
     return {
       processedMembers,
-      totalGroupFoodExpenses,
+      totalGroupFoodAndOtherExpenses,
       totalGroupMeals,
       memberCount,
       mealRate: mealRate || 0,
@@ -370,7 +363,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
 
   const {
       processedMembers,
-      totalGroupFoodExpenses,
+      totalGroupFoodAndOtherExpenses,
       totalGroupMeals,
       memberCount,
       mealRate,
@@ -389,8 +382,8 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
             </CardHeader>
             <CardContent className="flex-grow space-y-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">Total food expenses</p>
-                  <p className="text-2xl font-bold">৳{(totalGroupFoodExpenses || 0).toFixed(0)}</p>
+                  <p className="text-sm text-muted-foreground">Food & Other Expenses</p>
+                  <p className="text-2xl font-bold">৳{(totalGroupFoodAndOtherExpenses || 0).toFixed(0)}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Total meals consumed</p>
@@ -472,7 +465,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
               <TableRow className="bg-muted/50 font-bold">
                 <TableCell>Total</TableCell>
                 <TableCell>৳{(totalGroupExpenses || 0).toFixed(2)}</TableCell>
-                <TableCell>৳{((perMemberShare || 0) * (memberCount || 0)).toFixed(2)}</TableCell>
+                <TableCell>৳{((perMemberShare || 0) * (memberCount || 1)).toFixed(2)}</TableCell>
                 <TableCell className="text-right">৳0.00</TableCell>
               </TableRow>
             </TableFooter>
@@ -481,4 +474,3 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
       </Card>
     </div>
   );
-}
