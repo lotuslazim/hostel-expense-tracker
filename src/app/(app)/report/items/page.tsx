@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
@@ -30,7 +29,7 @@ function PageSkeleton() {
                 </div>
                  <Skeleton className="h-10 w-[330px]" />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <Skeleton className="h-96 w-full" />
                 <Skeleton className="h-96 w-full" />
             </div>
@@ -106,7 +105,7 @@ export default function FoodItemAnalysisPage() {
         const memberContributions = membersData.map(member => {
             const totalSpent = itemsData
                 .filter(item => item.userId === member.id)
-                .reduce((sum, item) => sum + item.cost, 0);
+                .reduce((sum, item) => sum + (item.cost || 0), 0);
 
             return {
                 id: member.id,
@@ -157,7 +156,7 @@ export default function FoodItemAnalysisPage() {
                 <MonthSwitcher currentDate={currentDate} onMonthChange={handleMonthChange} />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <AddPurchasedItemCard />
                 
                 <Card>
