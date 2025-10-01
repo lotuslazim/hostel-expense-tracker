@@ -1,4 +1,5 @@
 
+
 {
   "entities": {
     "Group": {
@@ -10,7 +11,17 @@
         "id": { "type": "string", "description": "Unique identifier for the group entity." },
         "groupName": { "type": "string", "description": "The name of the group or flat." },
         "invitationCode": { "type": "string", "description": "Unique code used for users to join the group." },
-        "adminId": { "type": "string", "description": "Reference to User who is the administrator of the group." }
+        "adminId": { "type": "string", "description": "Reference to User who is the administrator of the group." },
+        "settings": {
+          "type": "object",
+          "description": "Customizable settings for the group.",
+          "properties": {
+            "mealTypes": { "type": "array", "items": { "type": "string" }, "description": "List of available meal types for logging." },
+            "isMealItemNameRequired": { "type": "boolean", "description": "Whether the item name for a meal is mandatory." },
+            "isExpenseDescriptionRequired": { "type": "boolean", "description": "Whether the description for an expense is mandatory." },
+            "isUtilityReceiptRequired": { "type": "boolean", "description": "Whether a receipt upload is mandatory for utility expenses." }
+          }
+        }
       },
       "required": ["id", "groupName", "invitationCode", "adminId"]
     },
@@ -23,6 +34,7 @@
         "id": { "type": "string", "description": "Unique identifier for the user entity." },
         "email": { "type": "string", "description": "The user's email address.", "format": "email" },
         "displayName": { "type": "string", "description": "The user's display name." },
+        "photoURL": { "type": "string", "format": "uri", "description": "URL of the user's profile picture." },
         "groupId": { "type": ["string", "null"], "description": "Reference to Group that the user belongs to." },
         "isAdmin": { "type": "boolean", "description": "Indicates whether the user is an administrator of a group." }
       },
@@ -37,6 +49,7 @@
         "id": { "type": "string" },
         "email": { "type": "string", "description": "The member's email address.", "format": "email" },
         "displayName": { "type": "string", "description": "The user's display name." },
+        "photoURL": { "type": "string", "format": "uri", "description": "URL of the member's profile picture." },
         "role": { "type": "string", "description": "The role of the member within the group (e.g., 'admin', 'member')." },
         "joinedAt": { "type": "string", "description": "The timestamp when the member joined the group.", "format": "date-time" }
       },
@@ -53,7 +66,8 @@
         "date": { "type": "string", "format": "date-time" },
         "description": { "type": "string" },
         "mealNumber": { "type": "number" },
-        "createdAt": { "type": "string", "format": "date-time" }
+        "createdAt": { "type": "string", "format": "date-time" },
+        "itemName": { "type": ["string", "null"] }
       },
       "required": ["id", "groupId", "userId", "userName", "mealType", "date", "description", "mealNumber", "createdAt"]
     },
@@ -91,9 +105,43 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "groupId", "userId", "userName", "name", "quantity", "unit", "cost", "date", "createdAt"]
+    },
+    "ChatMessage": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ChatMessage",
+      "type": "object",
+      "description": "Represents a chat message within a group.",
+      "properties": {
+        "id": { "type": "string" },
+        "groupId": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "userPhotoURL": { "type": "string", "format": "uri" },
+        "text": { "type": "string" },
+        "imageUrl": { "type": "string", "format": "uri" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "groupId", "userId", "userName", "createdAt"]
     }
   },
   "auth": { "providers": ["password", "google"] },
+  "storage": {
+    "rules": {
+      "profilePictures/{userId}": {
+        "read": "allow read",
+        "write": "request.auth.uid == userId"
+      },
+      "chatImages/{groupId}/{imageId}": {
+        "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+        "write": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
+      },
+       "receipts/{groupId}/{receiptId}": {
+        "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+        "write": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
+      }
+    },
+    "reasoning": "Storage rules are set to allow any authenticated member of a group to read and write images to folders scoped to their specific `groupId`. Profile pictures are public to read but can only be written by the owner of that profile. This prevents users from one group from accessing the images of another group and users from editing other users profile pictures."
+  },
   "firestore": {
     "structure": [
       {
@@ -131,7 +179,7 @@
         "definition": {
           "entityName": "MealLog", "schema": { "$ref": "#/entities/MealLog" },
           "rules": { 
-            "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "list, get": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
             "create": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && request.resource.data.userId == request.auth.uid",
             "update, delete": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && resource.data.userId == request.auth.uid"
           },
@@ -143,7 +191,7 @@
         "definition": {
           "entityName": "Expense", "schema": { "$ref": "#/entities/Expense" },
           "rules": {
-            "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "list, get": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
             "create": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && request.resource.data.userId == request.auth.uid",
             "update, delete": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && resource.data.userId == request.auth.uid"
           },
@@ -155,11 +203,22 @@
         "definition": {
           "entityName": "PurchasedItem", "schema": { "$ref": "#/entities/PurchasedItem" },
           "rules": {
-            "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "list, get": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
             "create": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && request.resource.data.userId == request.auth.uid",
             "update, delete": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && resource.data.userId == request.auth.uid"
           },
           "description": "Stores detailed food item purchases. Accessible by members. Users can only create/edit their own items."
+        }
+      },
+      {
+        "path": "/groups/{groupId}/messages/{messageId}",
+        "definition": {
+          "entityName": "ChatMessage", "schema": { "$ref": "#/entities/ChatMessage" },
+          "rules": {
+            "list, get": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "create": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && request.resource.data.userId == request.auth.uid"
+          },
+          "description": "Stores chat messages. Accessible only by members of the group. Users can only create their own messages."
         }
       }
     ],
