@@ -108,7 +108,11 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
         const memberExpenses = expensesData.filter(e => e.userId === member.id);
         
         const totalMeals = memberMeals.reduce((sum, meal) => sum + (meal.mealNumber || 1), 0);
-        const foodExpenses = memberExpenses.filter(e => e.category === 'Food & Groceries').reduce((sum, e) => sum + e.amount, 0);
+        
+        // Food expenses now include 'Food & Groceries' and 'Other'
+        const foodExpenses = memberExpenses
+          .filter(e => e.category === 'Food & Groceries' || e.category === 'Other')
+          .reduce((sum, e) => sum + e.amount, 0);
         
         const memberUtilityExpenses = memberExpenses
           .filter(e => e.category === 'Electricity' || e.category === 'Gas')
