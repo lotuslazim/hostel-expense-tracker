@@ -56,7 +56,7 @@ export default function InventoryPage() {
 
 
   const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
-  const { data: currentUserData, isLoading: isCurrentUserDataLoading, refetch: refetchUser } = useDoc(currentUserRef);
+  const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
   
   const groupId = currentUserData?.groupId;
 
@@ -137,4 +137,3 @@ export default function InventoryPage() {
     </div>
   );
 }
-

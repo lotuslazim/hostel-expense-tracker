@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Query,
   onSnapshot,
@@ -8,6 +8,7 @@ import {
   FirestoreError,
   QuerySnapshot,
   CollectionReference,
+  getDocs,
 } from 'firebase/firestore';
 
 /** Utility type to add an 'id' field to a given type T. */
@@ -17,6 +18,7 @@ export interface UseCollectionResult<T> {
   data: WithId<T>[] | null;
   isLoading: boolean;
   error: FirestoreError | Error | null;
+  refetch: () => void;
 }
 
 export function useCollection<T = any>(
@@ -26,6 +28,25 @@ export function useCollection<T = any>(
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<FirestoreError | Error | null>(null);
 
+  const fetchData = useCallback(async (sourceQuery: CollectionReference<DocumentData> | Query<DocumentData>) => {
+    setIsLoading(true);
+    try {
+      const snapshot = await getDocs(sourceQuery);
+      const results: WithId<T>[] = snapshot.docs.map(doc => ({
+        ...(doc.data() as T),
+        id: doc.id,
+      }));
+      setData(results);
+      setError(null);
+    } catch (err: any) {
+      console.error('Firestore getDocs error:', err);
+      setError(err);
+      setData(null);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (!targetRefOrQuery) {
       setData(null);
@@ -34,9 +55,10 @@ export function useCollection<T = any>(
       return;
     }
 
-    setIsLoading(true);
-    setError(null);
+    // Initial fetch
+    fetchData(targetRefOrQuery);
 
+    // Set up real-time listener
     const unsubscribe = onSnapshot(
       targetRefOrQuery,
       (snapshot: QuerySnapshot<DocumentData>) => {
@@ -45,7 +67,7 @@ export function useCollection<T = any>(
           id: doc.id,
         }));
         setData(results);
-        setIsLoading(false);
+        setIsLoading(false); // New data arrived
         setError(null);
       },
       (err: FirestoreError) => {
@@ -57,7 +79,14 @@ export function useCollection<T = any>(
     );
 
     return () => unsubscribe();
-  }, [targetRefOrQuery]);
+  }, [targetRefOrQuery, fetchData]);
+  
+  const refetch = useCallback(() => {
+    if(targetRefOrQuery) {
+        fetchData(targetRefOrQuery);
+    }
+  }, [targetRefOrQuery, fetchData]);
 
-  return { data, isLoading, error };
+
+  return { data, isLoading, error, refetch };
 }
