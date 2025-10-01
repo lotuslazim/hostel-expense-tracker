@@ -20,12 +20,10 @@ interface ActivityFeedProps {
 
 export function ActivityFeed({ expenses, selectedDate, currentMonth, onMonthChange }: ActivityFeedProps) {
 
-  const dailyExpenses = useMemo(() => {
+  const monthlyExpenses = useMemo(() => {
     if (!expenses) return [];
-    return expenses
-      .filter(expense => isSameDay((expense.date as any).toDate(), selectedDate))
-      .sort((a, b) => (b.date as any).toDate() - (a.date as any).toDate());
-  }, [expenses, selectedDate]);
+    return expenses.sort((a, b) => (b.date as any).toDate() - (a.date as any).toDate());
+  }, [expenses]);
 
 
   return (
@@ -33,9 +31,9 @@ export function ActivityFeed({ expenses, selectedDate, currentMonth, onMonthChan
       <CardHeader>
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-                <CardTitle>Daily Expense Feed</CardTitle>
+                <CardTitle>Monthly Expense Feed</CardTitle>
                 <CardDescription>
-                  Showing expenses for {format(selectedDate, "PPP")}.
+                  Showing all expenses for {format(currentMonth, "MMMM yyyy")}.
                 </CardDescription>
             </div>
              <MonthSwitcher 
@@ -46,10 +44,11 @@ export function ActivityFeed({ expenses, selectedDate, currentMonth, onMonthChan
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-[calc(85vh-100px)]">
-            {dailyExpenses.length > 0 ? (
+            {monthlyExpenses.length > 0 ? (
                  <Table>
                     <TableHeader>
                         <TableRow>
+                            <TableHead>Date</TableHead>
                             <TableHead>Member</TableHead>
                             <TableHead>Description</TableHead>
                             <TableHead>Category</TableHead>
@@ -57,8 +56,9 @@ export function ActivityFeed({ expenses, selectedDate, currentMonth, onMonthChan
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {dailyExpenses.map((item) => (
+                        {monthlyExpenses.map((item) => (
                             <TableRow key={`expense-${item.id}`}>
+                                <TableCell>{format((item.date as any).toDate(), "MMM d")}</TableCell>
                                 <TableCell>{item.userName}</TableCell>
                                 <TableCell>{item.description || "N/A"}</TableCell>
                                 <TableCell><Badge variant="secondary">{item.category}</Badge></TableCell>
@@ -70,7 +70,7 @@ export function ActivityFeed({ expenses, selectedDate, currentMonth, onMonthChan
             ) : (
                 <div className="text-center py-16 text-muted-foreground flex flex-col items-center justify-center h-[calc(85vh-100px)]">
                     <ShoppingCart className="h-10 w-10 mb-2" />
-                    <p>No expenses logged for this day.</p>
+                    <p>No expenses logged for this month.</p>
                 </div>
             )}
         </ScrollArea>
