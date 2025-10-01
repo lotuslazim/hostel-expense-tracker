@@ -24,9 +24,10 @@ const itemSchema = z.object({
 
 interface AddItemFormProps {
   groupId: string;
+  onItemAdded: () => void;
 }
 
-export function AddItemForm({ groupId }: AddItemFormProps) {
+export function AddItemForm({ groupId, onItemAdded }: AddItemFormProps) {
   const { firestore } = useFirebase();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,7 +36,7 @@ export function AddItemForm({ groupId }: AddItemFormProps) {
     resolver: zodResolver(itemSchema),
     defaultValues: {
       name: "",
-      requiredQuantity: 1,
+      requiredQuantity: "" as any,
       unit: "",
       category: "",
     },
@@ -61,6 +62,7 @@ export function AddItemForm({ groupId }: AddItemFormProps) {
         description: `"${values.name}" has been added to your inventory requirements.`,
       });
       form.reset();
+      onItemAdded(); // Trigger the refresh function passed from the parent
     } catch (error) {
       console.error("Error adding item:", error);
       toast({ variant: "destructive", title: "Error", description: "Could not add item. Please try again." });

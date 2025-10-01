@@ -1,17 +1,17 @@
 
 "use client";
 
-import { useMemo, useState } from 'react';
-import { useFirebase, useUser, useDoc } from '@/firebase';
-import { doc } from 'firebase/firestore';
+import { useMemo, useState, useCallback } from 'react';
+import { useFirebase, useUser, useDoc, useCollection } from '@/firebase';
+import { doc, collection, query, where, Timestamp, orderBy } from 'firebase/firestore';
 import { WelcomeCard } from '@/components/app/welcome-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AddItemForm } from '@/components/inventory/AddItemForm';
 import { InventoryTable } from '@/components/inventory/InventoryTable';
 import { MonthSwitcher } from '@/components/report/month-switcher';
-import { startOfMonth, addMonths, subMonths, format } from 'date-fns';
-import { parseISO } from 'date-fns';
+import { startOfMonth, addMonths, subMonths, format, parseISO, endOfMonth } from 'date-fns';
 import { useSearchParams, useRouter } from 'next/navigation';
+import type { FoodItem, Purchase } from '@/lib/types';
 
 
 function InventoryPageSkeleton() {
@@ -56,9 +56,38 @@ export default function InventoryPage() {
 
 
   const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
-  const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
+  const { data: currentUserData, isLoading: isCurrentUserDataLoading, refetch: refetchUser } = useDoc(currentUserRef);
   
   const groupId = currentUserData?.groupId;
+
+  // Lifted state for data fetching
+  const inventoryQuery = useMemo(() => 
+      (groupId ? query(collection(firestore, `groups/${groupId}/inventory`), orderBy('name', 'asc')) : null),
+      [firestore, groupId]
+  );
+
+  const monthDateRange = useMemo(() => ({
+      start: startOfMonth(currentDate),
+      end: endOfMonth(currentDate),
+  }), [currentDate]);
+
+  const purchasesQuery = useMemo(() => 
+      (groupId ? query(
+          collection(firestore, `groups/${groupId}/purchases`),
+          where("date", ">=", Timestamp.fromDate(monthDateRange.start)),
+          where("date", "<=", Timestamp.fromDate(monthDateRange.end))
+      ) : null),
+      [firestore, groupId, monthDateRange]
+  );
+  
+  const { data: inventoryItems, isLoading: areItemsLoading, refetch: refetchInventory } = useCollection<FoodItem>(inventoryQuery);
+  const { data: purchases, isLoading: arePurchasesLoading, refetch: refetchPurchases } = useCollection<Purchase>(purchasesQuery);
+
+  const handleDataRefresh = useCallback(() => {
+    refetchInventory();
+    refetchPurchases();
+  }, [refetchInventory, refetchPurchases]);
+
 
   const handleMonthChange = (direction: "next" | "prev") => {
     const newDate = direction === "next" ? addMonths(currentDate, 1) : subMonths(currentDate, 1);
@@ -75,6 +104,8 @@ export default function InventoryPage() {
   if (!groupId) {
     return <WelcomeCard />;
   }
+  
+  const isDataLoading = areItemsLoading || arePurchasesLoading;
 
   return (
     <div className="space-y-6">
@@ -93,10 +124,14 @@ export default function InventoryPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         <div className="lg:col-span-1 space-y-6">
-           <AddItemForm groupId={groupId}/>
+           <AddItemForm groupId={groupId} onItemAdded={handleDataRefresh} />
         </div>
         <div className="lg:col-span-2">
-            <InventoryTable groupId={groupId} selectedMonth={currentDate} />
+            <InventoryTable 
+              inventoryItems={inventoryItems} 
+              purchases={purchases} 
+              isLoading={isDataLoading} 
+            />
         </div>
       </div>
     </div>

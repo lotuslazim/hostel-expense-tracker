@@ -1,21 +1,18 @@
 
 "use client";
 
-import { useMemo, useState } from 'react';
-import { useCollection, useFirebase, useUser } from '@/firebase';
-import { collection, query, where, Timestamp, orderBy } from 'firebase/firestore';
-import { startOfMonth, endOfMonth, format } from 'date-fns';
+import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { FoodItem, Purchase } from '@/lib/types';
 import { PackageOpen } from 'lucide-react';
-import { Button } from '../ui/button';
 
 interface InventoryTableProps {
-    groupId: string;
-    selectedMonth: Date;
+    inventoryItems: FoodItem[] | null;
+    purchases: Purchase[] | null;
+    isLoading: boolean;
 }
 
 interface ProcessedInventoryItem extends FoodItem {
@@ -36,7 +33,7 @@ function InventorySkeleton() {
             <CardContent>
                 <div className="space-y-4">
                     {[...Array(5)].map((_, i) => (
-                        <div key={i} className="flex items-center space-x-4">
+                        <div key={i} className="flex items-center space-x-4 p-4">
                             <div className="space-y-2 flex-grow">
                                 <Skeleton className="h-4 w-3/4" />
                                 <Skeleton className="h-4 w-1/2" />
@@ -50,31 +47,7 @@ function InventorySkeleton() {
     );
 }
 
-export function InventoryTable({ groupId, selectedMonth }: InventoryTableProps) {
-    const { firestore } = useFirebase();
-
-    const inventoryQuery = useMemo(() => 
-        (groupId ? query(collection(firestore, `groups/${groupId}/inventory`), orderBy('name', 'asc')) : null),
-        [firestore, groupId]
-    );
-
-    const monthDateRange = useMemo(() => ({
-        start: startOfMonth(selectedMonth),
-        end: endOfMonth(selectedMonth),
-    }), [selectedMonth]);
-
-    const purchasesQuery = useMemo(() => 
-        (groupId ? query(
-            collection(firestore, `groups/${groupId}/purchases`),
-            where("date", ">=", Timestamp.fromDate(monthDateRange.start)),
-            where("date", "<=", Timestamp.fromDate(monthDateRange.end))
-        ) : null),
-        [firestore, groupId, monthDateRange]
-    );
-
-    const { data: inventoryItems, isLoading: areItemsLoading } = useCollection<FoodItem>(inventoryQuery);
-    const { data: purchases, isLoading: arePurchasesLoading } = useCollection<Purchase>(purchasesQuery);
-
+export function InventoryTable({ inventoryItems, purchases, isLoading }: InventoryTableProps) {
     const processedInventory = useMemo((): ProcessedInventoryItem[] => {
         if (!inventoryItems || !purchases) return [];
 
@@ -96,8 +69,6 @@ export function InventoryTable({ groupId, selectedMonth }: InventoryTableProps) 
             };
         });
     }, [inventoryItems, purchases]);
-
-    const isLoading = areItemsLoading || arePurchasesLoading;
 
     if (isLoading) {
         return <InventorySkeleton />;
@@ -156,5 +127,3 @@ export function InventoryTable({ groupId, selectedMonth }: InventoryTableProps) 
         </Card>
     );
 }
-
-    
