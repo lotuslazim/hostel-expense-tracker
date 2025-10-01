@@ -4,7 +4,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { Flame, Zap, Utensils, Scale, Users, ChevronDown, AlertTriangle } from "lucide-react";
+import { Utensils, Scale, Users, ChevronDown, AlertTriangle, Zap } from "lucide-react";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
 import { doc, collection, query, where, type Timestamp } from "firebase/firestore";
 import { useMemo } from "react";
@@ -14,7 +14,6 @@ import type { MealLog, Expense } from "@/lib/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
 interface MonthlySummaryProps {
   month: Date;
@@ -107,47 +106,27 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
           });
           
         const memberExpenses = expensesData.filter(e => e.userId === member.id);
-        
-        const totalMeals = memberMeals.reduce((sum, meal) => sum + (meal.mealNumber || 1), 0);
-        
-        // Food expenses now include 'Food & Groceries' and 'Other'
-        const foodExpenses = memberExpenses
-          .filter(e => e.category === 'Food & Groceries' || e.category === 'Other')
-          .reduce((sum, e) => sum + e.amount, 0);
-        
-        const memberUtilityExpenses = memberExpenses
-          .filter(e => e.category === 'Electricity' || e.category === 'Gas')
-          .sort((a, b) => {
-            const dateA = a.date instanceof Date ? a.date : (a.date as Timestamp)?.toDate();
-            const dateB = b.date instanceof Date ? b.date : (b.date as Timestamp)?.toDate();
-            return dateB.getTime() - dateA.getTime();
-          });
-          
-        const utilityExpensesPaid = memberUtilityExpenses.reduce((sum, e) => sum + e.amount, 0);
-        const otherExpenses = memberExpenses.filter(e => e.category === 'Other').reduce((sum, e) => sum + e.amount, 0);
         const totalPaid = memberExpenses.reduce((sum, e) => sum + e.amount, 0);
-
+        
         return {
           id: member.id,
           name: member.displayName || member.email.split('@')[0],
-          meals: totalMeals,
-          memberMeals,
-          foodExpenses: foodExpenses,
-          utilityExpensesPaid: utilityExpensesPaid,
-          memberUtilityExpenses,
-          otherExpenses: otherExpenses,
+          meals: memberMeals,
           totalPaid,
         };
     });
 
-    const totalGroupFoodExpenses = processedMembers.reduce((acc, member) => acc + member.foodExpenses, 0);
-    const totalGroupMeals = processedMembers.reduce((acc, member) => acc + member.meals, 0);
+    const totalGroupMeals = processedMembers.reduce((acc, member) => acc + member.meals.reduce((s, m) => s + m.mealNumber, 0), 0);
     const memberCount = processedMembers.length > 0 ? processedMembers.length : 1;
-    const mealRate = totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
+    
+    const totalFoodExpenses = expensesData
+      .filter(e => e.category === 'Food & Groceries' || e.category === 'Other')
+      .reduce((sum, e) => sum + e.amount, 0);
+    
+    const mealRate = totalGroupMeals > 0 ? totalFoodExpenses / totalGroupMeals : 0;
 
     return {
         processedMembers,
-        totalGroupFoodExpenses,
         totalGroupMeals,
         memberCount,
         mealRate,
@@ -169,7 +148,6 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
 
   const {
       processedMembers,
-      totalGroupFoodExpenses,
       totalGroupMeals,
       memberCount,
       mealRate,
@@ -185,84 +163,39 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     return jsDate ? format(jsDate, 'MMM d, yyyy') : "N/A";
   };
 
-  const formatShortDateSafe = (date: Date | Timestamp | undefined): string => {
-    if (!date) return "N/A";
-    const jsDate = date instanceof Date ? date : (date as Timestamp)?.toDate?.();
-    return jsDate ? format(jsDate, 'MMM d') : "N/A";
-  };
 
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="lg:col-span-1 flex flex-col">
+        <Card>
             <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Utensils/> Food & Meals</CardTitle>
+                <CardTitle className="flex items-center gap-2"><Utensils/> Meals & Rate</CardTitle>
             </CardHeader>
-            <CardContent className="flex-grow grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Total food expenses</p>
-                  <p className="text-2xl font-bold">৳{totalGroupFoodExpenses.toFixed(0)}</p>
-                </div>
+            <CardContent className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Total meals consumed</p>
                   <p className="text-2xl font-bold">{totalGroupMeals}</p>
                 </div>
-            </CardContent>
-            <CardContent>
-                <div className="text-center p-3 bg-primary/10 rounded-lg">
-                  <p className="text-sm font-medium text-primary/80">Calculated Meal Rate</p>
-                  <p className="text-xl font-bold text-primary">৳{mealRate.toFixed(2)} / meal</p>
+                 <div className="text-right">
+                  <p className="text-sm text-muted-foreground">Calculated Meal Rate</p>
+                  <p className="text-2xl font-bold text-primary">৳{mealRate.toFixed(2)}</p>
               </div>
             </CardContent>
         </Card>
         
-       <Card className="lg:col-span-1 flex flex-col">
+       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2"><Zap/> Utility Payments</CardTitle>
-           <CardDescription>Click a member to see their detailed payments.</CardDescription>
+          <CardTitle className="flex items-center gap-2"><Zap/> Expenses Overview</CardTitle>
         </CardHeader>
-        <CardContent className="flex-grow">
-          {processedMembers.length > 0 ? (
-            processedMembers.map((member) => (
-              <Collapsible key={member.id} className="group border-b last:border-b-0 py-2">
-                <CollapsibleTrigger className="flex justify-between items-center w-full group">
-                  <span className="font-medium">{member.name}</span>
-                  <div className="flex items-center gap-4">
-                    <span className="text-muted-foreground font-semibold">৳{member.utilityExpensesPaid.toFixed(2)}</span>
-                     <div className="w-9 h-9 p-0 flex items-center justify-center">
-                        <ChevronDown className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                    </div>
-                  </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  {member.memberUtilityExpenses.length > 0 ? (
-                    <Table className="mt-2 bg-muted/50 rounded">
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-[100px]">Date</TableHead>
-                          <TableHead>Category</TableHead>
-                          <TableHead className="text-right">Amount</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {member.memberUtilityExpenses.map(expense => (
-                          <TableRow key={expense.id}>
-                            <TableCell>{formatShortDateSafe(expense.date)}</TableCell>
-                            <TableCell><Badge variant="outline">{expense.category}</Badge></TableCell>
-                            <TableCell className="text-right">৳{expense.amount.toFixed(2)}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  ) : (
-                    <p className="text-sm text-muted-foreground text-center py-4">No utility expenses paid by this member.</p>
-                  )}
-                </CollapsibleContent>
-              </Collapsible>
-            ))
-          ) : (
-            <p className="text-center text-muted-foreground py-4">No utility data available.</p>
-          )}
+        <CardContent className="grid grid-cols-2 gap-4">
+           <div>
+              <p className="text-sm text-muted-foreground">Total Group Expenses</p>
+              <p className="text-2xl font-bold">৳{totalGroupExpenses.toFixed(2)}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-muted-foreground">Share Per Member</p>
+              <p className="text-2xl font-bold text-primary">৳{perMemberShare.toFixed(2)}</p>
+            </div>
         </CardContent>
       </Card>
       </div>
@@ -273,7 +206,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
             <Scale /> Final Settlement
           </CardTitle>
           <CardDescription>
-            A summary of who owes what, including all food, utility, and other costs for the month. Click a member to see their meal history.
+            A summary of who owes what for all costs for the month. Click a member to see their meal history.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -281,8 +214,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
             <TableHeader>
               <TableRow>
                 <TableHead>Member</TableHead>
-                <TableHead>Food Paid</TableHead>
-                <TableHead>Utilities Paid</TableHead>
+                <TableHead>Total Paid</TableHead>
                 <TableHead>Share of Costs</TableHead>
                 <TableHead className="text-right">Final Balance</TableHead>
               </TableRow>
@@ -310,8 +242,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                           </CollapsibleTrigger>
                           {member.name}
                         </TableCell>
-                        <TableCell>৳{member.foodExpenses.toFixed(2)}</TableCell>
-                        <TableCell>৳{member.utilityExpensesPaid.toFixed(2)}</TableCell>
+                        <TableCell>৳{member.totalPaid.toFixed(2)}</TableCell>
                         <TableCell>৳{perMemberShare.toFixed(2)}</TableCell>
                         <TableCell
                           className={cn(
@@ -330,10 +261,10 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                         <TableCell colSpan={5} className="p-0 bg-muted/50">
                           <CollapsibleContent asChild>
                             <div className="p-4">
-                              {member.memberMeals.length > 0 ? (
+                              {member.meals.length > 0 ? (
                                 <>
                                   <h4 className="font-semibold mb-2 text-sm">
-                                    Meal History for {member.name} ({member.meals} total meals)
+                                    Meal History for {member.name} ({member.meals.reduce((s, m) => s + m.mealNumber, 0)} total meals)
                                   </h4>
                                   <Table>
                                     <TableHeader>
@@ -345,7 +276,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                                       </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                      {member.memberMeals.map((meal) => (
+                                      {member.meals.map((meal) => (
                                         <TableRow key={meal.id}>
                                           <TableCell>
                                             {formatDateSafe(meal.date)}
@@ -375,7 +306,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                 })
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center h-24">
+                  <TableCell colSpan={4} className="text-center h-24">
                     <Users className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
                     <p className="text-muted-foreground">No members found.</p>
                   </TableCell>
@@ -388,5 +319,3 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     </div>
   );
 }
-
-    
