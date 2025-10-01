@@ -11,7 +11,7 @@
         "id": { "type": "string", "description": "Unique identifier for the group entity." },
         "groupName": { "type": "string", "description": "The name of the group or flat." },
         "invitationCode": { "type": "string", "description": "Unique code used for users to join the group." },
-        "adminId": { "type": "string", "description": "Reference to User who is the administrator of the group." },
+        "adminId": { "type": "string",- "description": "Reference to User who is the administrator of the group." },
         "settings": {
           "type": "object",
           "description": "Customizable settings for the group.",
@@ -100,7 +100,7 @@
         "name": { "type": "string", "description": "Name of the item (e.g., 'Rice', 'Olive Oil')." },
         "quantity": { "type": "number", "description": "Quantity of the item." },
         "unit": { "type": "string", "description": "Unit of measurement (e.g., 'kg', 'L', 'pcs')." },
-        "cost": { "type": "number", "description": "Total cost of the item(s)." },
+        "cost": { "type": "number", "description": "Total cost for this quantity of the item." },
         "date": { "type": "string", "format": "date-time", "description": "The date the item was purchased." },
         "createdAt": { "type": "string", "format": "date-time" }
       },
