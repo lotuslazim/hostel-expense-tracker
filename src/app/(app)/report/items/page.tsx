@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
@@ -10,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle, Users, ChevronLeft, ShoppingBag } from "lucide-react";
+import { AlertTriangle, Users, ChevronLeft, ShoppingBag, List } from "lucide-react";
 import { WelcomeCard } from "@/components/app/welcome-card";
 import { Button } from "@/components/ui/button";
 import { MonthSwitcher } from "@/components/report/month-switcher";
@@ -29,9 +30,14 @@ function PageSkeleton() {
                 </div>
                  <Skeleton className="h-10 w-[330px]" />
             </div>
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <Skeleton className="h-96 w-full" />
-                <Skeleton className="h-96 w-full" />
+             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-1 space-y-8">
+                    <Skeleton className="h-96 w-full" />
+                </div>
+                <div className="lg:col-span-2 space-y-8">
+                    <Skeleton className="h-64 w-full" />
+                    <Skeleton className="h-80 w-full" />
+                </div>
             </div>
         </div>
     );
@@ -99,13 +105,13 @@ export default function FoodItemAnalysisPage() {
 
     const processedData = useMemo(() => {
         if (!membersData || !itemsData) {
-            return { memberContributions: [] };
+            return { memberContributions: [], aggregatedItems: [] };
         }
 
         const memberContributions = membersData.map(member => {
             const totalSpent = itemsData
-                .filter(item => item.userId === member.id)
-                .reduce((sum, item) => sum + (item.cost || 0), 0);
+            .filter(item => item.userId === member.id)
+            .reduce((sum, item) => sum + (item.cost || 0), 0);
 
             return {
                 id: member.id,
@@ -114,7 +120,24 @@ export default function FoodItemAnalysisPage() {
             };
         });
 
-        return { memberContributions };
+        const aggregatedItems = Object.values(
+            itemsData.reduce((acc, item) => {
+                if (!acc[item.name]) {
+                    acc[item.name] = { 
+                        name: item.name, 
+                        totalQuantity: 0, 
+                        totalCost: 0, 
+                        units: new Set<string>() 
+                    };
+                }
+                acc[item.name].totalQuantity += item.quantity || 0;
+                acc[item.name].totalCost += item.cost || 0;
+                acc[item.name].units.add(item.unit);
+                return acc;
+            }, {} as Record<string, { name: string; totalQuantity: number; totalCost: number; units: Set<string> }> )
+        ).sort((a, b) => b.totalCost - a.totalCost);
+
+        return { memberContributions, aggregatedItems };
     }, [membersData, itemsData]);
 
     const handleMonthChange = (direction: "next" | "prev") => {
@@ -138,7 +161,7 @@ export default function FoodItemAnalysisPage() {
     if (isDataLoading) return <PageSkeleton />;
     if (hasError) return <DataError />;
     
-    const { memberContributions } = processedData;
+    const { memberContributions, aggregatedItems } = processedData;
 
     return (
         <div className="space-y-6">
@@ -149,53 +172,97 @@ export default function FoodItemAnalysisPage() {
                         <span className="sr-only">Back</span>
                     </Button>
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight font-headline">Monthly Food Item Analysis</h1>
+                        <h1 className="text-3xl font-bold tracking-tight font-headline">Food Item Analysis</h1>
                         <p className="text-muted-foreground">A detailed breakdown of food items purchased in {format(currentDate, "MMMM yyyy")}.</p>
                     </div>
                 </div>
                 <MonthSwitcher currentDate={currentDate} onMonthChange={handleMonthChange} />
             </div>
 
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <AddPurchasedItemCard />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-1">
+                    <AddPurchasedItemCard />
+                </div>
                 
-                <Card>
-                    <CardHeader>
-                         <CardTitle className="flex items-center gap-2">
-                           <ShoppingBag /> Member Spending on Items
-                        </CardTitle>
-                        <CardDescription>
-                            Total amount spent by each member on individually logged food items this month.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Member</TableHead>
-                                    <TableHead className="text-right">Total Spent</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                            {memberContributions.length > 0 ? memberContributions.map(member => (
-                                <TableRow key={member.id}>
-                                    <TableCell className="font-medium">{member.name}</TableCell>
-                                    <TableCell className="text-right font-semibold">৳{member.totalSpent.toFixed(2)}</TableCell>
-                                </TableRow>
-                            )) : (
+                <div className="lg:col-span-2 space-y-8">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                            <ShoppingBag /> Member Spending on Items
+                            </CardTitle>
+                            <CardDescription>
+                                Total amount spent by each member on individually logged food items this month.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Table>
+                                <TableHeader>
                                     <TableRow>
-                                        <TableCell colSpan={2} className="h-24 text-center">
+                                        <TableHead>Member</TableHead>
+                                        <TableHead className="text-right">Total Spent</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                {memberContributions.length > 0 ? memberContributions.map(member => (
+                                    <TableRow key={member.id}>
+                                        <TableCell className="font-medium">{member.name}</TableCell>
+                                        <TableCell className="text-right font-semibold">৳{member.totalSpent.toFixed(2)}</TableCell>
+                                    </TableRow>
+                                )) : (
+                                        <TableRow>
+                                            <TableCell colSpan={2} className="h-24 text-center">
+                                                <div className="flex flex-col items-center gap-2">
+                                                    <Users className="h-8 w-8 text-muted-foreground" />
+                                                    <p className="text-muted-foreground">No items purchased this month.</p>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                )}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                               <List /> Aggregated Item Summary
+                            </CardTitle>
+                            <CardDescription>
+                                Summary of all unique items purchased by the group this month.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Item Name</TableHead>
+                                        <TableHead>Total Quantity</TableHead>
+                                        <TableHead className="text-right">Total Cost</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                {aggregatedItems.length > 0 ? aggregatedItems.map(item => (
+                                    <TableRow key={item.name}>
+                                        <TableCell className="font-medium">{item.name}</TableCell>
+                                        <TableCell>{item.totalQuantity} {Array.from(item.units).join(', ')}</TableCell>
+                                        <TableCell className="text-right font-semibold">৳{item.totalCost.toFixed(2)}</TableCell>
+                                    </TableRow>
+                                )) : (
+                                    <TableRow>
+                                        <TableCell colSpan={3} className="h-24 text-center">
                                             <div className="flex flex-col items-center gap-2">
-                                                <Users className="h-8 w-8 text-muted-foreground" />
-                                                <p className="text-muted-foreground">No items purchased this month.</p>
+                                                <ShoppingBag className="h-8 w-8 text-muted-foreground" />
+                                                <p className="text-muted-foreground">No items logged this month.</p>
                                             </div>
                                         </TableCell>
                                     </TableRow>
-                            )}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
+                                )}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
         </div>
     );
