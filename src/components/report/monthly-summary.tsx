@@ -97,10 +97,14 @@ function DataError() {
 // Custom collapsible row component for table
 function CollapsibleMemberRow({ 
   member, 
-  perMemberShare 
+  perMemberShare,
+  mealCost,
+  utilityShare,
 }: { 
   member: ProcessedMember;
   perMemberShare: number;
+  mealCost: number;
+  utilityShare: number;
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const finalBalance = member.totalPaid - perMemberShare;
@@ -144,9 +148,20 @@ function CollapsibleMemberRow({
       {isExpanded && (
         <TableRow className="bg-muted/30">
           <TableCell colSpan={4} className="p-0">
-            <div className="p-4">
+            <div className="p-4 space-y-4">
+              <div className="grid grid-cols-2 gap-4 text-center">
+                  <div className="bg-background/50 p-3 rounded-lg">
+                    <p className="text-sm text-muted-foreground">Total Meal Cost</p>
+                    <p className="font-semibold text-lg">৳{mealCost.toFixed(2)}</p>
+                  </div>
+                  <div className="bg-background/50 p-3 rounded-lg">
+                    <p className="text-sm text-muted-foreground">Utilities Share</p>
+                    <p className="font-semibold text-lg">৳{utilityShare.toFixed(2)}</p>
+                  </div>
+              </div>
+
               {member.memberMeals?.length > 0 ? (
-                <>
+                <div>
                   <h4 className="font-semibold mb-2 text-sm">
                     Meal History for {member.name} ({(member.meals || 0)} total meals)
                   </h4>
@@ -170,7 +185,7 @@ function CollapsibleMemberRow({
                       ))}
                     </TableBody>
                   </Table>
-                </>
+                </div>
               ) : (
                 <EmptyState icon={Users} message="No meals logged by this member." />
               )}
@@ -373,6 +388,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
   } = processedData;
 
   const perMemberShare = totalGroupExpenses / (memberCount || 1);
+  const utilitySharePerMember = totalUtilityExpenses / (memberCount || 1);
 
   return (
     <div className="space-y-6">
@@ -452,6 +468,8 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                     key={member.id}
                     member={member}
                     perMemberShare={perMemberShare}
+                    mealCost={member.meals * mealRate}
+                    utilityShare={utilitySharePerMember}
                   />
                 ))
               ) : (
@@ -475,5 +493,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
       </Card>
     </div>
   );
+
+    
 
     
