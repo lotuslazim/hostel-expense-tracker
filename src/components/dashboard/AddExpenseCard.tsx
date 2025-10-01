@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -23,21 +23,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useFirebase, useUser, useDoc } from "@/firebase";
-import { doc, addDoc, collection, serverTimestamp, Timestamp } from "firebase/firestore";
+import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
+import { doc, addDoc, collection, serverTimestamp, Timestamp, writeBatch, query, getDocs, where } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ShoppingCart, Camera, Upload, X, Paperclip } from "lucide-react";
+import { Loader2, ShoppingCart, Camera, Upload, X, Paperclip, Plus, Trash2 } from "lucide-react";
 import { sanitizeFirestoreData } from "@/lib/utils";
 import { Skeleton } from "../ui/skeleton";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import imageCompression from "browser-image-compression";
 import { Alert, AlertTitle, AlertDescription } from "../ui/alert";
-
+import type { FoodItem, PurchasedItem } from "@/lib/types";
 
 interface AddExpenseCardProps {
   selectedDate: Date;
 }
+
+const purchasedItemSchema = z.object({
+  name: z.string().min(1, "Item name is required."),
+  quantity: z.coerce.number().min(0.1, "Quantity is required."),
+  unit: z.string().min(1, "Unit is required."),
+  cost: z.coerce.number().min(0.01, "Cost is required."),
+  itemId: z.string().optional(), // To link to master FoodItem
+});
+
 
 export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   const { firestore, storage } = useFirebase();
@@ -54,6 +63,8 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const [isCameraDialogOpen, setIsCameraDialogOpen] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [showInventoryFields, setShowInventoryFields] = useState(false);
+
 
   const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
   const { data: currentUserData } = useDoc(currentUserRef);
@@ -61,6 +72,12 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
 
   const groupRef = useMemo(() => (groupId ? doc(firestore, "groups", groupId) : null), [firestore, groupId]);
   const { data: groupData, isLoading: isGroupDataLoading } = useDoc(groupRef);
+
+  const inventoryQuery = useMemo(() => 
+    (groupId ? query(collection(firestore, `groups/${groupId}/inventory`)) : null),
+    [firestore, groupId]
+  );
+  const { data: inventoryItems, isLoading: areItemsLoading } = useCollection<FoodItem>(inventoryQuery);
 
   const isExpenseDescriptionRequired = useMemo(() => groupData?.settings?.isExpenseDescriptionRequired ?? false, [groupData]);
   const isUtilityReceiptRequired = useMemo(() => groupData?.settings?.isUtilityReceiptRequired ?? false, [groupData]);
@@ -76,6 +93,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
             required_error: "Please select a category.",
         }),
         receipt: z.instanceof(File).optional(),
+        purchasedItems: z.array(purchasedItemSchema).optional(),
     }).refine(data => {
         if((data.category === 'Electricity' || data.category === 'Gas') && isUtilityReceiptRequired) {
             return !!data.receipt;
@@ -92,14 +110,33 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     defaultValues: {
       amount: 0,
       description: "",
+      purchasedItems: [],
     },
+  });
+  
+  const { fields, append, remove, update } = useFieldArray({
+    control: form.control,
+    name: "purchasedItems",
   });
 
   const categoryValue = form.watch("category");
+  const purchasedItemsValue = form.watch("purchasedItems");
 
   useEffect(() => {
     setShowReceipt(categoryValue === 'Electricity' || categoryValue === 'Gas');
-  }, [categoryValue]);
+    setShowInventoryFields(categoryValue === 'Food & Groceries');
+    if (categoryValue !== 'Food & Groceries') {
+      // Clear purchased items if category changes
+      form.setValue('purchasedItems', []);
+    }
+  }, [categoryValue, form]);
+
+  useEffect(() => {
+    if (showInventoryFields && purchasedItemsValue && purchasedItemsValue.length > 0) {
+      const totalItemCost = purchasedItemsValue.reduce((acc, item) => acc + (item.cost || 0), 0);
+      form.setValue('amount', totalItemCost, { shouldValidate: true });
+    }
+  }, [purchasedItemsValue, showInventoryFields, form]);
   
   useEffect(() => {
     if (!isCameraDialogOpen) {
@@ -179,6 +216,16 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
       }
   };
 
+  const findMasterItemId = async (itemName: string) => {
+    if (!groupId) return undefined;
+    const q = query(collection(firestore, `groups/${groupId}/inventory`), where("name", "==", itemName));
+    const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
+        return querySnapshot.docs[0].id;
+    }
+    return undefined;
+  };
+
   async function onSubmit(values: z.infer<typeof expenseSchema>) {
     if (!currentUser || !groupId) {
       toast({ variant: "destructive", title: "Error", description: "You must be in a group to add an expense." });
@@ -189,40 +236,71 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     let receiptUrl: string | undefined = undefined;
 
     try {
-      if (values.receipt) {
-        const storageRef = ref(storage, `receipts/${groupId}/${Date.now()}_${values.receipt.name}`);
-        const snapshot = await uploadBytes(storageRef, values.receipt);
-        receiptUrl = await getDownloadURL(snapshot.ref);
-      }
+        const batch = writeBatch(firestore);
 
-      const expenseData = sanitizeFirestoreData({
-        amount: values.amount,
-        description: values.description || "",
-        category: values.category,
-        receiptPhotoUrl: receiptUrl,
-        userId: currentUser.uid,
-        userName: currentUser.displayName || currentUser.email?.split('@')[0],
-        date: Timestamp.fromDate(selectedDate),
-        createdAt: serverTimestamp(),
-      });
+        // 1. Handle receipt upload
+        if (values.receipt) {
+            const storageRef = ref(storage, `receipts/${groupId}/${Date.now()}_${values.receipt.name}`);
+            const snapshot = await uploadBytes(storageRef, values.receipt);
+            receiptUrl = await getDownloadURL(snapshot.ref);
+        }
 
-      await addDoc(collection(firestore, `groups/${groupId}/expenses`), expenseData);
+        // 2. Create the main expense document
+        const expenseRef = doc(collection(firestore, `groups/${groupId}/expenses`));
+        const expenseData = sanitizeFirestoreData({
+            amount: values.amount,
+            description: values.description || "",
+            category: values.category,
+            receiptPhotoUrl: receiptUrl,
+            userId: currentUser.uid,
+            userName: currentUser.displayName || currentUser.email?.split('@')[0],
+            date: Timestamp.fromDate(selectedDate),
+            createdAt: serverTimestamp(),
+        });
+        batch.set(expenseRef, expenseData);
 
-      toast({
-        title: "Expense Added",
-        description: `Your ${values.category.toLowerCase()} expense of ৳${values.amount} has been logged.`,
-      });
-      form.reset({ amount: 0, description: "", category: undefined, receipt: undefined });
-      clearImage();
+        // 3. Create purchase documents if it's a food expense
+        if (values.category === 'Food & Groceries' && values.purchasedItems) {
+            for (const item of values.purchasedItems) {
+                const purchaseRef = doc(collection(firestore, `groups/${groupId}/purchases`));
+                
+                const masterItemId = await findMasterItemId(item.name);
+
+                const purchaseData = sanitizeFirestoreData({
+                    itemId: masterItemId,
+                    itemName: item.name,
+                    quantity: item.quantity,
+                    cost: item.cost,
+                    unit: item.unit,
+                    unitPrice: item.cost / item.quantity,
+                    date: Timestamp.fromDate(selectedDate),
+                    userId: currentUser.uid,
+                    userName: currentUser.displayName || currentUser.email?.split('@')[0],
+                    groupId,
+                });
+                batch.set(purchaseRef, purchaseData);
+            }
+        }
+        
+        // 4. Commit batch
+        await batch.commit();
+
+        toast({
+            title: "Expense Added",
+            description: `Your ${values.category.toLowerCase()} expense of ৳${values.amount} has been logged.`,
+        });
+        form.reset({ amount: 0, description: "", category: undefined, receipt: undefined, purchasedItems: [] });
+        clearImage();
+
     } catch (error) {
-      console.error("Error adding expense:", error);
-      toast({ variant: "destructive", title: "Error", description: "Could not log expense. Please try again." });
+        console.error("Error adding expense:", error);
+        toast({ variant: "destructive", title: "Error", description: "Could not log expense. Please try again." });
     } finally {
-      setIsSubmitting(false);
+        setIsSubmitting(false);
     }
   }
   
-  if (isGroupDataLoading && groupId) {
+  if ((isGroupDataLoading || areItemsLoading) && groupId) {
     return (
         <Card>
             <CardHeader>
@@ -277,7 +355,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                     <FormItem>
                     <FormLabel>Amount (৳)</FormLabel>
                     <FormControl>
-                        <Input type="number" placeholder="0.00" {...field} />
+                        <Input type="number" placeholder="0.00" {...field} disabled={showInventoryFields && fields.length > 0} />
                     </FormControl>
                     <FormMessage />
                     </FormItem>
@@ -290,13 +368,82 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                     <FormItem>
                     <FormLabel>Description {isExpenseDescriptionRequired ? '' : '(Optional)'}</FormLabel>
                     <FormControl>
-                        <Input placeholder="e.g., Weekly groceries" {...field} />
+                        <Input placeholder="e.g., Weekly groceries at Agora" {...field} />
                     </FormControl>
                     <FormMessage />
                     </FormItem>
                 )}
                 />
                 
+                {showInventoryFields && (
+                  <div className="space-y-4 rounded-md border p-4">
+                      <h4 className="font-medium">Log Purchased Items</h4>
+                      {fields.map((field, index) => (
+                        <div key={field.id} className="grid grid-cols-12 gap-2 items-start border-t pt-3">
+                           <FormField
+                              control={form.control}
+                              name={`purchasedItems.${index}.name`}
+                              render={({ field }) => (
+                                <FormItem className="col-span-5">
+                                  <FormLabel className="sr-only">Item Name</FormLabel>
+                                  <FormControl>
+                                      <Input placeholder="Item name" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name={`purchasedItems.${index}.quantity`}
+                              render={({ field }) => (
+                                <FormItem className="col-span-2">
+                                  <FormLabel className="sr-only">Qty</FormLabel>
+                                  <FormControl><Input type="number" placeholder="Qty" {...field}/></FormControl>
+                                  <FormMessage/>
+                                </FormItem>
+                              )}
+                            />
+                             <FormField
+                              control={form.control}
+                              name={`purchasedItems.${index}.unit`}
+                              render={({ field }) => (
+                                <FormItem className="col-span-2">
+                                  <FormLabel className="sr-only">Unit</FormLabel>
+                                  <FormControl><Input placeholder="Unit" {...field}/></FormControl>
+                                  <FormMessage/>
+                                </FormItem>
+                              )}
+                            />
+                             <FormField
+                              control={form.control}
+                              name={`purchasedItems.${index}.cost`}
+                              render={({ field }) => (
+                                <FormItem className="col-span-2">
+                                  <FormLabel className="sr-only">Cost</FormLabel>
+                                  <FormControl><Input type="number" placeholder="Cost" {...field}/></FormControl>
+                                  <FormMessage/>
+                                </FormItem>
+                              )}
+                            />
+                           <div className="col-span-1 flex items-center h-10">
+                              <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
+                                <Trash2 className="h-4 w-4 text-destructive"/>
+                              </Button>
+                           </div>
+                        </div>
+                      ))}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => append({ name: "", quantity: 1, unit: "", cost: 0 })}
+                      >
+                        <Plus className="mr-2 h-4 w-4" /> Add Item
+                      </Button>
+                  </div>
+                )}
+
                 {showReceipt && (
                   <FormField
                     control={form.control}
@@ -364,3 +511,5 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     </Card>
   );
 }
+
+    

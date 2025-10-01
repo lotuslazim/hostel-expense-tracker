@@ -53,13 +53,23 @@ export interface FoodItem {
 
 export interface Purchase {
     id: string;
-    itemId: string;
+    itemId?: string; // Optional because a purchase might not be linked to a master item
     itemName: string;
     quantity: number;
     cost: number;
+    unit: string;
     unitPrice: number;
     date: Timestamp;
     userId: string;
     userName: string;
     groupId: string;
 }
+
+export interface PurchasedItem {
+    name: string;
+    quantity: number;
+    unit: string;
+    cost: number;
+}
+
+    

@@ -11,7 +11,7 @@ import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { FoodItem, Purchase } from '@/lib/types';
 import { PackageOpen } from 'lucide-react';
-import { LogPurchaseDialog } from './LogPurchaseDialog';
+import { Button } from '../ui/button';
 
 interface InventoryTableProps {
     groupId: string;
@@ -116,9 +116,8 @@ export function InventoryTable({ groupId, selectedMonth }: InventoryTableProps) 
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-[40%]">Item</TableHead>
+                                <TableHead className="w-[60%]">Item</TableHead>
                                 <TableHead>Status</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -142,9 +141,6 @@ export function InventoryTable({ groupId, selectedMonth }: InventoryTableProps) 
                                             </div>
                                         </div>
                                     </TableCell>
-                                    <TableCell className="text-right">
-                                       <LogPurchaseDialog item={item} groupId={groupId} />
-                                    </TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -160,3 +156,5 @@ export function InventoryTable({ groupId, selectedMonth }: InventoryTableProps) 
         </Card>
     );
 }
+
+    
