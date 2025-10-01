@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -131,7 +132,7 @@ function CollapsibleMemberRow({
             "text-right font-bold p-0",
           )}
         >
-          <div className={cn("px-4 py-4 rounded-md", finalBalance >= 0 ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800")}>
+          <div className={cn("px-4 py-4 rounded-md", finalBalance >= 0 ? "text-green-800" : "text-red-800")}>
             {finalBalance >= 0
               ? `Gets: ৳${(finalBalance || 0).toFixed(2)}`
               : `Owes: ৳${Math.abs(finalBalance || 0).toFixed(2)}`}
@@ -474,3 +475,5 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
       </Card>
     </div>
   );
+
+    
