@@ -27,7 +27,7 @@ import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
 import { doc, addDoc, collection, serverTimestamp, Timestamp, writeBatch, query, getDocs, where } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ShoppingCart, Camera, Upload, X, Paperclip, Plus, Trash2 } from "lucide-react";
+import { Loader2, ShoppingCart, Camera, Upload, X, Plus, Trash2, AlertCircle } from "lucide-react";
 import { sanitizeFirestoreData } from "@/lib/utils";
 import { Skeleton } from "../ui/skeleton";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
@@ -73,12 +73,6 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   const groupRef = useMemo(() => (groupId ? doc(firestore, "groups", groupId) : null), [firestore, groupId]);
   const { data: groupData, isLoading: isGroupDataLoading } = useDoc(groupRef);
 
-  const inventoryQuery = useMemo(() => 
-    (groupId ? query(collection(firestore, `groups/${groupId}/inventory`)) : null),
-    [firestore, groupId]
-  );
-  const { data: inventoryItems, isLoading: areItemsLoading } = useCollection<FoodItem>(inventoryQuery);
-
   const isExpenseDescriptionRequired = useMemo(() => groupData?.settings?.isExpenseDescriptionRequired ?? false, [groupData]);
   const isUtilityReceiptRequired = useMemo(() => groupData?.settings?.isUtilityReceiptRequired ?? false, [groupData]);
 
@@ -94,7 +88,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
         }),
         receipt: z.instanceof(File).optional(),
         purchasedItems: z.array(purchasedItemSchema).optional(),
-    }).refine(data => {
+    }).refine(data => { // Receipt validation for utilities
         if((data.category === 'Electricity' || data.category === 'Gas') && isUtilityReceiptRequired) {
             return !!data.receipt;
         }
@@ -102,45 +96,59 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     }, {
         message: "A receipt is required for utility expenses.",
         path: ['receipt'],
+    }).refine(data => { // Food & Groceries amount validation
+        if (data.category === 'Food & Groceries' && data.purchasedItems && data.purchasedItems.length > 0) {
+            const itemsTotal = data.purchasedItems.reduce((sum, item) => sum + (item.cost || 0), 0);
+            // Use a small epsilon for floating point comparison
+            return Math.abs(itemsTotal - data.amount) < 0.01;
+        }
+        return true;
+    }, {
+        message: "The total cost of items must match the expense amount.",
+        path: ['amount'],
     });
   }, [isExpenseDescriptionRequired, isUtilityReceiptRequired]);
 
   const form = useForm<z.infer<typeof expenseSchema>>({
     resolver: zodResolver(expenseSchema),
     defaultValues: {
-      amount: 0,
+      amount: undefined,
       description: "",
       purchasedItems: [],
     },
   });
   
-  const { fields, append, remove, update } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "purchasedItems",
   });
 
   const categoryValue = form.watch("category");
   const purchasedItemsValue = form.watch("purchasedItems");
+  const amountValue = form.watch("amount");
+
+  const itemsTotal = useMemo(() => {
+    if (!purchasedItemsValue) return 0;
+    return purchasedItemsValue.reduce((acc, item) => acc + (item.cost || 0), 0);
+  }, [purchasedItemsValue]);
+
+  const remainingToLog = useMemo(() => {
+      if(amountValue === undefined) return 0;
+      return amountValue - itemsTotal;
+  }, [amountValue, itemsTotal])
 
   useEffect(() => {
     setShowReceipt(categoryValue === 'Electricity' || categoryValue === 'Gas');
-    setShowInventoryFields(categoryValue === 'Food & Groceries');
-    if (categoryValue !== 'Food & Groceries') {
-      // Clear purchased items if category changes
+    const isFood = categoryValue === 'Food & Groceries';
+    setShowInventoryFields(isFood);
+    if (!isFood) {
       form.setValue('purchasedItems', []);
+      form.clearErrors('amount');
     }
   }, [categoryValue, form]);
 
   useEffect(() => {
-    if (showInventoryFields && purchasedItemsValue && purchasedItemsValue.length > 0) {
-      const totalItemCost = purchasedItemsValue.reduce((acc, item) => acc + (item.cost || 0), 0);
-      form.setValue('amount', totalItemCost, { shouldValidate: true });
-    }
-  }, [purchasedItemsValue, showInventoryFields, form]);
-  
-  useEffect(() => {
     if (!isCameraDialogOpen) {
-      // Stop camera stream when dialog is closed
       if (videoRef.current && videoRef.current.srcObject) {
         const stream = videoRef.current.srcObject as MediaStream;
         stream.getTracks().forEach(track => track.stop());
@@ -238,14 +246,12 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     try {
         const batch = writeBatch(firestore);
 
-        // 1. Handle receipt upload
         if (values.receipt) {
             const storageRef = ref(storage, `receipts/${groupId}/${Date.now()}_${values.receipt.name}`);
             const snapshot = await uploadBytes(storageRef, values.receipt);
             receiptUrl = await getDownloadURL(snapshot.ref);
         }
 
-        // 2. Create the main expense document
         const expenseRef = doc(collection(firestore, `groups/${groupId}/expenses`));
         const expenseData = sanitizeFirestoreData({
             amount: values.amount,
@@ -259,7 +265,6 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
         });
         batch.set(expenseRef, expenseData);
 
-        // 3. Create purchase documents if it's a food expense
         if (values.category === 'Food & Groceries' && values.purchasedItems) {
             for (const item of values.purchasedItems) {
                 const purchaseRef = doc(collection(firestore, `groups/${groupId}/purchases`));
@@ -282,14 +287,13 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
             }
         }
         
-        // 4. Commit batch
         await batch.commit();
 
         toast({
             title: "Expense Added",
             description: `Your ${values.category.toLowerCase()} expense of ৳${values.amount} has been logged.`,
         });
-        form.reset({ amount: 0, description: "", category: undefined, receipt: undefined, purchasedItems: [] });
+        form.reset({ amount: undefined, description: "", category: undefined, receipt: undefined, purchasedItems: [] });
         clearImage();
 
     } catch (error) {
@@ -300,7 +304,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     }
   }
   
-  if ((isGroupDataLoading || areItemsLoading) && groupId) {
+  if (isGroupDataLoading && groupId) {
     return (
         <Card>
             <CardHeader>
@@ -355,7 +359,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                     <FormItem>
                     <FormLabel>Amount (৳)</FormLabel>
                     <FormControl>
-                        <Input type="number" placeholder="0.00" {...field} disabled={showInventoryFields && fields.length > 0} />
+                        <Input type="number" placeholder="0.00" {...field} />
                     </FormControl>
                     <FormMessage />
                     </FormItem>
@@ -377,7 +381,16 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                 
                 {showInventoryFields && (
                   <div className="space-y-4 rounded-md border p-4">
-                      <h4 className="font-medium">Log Purchased Items</h4>
+                      <div className="flex justify-between items-center">
+                        <h4 className="font-medium">Log Purchased Items</h4>
+                        <div className="text-sm">
+                            <span className="text-muted-foreground">Remaining: </span>
+                            <span className={remainingToLog === 0 ? "text-green-600 font-semibold" : "text-destructive font-semibold"}>
+                                ৳{remainingToLog.toFixed(2)}
+                            </span>
+                        </div>
+                      </div>
+                      
                       {fields.map((field, index) => (
                         <div key={field.id} className="grid grid-cols-12 gap-2 items-start border-t pt-3">
                            <FormField
