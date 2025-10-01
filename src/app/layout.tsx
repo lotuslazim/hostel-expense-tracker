@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { I18nProvider } from '@/i18n/client-provider';
+import { InventoryProvider } from '@/contexts/InventoryContext';
 
 export const metadata: Metadata = {
   title: 'NourishTrack',
@@ -30,7 +31,9 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            {children}
+            <InventoryProvider>
+              {children}
+            </InventoryProvider>
             <Toaster />
           </ThemeProvider>
         </I18nProvider>

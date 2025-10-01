@@ -12,6 +12,7 @@ import { MonthSwitcher } from '@/components/report/month-switcher';
 import { startOfMonth, addMonths, subMonths, format, parseISO, endOfMonth } from 'date-fns';
 import { useSearchParams, useRouter } from 'next/navigation';
 import type { FoodItem, Purchase } from '@/lib/types';
+import { useInventory } from '@/contexts/InventoryContext';
 
 
 function InventoryPageSkeleton() {
@@ -39,6 +40,8 @@ export default function InventoryPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const monthParam = searchParams.get('month');
+  const { lastUpdate } = useInventory();
+
 
   const currentDate = useMemo(() => {
     if (monthParam) {
@@ -63,7 +66,7 @@ export default function InventoryPage() {
   // Lifted state for data fetching
   const inventoryQuery = useMemo(() => 
       (groupId ? query(collection(firestore, `groups/${groupId}/inventory`), orderBy('name', 'asc')) : null),
-      [firestore, groupId]
+      [firestore, groupId, lastUpdate]
   );
 
   const monthDateRange = useMemo(() => ({
@@ -77,7 +80,7 @@ export default function InventoryPage() {
           where("date", ">=", Timestamp.fromDate(monthDateRange.start)),
           where("date", "<=", Timestamp.fromDate(monthDateRange.end))
       ) : null),
-      [firestore, groupId, monthDateRange]
+      [firestore, groupId, monthDateRange, lastUpdate]
   );
   
   const { data: inventoryItems, isLoading: areItemsLoading, refetch: refetchInventory } = useCollection<FoodItem>(inventoryQuery);

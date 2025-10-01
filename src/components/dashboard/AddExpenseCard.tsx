@@ -34,6 +34,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import imageCompression from "browser-image-compression";
 import { Alert, AlertTitle, AlertDescription } from "../ui/alert";
 import type { FoodItem, PurchasedItem } from "@/lib/types";
+import { useInventory } from "@/contexts/InventoryContext";
 
 interface AddExpenseCardProps {
   selectedDate: Date;
@@ -55,6 +56,8 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showReceipt, setShowReceipt] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const { triggerUpdate } = useInventory();
+
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -293,6 +296,11 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
             title: "Expense Added",
             description: `Your ${values.category.toLowerCase()} expense of ৳${values.amount} has been logged.`,
         });
+
+        if (values.category === 'Food & Groceries') {
+            triggerUpdate(); // Notify inventory page of the update
+        }
+
         form.reset({ amount: "" as unknown as number, description: "", category: undefined, receipt: undefined, purchasedItems: [] });
         clearImage();
 
@@ -359,7 +367,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                     <FormItem>
                     <FormLabel>Amount (৳)</FormLabel>
                     <FormControl>
-                        <Input type="number" placeholder="0.00" {...field} />
+                        <Input type="number" placeholder="0.00" {...field} value={field.value ?? ''} />
                     </FormControl>
                     <FormMessage />
                     </FormItem>
