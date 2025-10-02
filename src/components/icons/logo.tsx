@@ -11,18 +11,20 @@ function LinkComponent({ href, children, ...props }: ComponentProps<typeof Link>
 
 export function Logo() {
   return (
-    <LinkComponent href="/" className="flex items-center gap-1" aria-label="BachelorBite Home">
-      <svg width="48" height="48" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <g clipPath="url(#clip0_303_2)">
-        <path d="M20 0C8.954 0 0 8.954 0 20C0 31.046 8.954 40 20 40C31.046 40 40 31.046 40 20C40 8.954 31.046 0 20 0Z" fill="#2E3A33"/>
-        <path d="M25.7979 11.2345C25.4746 10.9701 25.0504 10.9576 24.7145 11.205C23.2384 12.2906 22.1866 14.1566 22.1866 16.035C22.1866 18.9839 24.6195 21.4168 27.5684 21.4168C27.9303 21.4168 28.2834 21.3788 28.6234 21.3069V24.0805C28.6234 24.4996 28.2859 24.8371 27.8668 24.8371C27.5954 24.8371 27.348 24.6938 27.2047 24.4538L25.9686 22.4271C25.7004 21.9871 25.109 21.8214 24.6067 22.0496L20.2882 24.1629C19.7859 24.3911 19.5002 24.9657 19.6589 25.5022L20.7308 29.3516C20.8895 29.8881 21.4429 30.2256 21.9964 30.101L29.743 28.2033C30.2965 28.0787 30.6874 27.5422 30.6251 26.9676L30.2851 23.9559C31.0041 23.4993 31.6222 22.8812 32.0883 22.1534C32.3214 21.7827 32.2359 21.2804 31.9126 21.016L25.7979 11.2345Z" fill="#A7D1AB"/>
-        <path d="M11.6268 24.0805V21.3069C11.9668 21.3788 12.3199 21.4168 12.6818 21.4168C15.6307 21.4168 18.0636 18.9839 18.0636 16.035C18.0636 14.1566 17.0118 12.2906 15.5357 11.205C15.1998 10.9576 14.7756 10.9701 14.4523 11.2345L8.33758 21.016C8.01427 21.2804 7.92878 21.7827 8.16187 22.1534C8.62799 22.8812 9.24606 23.4993 9.96504 23.9559L9.62504 26.9676C9.56273 27.5422 9.95365 28.0787 10.5071 28.2033L18.2535 30.101C18.807 30.2256 19.3604 29.8881 19.5191 29.3516L20.591 25.5022C20.7497 24.9657 20.464 24.3911 19.9617 24.1629L15.6432 22.0496C15.1409 21.8214 14.5495 21.9871 14.2813 22.4271L13.0452 24.4538C12.9019 24.6938 12.6545 24.8371 12.3831 24.8371C11.964 24.8371 11.6268 24.4996 11.6268 24.0805Z" fill="#E8D59A"/>
-        </g>
-        <defs>
-        <clipPath id="clip0_303_2">
-        <rect width="40" height="40" fill="white"/>
-        </clipPath>
-        </defs>
+    <LinkComponent href="/" className="flex items-center gap-2" aria-label="BachelorBite Home">
+      <svg width="48" height="48" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="100" cy="100" r="100" fill="#2E3A33"/>
+        <path d="M129.5 65.5C129.5 61.3579 126.142 58 122 58H110.5C108.015 58 106 55.9853 106 53.5C106 51.0147 108.015 49 110.5 49H125C129.142 49 132.5 52.3579 132.5 56.5V65.5" stroke="#A7D1AB" strokeWidth="6" strokeLinecap="round"/>
+        <path d="M152 108C152 101.373 146.627 96 140 96H107.5C104.186 96 101.5 93.3137 101.5 90V83C101.5 79.6863 98.8137 77 95.5 77H86.5" stroke="#A7D1AB" strokeWidth="6" strokeLinecap="round"/>
+        <path d="M102 121C102 119.343 100.657 118 99 118H90C88.3431 118 87 119.343 87 121V124.5C87 126.157 85.6569 127.5 84 127.5H75C73.3431 127.5 72 126.157 72 124.5V121" stroke="#A7D1AB" strokeWidth="6" strokeLinecap="round"/>
+        <path d="M123.5 125V148.5C123.5 150.709 121.709 152.5 119.5 152.5H112" stroke="#A7D1AB" strokeWidth="6" strokeLinecap="round"/>
+        <path d="M87 148.5C87 150.709 85.2091 152.5 83 152.5H75.5" stroke="#A7D1AB" strokeWidth="6" strokeLinecap="round"/>
+        <path d="M126 102.5L145 77.5" stroke="#E8D59A" strokeWidth="6" strokeLinecap="round"/>
+        <path d="M151.5 77.5H145" stroke="#E8D59A" strokeWidth="6" strokeLinecap="round"/>
+        <path d="M148.25 74.25V80.75" stroke="#E8D59A" strokeWidth="6" strokeLinecap="round"/>
+        <path d="M141.75 74.25V80.75" stroke="#E8D_59A" strokeWidth="6" strokeLinecap="round"/>
+        <path d="M135.25 74.25V80.75" stroke="#E8D59A" strokeWidth="6" strokeLinecap="round"/>
+        <path d="M128.75 74.25V80.75" stroke="#E8D59A" strokeWidth="6" strokeLinecap="round"/>
       </svg>
       <span className="text-3xl font-bold font-headline text-foreground">BachelorBite</span>
     </LinkComponent>
