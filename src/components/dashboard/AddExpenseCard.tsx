@@ -141,7 +141,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   const remainingToLog = useMemo(() => {
     const totalAmount = Number(amountValue) || 0;
     const remaining = totalAmount - itemsTotal;
-    return remaining > 0 ? remaining : 0;
+    return remaining;
   }, [amountValue, itemsTotal]);
 
 
@@ -154,23 +154,27 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
       form.setValue('purchasedItems', []);
       form.clearErrors('amount');
     }
+
+    let finalExpenseItem: string | undefined;
+    if (categoryValue === 'Food & Groceries') {
+        // This is handled by the other useEffect
+    } else if (categoryValue === 'Electricity') {
+        finalExpenseItem = 'Electricity Bill';
+    } else if (categoryValue === 'Gas') {
+        finalExpenseItem = 'Gas Bill';
+    }
+    if(finalExpenseItem !== undefined) {
+      form.setValue('expenseItem', finalExpenseItem);
+    }
   }, [categoryValue, form]);
-  
+
   useEffect(() => {
-      let finalExpenseItem: string | undefined;
-      if (categoryValue === 'Food & Groceries') {
-          finalExpenseItem = purchasedItemsValue?.map(item => item.name).filter(Boolean).join(', ') || 'Groceries';
-      } else if (categoryValue === 'Electricity') {
-          finalExpenseItem = 'Electricity Bill';
-      } else if (categoryValue === 'Gas') {
-          finalExpenseItem = 'Gas Bill';
-      }
-      if(finalExpenseItem !== undefined) {
+    if (categoryValue === 'Food & Groceries') {
+        const finalExpenseItem = purchasedItemsValue?.map(item => item.name).filter(Boolean).join(', ') || 'Groceries';
         form.setValue('expenseItem', finalExpenseItem);
-      }
+    }
   }, [purchasedItemsValue, categoryValue, form]);
-
-
+  
   useEffect(() => {
     if (!isCameraDialogOpen) {
       if (videoRef.current && videoRef.current.srcObject) {
@@ -278,20 +282,9 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
 
         const expenseRef = doc(collection(firestore, `groups/${groupId}/expenses`));
 
-        let finalExpenseItem = values.expenseItem;
-        if (values.category === 'Food & Groceries') {
-            finalExpenseItem = values.purchasedItems?.map(item => item.name).filter(Boolean).join(', ');
-            if (!finalExpenseItem) finalExpenseItem = values.expenseItem || 'Groceries';
-        } else if (values.category === 'Electricity') {
-            finalExpenseItem = 'Electricity Bill';
-        } else if (values.category === 'Gas') {
-            finalExpenseItem = 'Gas Bill';
-        }
-
-
         const expenseData = sanitizeFirestoreData({
             amount: values.amount,
-            expenseItem: finalExpenseItem,
+            expenseItem: values.expenseItem,
             category: values.category,
             receiptPhotoUrl: receiptUrl,
             userId: currentUser.uid,
@@ -431,11 +424,8 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                   <div className="space-y-4 rounded-md border p-4">
                       <div className="flex justify-between items-center mb-2">
                         <h4 className="font-medium">Log Purchased Items</h4>
-                        <div className="text-sm">
-                            <span className="text-muted-foreground">Remaining: </span>
-                            <span className="font-semibold text-muted-foreground">
-                                ৳{remainingToLog.toFixed(2)}
-                            </span>
+                        <div className="text-sm text-muted-foreground">
+                            Remaining: ৳{remainingToLog.toFixed(2)}
                         </div>
                       </div>
                       
