@@ -7,7 +7,7 @@ import { I18nProvider } from '@/i18n/client-provider';
 import { InventoryProvider } from '@/contexts/InventoryContext';
 
 export const metadata: Metadata = {
-  title: 'NourishTrack',
+  title: 'BachelorBite',
   description: 'Shared living, simplified. Track meals and expenses with your flatmates.',
 };
 
