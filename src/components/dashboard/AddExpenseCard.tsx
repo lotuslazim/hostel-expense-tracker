@@ -132,7 +132,6 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
 
   const categoryValue = form.watch("category");
   const purchasedItemsValue = form.watch("purchasedItems");
-  const amountValue = form.watch("amount");
 
   useEffect(() => {
     setShowReceipt(categoryValue === 'Electricity' || categoryValue === 'Gas');
@@ -545,7 +544,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                       </FormItem>
                     )}
                   />
-                
+                )}
                 <Button type="submit" disabled={isSubmitting} className="w-full">
                     {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Add Expense
