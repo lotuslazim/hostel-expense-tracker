@@ -26,6 +26,13 @@ export default function LandingPage() {
         <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
           <div className="grid md:grid-cols-1 gap-12 items-center text-center">
             <div className="space-y-6">
+              <div className="flex justify-center mb-8">
+                <div className="w-48 h-48 bg-card rounded-full flex items-center justify-center shadow-lg">
+                    <div className="scale-150">
+                        <Logo />
+                    </div>
+                </div>
+              </div>
               <h1 className="text-4xl md:text-5xl font-bold tracking-tighter font-headline">
                 Track meals, not heartbreaks.
               </h1>
