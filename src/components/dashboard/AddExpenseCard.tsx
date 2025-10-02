@@ -27,13 +27,12 @@ import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
 import { doc, addDoc, collection, serverTimestamp, Timestamp, writeBatch, query, getDocs, where } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ShoppingCart, Camera, Upload, X, Plus, Trash2, AlertCircle } from "lucide-react";
+import { Loader2, ShoppingCart, Camera, Upload, X, Plus, Trash2 } from "lucide-react";
 import { sanitizeFirestoreData } from "@/lib/utils";
 import { Skeleton } from "../ui/skeleton";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import imageCompression from "browser-image-compression";
 import { Alert, AlertTitle, AlertDescription } from "../ui/alert";
-import type { FoodItem, PurchasedItem } from "@/lib/types";
 import { useInventory } from "@/contexts/InventoryContext";
 import { cn } from "@/lib/utils";
 
@@ -133,6 +132,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
 
   const categoryValue = form.watch("category");
   const purchasedItemsValue = form.watch("purchasedItems");
+  const amountValue = form.watch("amount");
 
   useEffect(() => {
     setShowReceipt(categoryValue === 'Electricity' || categoryValue === 'Gas');
@@ -335,7 +335,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   }
 
   const commonUnits = ['kg', 'gm', 'L', 'ml', 'pcs', 'dozen', 'unit'];
-
+  
   return (
     <Card>
         <CardHeader>
