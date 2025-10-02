@@ -4,23 +4,20 @@
 import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
-import { FoodItem, Purchase } from '@/lib/types';
+import type { Purchase } from '@/lib/types';
 import { PackageOpen } from 'lucide-react';
 
 interface InventoryTableProps {
-    inventoryItems: FoodItem[] | null;
     purchases: Purchase[] | null;
     isLoading: boolean;
 }
 
-interface ProcessedInventoryItem extends FoodItem {
-    purchasedQuantity: number;
-    remainingQuantity: number;
+interface ProcessedPurchaseItem {
+    name: string;
+    totalQuantity: number;
     totalCost: number;
-    avgUnitPrice: number;
-    progress: number;
+    unit: string; // Assuming unit is consistent for the same item
 }
 
 function InventorySkeleton() {
@@ -47,28 +44,29 @@ function InventorySkeleton() {
     );
 }
 
-export function InventoryTable({ inventoryItems, purchases, isLoading }: InventoryTableProps) {
-    const processedInventory = useMemo((): ProcessedInventoryItem[] => {
-        if (!inventoryItems || !purchases) return [];
+export function InventoryTable({ purchases, isLoading }: InventoryTableProps) {
 
-        return inventoryItems.map(item => {
-            const itemPurchases = purchases.filter(p => p.itemId === item.id);
-            const purchasedQuantity = itemPurchases.reduce((sum, p) => sum + p.quantity, 0);
-            const totalCost = itemPurchases.reduce((sum, p) => sum + p.cost, 0);
-            const remainingQuantity = item.requiredQuantity - purchasedQuantity;
-            const avgUnitPrice = purchasedQuantity > 0 ? totalCost / purchasedQuantity : 0;
-            const progress = item.requiredQuantity > 0 ? (purchasedQuantity / item.requiredQuantity) * 100 : 100;
+    const processedItems = useMemo((): ProcessedPurchaseItem[] => {
+        if (!purchases) return [];
 
-            return {
-                ...item,
-                purchasedQuantity,
-                remainingQuantity,
-                totalCost,
-                avgUnitPrice,
-                progress,
-            };
-        });
-    }, [inventoryItems, purchases]);
+        const groupedItems = purchases.reduce((acc, purchase) => {
+            if (!acc[purchase.itemName]) {
+                acc[purchase.itemName] = {
+                    name: purchase.itemName,
+                    totalQuantity: 0,
+                    totalCost: 0,
+                    unit: purchase.unit, // Take the first unit found
+                };
+            }
+            acc[purchase.itemName].totalQuantity += purchase.quantity;
+            acc[purchase.itemName].totalCost += purchase.cost;
+            return acc;
+        }, {} as Record<string, ProcessedPurchaseItem>);
+
+        return Object.values(groupedItems).sort((a, b) => a.name.localeCompare(b.name));
+
+    }, [purchases]);
+
 
     if (isLoading) {
         return <InventorySkeleton />;
@@ -77,39 +75,32 @@ export function InventoryTable({ inventoryItems, purchases, isLoading }: Invento
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Monthly Consumption & Requirements</CardTitle>
+                <CardTitle>Monthly Purchase Summary</CardTitle>
                 <CardDescription>
-                    Track your progress against your monthly grocery requirements.
+                    This is an automatically generated summary of all "Food & Groceries" purchased this month.
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                {processedInventory.length > 0 ? (
+                {processedItems.length > 0 ? (
                     <Table>
                         <TableHeader>
                             <TableRow>
                                 <TableHead className="w-[60%]">Item</TableHead>
-                                <TableHead>Status</TableHead>
+                                <TableHead className="text-right">Total Purchased & Spent</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {processedInventory.map(item => (
-                                <TableRow key={item.id}>
+                            {processedItems.map(item => (
+                                <TableRow key={item.name}>
                                     <TableCell>
                                         <div className="font-medium">{item.name}</div>
-                                        <div className="text-sm text-muted-foreground">{item.category}</div>
                                     </TableCell>
-                                    <TableCell>
-                                        <div className="flex flex-col gap-1.5">
-                                            <Progress value={item.progress} className="h-2"/>
-                                            <div className="text-xs text-muted-foreground">
-                                                <span className="font-semibold text-foreground">{item.purchasedQuantity.toFixed(1)}</span>
-                                                / {item.requiredQuantity.toFixed(1)} {item.unit} purchased
-                                                (Remaining: <span className="font-semibold">{item.remainingQuantity > 0 ? item.remainingQuantity.toFixed(1) : 0} {item.unit}</span>)
-                                            </div>
-                                             <div className="text-xs text-muted-foreground">
-                                                Total Cost: <span className="font-semibold text-foreground">৳{item.totalCost.toFixed(2)}</span>
-                                                {item.avgUnitPrice > 0 && ` (@ ৳${item.avgUnitPrice.toFixed(2)}/${item.unit})`}
-                                            </div>
+                                    <TableCell className="text-right">
+                                        <div className="font-semibold">
+                                            {item.totalQuantity.toFixed(2)} {item.unit}
+                                        </div>
+                                         <div className="text-sm text-muted-foreground">
+                                            Total Cost: ৳{item.totalCost.toFixed(2)}
                                         </div>
                                     </TableCell>
                                 </TableRow>
@@ -119,8 +110,8 @@ export function InventoryTable({ inventoryItems, purchases, isLoading }: Invento
                 ) : (
                     <div className="text-center py-16 text-muted-foreground flex flex-col items-center justify-center">
                         <PackageOpen className="h-10 w-10 mb-4" />
-                        <h3 className="text-lg font-semibold">No Inventory Items</h3>
-                        <p>Add an item to your inventory list to get started.</p>
+                        <h3 className="text-lg font-semibold">No Purchase Data</h3>
+                        <p>Log a "Food & Groceries" expense from the dashboard to see a summary here.</p>
                     </div>
                 )}
             </CardContent>

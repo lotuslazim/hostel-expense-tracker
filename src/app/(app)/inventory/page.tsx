@@ -10,7 +10,7 @@ import { InventoryTable } from '@/components/inventory/InventoryTable';
 import { MonthSwitcher } from '@/components/report/month-switcher';
 import { startOfMonth, addMonths, subMonths, format, parseISO, endOfMonth } from 'date-fns';
 import { useSearchParams, useRouter } from 'next/navigation';
-import type { FoodItem, Purchase } from '@/lib/types';
+import type { Purchase } from '@/lib/types';
 import { useInventory } from '@/contexts/InventoryContext';
 
 
@@ -57,11 +57,6 @@ export default function InventoryPage() {
   
   const groupId = currentUserData?.groupId;
 
-  const inventoryQuery = useMemo(() => 
-      (groupId ? query(collection(firestore, `groups/${groupId}/inventory`), orderBy('name', 'asc')) : null),
-      [firestore, groupId, lastUpdate]
-  );
-
   const monthDateRange = useMemo(() => ({
       start: startOfMonth(currentDate),
       end: endOfMonth(currentDate),
@@ -76,13 +71,11 @@ export default function InventoryPage() {
       [firestore, groupId, monthDateRange, lastUpdate]
   );
   
-  const { data: inventoryItems, isLoading: areItemsLoading, refetch: refetchInventory } = useCollection<FoodItem>(inventoryQuery);
   const { data: purchases, isLoading: arePurchasesLoading, refetch: refetchPurchases } = useCollection<Purchase>(purchasesQuery);
 
   const handleDataRefresh = useCallback(() => {
-    refetchInventory();
     refetchPurchases();
-  }, [refetchInventory, refetchPurchases]);
+  }, [refetchPurchases]);
 
 
   const handleMonthChange = (direction: "next" | "prev") => {
@@ -101,7 +94,7 @@ export default function InventoryPage() {
     return <WelcomeCard />;
   }
   
-  const isDataLoading = areItemsLoading || arePurchasesLoading;
+  const isDataLoading = arePurchasesLoading;
 
   return (
     <div className="space-y-6">
@@ -109,7 +102,7 @@ export default function InventoryPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight font-headline">Food Inventory</h1>
           <p className="text-muted-foreground">
-            Track monthly item requirements, consumption, and expenses for {format(currentDate, "MMMM yyyy")}.
+            A summary of all food & grocery items purchased in {format(currentDate, "MMMM yyyy")}.
           </p>
         </div>
          <MonthSwitcher
@@ -120,7 +113,6 @@ export default function InventoryPage() {
 
       <div className="items-start">
         <InventoryTable 
-          inventoryItems={inventoryItems} 
           purchases={purchases} 
           isLoading={isDataLoading} 
         />
