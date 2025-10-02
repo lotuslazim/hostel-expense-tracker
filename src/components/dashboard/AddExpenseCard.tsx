@@ -140,9 +140,10 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   }, [purchasedItemsValue]);
 
   const remainingToLog = useMemo(() => {
-      if(!amountValue) return 0;
-      return Number(amountValue) - itemsTotal;
-  }, [amountValue, itemsTotal])
+    if (!amountValue || amountValue <= 0) return 0;
+    const remaining = Number(amountValue) - itemsTotal;
+    return remaining > 0 ? remaining : 0;
+  }, [amountValue, itemsTotal]);
 
   useEffect(() => {
     setShowReceipt(categoryValue === 'Electricity' || categoryValue === 'Gas');
@@ -159,7 +160,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     if (categoryValue === 'Food & Groceries') {
       const itemNames = purchasedItemsValue?.map(item => item.name).filter(Boolean).join(', ');
       if (itemNames) {
-        form.setValue('expenseItem', itemNames.substring(0, 100) + (itemNames.length > 100 ? '...' : ''));
+        form.setValue('expenseItem', itemNames);
       } else {
         form.setValue('expenseItem', 'Groceries');
       }
@@ -280,8 +281,8 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
         const expenseRef = doc(collection(firestore, `groups/${groupId}/expenses`));
 
         let finalExpenseItem = values.expenseItem || "";
-        if(values.category === 'Food & Groceries') {
-            finalExpenseItem = values.purchasedItems?.map(item => item.name).filter(Boolean).join(', ') || "Groceries";
+        if (values.category === 'Food & Groceries') {
+            finalExpenseItem = values.purchasedItems?.map(item => item.name).filter(Boolean).join(', ') || 'Groceries';
         } else if (values.category === 'Electricity') {
             finalExpenseItem = 'Electricity Bill';
         } else if (values.category === 'Gas') {
@@ -433,18 +434,18 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                         <h4 className="font-medium">Log Purchased Items</h4>
                         <div className="text-sm">
                             <span className="text-muted-foreground">Remaining: </span>
-                            <span className={remainingToLog === 0 ? "text-green-600 font-semibold" : "text-destructive font-semibold"}>
+                            <span className={remainingToLog > 0 ? "text-destructive font-semibold" : "text-green-600 font-semibold"}>
                                 ৳{remainingToLog.toFixed(2)}
                             </span>
                         </div>
                       </div>
-
+                      
                       {fields.length > 0 && (
-                        <div className="grid grid-cols-12 gap-2 items-start text-xs font-medium text-muted-foreground">
-                            <div className="col-span-5">Item Name</div>
-                            <div className="col-span-2">Qty</div>
-                            <div className="col-span-2">Unit</div>
-                            <div className="col-span-2">Cost (৳)</div>
+                        <div className="grid grid-cols-12 gap-2 items-start border-t pt-3">
+                            <div className="col-span-5"><FormLabel>Item Name</FormLabel></div>
+                            <div className="col-span-2"><FormLabel>Qty</FormLabel></div>
+                            <div className="col-span-2"><FormLabel>Unit</FormLabel></div>
+                            <div className="col-span-2"><FormLabel>Cost (৳)</FormLabel></div>
                         </div>
                       )}
                       
@@ -476,7 +477,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                               control={form.control}
                               name={`purchasedItems.${index}.unit`}
                               render={({ field }) => (
-                                <FormItem className="col-span-3">
+                                <FormItem className="col-span-2">
                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <FormControl>
                                       <SelectTrigger>
