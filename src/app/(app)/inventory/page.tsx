@@ -1,12 +1,11 @@
 
 "use client";
 
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useCallback } from 'react';
 import { useFirebase, useUser, useDoc, useCollection } from '@/firebase';
 import { doc, collection, query, where, Timestamp, orderBy } from 'firebase/firestore';
 import { WelcomeCard } from '@/components/app/welcome-card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AddItemForm } from '@/components/inventory/AddItemForm';
 import { InventoryTable } from '@/components/inventory/InventoryTable';
 import { MonthSwitcher } from '@/components/report/month-switcher';
 import { startOfMonth, addMonths, subMonths, format, parseISO, endOfMonth } from 'date-fns';
@@ -22,13 +21,8 @@ function InventoryPageSkeleton() {
         <Skeleton className="h-9 w-80" />
         <Skeleton className="h-10 w-[330px]" />
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-1">
-          <Skeleton className="h-72 w-full" />
-        </div>
-        <div className="lg:col-span-2">
+      <div >
           <Skeleton className="h-96 w-full" />
-        </div>
       </div>
     </div>
   );
@@ -63,7 +57,6 @@ export default function InventoryPage() {
   
   const groupId = currentUserData?.groupId;
 
-  // Lifted state for data fetching
   const inventoryQuery = useMemo(() => 
       (groupId ? query(collection(firestore, `groups/${groupId}/inventory`), orderBy('name', 'asc')) : null),
       [firestore, groupId, lastUpdate]
@@ -125,17 +118,12 @@ export default function InventoryPage() {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        <div className="lg:col-span-1 space-y-6">
-           <AddItemForm groupId={groupId} onItemAdded={handleDataRefresh} />
-        </div>
-        <div className="lg:col-span-2">
-            <InventoryTable 
-              inventoryItems={inventoryItems} 
-              purchases={purchases} 
-              isLoading={isDataLoading} 
-            />
-        </div>
+      <div className="items-start">
+        <InventoryTable 
+          inventoryItems={inventoryItems} 
+          purchases={purchases} 
+          isLoading={isDataLoading} 
+        />
       </div>
     </div>
   );
