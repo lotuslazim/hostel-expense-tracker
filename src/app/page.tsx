@@ -24,12 +24,12 @@ export default function LandingPage() {
       </header>
       <main className="flex-grow">
         <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className="grid md:grid-cols-1 gap-12 items-center text-center">
             <div className="space-y-6">
               <h1 className="text-4xl md:text-5xl font-bold tracking-tighter font-headline">
                 Track meals, not heartbreaks.
               </h1>
-              <p className="text-lg text-muted-foreground">
+              <p className="text-lg text-muted-foreground max-w-xl mx-auto">
                 We can’t cook for you, but we can make your bachelor life a little less messy.
               </p>
               <Button size="lg" asChild>
@@ -37,19 +37,6 @@ export default function LandingPage() {
                   Get Started Free <ArrowRight className="ml-2" />
                 </Link>
               </Button>
-            </div>
-            <div className="relative h-80 w-full md:h-full rounded-lg overflow-hidden shadow-xl">
-              {heroImage && (
-                <Image
-                  src={heroImage.imageUrl}
-                  alt={heroImage.description}
-                  fill
-                  style={{ objectFit: 'cover' }}
-                  className="bg-muted"
-                  data-ai-hint={heroImage.imageHint}
-                  unoptimized
-                />
-              )}
             </div>
           </div>
         </section>
