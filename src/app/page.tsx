@@ -27,18 +27,10 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-1 gap-12 items-center text-center">
             <div className="space-y-6">
               <div className="flex justify-center mb-8">
-                <div className="relative w-48 h-48 rounded-full flex items-center justify-center shadow-lg overflow-hidden">
-                    <Image 
-                      src="https://images.unsplash.com/photo-1614850523011-8f49ffc73908?q=80&w=1080"
-                      alt="Subtle texture background"
-                      fill
-                      style={{ objectFit: 'cover' }}
-                      className="opacity-50"
-                      data-ai-hint="subtle texture"
-                    />
-                    <div className="scale-150 z-10">
-                        <Logo />
-                    </div>
+                <div className="w-48 h-48 bg-card rounded-full flex items-center justify-center shadow-lg">
+                  <div className="scale-150">
+                    <Logo />
+                  </div>
                 </div>
               </div>
               <h1 className="text-4xl md:text-5xl font-bold tracking-tighter font-headline">
