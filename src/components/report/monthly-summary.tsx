@@ -427,7 +427,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
             <CardContent>
                 <div className="text-center p-3 bg-accent/20 rounded-lg">
                   <p className="text-sm font-medium text-accent-foreground/80">Calculated Meal Rate</p>
-                  <p className="text-xl font-bold text-accent-foreground">৳{(mealRate || 0).toFixed(2)} / meal</p>
+                  <p className="text-2xl font-bold text-accent-foreground">৳{(mealRate || 0).toFixed(2)} / meal</p>
               </div>
             </CardContent>
         </Card>
@@ -560,6 +560,3 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
   );
 
     
-
-    
-
