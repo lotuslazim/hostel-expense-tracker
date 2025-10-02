@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useState, useMemo, useEffect, useRef } from "react";
@@ -112,7 +111,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   const form = useForm<z.infer<typeof expenseSchema>>({
     resolver: zodResolver(expenseSchema),
     defaultValues: {
-      amount: "" as unknown as number,
+      amount: '' as unknown as number,
       expenseItem: "",
       purchasedItems: [],
     },
@@ -147,8 +146,9 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     } else if (categoryValue === 'Gas') {
       form.setValue('expenseItem', 'Gas Bill');
     } else if (categoryValue === 'Food & Groceries') {
-       if (purchasedItemsValue && purchasedItemsValue.length > 0) {
-        const itemNames = purchasedItemsValue.map(item => item.name).join(', ');
+      const currentPurchasedItems = form.getValues('purchasedItems');
+      if (currentPurchasedItems && currentPurchasedItems.length > 0) {
+        const itemNames = currentPurchasedItems.map(item => item.name).join(', ');
         form.setValue('expenseItem', itemNames.substring(0, 100) + (itemNames.length > 100 ? '...' : ''));
       } else {
         form.setValue('expenseItem', 'Groceries');
@@ -161,7 +161,19 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
       form.setValue('purchasedItems', []);
       form.clearErrors('amount');
     }
-  }, [categoryValue, form, purchasedItemsValue]);
+  }, [categoryValue, form]);
+  
+   useEffect(() => {
+    if (categoryValue === 'Food & Groceries') {
+      const itemNames = purchasedItemsValue?.map(item => item.name).filter(Boolean).join(', ');
+      if (itemNames) {
+        form.setValue('expenseItem', itemNames.substring(0, 100) + (itemNames.length > 100 ? '...' : ''));
+      } else {
+        form.setValue('expenseItem', 'Groceries');
+      }
+    }
+  }, [purchasedItemsValue, categoryValue, form]);
+
 
   useEffect(() => {
     if (!isCameraDialogOpen) {
@@ -549,5 +561,3 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     </Card>
   );
 }
-
-    
