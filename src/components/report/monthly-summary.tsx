@@ -4,7 +4,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { Flame, Zap, Utensils, Scale, Users, FileText, ArrowRight, ChevronDown, AlertTriangle } from "lucide-react";
+import { Flame, Zap, Utensils, Scale, Users, FileText, ArrowRight, ChevronDown, AlertTriangle, Package } from "lucide-react";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
 import { doc, collection, query, where, Timestamp } from "firebase/firestore";
 import { useMemo, useState } from "react";
@@ -25,7 +25,8 @@ interface ProcessedMember {
   name: string;
   meals: number;
   memberMeals: MealLog[];
-  foodAndOtherExpenses: number;
+  foodExpenses: number;
+  otherExpenses: number;
   utilityExpensesPaid: number;
   memberUtilityExpenses: Expense[];
   totalPaid: number;
@@ -33,7 +34,8 @@ interface ProcessedMember {
 
 interface ProcessedData {
   processedMembers: ProcessedMember[];
-  totalGroupFoodAndOtherExpenses: number;
+  totalGroupFoodExpenses: number;
+  totalGroupOtherExpenses: number;
   totalGroupMeals: number;
   memberCount: number;
   mealRate: number;
@@ -73,7 +75,8 @@ function EmptyState({ icon: Icon, message }: { icon: React.ComponentType<any>, m
 function SummarySkeleton() {
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Skeleton className="h-64 w-full rounded-lg" />
           <Skeleton className="h-64 w-full rounded-lg" />
           <Skeleton className="h-64 w-full rounded-lg" />
       </div>
@@ -323,8 +326,12 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
 
       const totalMeals = memberMeals.reduce((sum, meal) => sum + (meal.mealNumber || 1), 0);
       
-      const foodAndOtherExpenses = memberExpenses
-        .filter(e => e.category === 'Food & Groceries' || e.category === 'Other')
+      const foodExpenses = memberExpenses
+        .filter(e => e.category === 'Food & Groceries')
+        .reduce((sum, e) => sum + (e.amount || 0), 0);
+      
+      const otherExpenses = memberExpenses
+        .filter(e => e.category === 'Other')
         .reduce((sum, e) => sum + (e.amount || 0), 0);
       
       const memberUtilityExpenses = memberExpenses
@@ -340,23 +347,26 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
         name: member.displayName || member.email?.split('@')[0] || 'Unknown User',
         meals: totalMeals,
         memberMeals,
-        foodAndOtherExpenses,
+        foodExpenses,
+        otherExpenses,
         utilityExpensesPaid,
         memberUtilityExpenses,
         totalPaid,
       } as ProcessedMember;
     });
 
-    const totalGroupFoodAndOtherExpenses = processedMembers.reduce((acc, member) => acc + (member.foodAndOtherExpenses || 0), 0);
+    const totalGroupFoodExpenses = processedMembers.reduce((acc, member) => acc + (member.foodExpenses || 0), 0);
+    const totalGroupOtherExpenses = processedMembers.reduce((acc, member) => acc + (member.otherExpenses || 0), 0);
     const totalGroupMeals = processedMembers.reduce((acc, member) => acc + (member.meals || 0), 0);
     const memberCount = processedMembers.length > 0 ? processedMembers.length : 1;
-    const mealRate = totalGroupMeals > 0 ? totalGroupFoodAndOtherExpenses / totalGroupMeals : 0;
+    const mealRate = totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
     const totalUtilityExpenses = expensesData.filter(e => e.category === 'Electricity' || e.category === 'Gas').reduce((sum, e) => sum + (e.amount || 0), 0);
     const totalGroupExpenses = expensesData.reduce((sum, e) => sum + (e.amount || 0), 0);
 
     return {
       processedMembers,
-      totalGroupFoodAndOtherExpenses,
+      totalGroupFoodExpenses,
+      totalGroupOtherExpenses,
       totalGroupMeals,
       memberCount,
       mealRate: mealRate || 0,
@@ -379,7 +389,8 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
 
   const {
       processedMembers,
-      totalGroupFoodAndOtherExpenses,
+      totalGroupFoodExpenses,
+      totalGroupOtherExpenses,
       totalGroupMeals,
       memberCount,
       mealRate,
@@ -392,15 +403,15 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="lg:col-span-1 flex flex-col">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card className="flex flex-col">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Utensils/> Food & Meals</CardTitle>
             </CardHeader>
             <CardContent className="flex-grow space-y-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">Food & Other Expenses</p>
-                  <p className="text-2xl font-bold">৳{(totalGroupFoodAndOtherExpenses || 0).toFixed(0)}</p>
+                  <p className="text-sm text-muted-foreground">Food & Groceries Expenses</p>
+                  <p className="text-2xl font-bold">৳{(totalGroupFoodExpenses || 0).toFixed(0)}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Total meals consumed</p>
@@ -415,7 +426,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
             </CardContent>
         </Card>
         
-       <Card className="lg:col-span-1 flex flex-col">
+       <Card className="flex flex-col">
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><Zap/> Utilities Breakdown</CardTitle>
            <CardDescription>A summary of monthly utility payments.</CardDescription>
@@ -440,6 +451,18 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
             </div>
         </CardContent>
       </Card>
+       <Card className="flex flex-col">
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Package/> Miscellaneous</CardTitle>
+                 <CardDescription>A summary of other expenses.</CardDescription>
+            </CardHeader>
+            <CardContent className="flex-grow space-y-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Total "Other" Expenses</p>
+                  <p className="text-2xl font-bold">৳{(totalGroupOtherExpenses || 0).toFixed(0)}</p>
+                </div>
+            </CardContent>
+        </Card>
       </div>
 
       <Card>
