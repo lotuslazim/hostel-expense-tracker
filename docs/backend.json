@@ -81,14 +81,14 @@
         "groupId": { "type": "string", "description": "The ID of the group this expense belongs to." }, 
         "userId": { "type": "string", "description": "The ID of the user who logged the expense." }, 
         "userName": { "type": "string", "description": "The display name of the user who logged the expense." },
-        "description": { "type": "string", "description": "A description of the expense (e.g., 'Groceries' or 'September Electricity Bill')." }, 
+        "expenseItem": { "type": "string", "description": "A structured description of the expense (e.g., 'Rice, Oil' or 'Electricity Bill')." }, 
         "amount": { "type": "number", "description": "The total amount of the expense." }, 
         "date": { "type": "string", "format": "date-time", "description": "The date the expense was incurred." },
         "category": { "type": "string", "enum": ["Food & Groceries", "Electricity", "Gas", "Other"], "description": "The category of the expense." },
         "receiptPhotoUrl": { "type": "string", "format": "uri", "description": "An optional URL for a photo of the receipt." },
         "createdAt": { "type": "string", "format": "date-time", "description": "The timestamp when the expense was logged." }
       },
-      "required": ["id", "groupId", "userId", "userName", "description", "amount", "date", "category", "createdAt"]
+      "required": ["id", "groupId", "userId", "userName", "expenseItem", "amount", "date", "category", "createdAt"]
     },
     "ChatMessage": {
       "$schema": "http://json-schema.org/draft-07/schema#",
@@ -256,3 +256,6 @@
   }
 }
 
+
+
+    

@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useMemo, useEffect, useRef } from "react";
@@ -76,16 +77,12 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   const groupRef = useMemo(() => (groupId ? doc(firestore, "groups", groupId) : null), [firestore, groupId]);
   const { data: groupData, isLoading: isGroupDataLoading } = useDoc(groupRef);
 
-  const isExpenseDescriptionRequired = useMemo(() => groupData?.settings?.isExpenseDescriptionRequired ?? false, [groupData]);
   const isUtilityReceiptRequired = useMemo(() => groupData?.settings?.isUtilityReceiptRequired ?? false, [groupData]);
-
 
   const expenseSchema = useMemo(() => {
     return z.object({
         amount: z.coerce.number().min(0.01, "Amount must be greater than 0."),
-        description: isExpenseDescriptionRequired
-            ? z.string().min(1, "Description is required.")
-            : z.string().optional(),
+        expenseItem: z.string().min(1, "Expense Item is required."),
         category: z.enum(["Food & Groceries", "Electricity", "Gas", "Other"], {
             required_error: "Please select a category.",
         }),
@@ -110,13 +107,13 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
         message: "The total cost of items must match the expense amount.",
         path: ['amount'],
     });
-  }, [isExpenseDescriptionRequired, isUtilityReceiptRequired]);
+  }, [isUtilityReceiptRequired]);
 
   const form = useForm<z.infer<typeof expenseSchema>>({
     resolver: zodResolver(expenseSchema),
     defaultValues: {
       amount: "" as unknown as number,
-      description: "",
+      expenseItem: "",
       purchasedItems: [],
     },
   });
@@ -144,11 +141,27 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     setShowReceipt(categoryValue === 'Electricity' || categoryValue === 'Gas');
     const isFood = categoryValue === 'Food & Groceries';
     setShowInventoryFields(isFood);
+    
+    if (categoryValue === 'Electricity') {
+      form.setValue('expenseItem', 'Electricity Bill');
+    } else if (categoryValue === 'Gas') {
+      form.setValue('expenseItem', 'Gas Bill');
+    } else if (categoryValue === 'Food & Groceries') {
+       if (purchasedItemsValue && purchasedItemsValue.length > 0) {
+        const itemNames = purchasedItemsValue.map(item => item.name).join(', ');
+        form.setValue('expenseItem', itemNames.substring(0, 100) + (itemNames.length > 100 ? '...' : ''));
+      } else {
+        form.setValue('expenseItem', 'Groceries');
+      }
+    } else {
+      // For 'Other', we let the user type, so we don't automatically set it.
+    }
+    
     if (!isFood) {
       form.setValue('purchasedItems', []);
       form.clearErrors('amount');
     }
-  }, [categoryValue, form]);
+  }, [categoryValue, form, purchasedItemsValue]);
 
   useEffect(() => {
     if (!isCameraDialogOpen) {
@@ -255,18 +268,10 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
             receiptUrl = await getDownloadURL(snapshot.ref);
         }
 
-        let finalDescription: string;
-        if (values.category === 'Food & Groceries' && values.purchasedItems && values.purchasedItems.length > 0) {
-            const itemNames = values.purchasedItems.map(item => item.name).join(', ');
-            finalDescription = itemNames.substring(0, 100) + (itemNames.length > 100 ? '...' : '');
-        } else {
-            finalDescription = values.description || (values.category === 'Food & Groceries' ? 'Groceries' : 'N/A');
-        }
-
         const expenseRef = doc(collection(firestore, `groups/${groupId}/expenses`));
         const expenseData = sanitizeFirestoreData({
             amount: values.amount,
-            description: finalDescription,
+            expenseItem: values.expenseItem,
             category: values.category,
             receiptPhotoUrl: receiptUrl,
             userId: currentUser.uid,
@@ -309,7 +314,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
             triggerUpdate(); // Notify inventory page of the update
         }
 
-        form.reset({ amount: "" as unknown as number, description: "", category: undefined, receipt: undefined, purchasedItems: [] });
+        form.reset({ amount: "" as unknown as number, expenseItem: "", category: undefined, receipt: undefined, purchasedItems: [] });
         clearImage();
 
     } catch (error) {
@@ -382,19 +387,23 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                 )}
                 />
                 <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
+                  control={form.control}
+                  name="expenseItem"
+                  render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Description {isExpenseDescriptionRequired ? '' : '(Optional)'}</FormLabel>
-                    <FormControl>
-                        <Input placeholder="e.g., Weekly groceries at Agora" {...field} />
-                    </FormControl>
-                    <FormMessage />
+                      <FormLabel>Expense Item</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder={categoryValue === 'Other' ? 'e.g., Kitchen repair' : 'Auto-generated'} 
+                          {...field} 
+                          disabled={categoryValue !== 'Other'}
+                        />
+                      </FormControl>
+                      <FormMessage />
                     </FormItem>
-                )}
+                  )}
                 />
-                
+
                 {showInventoryFields && (
                   <div className="space-y-4 rounded-md border p-4">
                       <div className="flex justify-between items-center">
@@ -540,3 +549,5 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     </Card>
   );
 }
+
+    

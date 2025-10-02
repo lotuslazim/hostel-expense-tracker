@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useMemo } from "react";
@@ -50,7 +51,7 @@ export function ActivityFeed({ expenses, selectedDate, currentMonth, onMonthChan
                         <TableRow>
                             <TableHead>Date</TableHead>
                             <TableHead>Member</TableHead>
-                            <TableHead>Description</TableHead>
+                            <TableHead>Expense Item</TableHead>
                             <TableHead>Category</TableHead>
                             <TableHead className="text-right">Amount</TableHead>
                         </TableRow>
@@ -60,7 +61,7 @@ export function ActivityFeed({ expenses, selectedDate, currentMonth, onMonthChan
                             <TableRow key={`expense-${item.id}`}>
                                 <TableCell>{format((item.date as any).toDate(), "MMM d")}</TableCell>
                                 <TableCell>{item.userName}</TableCell>
-                                <TableCell>{item.description || "N/A"}</TableCell>
+                                <TableCell>{item.expenseItem || item.description || "N/A"}</TableCell>
                                 <TableCell><Badge variant="secondary">{item.category}</Badge></TableCell>
                                 <TableCell className="text-right font-semibold">৳{item.amount.toFixed(2)}</TableCell>
                             </TableRow>
@@ -78,3 +79,5 @@ export function ActivityFeed({ expenses, selectedDate, currentMonth, onMonthChan
     </Card>
   );
 }
+
+    

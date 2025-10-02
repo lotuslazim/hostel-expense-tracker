@@ -1,4 +1,5 @@
 
+
 import type { Timestamp } from 'firebase/firestore';
 
 export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
@@ -19,7 +20,8 @@ export type ExpenseCategory = 'Food & Groceries' | 'Electricity' | 'Gas' | 'Othe
 
 export interface Expense {
   id: string;
-  description?: string;
+  description?: string; // Kept for backward compatibility
+  expenseItem: string;
   amount: number;
   category: ExpenseCategory;
   quantity?: number;
