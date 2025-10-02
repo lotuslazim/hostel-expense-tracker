@@ -132,6 +132,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
 
   const categoryValue = form.watch("category");
   const purchasedItemsValue = form.watch("purchasedItems");
+  const purchasedItemsString = JSON.stringify(purchasedItemsValue);
 
   useEffect(() => {
     setShowReceipt(categoryValue === 'Electricity' || categoryValue === 'Gas');
@@ -151,10 +152,12 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     } else if (categoryValue === 'Gas') {
         finalExpenseItem = 'Gas Bill';
     }
-    if(finalExpenseItem !== undefined) {
+    
+    const currentExpenseItem = form.getValues('expenseItem');
+    if(finalExpenseItem !== undefined && finalExpenseItem !== currentExpenseItem) {
       form.setValue('expenseItem', finalExpenseItem);
     }
-  }, [categoryValue, form, purchasedItemsValue]);
+  }, [categoryValue, form, purchasedItemsString]);
   
   useEffect(() => {
     if (!isCameraDialogOpen) {
@@ -334,7 +337,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   }
 
   const commonUnits = ['kg', 'gm', 'L', 'ml', 'pcs', 'dozen', 'unit'];
-  
+
   return (
     <Card>
         <CardHeader>
@@ -555,3 +558,5 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     </Card>
   );
 }
+
+    
