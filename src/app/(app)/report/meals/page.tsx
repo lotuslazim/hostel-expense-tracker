@@ -3,18 +3,19 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { useMemo } from "react";
-import { parseISO, startOfMonth, endOfMonth, format, addMonths, subMonths } from "date-fns";
+import { parseISO, startOfMonth, endOfMonth, format, addMonths, subMonths, isSameDay } from "date-fns";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
 import { doc, collection, query, where, Timestamp } from "firebase/firestore";
 import type { MealLog } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle, ChevronLeft, Users, Utensils, ChevronDown } from "lucide-react";
+import { AlertTriangle, ChevronLeft, Users, Utensils, ChevronDown, CalendarDays } from "lucide-react";
 import { WelcomeCard } from "@/components/app/welcome-card";
 import { Button } from "@/components/ui/button";
 import { MonthSwitcher } from "@/components/report/month-switcher";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Badge } from "@/components/ui/badge";
 
 // Define a specific type for member data used in this page
 interface Member {
@@ -25,14 +26,15 @@ interface Member {
 
 interface DailyMealInfo {
     day: Date;
-    count: number;
+    totalMeals: number;
+    meals: MealLog[];
 }
 
 interface MemberMealInfo {
     id: string;
     name: string;
     totalMeals: number;
-    dailyMeals: DailyMealInfo[];
+    dailyData: DailyMealInfo[];
 }
 
 function PageSkeleton() {
@@ -139,29 +141,32 @@ export default function MealConsumptionPage() {
 
         return membersData.map((member) => {
             const memberMeals = mealsByUser.get(member.id) || [];
-            const totalMeals = memberMeals.reduce((sum, meal) => sum + (meal.mealNumber || 1), 0);
-
-            const mealCountsByDay = memberMeals.reduce((acc, meal) => {
+            const totalMealsForMonth = memberMeals.reduce((sum, meal) => sum + (meal.mealNumber || 1), 0);
+            
+            const mealsByDay = memberMeals.reduce((acc, meal) => {
                 const dateObj = meal.date instanceof Date 
                     ? meal.date 
                     : (meal.date as Timestamp).toDate();
                 const day = format(dateObj, 'yyyy-MM-dd');
+                
                 if (!acc[day]) {
-                    acc[day] = 0;
+                    acc[day] = { day: dateObj, totalMeals: 0, meals: [] };
                 }
-                acc[day] += meal.mealNumber || 1;
+                
+                acc[day].totalMeals += meal.mealNumber || 1;
+                acc[day].meals.push(meal);
+                
                 return acc;
-            }, {} as Record<string, number>);
+            }, {} as Record<string, DailyMealInfo>);
 
-            const dailyMeals = Object.entries(mealCountsByDay)
-                .map(([day, count]) => ({ day: parseISO(day), count }))
+            const dailyData = Object.values(mealsByDay)
                 .sort((a, b) => a.day.getTime() - b.day.getTime());
 
             return {
                 id: member.id,
                 name: member.displayName || member.email?.split('@')[0] || 'Unknown Member',
-                totalMeals,
-                dailyMeals,
+                totalMeals: totalMealsForMonth,
+                dailyData,
             };
         });
 
@@ -221,7 +226,7 @@ export default function MealConsumptionPage() {
                         Member Meal Counts
                     </CardTitle>
                     <CardDescription>
-                        Total meals logged by each member for the month. Click to see daily meal breakdown.
+                        Total meals for the month. Click to see a detailed daily meal breakdown.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -233,7 +238,7 @@ export default function MealConsumptionPage() {
                                         <p className="font-medium text-lg">{member.name}</p>
                                         <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                                             <Utensils className="h-4 w-4 text-primary" />
-                                            <span className="font-semibold">{member.totalMeals} meals</span>
+                                            <span className="font-semibold">{member.totalMeals} meals this month</span>
                                         </div>
                                     </div>
                                     <CollapsibleTrigger asChild>
@@ -246,33 +251,29 @@ export default function MealConsumptionPage() {
                                 
                                 <CollapsibleContent>
                                     <div className="p-4 bg-muted/50 border-t">
-                                        {member.dailyMeals.length > 0 ? (
-                                            <div className="space-y-3">
+                                        {member.dailyData.length > 0 ? (
+                                            <div className="space-y-4">
                                                 <h4 className="font-medium text-sm text-muted-foreground">
                                                     Daily Meal History for {format(currentDate, "MMMM yyyy")}:
                                                 </h4>
-                                                <div className="grid gap-2">
-                                                    {member.dailyMeals.map(({day, count}) => (
-                                                        <div 
-                                                            key={day.toString()} 
-                                                            className="flex justify-between items-center py-2 px-3 bg-background rounded-md border"
-                                                        >
-                                                            <span className="font-medium">
-                                                                {format(day, 'EEEE, MMMM d')}
-                                                            </span>
-                                                            <span className="font-semibold text-primary">
-                                                                {count} {count === 1 ? 'meal' : 'meals'}
-                                                            </span>
+                                                <div className="space-y-4">
+                                                    {member.dailyData.map(({day, totalMeals, meals}) => (
+                                                        <div key={day.toString()} className="p-3 bg-background rounded-lg border">
+                                                            <div className="flex justify-between items-center mb-2">
+                                                                <p className="font-semibold flex items-center gap-2"><CalendarDays className="h-4 w-4" />{format(day, 'EEEE, MMMM d')}</p>
+                                                                <Badge>Total meals: {totalMeals}</Badge>
+                                                            </div>
+                                                            <div className="pl-4 border-l-2 ml-2 space-y-1">
+                                                                {meals.map(meal => (
+                                                                    <div key={meal.id} className="text-sm">
+                                                                        <span className="font-medium">{meal.mealType} ({meal.mealNumber} {meal.mealNumber > 1 ? 'meals' : 'meal'}): </span>
+                                                                        <span className="text-muted-foreground">{meal.itemName || 'N/A'}</span>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
                                                         </div>
                                                     ))}
                                                 </div>
-                                                {member.dailyMeals.length > 0 && (
-                                                    <div className="pt-2 border-t">
-                                                        <p className="text-sm text-muted-foreground text-center">
-                                                            Average: {(member.totalMeals / member.dailyMeals.length).toFixed(1)} meals per day
-                                                        </p>
-                                                    </div>
-                                                )}
                                             </div>
                                         ) : (
                                             <div className="text-center py-6">
