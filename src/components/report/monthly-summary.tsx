@@ -16,6 +16,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 
 interface MonthlySummaryProps {
@@ -26,6 +27,7 @@ interface MonthlySummaryProps {
 interface ProcessedMember {
   id: string;
   name: string;
+  photoURL?: string;
   meals: number;
   memberMeals: MealLog[];
   foodExpenses: number;
@@ -247,6 +249,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
       return {
         id: member.id,
         name: member.displayName || member.email?.split('@')[0] || 'Unknown User',
+        photoURL: member.photoURL,
         meals: totalMeals,
         memberMeals,
         foodExpenses,
@@ -303,11 +306,9 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
       otherExpensesList
   } = processedData;
 
-  const perMemberFoodShare = totalGroupFoodExpenses / (memberCount || 1);
   const perMemberUtilityShare = totalUtilityExpenses / (memberCount || 1);
   const perMemberOtherShare = totalGroupOtherExpenses / (memberCount || 1);
-  const perMemberTotalShare = perMemberFoodShare + perMemberUtilityShare + perMemberOtherShare;
-
+  
 
   return (
     <div className="space-y-6">
@@ -409,121 +410,106 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
         </Card>
       </div>
 
-      <Collapsible asChild>
-        <Card>
-            <CardHeader>
-              <div className="flex justify-between items-start">
-                  <div>
-                      <CardTitle className="flex items-center gap-2">
-                          <Scale /> Final Settlement
-                      </CardTitle>
-                      <CardDescription>
-                          A detailed breakdown of expenses, contributions, and balances for each member.
-                      </CardDescription>
+      <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+                <Scale /> Final Settlement
+            </CardTitle>
+            <CardDescription>
+                A breakdown of expenses, contributions, and balances for each member.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {processedMembers.map(member => {
+              const totalMealCost = member.meals * mealRate;
+              const memberShare = totalMealCost + perMemberUtilityShare + perMemberOtherShare;
+              const balance = member.totalPaid - memberShare;
+
+              return (
+                <Collapsible key={member.id} className="border rounded-lg bg-card group">
+                  <div className="flex flex-col md:flex-row items-start md:items-center p-4 gap-4">
+                      <div className="flex items-center gap-3 flex-1">
+                          <Avatar>
+                            <AvatarImage src={member.photoURL}/>
+                            <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <p className="font-semibold text-lg">{member.name}</p>
+                            <div className={cn(
+                                "font-bold text-xl",
+                                balance >= 0 ? 'text-green-600' : 'text-red-600'
+                              )}>
+                              {balance >= 0 ? `Gets: ` : `Owes: `}
+                              ৳{Math.abs(balance).toFixed(2)}
+                            </div>
+                          </div>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-none md:flex md:items-center gap-x-4 gap-y-2 text-sm w-full md:w-auto">
+                        <div className="text-center">
+                          <p className="text-muted-foreground">Total Paid</p>
+                          <p className="font-medium">৳{member.totalPaid.toFixed(2)}</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-muted-foreground">Total Share</p>
+                          <p className="font-medium">৳{memberShare.toFixed(2)}</p>
+                        </div>
+                        <CollapsibleTrigger asChild className="col-span-2 md:col-span-1">
+                          <Button variant="ghost" className="w-full md:w-auto group-data-[state=open]:bg-accent">
+                            View Details 
+                            <ChevronDown className="h-4 w-4 ml-2 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                          </Button>
+                        </CollapsibleTrigger>
+                      </div>
                   </div>
-                   <CollapsibleTrigger asChild>
-                      <Button variant="outline" className="group">
-                          Show Details
-                          <ChevronDown className="h-4 w-4 ml-2 transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                      </Button>
-                  </CollapsibleTrigger>
-              </div>
-            </CardHeader>
-            <CollapsibleContent>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[150px]">Details</TableHead>
-                      {processedMembers.map(member => (
-                          <TableHead key={member.id} className="text-center">{member.name}</TableHead>
-                      ))}
-                      <TableHead className="text-right w-[150px]">Section Total</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                      {/* Food Section */}
-                      <TableRow className="bg-muted/20">
-                          <TableCell colSpan={processedMembers.length + 2} className="font-semibold text-primary">
-                            Food & Groceries
-                          </TableCell>
-                      </TableRow>
-                      <TableRow>
-                          <TableCell className="pl-8 text-muted-foreground">Contribution</TableCell>
-                          {processedMembers.map(member => (
-                              <TableCell key={member.id} className="text-center">৳{member.foodExpenses.toFixed(2)}</TableCell>
-                          ))}
-                          <TableCell className="text-right font-medium">৳{totalGroupFoodExpenses.toFixed(2)}</TableCell>
-                      </TableRow>
-                    
-                      {/* Utility Section */}
-                      <TableRow className="bg-muted/20">
-                          <TableCell colSpan={processedMembers.length + 2} className="font-semibold text-primary">
-                              Utilities (Gas & Electricity)
-                          </TableCell>
-                      </TableRow>
-                      <TableRow>
-                          <TableCell className="pl-8 text-muted-foreground">Contribution</TableCell>
-                          {processedMembers.map(member => (
-                              <TableCell key={member.id} className="text-center">৳{member.utilityExpensesPaid.toFixed(2)}</TableCell>
-                          ))}
-                          <TableCell className="text-right font-medium">৳{totalUtilityExpenses.toFixed(2)}</TableCell>
-                      </TableRow>
-                    
-                      {/* Other Section */}
-                      <TableRow className="bg-muted/20">
-                          <TableCell colSpan={processedMembers.length + 2} className="font-semibold text-primary">
-                            Other Expenses
-                          </TableCell>
-                      </TableRow>
-                      <TableRow>
-                          <TableCell className="pl-8 text-muted-foreground">Contribution</TableCell>
-                          {processedMembers.map(member => (
-                              <TableCell key={member.id} className="text-center">৳{member.otherExpenses.toFixed(2)}</TableCell>
-                          ))}
-                          <TableCell className="text-right font-medium">৳{totalGroupOtherExpenses.toFixed(2)}</TableCell>
-                      </TableRow>
-                  </TableBody>
-                  <TableFooter>
-                      {/* Grand Total */}
-                      <TableRow className="bg-muted/50 font-bold">
-                          <TableCell>Grand Total (Paid)</TableCell>
-                          {processedMembers.map(member => (
-                              <TableCell key={member.id} className="text-center">৳{member.totalPaid.toFixed(2)}</TableCell>
-                          ))}
-                          <TableCell className="text-right text-primary">৳{totalGroupExpenses.toFixed(2)}</TableCell>
-                      </TableRow>
-                      <TableRow className="font-semibold">
-                          <TableCell>Individual Share</TableCell>
-                          {processedMembers.map(member => (
-                              <TableCell key={member.id} className="text-center text-muted-foreground">৳{perMemberTotalShare.toFixed(2)}</TableCell>
-                          ))}
-                          <TableCell className="text-right">৳{totalGroupExpenses.toFixed(2)}</TableCell>
-                      </TableRow>
-                      {/* Final Balance */}
-                      <TableRow className="bg-muted/50 font-bold text-lg">
-                          <TableCell>Final Balance</TableCell>
-                          {processedMembers.map(member => {
-                              const balance = member.totalPaid - perMemberTotalShare;
-                              return (
-                                  <TableCell key={member.id} className={cn("text-center", balance >= 0 ? 'text-green-600' : 'text-red-600')}>
-                                      {balance >= 0 ? `Gets: ` : `Owes: `}
-                                      ৳{Math.abs(balance).toFixed(2)}
-                                  </TableCell>
-                              )
-                          })}
-                          <TableCell className="text-right">৳0.00</TableCell>
-                      </TableRow>
-                  </TableFooter>
-                </Table>
-              </CardContent>
-            </CollapsibleContent>
-        </Card>
-      </Collapsible>
+                  <CollapsibleContent>
+                    <div className="border-t bg-muted/50 p-4">
+                      <h4 className="font-semibold mb-3">Details for {member.name}</h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                        <div className="p-3 bg-background rounded-lg border">
+                          <p className="text-muted-foreground">Total Meals</p>
+                          <p className="font-bold text-lg">{member.meals}</p>
+                        </div>
+                        <div className="p-3 bg-background rounded-lg border">
+                          <p className="text-muted-foreground">Food Contribution</p>
+                          <p className="font-bold text-lg">৳{member.foodExpenses.toFixed(2)}</p>
+                        </div>
+                        <div className="p-3 bg-background rounded-lg border">
+                          <p className="text-muted-foreground">Utility Contribution</p>
+                          <p className="font-bold text-lg">৳{member.utilityExpensesPaid.toFixed(2)}</p>
+                        </div>
+                        <div className="p-3 bg-background rounded-lg border">
+                          <p className="text-muted-foreground">Other Contribution</p>
+                          <p className="font-bold text-lg">৳{member.otherExpenses.toFixed(2)}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              )
+            })}
+          </CardContent>
+          <CardFooter className="bg-muted/50 p-4 border-t rounded-b-lg">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full text-center">
+                    <div>
+                        <p className="text-sm text-muted-foreground">Total Food Cost</p>
+                        <p className="font-bold text-lg">৳{totalGroupFoodExpenses.toFixed(2)}</p>
+                    </div>
+                     <div>
+                        <p className="text-sm text-muted-foreground">Total Utility Cost</p>
+                        <p className="font-bold text-lg">৳{totalUtilityExpenses.toFixed(2)}</p>
+                    </div>
+                     <div>
+                        <p className="text-sm text-muted-foreground">Total Other Cost</p>
+                        <p className="font-bold text-lg">৳{totalGroupOtherExpenses.toFixed(2)}</p>
+                    </div>
+                     <div>
+                        <p className="text-sm text-muted-foreground">Grand Total</p>
+                        <p className="font-bold text-lg text-primary">৳{totalGroupExpenses.toFixed(2)}</p>
+                    </div>
+                </div>
+          </CardFooter>
+      </Card>
     </div>
   );
 
-    
-
-    
-
+}
