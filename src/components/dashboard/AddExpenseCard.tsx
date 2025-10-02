@@ -81,7 +81,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   const expenseSchema = useMemo(() => {
     return z.object({
         amount: z.coerce.number().min(0.01, "Amount must be greater than 0."),
-        expenseItem: z.string().min(1, "Expense Item is required."),
+        expenseItem: z.string().optional(),
         category: z.enum(["Food & Groceries", "Electricity", "Gas", "Other"], {
             required_error: "Please select a category.",
         }),
@@ -105,6 +105,14 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     }, {
         message: "The total cost of items must match the expense amount.",
         path: ['amount'],
+    }).refine(data => { // Other category expenseItem validation
+      if(data.category === 'Other') {
+        return !!data.expenseItem && data.expenseItem.length > 0;
+      }
+      return true;
+    }, {
+      message: "Expense Item is required for 'Other' category.",
+      path: ['expenseItem']
     });
   }, [isUtilityReceiptRequired]);
 
@@ -141,29 +149,13 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     const isFood = categoryValue === 'Food & Groceries';
     setShowInventoryFields(isFood);
     
-    if (categoryValue === 'Electricity') {
-      form.setValue('expenseItem', 'Electricity Bill');
-    } else if (categoryValue === 'Gas') {
-      form.setValue('expenseItem', 'Gas Bill');
-    } else if (categoryValue === 'Food & Groceries') {
-      const currentPurchasedItems = form.getValues('purchasedItems');
-      if (currentPurchasedItems && currentPurchasedItems.length > 0) {
-        const itemNames = currentPurchasedItems.map(item => item.name).join(', ');
-        form.setValue('expenseItem', itemNames.substring(0, 100) + (itemNames.length > 100 ? '...' : ''));
-      } else {
-        form.setValue('expenseItem', 'Groceries');
-      }
-    } else {
-      // For 'Other', we let the user type, so we don't automatically set it.
-    }
-    
     if (!isFood) {
       form.setValue('purchasedItems', []);
       form.clearErrors('amount');
     }
   }, [categoryValue, form]);
   
-   useEffect(() => {
+  useEffect(() => {
     if (categoryValue === 'Food & Groceries') {
       const itemNames = purchasedItemsValue?.map(item => item.name).filter(Boolean).join(', ');
       if (itemNames) {
@@ -171,7 +163,12 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
       } else {
         form.setValue('expenseItem', 'Groceries');
       }
+    } else if (categoryValue === 'Electricity') {
+      form.setValue('expenseItem', 'Electricity Bill');
+    } else if (categoryValue === 'Gas') {
+      form.setValue('expenseItem', 'Gas Bill');
     }
+
   }, [purchasedItemsValue, categoryValue, form]);
 
 
@@ -281,9 +278,20 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
         }
 
         const expenseRef = doc(collection(firestore, `groups/${groupId}/expenses`));
+
+        let finalExpenseItem = values.expenseItem || "";
+        if(values.category === 'Food & Groceries') {
+            finalExpenseItem = values.purchasedItems?.map(item => item.name).filter(Boolean).join(', ') || "Groceries";
+        } else if (values.category === 'Electricity') {
+            finalExpenseItem = 'Electricity Bill';
+        } else if (values.category === 'Gas') {
+            finalExpenseItem = 'Gas Bill';
+        }
+
+
         const expenseData = sanitizeFirestoreData({
             amount: values.amount,
-            expenseItem: values.expenseItem,
+            expenseItem: finalExpenseItem,
             category: values.category,
             receiptPhotoUrl: receiptUrl,
             userId: currentUser.uid,
@@ -326,7 +334,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
             triggerUpdate(); // Notify inventory page of the update
         }
 
-        form.reset({ amount: "" as unknown as number, expenseItem: "", category: undefined, receipt: undefined, purchasedItems: [] });
+        form.reset({ amount: '' as unknown as number, expenseItem: "", category: undefined, receipt: undefined, purchasedItems: [] });
         clearImage();
 
     } catch (error) {
@@ -350,6 +358,8 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
         </Card>
     );
   }
+
+  const commonUnits = ['kg', 'gm', 'L', 'ml', 'pcs', 'dozen', 'unit'];
 
   return (
     <Card>
@@ -390,7 +400,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                 name="amount"
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Amount (৳)</FormLabel>
+                    <FormLabel>Total Amount (৳)</FormLabel>
                     <FormControl>
                         <Input type="number" placeholder="0.00" {...field} value={field.value ?? ''} />
                     </FormControl>
@@ -406,9 +416,10 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                       <FormLabel>Expense Item</FormLabel>
                       <FormControl>
                         <Input 
-                          placeholder={categoryValue === 'Other' ? 'e.g., Kitchen repair' : 'Auto-generated'} 
+                          placeholder={categoryValue === 'Other' ? 'e.g., Kitchen repair' : 'Auto-generated for other categories'} 
                           {...field} 
                           disabled={categoryValue !== 'Other'}
+                          value={field.value ?? ''}
                         />
                       </FormControl>
                       <FormMessage />
@@ -418,7 +429,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
 
                 {showInventoryFields && (
                   <div className="space-y-4 rounded-md border p-4">
-                      <div className="flex justify-between items-center">
+                      <div className="flex justify-between items-center mb-2">
                         <h4 className="font-medium">Log Purchased Items</h4>
                         <div className="text-sm">
                             <span className="text-muted-foreground">Remaining: </span>
@@ -427,17 +438,25 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                             </span>
                         </div>
                       </div>
+
+                      {fields.length > 0 && (
+                        <div className="grid grid-cols-12 gap-2 items-start text-xs font-medium text-muted-foreground">
+                            <div className="col-span-5">Item Name</div>
+                            <div className="col-span-2">Qty</div>
+                            <div className="col-span-2">Unit</div>
+                            <div className="col-span-2">Cost (৳)</div>
+                        </div>
+                      )}
                       
                       {fields.map((field, index) => (
-                        <div key={field.id} className="grid grid-cols-12 gap-2 items-start border-t pt-3">
+                        <div key={field.id} className="grid grid-cols-12 gap-2 items-start">
                            <FormField
                               control={form.control}
                               name={`purchasedItems.${index}.name`}
                               render={({ field }) => (
                                 <FormItem className="col-span-5">
-                                  <FormLabel className="sr-only">Item Name</FormLabel>
                                   <FormControl>
-                                      <Input placeholder="Item name" {...field} />
+                                      <Input placeholder="e.g. Rice" {...field} />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -448,8 +467,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                               name={`purchasedItems.${index}.quantity`}
                               render={({ field }) => (
                                 <FormItem className="col-span-2">
-                                  <FormLabel className="sr-only">Qty</FormLabel>
-                                  <FormControl><Input type="number" placeholder="Qty" {...field}/></FormControl>
+                                  <FormControl><Input type="number" placeholder="1" {...field}/></FormControl>
                                   <FormMessage/>
                                 </FormItem>
                               )}
@@ -458,9 +476,19 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                               control={form.control}
                               name={`purchasedItems.${index}.unit`}
                               render={({ field }) => (
-                                <FormItem className="col-span-2">
-                                  <FormLabel className="sr-only">Unit</FormLabel>
-                                  <FormControl><Input placeholder="Unit" {...field}/></FormControl>
+                                <FormItem className="col-span-3">
+                                   <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Unit" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      {commonUnits.map(unit => (
+                                        <SelectItem key={unit} value={unit}>{unit}</SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
                                   <FormMessage/>
                                 </FormItem>
                               )}
@@ -470,15 +498,15 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                               name={`purchasedItems.${index}.cost`}
                               render={({ field }) => (
                                 <FormItem className="col-span-2">
-                                  <FormLabel className="sr-only">Cost</FormLabel>
-                                  <FormControl><Input type="number" placeholder="Cost" {...field}/></FormControl>
+                                  <FormControl><Input type="number" placeholder="0" {...field}/></FormControl>
                                   <FormMessage/>
                                 </FormItem>
                               )}
                             />
-                           <div className="col-span-1 flex items-center h-10">
-                              <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
+                           <div className="col-span-12 sm:col-span-1 flex items-center justify-end sm:justify-center h-10 -mt-2 sm:mt-0">
+                              <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)} className="h-8 w-8">
                                 <Trash2 className="h-4 w-4 text-destructive"/>
+                                <span className="sr-only">Remove Item</span>
                               </Button>
                            </div>
                         </div>
