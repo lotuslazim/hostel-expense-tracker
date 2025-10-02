@@ -12,8 +12,8 @@ function LinkComponent({ href, children, ...props }: ComponentProps<typeof Link>
 
 export function Logo() {
   return (
-    <LinkComponent href="/" className="flex items-center gap-3" aria-label="BachelorBite Home">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
+    <LinkComponent href="/" className="flex flex-col items-center gap-1" aria-label="BachelorBite Home">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
         <path d="M9 1H10V2H11V3H12V4H13V5H14V6H15V7H16V8H17V7H18V6H19V7H20V8H19V9H17V10H16V11H15V12H14V13H13V14H12V15H11V16H10V17H9V18H8V19H7V20H6V21H5V22H4V23H5V22H6V21H7V20H8V19H9V18H10V17H11V16H12V15H13V14H14V13H15V12H16V11H17V10H18V9H19V8H20V7H21V8H22V10H21V11H20V12H19V13H18V14H17V15H16V16H15V17H14V18H13V19H12V20H11V21H10V22H9V23H8V22H7V21H6V20H5V19H4V17H3V16H2V15H1V14H0V12H1V11H2V10H3V9H4V8H5V7H6V6H7V5H8V4H9V3H8V2H7V1H8V0H9V1Z" fill="#A7D1AB"/>
         <path d="M12 5H13V6H12V5Z" fill="white"/>
         <path d="M13 6H14V7H13V6Z" fill="#1A7431"/>
@@ -32,8 +32,8 @@ export function Logo() {
         <path d="M16 10H17V11H16V10Z" fill="#F0F4F2"/>
       </svg>
       <div className="flex items-baseline">
-        <span className="font-headline text-3xl font-bold text-foreground">Bachelor</span>
-        <span className="font-headline text-3xl font-bold text-primary">Bite</span>
+        <span className="font-headline text-lg font-bold text-foreground">Bachelor</span>
+        <span className="font-headline text-lg font-bold text-primary">Bite</span>
       </div>
     </LinkComponent>
   );
