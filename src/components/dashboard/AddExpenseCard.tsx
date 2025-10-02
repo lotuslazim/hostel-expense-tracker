@@ -35,6 +35,7 @@ import imageCompression from "browser-image-compression";
 import { Alert, AlertTitle, AlertDescription } from "../ui/alert";
 import type { FoodItem, PurchasedItem } from "@/lib/types";
 import { useInventory } from "@/contexts/InventoryContext";
+import { cn } from "@/lib/utils";
 
 interface AddExpenseCardProps {
   selectedDate: Date;
@@ -140,10 +141,10 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
 
   const remainingToLog = useMemo(() => {
     const totalAmount = Number(amountValue) || 0;
-    const remaining = totalAmount - itemsTotal;
-    return remaining;
+    const currentTotal = itemsTotal || 0;
+    const remaining = totalAmount - currentTotal;
+    return remaining > 0 ? remaining : 0;
   }, [amountValue, itemsTotal]);
-
 
   useEffect(() => {
     setShowReceipt(categoryValue === 'Electricity' || categoryValue === 'Gas');
@@ -157,7 +158,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
 
     let finalExpenseItem: string | undefined;
     if (categoryValue === 'Food & Groceries') {
-        // This is handled by the other useEffect
+       finalExpenseItem = purchasedItemsValue?.map(item => item.name).filter(Boolean).join(', ') || 'Groceries';
     } else if (categoryValue === 'Electricity') {
         finalExpenseItem = 'Electricity Bill';
     } else if (categoryValue === 'Gas') {
@@ -166,14 +167,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     if(finalExpenseItem !== undefined) {
       form.setValue('expenseItem', finalExpenseItem);
     }
-  }, [categoryValue, form]);
-
-  useEffect(() => {
-    if (categoryValue === 'Food & Groceries') {
-        const finalExpenseItem = purchasedItemsValue?.map(item => item.name).filter(Boolean).join(', ') || 'Groceries';
-        form.setValue('expenseItem', finalExpenseItem);
-    }
-  }, [purchasedItemsValue, categoryValue, form]);
+  }, [categoryValue, form, purchasedItemsValue]);
   
   useEffect(() => {
     if (!isCameraDialogOpen) {
@@ -424,19 +418,18 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                   <div className="space-y-4 rounded-md border p-4">
                       <div className="flex justify-between items-center mb-2">
                         <h4 className="font-medium">Log Purchased Items</h4>
-                        <div className="text-sm text-muted-foreground">
+                        <div className={cn("text-sm font-semibold", remainingToLog > 0.01 ? 'text-destructive' : 'text-green-600' )}>
                             Remaining: ৳{remainingToLog.toFixed(2)}
                         </div>
                       </div>
                       
-                      {fields.length > 0 && (
-                        <div className="grid grid-cols-12 gap-2 items-start border-t pt-3">
-                            <div className="col-span-5"><FormLabel>Item Name</FormLabel></div>
-                            <div className="col-span-2"><FormLabel>Qty</FormLabel></div>
-                            <div className="col-span-2"><FormLabel>Unit</FormLabel></div>
-                            <div className="col-span-2"><FormLabel>Cost (৳)</FormLabel></div>
-                        </div>
-                      )}
+                      <div className="grid grid-cols-12 gap-2 items-start border-t pt-3">
+                          <div className="col-span-5"><FormLabel>Item Name</FormLabel></div>
+                          <div className="col-span-2"><FormLabel>Qty</FormLabel></div>
+                          <div className="col-span-2"><FormLabel>Unit</FormLabel></div>
+                          <div className="col-span-2"><FormLabel>Cost (৳)</FormLabel></div>
+                          <div className="col-span-1"></div>
+                      </div>
                       
                       {fields.map((field, index) => (
                         <div key={field.id} className="grid grid-cols-12 gap-2 items-start">
@@ -578,3 +571,5 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     </Card>
   );
 }
+
+    
