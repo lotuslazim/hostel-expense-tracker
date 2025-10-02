@@ -14,6 +14,8 @@ import type { MealLog, Expense } from "@/lib/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+
 
 interface MonthlySummaryProps {
   month: Date;
@@ -41,6 +43,7 @@ interface ProcessedData {
   mealRate: number;
   totalGroupExpenses: number;
   totalUtilityExpenses: number;
+  otherExpensesList: Expense[];
 }
 
 // Reusable utility functions
@@ -362,6 +365,7 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     const mealRate = totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
     const totalUtilityExpenses = expensesData.filter(e => e.category === 'Electricity' || e.category === 'Gas').reduce((sum, e) => sum + (e.amount || 0), 0);
     const totalGroupExpenses = expensesData.reduce((sum, e) => sum + (e.amount || 0), 0);
+    const otherExpensesList = expensesData.filter(e => e.category === 'Other').sort(sortByDateDesc);
 
     return {
       processedMembers,
@@ -371,7 +375,8 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
       memberCount,
       mealRate: mealRate || 0,
       totalGroupExpenses: totalGroupExpenses || 0,
-      totalUtilityExpenses: totalUtilityExpenses || 0
+      totalUtilityExpenses: totalUtilityExpenses || 0,
+      otherExpensesList
     };
   }, [membersData, mealsData, expensesData]);
 
@@ -395,7 +400,8 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
       memberCount,
       mealRate,
       totalGroupExpenses,
-      totalUtilityExpenses
+      totalUtilityExpenses,
+      otherExpensesList
   } = processedData;
 
   const perMemberShare = totalGroupExpenses / (memberCount || 1);
@@ -461,6 +467,42 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
                   <p className="text-sm text-muted-foreground">Total "Other" Expenses</p>
                   <p className="text-2xl font-bold">৳{(totalGroupOtherExpenses || 0).toFixed(0)}</p>
                 </div>
+                 <Collapsible>
+                    <CollapsibleTrigger asChild>
+                        <Button variant="outline" size="sm" className="w-full group">
+                            Show Breakdown 
+                            <ChevronDown className="h-4 w-4 ml-2 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                        </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="mt-4">
+                        {otherExpensesList.length > 0 ? (
+                           <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Date</TableHead>
+                                        <TableHead>Member</TableHead>
+                                        <TableHead>Item</TableHead>
+                                        <TableHead className="text-right">Amount</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {otherExpensesList.map(expense => (
+                                        <TableRow key={expense.id}>
+                                            <TableCell>{formatShortDateSafe(expense.date)}</TableCell>
+                                            <TableCell>{expense.userName}</TableCell>
+                                            <TableCell>{expense.expenseItem}</TableCell>
+                                            <TableCell className="text-right">৳{expense.amount.toFixed(2)}</TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                           </Table>
+                        ) : (
+                            <div className="text-center text-muted-foreground py-4 text-sm">
+                                No "Other" expenses logged for this month.
+                            </div>
+                        )}
+                    </CollapsibleContent>
+                 </Collapsible>
             </CardContent>
         </Card>
       </div>
@@ -520,3 +562,4 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
     
 
     
+
