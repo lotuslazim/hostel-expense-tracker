@@ -10,7 +10,7 @@ export function WelcomeCard() {
     return (
         <Card className="max-w-2xl mx-auto">
             <CardHeader>
-                <CardTitle>Welcome to NourishTrack!</CardTitle>
+                <CardTitle>Welcome to BachelorBite!</CardTitle>
                 <CardDescription>It looks like you're not part of a group yet.</CardDescription>
             </CardHeader>
             <CardContent>
