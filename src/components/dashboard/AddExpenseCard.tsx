@@ -133,18 +133,6 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
 
   const categoryValue = form.watch("category");
   const purchasedItemsValue = form.watch("purchasedItems");
-  const amountValue = form.watch("amount");
-
-  const itemsTotal = useMemo(() => {
-    return (purchasedItemsValue || []).reduce((acc, item) => acc + (item.cost || 0), 0);
-  }, [purchasedItemsValue]);
-
-  const remainingToLog = useMemo(() => {
-    const totalAmount = Number(amountValue) || 0;
-    const currentTotal = itemsTotal || 0;
-    const remaining = totalAmount - currentTotal;
-    return remaining > 0 ? remaining : 0;
-  }, [amountValue, itemsTotal]);
 
   useEffect(() => {
     setShowReceipt(categoryValue === 'Electricity' || categoryValue === 'Gas');
@@ -418,9 +406,6 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                   <div className="space-y-4 rounded-md border p-4">
                       <div className="flex justify-between items-center mb-2">
                         <h4 className="font-medium">Log Purchased Items</h4>
-                        <div className={cn("text-sm font-semibold", remainingToLog > 0.01 ? 'text-destructive' : 'text-green-600' )}>
-                            Remaining: ৳{remainingToLog.toFixed(2)}
-                        </div>
                       </div>
                       
                       <div className="grid grid-cols-12 gap-2 items-start border-t pt-3">
@@ -571,5 +556,3 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     </Card>
   );
 }
-
-    
