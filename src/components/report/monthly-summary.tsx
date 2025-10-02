@@ -316,15 +316,17 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
             <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Utensils/> Food & Meals</CardTitle>
             </CardHeader>
-            <CardContent className="flex-grow space-y-4">
+            <CardContent className="flex-grow">
+               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">Food & Groceries Expenses</p>
+                  <p className="text-sm text-muted-foreground">Food & Groceries</p>
                   <p className="text-2xl font-bold">৳{(totalGroupFoodExpenses || 0).toFixed(0)}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Total meals consumed</p>
+                  <p className="text-sm text-muted-foreground">Total Meals</p>
                   <p className="text-2xl font-bold">{totalGroupMeals || 0}</p>
                 </div>
+               </div>
             </CardContent>
             <CardContent>
                 <div className="text-center p-3 bg-primary/10 rounded-lg">
