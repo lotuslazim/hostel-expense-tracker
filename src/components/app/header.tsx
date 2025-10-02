@@ -4,43 +4,75 @@ import { Logo } from "@/components/icons/logo";
 import { UserNav } from "@/components/app/user-nav";
 import { NavLink } from "./nav-link";
 import { Button } from "../ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Menu, MessageSquare } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Menu, MessageSquare, LayoutDashboard, BarChart3, Package } from "lucide-react";
 
 export function AppHeader() {
+  const navLinks = [
+    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/report", label: "Monthly Report", icon: BarChart3 },
+    { href: "/inventory", label: "Inventory", icon: Package },
+  ];
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
-        <div className="mr-auto flex">
-           <Logo />
-        </div>
         
-        <div className="flex flex-1 items-center justify-end space-x-2">
-          <Button variant="ghost" size="icon" asChild>
-              <Link href="/chat">
-                <MessageSquare />
-                <span className="sr-only">Open Chat</span>
-              </Link>
-          </Button>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+        {/* Mobile Menu */}
+        <div className="md:hidden mr-4">
+          <Sheet>
+            <SheetTrigger asChild>
               <Button variant="ghost" size="icon">
-                <Menu />
+                <Menu className="h-5 w-5" />
                 <span className="sr-only">Open navigation menu</span>
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem asChild><Link href="/dashboard">Dashboard</Link></DropdownMenuItem>
-              <DropdownMenuItem asChild><Link href="/report">Monthly Report</Link></DropdownMenuItem>
-              <DropdownMenuItem asChild><Link href="/inventory">Inventory</Link></DropdownMenuItem>
-              <DropdownMenuItem asChild><Link href="/profile">Profile</Link></DropdownMenuItem>
-              <DropdownMenuItem asChild><Link href="/admin">Admin</Link></DropdownMenuItem>
-              <DropdownMenuItem asChild><Link href="/settings">Settings</Link></DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[300px] sm:w-[350px]">
+              <div className="flex flex-col gap-4 py-6">
+                <div className="px-4 mb-4">
+                  <Logo />
+                </div>
+                <nav className="flex flex-col gap-2 px-4">
+                  {navLinks.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className="flex items-center gap-3 rounded-lg px-3 py-3 text-muted-foreground transition-all hover:text-primary text-base font-medium"
+                    >
+                      <link.icon className="h-5 w-5" />
+                      {link.label}
+                    </Link>
+                  ))}
+                </nav>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
 
-          <UserNav />
+        {/* Desktop Logo & Nav */}
+        <div className="hidden md:flex items-center gap-6">
+          <Logo />
+          <nav className="flex items-center gap-6 text-sm font-medium">
+            <NavLink href="/dashboard">Dashboard</NavLink>
+            <NavLink href="/report">Monthly Report</NavLink>
+            <NavLink href="/inventory">Inventory</NavLink>
+          </nav>
+        </div>
+
+        {/* Right side icons */}
+        <div className="flex flex-1 items-center justify-end space-x-2">
+           <div className="md:hidden">
+              <Logo />
+           </div>
+           <div className="flex items-center space-x-2">
+            <Button variant="ghost" size="icon" asChild>
+                <Link href="/chat">
+                  <MessageSquare />
+                  <span className="sr-only">Open Chat</span>
+                </Link>
+            </Button>
+            <UserNav />
+           </div>
         </div>
       </div>
     </header>
