@@ -14,13 +14,16 @@ export function Logo() {
   return (
     <LinkComponent href="/" className="flex items-center gap-2" aria-label="BachelorBite Home">
       <svg width="48" height="48" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M62 82C62 73.1634 69.1634 66 78 66H154C162.837 66 170 73.1634 170 82V82C170 90.8366 162.837 98 154 98H93.5C81.634 98 72 107.634 72 119.5V119.5C72 129.165 64.165 137 54.5 137H46" stroke="#2E3A33" strokeWidth="12" strokeLinecap="round"/>
-          <path d="M96 98L106 114" stroke="#A7D1AB" strokeWidth="12" strokeLinecap="round"/>
-          <path d="M118 98L128 114" stroke="#A7D1AB" strokeWidth="12" strokeLinecap="round"/>
-          <path d="M152 66L157.333 52" stroke="#2E3A33" strokeWidth="12" strokeLinecap="round"/>
-          <circle cx="92" cy="82" r="6" fill="#2E3A33"/>
+          <path d="M123.504 66H70C61.1634 66 54 73.1634 54 82V124C54 132.837 61.1634 140 70 140H146C154.837 140 162 132.837 162 124V88.8858C162 84.0152 159.255 79.5936 155.193 77.3005L129.193 64.8005C127.054 63.654 124.614 63.6496 122.47 64.7876L110.428 71.0494" stroke="#A7D1AB" strokeWidth="12" strokeLinecap="round"/>
+          <path d="M70 66L64 53" stroke="hsl(var(--foreground))" strokeWidth="12" strokeLinecap="round"/>
+          <path d="M102 66L96 53" stroke="hsl(var(--foreground))" strokeWidth="12" strokeLinecap="round"/>
+          <circle cx="86" cy="103" r="7" fill="hsl(var(--foreground))"/>
+          <path d="M96 112L92 124" stroke="#A7D1AB" strokeWidth="10" strokeLinecap="round"/>
       </svg>
-      <span className="text-3xl font-bold font-headline text-foreground">BachelorBite</span>
+      <span className="text-3xl font-bold font-headline">
+        <span className="text-foreground">Bachelor</span>
+        <span className="text-primary">Bite</span>
+      </span>
     </LinkComponent>
   );
 }
