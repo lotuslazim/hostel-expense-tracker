@@ -8,7 +8,7 @@ export function Logo() {
       className="flex items-center gap-2"
       aria-label="BachelorBite Home"
     >
-      <svg width="36" height="36" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg width="48" height="48" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
         {/* Dino Body */}
         <path d="M12.2,27.3c-1.2-0.3-2.3-1.1-2.9-2.2c-0.6-1.1-0.7-2.4-0.4-3.6l2-8.5c0.3-1.2,1.1-2.3,2.2-2.9s2.4-0.7,3.6-0.4l2.5,0.6c0.5,0.1,0.9,0.4,1.2,0.8c0.3,0.4,0.4,0.9,0.4,1.4v13.5c0,1.8-1.5,3.3-3.3,3.3h-1.5C14.8,29.3,13.4,28.5,12.2,27.3z" fill="hsl(var(--primary))"/>
         {/* Dino Head */}
