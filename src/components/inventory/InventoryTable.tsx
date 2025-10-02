@@ -1,12 +1,17 @@
 
 "use client";
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { Purchase } from '@/lib/types';
-import { PackageOpen } from 'lucide-react';
+import { PackageOpen, ChevronDown } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
+import { format } from 'date-fns';
 
 interface InventoryTableProps {
     purchases: Purchase[] | null;
@@ -18,6 +23,8 @@ interface ProcessedPurchaseItem {
     totalQuantity: number;
     totalCost: number;
     unit: string; // Assuming unit is consistent for the same item
+    contributions: Purchase[];
+    averagePrice: number;
 }
 
 function InventorySkeleton() {
@@ -50,20 +57,27 @@ export function InventoryTable({ purchases, isLoading }: InventoryTableProps) {
         if (!purchases) return [];
 
         const groupedItems = purchases.reduce((acc, purchase) => {
-            if (!acc[purchase.itemName]) {
-                acc[purchase.itemName] = {
-                    name: purchase.itemName,
+            const itemName = purchase.itemName.trim();
+            if (!acc[itemName]) {
+                acc[itemName] = {
+                    name: itemName,
                     totalQuantity: 0,
                     totalCost: 0,
-                    unit: purchase.unit, // Take the first unit found
+                    unit: purchase.unit,
+                    contributions: [],
+                    averagePrice: 0,
                 };
             }
-            acc[purchase.itemName].totalQuantity += purchase.quantity;
-            acc[purchase.itemName].totalCost += purchase.cost;
+            acc[itemName].totalQuantity += purchase.quantity;
+            acc[itemName].totalCost += purchase.cost;
+            acc[itemName].contributions.push(purchase);
             return acc;
         }, {} as Record<string, ProcessedPurchaseItem>);
 
-        return Object.values(groupedItems).sort((a, b) => a.name.localeCompare(b.name));
+        return Object.values(groupedItems).map(item => ({
+            ...item,
+            averagePrice: item.totalQuantity > 0 ? item.totalCost / item.totalQuantity : 0,
+        })).sort((a, b) => a.name.localeCompare(b.name));
 
     }, [purchases]);
 
@@ -77,36 +91,63 @@ export function InventoryTable({ purchases, isLoading }: InventoryTableProps) {
             <CardHeader>
                 <CardTitle>Monthly Purchase Summary</CardTitle>
                 <CardDescription>
-                    This is an automatically generated summary of all "Food & Groceries" purchased this month.
+                    This is an automatically generated summary of all "Food & Groceries" purchased this month. Click on an item to see the contribution breakdown.
                 </CardDescription>
             </CardHeader>
             <CardContent>
                 {processedItems.length > 0 ? (
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead className="w-[60%]">Item</TableHead>
-                                <TableHead className="text-right">Total Purchased & Spent</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {processedItems.map(item => (
-                                <TableRow key={item.name}>
-                                    <TableCell>
-                                        <div className="font-medium">{item.name}</div>
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <div className="font-semibold">
-                                            {item.totalQuantity.toFixed(2)} {item.unit}
+                    <div className="border rounded-lg">
+                        {processedItems.map(item => (
+                            <Collapsible key={item.name} className="border-b last:border-b-0 group">
+                                <CollapsibleTrigger asChild>
+                                    <div className="flex items-center p-4 cursor-pointer hover:bg-muted/50 transition-colors">
+                                        <div className="flex-1">
+                                            <p className="font-medium text-lg">{item.name}</p>
+                                            <div className="text-sm text-muted-foreground">
+                                                <span>{item.totalQuantity.toFixed(2)} {item.unit}</span>
+                                                <span className="mx-2">·</span>
+                                                <span>Total: ৳{item.totalCost.toFixed(2)}</span>
+                                            </div>
                                         </div>
-                                         <div className="text-sm text-muted-foreground">
-                                            Total Cost: ৳{item.totalCost.toFixed(2)}
+                                        <Button variant="ghost" size="icon" className="h-8 w-8 ml-2">
+                                            <ChevronDown className="h-5 w-5 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                                            <span className="sr-only">View Contributions</span>
+                                        </Button>
+                                    </div>
+                                </CollapsibleTrigger>
+                                <CollapsibleContent>
+                                    <div className="p-4 bg-muted/50 border-t">
+                                        <div className="flex justify-between items-center mb-3">
+                                            <h4 className="font-semibold">Contribution Breakdown</h4>
+                                            <Badge variant="secondary">
+                                                Avg. Price: ৳{item.averagePrice.toFixed(2)} / {item.unit}
+                                            </Badge>
                                         </div>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead>Member</TableHead>
+                                                    <TableHead>Date</TableHead>
+                                                    <TableHead className="text-right">Quantity</TableHead>
+                                                    <TableHead className="text-right">Cost</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {item.contributions.sort((a,b) => (a.date as any).toDate() - (b.date as any).toDate()).map(contrib => (
+                                                    <TableRow key={contrib.id}>
+                                                        <TableCell>{contrib.userName}</TableCell>
+                                                        <TableCell>{format((contrib.date as any).toDate(), 'MMM dd')}</TableCell>
+                                                        <TableCell className="text-right">{contrib.quantity.toFixed(2)} {contrib.unit}</TableCell>
+                                                        <TableCell className="text-right">৳{contrib.cost.toFixed(2)}</TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
+                                </CollapsibleContent>
+                            </Collapsible>
+                        ))}
+                    </div>
                 ) : (
                     <div className="text-center py-16 text-muted-foreground flex flex-col items-center justify-center">
                         <PackageOpen className="h-10 w-10 mb-4" />
