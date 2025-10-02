@@ -142,7 +142,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   const remainingToLog = useMemo(() => {
     if (!amountValue || amountValue <= 0) return 0;
     const remaining = Number(amountValue) - itemsTotal;
-    return remaining > 0 ? remaining : 0;
+    return remaining >= 0 ? remaining : 0;
   }, [amountValue, itemsTotal]);
 
   useEffect(() => {
@@ -158,7 +158,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   
   useEffect(() => {
     if (categoryValue === 'Food & Groceries') {
-      const itemNames = purchasedItemsValue?.map(item => item.name).filter(Boolean).join(', ');
+      const itemNames = form.getValues('purchasedItems')?.map(item => item.name).filter(Boolean).join(', ');
       if (itemNames) {
         form.setValue('expenseItem', itemNames);
       } else {
@@ -386,7 +386,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                         </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                        <SelectItem value="Food & Groceries">Food & Groceries</SelectItem>
+                        <SelectItem value="Food &amp; Groceries">Food &amp; Groceries</SelectItem>
                         <SelectItem value="Electricity">Electricity</SelectItem>
                         <SelectItem value="Gas">Gas</SelectItem>
                         <SelectItem value="Other">Other</SelectItem>
@@ -434,7 +434,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                         <h4 className="font-medium">Log Purchased Items</h4>
                         <div className="text-sm">
                             <span className="text-muted-foreground">Remaining: </span>
-                            <span className={remainingToLog > 0 ? "text-destructive font-semibold" : "text-green-600 font-semibold"}>
+                            <span className="font-semibold text-muted-foreground">
                                 ৳{remainingToLog.toFixed(2)}
                             </span>
                         </div>
