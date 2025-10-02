@@ -135,15 +135,15 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   const amountValue = form.watch("amount");
 
   const itemsTotal = useMemo(() => {
-    if (!purchasedItemsValue) return 0;
-    return purchasedItemsValue.reduce((acc, item) => acc + (item.cost || 0), 0);
+    return (purchasedItemsValue || []).reduce((acc, item) => acc + (item.cost || 0), 0);
   }, [purchasedItemsValue]);
 
   const remainingToLog = useMemo(() => {
-    if (!amountValue || amountValue <= 0) return 0;
-    const remaining = Number(amountValue) - itemsTotal;
-    return remaining >= 0 ? remaining : 0;
+    const totalAmount = Number(amountValue) || 0;
+    const remaining = totalAmount - itemsTotal;
+    return remaining > 0 ? remaining : 0;
   }, [amountValue, itemsTotal]);
+
 
   useEffect(() => {
     setShowReceipt(categoryValue === 'Electricity' || categoryValue === 'Gas');
@@ -157,19 +157,17 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   }, [categoryValue, form]);
   
   useEffect(() => {
-    if (categoryValue === 'Food & Groceries') {
-      const itemNames = form.getValues('purchasedItems')?.map(item => item.name).filter(Boolean).join(', ');
-      if (itemNames) {
-        form.setValue('expenseItem', itemNames);
-      } else {
-        form.setValue('expenseItem', 'Groceries');
+      let finalExpenseItem: string | undefined;
+      if (categoryValue === 'Food & Groceries') {
+          finalExpenseItem = purchasedItemsValue?.map(item => item.name).filter(Boolean).join(', ') || 'Groceries';
+      } else if (categoryValue === 'Electricity') {
+          finalExpenseItem = 'Electricity Bill';
+      } else if (categoryValue === 'Gas') {
+          finalExpenseItem = 'Gas Bill';
       }
-    } else if (categoryValue === 'Electricity') {
-      form.setValue('expenseItem', 'Electricity Bill');
-    } else if (categoryValue === 'Gas') {
-      form.setValue('expenseItem', 'Gas Bill');
-    }
-
+      if(finalExpenseItem !== undefined) {
+        form.setValue('expenseItem', finalExpenseItem);
+      }
   }, [purchasedItemsValue, categoryValue, form]);
 
 
@@ -280,9 +278,10 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
 
         const expenseRef = doc(collection(firestore, `groups/${groupId}/expenses`));
 
-        let finalExpenseItem = values.expenseItem || "";
+        let finalExpenseItem = values.expenseItem;
         if (values.category === 'Food & Groceries') {
-            finalExpenseItem = values.purchasedItems?.map(item => item.name).filter(Boolean).join(', ') || 'Groceries';
+            finalExpenseItem = values.purchasedItems?.map(item => item.name).filter(Boolean).join(', ');
+            if (!finalExpenseItem) finalExpenseItem = values.expenseItem || 'Groceries';
         } else if (values.category === 'Electricity') {
             finalExpenseItem = 'Electricity Bill';
         } else if (values.category === 'Gas') {
@@ -386,7 +385,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                         </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                        <SelectItem value="Food &amp; Groceries">Food &amp; Groceries</SelectItem>
+                        <SelectItem value="Food & Groceries">Food & Groceries</SelectItem>
                         <SelectItem value="Electricity">Electricity</SelectItem>
                         <SelectItem value="Gas">Gas</SelectItem>
                         <SelectItem value="Other">Other</SelectItem>
@@ -578,7 +577,6 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                       </FormItem>
                     )}
                   />
-                )}
                 
                 <Button type="submit" disabled={isSubmitting} className="w-full">
                     {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
