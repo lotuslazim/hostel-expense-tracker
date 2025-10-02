@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -100,108 +101,6 @@ function DataError() {
   );
 }
 
-// Custom collapsible row component for table
-function CollapsibleMemberRow({ 
-  member, 
-  perMemberShare,
-  mealCost,
-  utilityShare,
-}: { 
-  member: ProcessedMember;
-  perMemberShare: number;
-  mealCost: number;
-  utilityShare: number;
-}) {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const finalBalance = member.totalPaid - perMemberShare;
-
-  return (
-    <>
-      {/* Main member row */}
-      <TableRow className="transition-colors">
-        <TableCell className="font-medium flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => setIsExpanded(!isExpanded)}
-            aria-label={`Toggle meal history for ${member.name}`}
-            aria-expanded={isExpanded}
-          >
-            <ChevronDown className={cn(
-              "h-4 w-4 transition-transform duration-200",
-              isExpanded ? "rotate-180" : ""
-            )} />
-          </Button>
-          {member.name}
-        </TableCell>
-        <TableCell>৳{(member.totalPaid || 0).toFixed(2)}</TableCell>
-        <TableCell>৳{(perMemberShare || 0).toFixed(2)}</TableCell>
-        <TableCell
-          className={cn(
-            "text-right font-bold p-0",
-          )}
-        >
-          <div className={cn("px-4 py-4 rounded-md", finalBalance >= 0 ? "text-green-800" : "text-red-800")}>
-            {finalBalance >= 0
-              ? `Gets: ৳${(finalBalance || 0).toFixed(2)}`
-              : `Owes: ৳${Math.abs(finalBalance || 0).toFixed(2)}`}
-          </div>
-        </TableCell>
-      </TableRow>
-
-      {/* Expandable content row */}
-      {isExpanded && (
-        <TableRow className="bg-muted/30">
-          <TableCell colSpan={4} className="p-0">
-            <div className="p-4 space-y-4">
-              <div className="grid grid-cols-2 gap-4 text-center">
-                  <div className="bg-background/50 p-3 rounded-lg">
-                    <p className="text-sm text-muted-foreground">Total Meal Cost</p>
-                    <p className="font-semibold text-lg">৳{mealCost.toFixed(2)}</p>
-                  </div>
-                  <div className="bg-background/50 p-3 rounded-lg">
-                    <p className="text-sm text-muted-foreground">Utilities Share</p>
-                    <p className="font-semibold text-lg">৳{utilityShare.toFixed(2)}</p>
-                  </div>
-              </div>
-
-              {member.memberMeals?.length > 0 ? (
-                <div>
-                  <h4 className="font-semibold mb-2 text-sm">
-                    Meal History for {member.name} ({(member.meals || 0)} total meals)
-                  </h4>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Meal Type</TableHead>
-                        <TableHead>Count</TableHead>
-                        <TableHead>Item Name</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {member.memberMeals.map((meal) => (
-                        <TableRow key={meal.id}>
-                          <TableCell>{formatDateSafe(meal.date)}</TableCell>
-                          <TableCell className="capitalize">{meal.mealType}</TableCell>
-                          <TableCell>{meal.mealNumber || 1}</TableCell>
-                          <TableCell>{meal.itemName || "N/A"}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              ) : (
-                <EmptyState icon={Users} message="No meals logged by this member." />
-              )}
-            </div>
-          </TableCell>
-        </TableRow>
-      )}
-    </>
-  );
-}
 
 // Custom collapsible utility component
 function CollapsibleUtilityItem({ 
@@ -404,8 +303,11 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
       otherExpensesList
   } = processedData;
 
-  const perMemberShare = totalGroupExpenses / (memberCount || 1);
-  const utilitySharePerMember = totalUtilityExpenses / (memberCount || 1);
+  const perMemberFoodShare = totalGroupFoodExpenses / (memberCount || 1);
+  const perMemberUtilityShare = totalUtilityExpenses / (memberCount || 1);
+  const perMemberOtherShare = totalGroupOtherExpenses / (memberCount || 1);
+  const perMemberTotalShare = perMemberFoodShare + perMemberUtilityShare + perMemberOtherShare;
+
 
   return (
     <div className="space-y-6">
@@ -513,45 +415,93 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
             <Scale /> Final Settlement
           </CardTitle>
           <CardDescription>
-            A summary of who owes what, including all food, utility, and other costs for the month.
+            A detailed breakdown of expenses, contributions, and balances for each member.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Member</TableHead>
-                <TableHead>Total Paid</TableHead>
-                <TableHead>Share of Costs</TableHead>
-                <TableHead className="text-right">Final Balance</TableHead>
+                <TableHead className="w-[150px]">Details</TableHead>
+                {processedMembers.map(member => (
+                    <TableHead key={member.id} className="text-center">{member.name}</TableHead>
+                ))}
+                <TableHead className="text-right w-[150px]">Section Total</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {processedMembers.length > 0 ? (
-                processedMembers.map((member) => (
-                  <CollapsibleMemberRow
-                    key={member.id}
-                    member={member}
-                    perMemberShare={perMemberShare}
-                    mealCost={member.meals * mealRate}
-                    utilityShare={utilitySharePerMember}
-                  />
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={4}>
-                    <EmptyState icon={Users} message="No members found." />
-                  </TableCell>
+                {/* Food Section */}
+                <TableRow className="bg-muted/20">
+                    <TableCell colSpan={processedMembers.length + 2} className="font-semibold text-primary">
+                       Food & Groceries
+                    </TableCell>
                 </TableRow>
-              )}
+                <TableRow>
+                    <TableCell className="pl-8 text-muted-foreground">Contribution</TableCell>
+                    {processedMembers.map(member => (
+                        <TableCell key={member.id} className="text-center">৳{member.foodExpenses.toFixed(2)}</TableCell>
+                    ))}
+                    <TableCell className="text-right font-medium">৳{totalGroupFoodExpenses.toFixed(2)}</TableCell>
+                </TableRow>
+               
+                {/* Utility Section */}
+                <TableRow className="bg-muted/20">
+                    <TableCell colSpan={processedMembers.length + 2} className="font-semibold text-primary">
+                        Utilities (Gas & Electricity)
+                    </TableCell>
+                </TableRow>
+                <TableRow>
+                    <TableCell className="pl-8 text-muted-foreground">Contribution</TableCell>
+                     {processedMembers.map(member => (
+                        <TableCell key={member.id} className="text-center">৳{member.utilityExpensesPaid.toFixed(2)}</TableCell>
+                    ))}
+                    <TableCell className="text-right font-medium">৳{totalUtilityExpenses.toFixed(2)}</TableCell>
+                </TableRow>
+               
+                {/* Other Section */}
+                <TableRow className="bg-muted/20">
+                    <TableCell colSpan={processedMembers.length + 2} className="font-semibold text-primary">
+                       Other Expenses
+                    </TableCell>
+                </TableRow>
+                <TableRow>
+                    <TableCell className="pl-8 text-muted-foreground">Contribution</TableCell>
+                     {processedMembers.map(member => (
+                        <TableCell key={member.id} className="text-center">৳{member.otherExpenses.toFixed(2)}</TableCell>
+                    ))}
+                    <TableCell className="text-right font-medium">৳{totalGroupOtherExpenses.toFixed(2)}</TableCell>
+                </TableRow>
             </TableBody>
             <TableFooter>
-              <TableRow className="bg-muted/50 font-bold">
-                <TableCell>Total</TableCell>
-                <TableCell>৳{(totalGroupExpenses || 0).toFixed(2)}</TableCell>
-                <TableCell>৳{((perMemberShare || 0) * (memberCount || 1)).toFixed(2)}</TableCell>
-                <TableCell className="text-right">৳0.00</TableCell>
-              </TableRow>
+                {/* Grand Total */}
+                <TableRow className="bg-muted/50 font-bold">
+                    <TableCell>Grand Total (Paid)</TableCell>
+                    {processedMembers.map(member => (
+                        <TableCell key={member.id} className="text-center">৳{member.totalPaid.toFixed(2)}</TableCell>
+                    ))}
+                    <TableCell className="text-right text-primary">৳{totalGroupExpenses.toFixed(2)}</TableCell>
+                </TableRow>
+                 <TableRow className="font-semibold">
+                    <TableCell>Individual Share</TableCell>
+                    {processedMembers.map(member => (
+                         <TableCell key={member.id} className="text-center text-muted-foreground">৳{perMemberTotalShare.toFixed(2)}</TableCell>
+                    ))}
+                    <TableCell className="text-right">৳{totalGroupExpenses.toFixed(2)}</TableCell>
+                </TableRow>
+                {/* Final Balance */}
+                 <TableRow className="bg-muted/50 font-bold text-lg">
+                    <TableCell>Final Balance</TableCell>
+                    {processedMembers.map(member => {
+                        const balance = member.totalPaid - perMemberTotalShare;
+                        return (
+                            <TableCell key={member.id} className={cn("text-center", balance >= 0 ? 'text-green-600' : 'text-red-600')}>
+                                {balance >= 0 ? `Gets: ` : `Owes: `}
+                                ৳{Math.abs(balance).toFixed(2)}
+                            </TableCell>
+                        )
+                    })}
+                     <TableCell className="text-right">৳0.00</TableCell>
+                </TableRow>
             </TableFooter>
           </Table>
         </CardContent>
