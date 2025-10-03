@@ -11,7 +11,7 @@
         "id": { "type": "string", "description": "Unique identifier for the group entity." },
         "groupName": { "type": "string", "description": "The name of the group or flat." },
         "invitationCode": { "type": "string", "description": "Unique code used for users to join the group." },
-        "adminId": { "type": "string",- "description": "Reference to User who is the administrator of the group." },
+        "adminId": { "type": "string","- "description": "Reference to User who is the administrator of the group." },
         "settings": {
           "type": "object",
           "description": "Customizable settings for the group.",
@@ -148,15 +148,15 @@
     "rules": {
       "profilePictures/{userId}": {
         "read": "allow read",
-        "write": "request.auth.uid == userId"
+        "write": "allow write: if request.auth.uid == userId"
       },
       "chatImages/{groupId}/{imageId}": {
-        "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
-        "write": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
+        "read": "allow read: if exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+        "write": "allow write: if exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
       },
        "receipts/{groupId}/{receiptId}": {
-        "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
-        "write": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
+        "read": "allow read: if exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+        "write": "allow write: if exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
       }
     },
     "reasoning": "Storage rules are set to allow any authenticated member of a group to read and write images to folders scoped to their specific `groupId`. Profile pictures are public to read but can only be written by the owner of that profile. This prevents users from one group from accessing the images of another group and users from editing other users profile pictures."
@@ -257,5 +257,8 @@
 }
 
 
+
+    
+    
 
     
