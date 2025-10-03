@@ -7,6 +7,7 @@ import { ArrowRight, Clock } from "lucide-react";
 import { Logo } from "@/components/icons/logo";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState, useEffect } from "react";
+import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 function ClientOnlyContent() {
   const [clientTime, setClientTime] = useState<string | null>(null);
@@ -52,6 +53,8 @@ function FooterYear() {
 
 
 export default function LandingPage() {
+  const heroImage = PlaceHolderImages.find(p => p.id === "landing-hero");
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <header className="container mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">

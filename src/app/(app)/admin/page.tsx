@@ -373,7 +373,7 @@ export default function AdminPage() {
                     } catch (error) {
                       toast({ variant: "destructive", title: "Copy Failed", description: "Could not copy to clipboard." });
                     } finally {
-                      setTimeout(() => setIsCopying(false), 1000);
+                      setTimeout(() => setIsCopying(false), 2000);
                     }
                   }
                 }}
