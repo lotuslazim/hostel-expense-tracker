@@ -1,13 +1,51 @@
 
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Clock } from "lucide-react";
 import { Logo } from "@/components/icons/logo";
-import placeholderImages from "@/lib/placeholder-images.json";
+import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useEffect } from "react";
+
+function ClientOnlyContent() {
+  const [clientTime, setClientTime] = useState<string | null>(null);
+
+  useEffect(() => {
+    // This code runs only on the client, after the initial server render.
+    // This is the correct place for browser-specific logic or dynamic values.
+    if (typeof window !== 'undefined') {
+       setClientTime(new Date().toLocaleTimeString());
+    }
+  }, []);
+
+  return (
+    <Card className="mt-12 max-w-xl mx-auto">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-xl">
+          <Clock /> Client-Only Content
+        </CardTitle>
+        <CardDescription>
+          This card demonstrates how to prevent hydration errors by rendering dynamic content only on the client-side.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <p className="text-lg font-medium">
+          Current Client Time: {clientTime ? clientTime : "Loading..."}
+        </p>
+        <p className="text-sm text-muted-foreground mt-2">
+          The server-rendered HTML for this part is "Loading...". The actual time is filled in by a `useEffect` hook on the client, avoiding a server-client mismatch.
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
 
 export default function LandingPage() {
-  const heroImage = placeholderImages.placeholderImages.find(p => p.id === "landing-hero");
+  const heroImage = PlaceHolderImages.find(p => p.id === "landing-hero");
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -44,6 +82,7 @@ export default function LandingPage() {
               </Button>
             </div>
           </div>
+          <ClientOnlyContent />
         </section>
       </main>
       <footer className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-muted-foreground text-sm">
