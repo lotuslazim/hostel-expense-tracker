@@ -18,12 +18,13 @@ import { AuthCard } from "./auth-card";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
 import { useAuth, useFirebase } from "@/firebase";
-import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification } from "firebase/auth";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, AlertCircle } from "lucide-react";
 import { GoogleIcon } from "../icons/google";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email." }),
@@ -33,6 +34,7 @@ const formSchema = z.object({
 export function LoginForm() {
   const router = useRouter();
   const auth = useAuth();
+  const { firestore } = useFirebase();
   const [isLoading, setIsLoading] = useState(false);
   const [needsVerification, setNeedsVerification] = useState(false);
   const { toast } = useToast();
@@ -44,6 +46,23 @@ export function LoginForm() {
       password: "",
     },
   });
+  
+  const createUserDocument = async (user: any) => {
+    const userDocRef = doc(firestore, "users", user.uid);
+    const userDoc = await getDoc(userDocRef);
+
+    if (!userDoc.exists()) {
+      await setDoc(userDocRef, {
+        id: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+        photoURL: user.photoURL,
+        groupId: null,
+        isAdmin: false,
+      });
+    }
+  };
+
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
@@ -68,14 +87,15 @@ export function LoginForm() {
         description: description,
       });
     } finally {
-      if(needsVerification === false) setIsLoading(false);
+      if(!needsVerification) setIsLoading(false);
     }
   }
 
   const handleGoogleSignIn = async () => {
     const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      await createUserDocument(result.user);
       router.push('/dashboard');
     } catch (error) {
       console.error("Error during Google sign-in:", error);

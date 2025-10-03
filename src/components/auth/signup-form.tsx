@@ -22,7 +22,7 @@ import { GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, up
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import { doc, getDoc, setDoc, writeBatch } from "firebase/firestore";
+import { doc, getDoc, setDoc, writeBatch, serverTimestamp } from "firebase/firestore";
 import { GoogleIcon } from "../icons/google";
 
 const formSchema = z.object({
@@ -69,12 +69,16 @@ export function SignupForm() {
       await updateProfile(user, { displayName: values.name });
       await sendEmailVerification(user);
 
-      const userWithProfileData = {
-        ...user,
-        displayName: values.name,
-        photoURL: user.photoURL,
-      };
-      await createUserDocument(userWithProfileData as User);
+      // Create user document in Firestore
+      const userDocRef = doc(firestore, "users", user.uid);
+      await setDoc(userDocRef, {
+          id: user.uid,
+          email: user.email,
+          displayName: values.name,
+          photoURL: user.photoURL,
+          groupId: null,
+          isAdmin: false,
+      });
       
       toast({
         title: "Account Created!",

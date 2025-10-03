@@ -148,18 +148,18 @@
     "rules": {
       "profilePictures/{userId}": {
         "read": "allow read",
-        "write": "allow write: if request.auth.uid == userId"
+        "write": "allow write: if request.auth != null && request.auth.uid == userId && request.auth.token.email_verified == true;"
       },
       "chatImages/{groupId}/{imageId}": {
-        "read": "allow read: if exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
-        "write": "allow write: if exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
+        "read": "allow read: if request.auth != null && request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+        "write": "allow write: if request.auth != null && request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
       },
        "receipts/{groupId}/{receiptId}": {
-        "read": "allow read: if exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
-        "write": "allow write: if exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
+        "read": "allow read: if request.auth != null && request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+        "write": "allow write: if request.auth != null && request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
       }
     },
-    "reasoning": "Storage rules are set to allow any authenticated member of a group to read and write images to folders scoped to their specific `groupId`. Profile pictures are public to read but can only be written by the owner of that profile. This prevents users from one group from accessing the images of another group and users from editing other users profile pictures."
+    "reasoning": "Storage rules are set to allow any authenticated member of a group to read and write images to folders scoped to their specific `groupId`. Profile pictures are public to read but can only be written by the owner of that profile. This prevents users from one group from accessing the images of another group and users from editing other users profile pictures. A check for request.auth.token.email_verified ensures only verified users can write."
   },
   "firestore": {
     "structure": [
@@ -176,10 +176,10 @@
         "definition": {
           "entityName": "Group", "schema": { "$ref": "#/entities/Group" },
           "rules": {
-            "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
-            "write": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true"
+            "read": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "write": "request.auth.token.email_verified == true && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true"
           },
-          "description": "Stores group information. Readable by members, writable only by the group admin."
+          "description": "Stores group information. Readable by members, writable only by the group admin. Email verification required."
         }
       },
       {
@@ -187,10 +187,10 @@
         "definition": {
           "entityName": "Member", "schema": { "$ref": "#/entities/Member" },
           "rules": {
-            "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
-            "write": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true || request.auth.uid == memberId"
+            "read": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "write": "request.auth.token.email_verified == true && (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true || request.auth.uid == memberId)"
           },
-          "description": "Stores basic info about group members. Readable by all members. Writable by admins or the member themselves."
+          "description": "Stores basic info about group members. Readable by all members. Writable by admins or the member themselves. Email verification required."
         }
       },
       {
@@ -198,11 +198,11 @@
         "definition": {
           "entityName": "MealLog", "schema": { "$ref": "#/entities/MealLog" },
           "rules": { 
-            "list, get": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
-            "create": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && request.resource.data.userId == request.auth.uid",
-            "update, delete": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && resource.data.userId == request.auth.uid"
+            "list, get": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "create": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && request.resource.data.userId == request.auth.uid",
+            "update, delete": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && resource.data.userId == request.auth.uid"
           },
-          "description": "Stores meal logs. Accessible only by members of the group. Users can only create/edit their own meals."
+          "description": "Stores meal logs. Accessible only by members of the group. Users can only create/edit their own meals. Email verification required."
         }
       },
       {
@@ -210,11 +210,11 @@
         "definition": {
           "entityName": "Expense", "schema": { "$ref": "#/entities/Expense" },
           "rules": {
-            "list, get": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
-            "create": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && request.resource.data.userId == request.auth.uid",
-            "update, delete": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && resource.data.userId == request.auth.uid"
+            "list, get": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "create": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && request.resource.data.userId == request.auth.uid",
+            "update, delete": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && resource.data.userId == request.auth.uid"
           },
-          "description": "Stores all expense entries. Accessible only by members of the group. Users can only create/edit their own expenses."
+          "description": "Stores all expense entries. Accessible only by members of the group. Users can only create/edit their own expenses. Email verification required."
         }
       },
       {
@@ -222,10 +222,10 @@
         "definition": {
           "entityName": "ChatMessage", "schema": { "$ref": "#/entities/ChatMessage" },
           "rules": {
-            "list, get": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
-            "create": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && request.resource.data.userId == request.auth.uid"
+            "list, get": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "create": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && request.resource.data.userId == request.auth.uid"
           },
-          "description": "Stores chat messages. Accessible only by members of the group. Users can only create their own messages."
+          "description": "Stores chat messages. Accessible only by members of the group. Users can only create their own messages. Email verification required."
         }
       },
        {
@@ -233,10 +233,10 @@
         "definition": {
           "entityName": "FoodItem", "schema": { "$ref": "#/entities/FoodItem" },
           "rules": {
-            "list, get": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
-            "create, update, delete": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true"
+            "list, get": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "create, update, delete": "request.auth.token.email_verified == true && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true"
           },
-          "description": "Stores master food item list. Readable by all members, writable only by admins."
+          "description": "Stores master food item list. Readable by all members, writable only by admins. Email verification required."
         }
       },
       {
@@ -244,21 +244,19 @@
         "definition": {
           "entityName": "Purchase", "schema": { "$ref": "#/entities/Purchase" },
           "rules": {
-            "list, get": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
-            "create": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && request.resource.data.userId == request.auth.uid",
-            "update, delete": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && resource.data.userId == request.auth.uid"
+            "list, get": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "create": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && request.resource.data.userId == request.auth.uid",
+            "update, delete": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && resource.data.userId == request.auth.uid"
           },
-          "description": "Stores individual purchase records. Accessible by all members. Users can only create/edit their own purchases."
+          "description": "Stores individual purchase records. Accessible by all members. Users can only create/edit their own purchases. Email verification required."
         }
       }
     ],
-    "reasoning": "This structure enforces security by scoping all group-related data within a group's subcollections. The rule `exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))` is used consistently to verify that the requesting user is a member of the group they are trying to access. This is a secure and scalable pattern that prevents unauthorized data access. Write access is also based on group membership, with more restrictive admin-only writes on the core group document. Firestore's default-deny policy ensures any path not explicitly granted access is automatically blocked."
+    "reasoning": "This structure enforces security by scoping all group-related data within a group's subcollections. The rule `exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))` is used consistently to verify that the requesting user is a member of the group they are trying to access. Adding `request.auth.token.email_verified == true` to the rules ensures that only users who have verified their email can access or modify data, enhancing security. This is a secure and scalable pattern that prevents unauthorized data access. Write access is also based on group membership, with more restrictive admin-only writes on the core group document. Firestore's default-deny policy ensures any path not explicitly granted access is automatically blocked."
   }
 }
 
 
 
     
-    
-
     
