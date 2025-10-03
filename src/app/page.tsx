@@ -4,10 +4,10 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { Logo } from "@/components/icons/logo";
-import { placeholderImages } from "@/lib/placeholder-images.json";
+import placeholderImages from "@/lib/placeholder-images.json";
 
 export default function LandingPage() {
-  const heroImage = placeholderImages.find(p => p.id === "landing-hero");
+  const heroImage = placeholderImages.placeholderImages.find(p => p.id === "landing-hero");
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
