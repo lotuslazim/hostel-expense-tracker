@@ -57,6 +57,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   const [showReceipt, setShowReceipt] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const { triggerUpdate } = useInventory();
+  const [capturedImageBlob, setCapturedImageBlob] = useState<Blob | null>(null);
 
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -89,7 +90,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
         purchasedItems: z.array(purchasedItemSchema).optional(),
     }).refine(data => { // Receipt validation for utilities
         if((data.category === 'Electricity' || data.category === 'Gas') && isUtilityReceiptRequired) {
-            return !!data.receipt;
+            return !!data.receipt || !!capturedImageBlob;
         }
         return true;
     }, {
@@ -114,7 +115,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
       message: "Expense Item is required for 'Other' category.",
       path: ['expenseItem']
     });
-  }, [isUtilityReceiptRequired]);
+  }, [isUtilityReceiptRequired, capturedImageBlob]);
 
   const form = useForm<z.infer<typeof expenseSchema>>({
     resolver: zodResolver(expenseSchema),
@@ -172,6 +173,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     const file = event.target.files?.[0];
     if (file) {
       try {
+        setCapturedImageBlob(null); // Clear any captured blob
         const compressedFile = await imageCompression(file, { maxSizeMB: 1, maxWidthOrHeight: 1024 });
         form.setValue("receipt", compressedFile);
         setImagePreview(URL.createObjectURL(compressedFile));
@@ -183,6 +185,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
 
   const clearImage = () => {
       form.setValue("receipt", undefined);
+      setCapturedImageBlob(null);
       setImagePreview(null);
       if(fileInputRef.current) {
           fileInputRef.current.value = "";
@@ -221,14 +224,14 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
           
           canvas.toBlob(async (blob) => {
               if(blob) {
-                  const file = new File([blob], `capture-${Date.now()}.jpg`, { type: 'image/jpeg' });
-                   try {
-                    const compressedFile = await imageCompression(file, { maxSizeMB: 1, maxWidthOrHeight: 1024 });
-                    form.setValue("receipt", compressedFile);
-                    setImagePreview(URL.createObjectURL(compressedFile));
+                  try {
+                    const compressedBlob = await imageCompression.lib.blobToFixged(blob, { maxSizeMB: 1, maxWidthOrHeight: 1024 });
+                    setCapturedImageBlob(compressedBlob);
+                    form.setValue("receipt", undefined); // Clear file input
+                    setImagePreview(URL.createObjectURL(compressedBlob));
                     setIsCameraDialogOpen(false);
                   } catch (error) {
-                    toast({ variant: "destructive", title: "Error compressing image." });
+                    toast({ variant: "destructive", title: "Error processing captured image." });
                   }
               }
               setIsCapturing(false);
@@ -256,14 +259,20 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     let receiptUrl: string | undefined = undefined;
 
     try {
-        const batch = writeBatch(firestore);
-
-        if (values.receipt) {
-            const storageRef = ref(storage, `receipts/${groupId}/${Date.now()}_${values.receipt.name}`);
-            const snapshot = await uploadBytes(storageRef, values.receipt);
-            receiptUrl = await getDownloadURL(snapshot.ref);
+        let receiptToUpload: File | Blob | null = values.receipt || capturedImageBlob;
+        
+        if (receiptToUpload) {
+            if (!(receiptToUpload instanceof File) && receiptToUpload instanceof Blob) {
+                receiptToUpload = new File([receiptToUpload], `receipt-${Date.now()}.jpg`, { type: 'image/jpeg' });
+            }
+            if (receiptToUpload instanceof File) {
+                const storageRef = ref(storage, `receipts/${groupId}/${Date.now()}_${receiptToUpload.name}`);
+                const snapshot = await uploadBytes(storageRef, receiptToUpload);
+                receiptUrl = await getDownloadURL(snapshot.ref);
+            }
         }
-
+        
+        const batch = writeBatch(firestore);
         const expenseRef = doc(collection(firestore, `groups/${groupId}/expenses`));
 
         const expenseData = sanitizeFirestoreData({
