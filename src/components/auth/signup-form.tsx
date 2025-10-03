@@ -18,7 +18,7 @@ import { AuthCard } from "./auth-card";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
 import { useAuth, useFirebase } from "@/firebase";
-import { GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, updateProfile, type User, sendEmailVerification, signInWithEmailAndPassword } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, updateProfile, type User, sendEmailVerification } from "firebase/auth";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
@@ -62,7 +62,6 @@ export function SignupForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      // 1. Try to create a new user
       console.log("Attempting to create a new user...");
       const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
       console.log("Signup successful for:", userCredential.user.email);
@@ -84,39 +83,11 @@ export function SignupForm() {
       form.reset();
 
     } catch (error: any) {
-      // 2. If email is already in use, try to sign in instead
-      if (error.code === 'auth/email-already-in-use') {
-        console.log("Email already in use. Attempting to sign in...");
-        try {
-          const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
-           console.log("Fallback login successful for:", userCredential.user.email);
-           
-           if (!userCredential.user.emailVerified) {
-               toast({
-                   variant: "destructive",
-                   title: "Login Failed",
-                   description: "Your email is not verified. Please check your inbox for the verification link.",
-               });
-           } else {
-               router.push('/dashboard');
-           }
-        } catch (signInError: any) {
-          console.error("Fallback sign-in error:", signInError);
-          let description = "An unexpected error occurred during login.";
-          if (signInError.code === 'auth/wrong-password' || signInError.code === 'auth/invalid-credential') {
-              description = "This email is already registered. Please enter the correct password to log in.";
-          }
-          toast({
-            variant: "destructive",
-            title: "Login Failed",
-            description: description,
-          });
-        }
-      } else {
-        // 3. Handle other signup errors
         console.error("Error creating user:", error);
         let description = "An unexpected error occurred. Please try again.";
-        if (error.code === 'auth/invalid-email') {
+        if (error.code === 'auth/email-already-in-use') {
+            description = "This email is already registered. Please log in instead.";
+        } else if (error.code === 'auth/invalid-email') {
           description = "Please enter a valid email address.";
         } else if (error.code === 'auth/network-request-failed') {
           description = "A network error occurred. Please check your connection and try again.";
@@ -126,7 +97,6 @@ export function SignupForm() {
           title: "Sign-Up Failed",
           description: description,
         });
-      }
     } finally {
       setIsLoading(false);
     }

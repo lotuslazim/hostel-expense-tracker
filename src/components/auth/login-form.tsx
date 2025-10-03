@@ -86,8 +86,7 @@ export function LoginForm() {
         title: "Login Failed",
         description: description,
       });
-    } finally {
-      if(!needsVerification) setIsLoading(false);
+      setIsLoading(false);
     }
   }
 
