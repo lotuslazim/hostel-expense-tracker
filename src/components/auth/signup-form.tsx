@@ -22,7 +22,7 @@ import { GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, up
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, writeBatch } from "firebase/firestore";
 import { GoogleIcon } from "../icons/google";
 
 const formSchema = z.object({
@@ -48,15 +48,19 @@ export function SignupForm() {
     const userDoc = await getDoc(userDocRef);
 
     if (!userDoc.exists()) {
+      // For a brand new user, set their initial data.
+      // They won't be in a group yet.
       await setDoc(userDocRef, {
         id: user.uid,
         email: user.email,
         displayName: user.displayName,
         photoURL: user.photoURL,
         groupId: null,
-        isAdmin: false,
+        isAdmin: false, // A new user is not an admin of any group yet
       });
     }
+    // If the doc exists, it means it's a returning user (e.g. Google sign-in),
+    // so we don't overwrite their existing data.
   };
 
 
@@ -66,11 +70,17 @@ export function SignupForm() {
       const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
       
+      // Update the user's profile with the name.
       await updateProfile(user, { displayName: values.name });
       
-      // We need to use the user object from the credential, but after profile update for the name
-      const updatedUser = { ...user, displayName: values.name };
-      await createUserDocument(updatedUser as User);
+      // Now create the user document in Firestore with the updated info.
+      // We manually pass the updated info to avoid race conditions.
+      const userWithProfileData = {
+        ...user,
+        displayName: values.name,
+        photoURL: user.photoURL, // It might be null, which is fine
+      };
+      await createUserDocument(userWithProfileData as User);
       
       router.push('/dashboard');
 
@@ -96,6 +106,7 @@ export function SignupForm() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       
+      // This will create a document ONLY if one doesn't already exist.
       await createUserDocument(user);
       
       router.push('/dashboard');
@@ -173,7 +184,8 @@ export function SignupForm() {
             <Button type="submit" className="w-full" disabled={isLoading}>
                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Create Account
-            </Button>          </form>
+            </Button>
+          </form>
         </Form>
       </div>
     </AuthCard>
