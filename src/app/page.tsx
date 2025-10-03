@@ -1,12 +1,10 @@
 
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Clock } from "lucide-react";
 import { Logo } from "@/components/icons/logo";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 
@@ -16,9 +14,7 @@ function ClientOnlyContent() {
   useEffect(() => {
     // This code runs only on the client, after the initial server render.
     // This is the correct place for browser-specific logic or dynamic values.
-    if (typeof window !== 'undefined') {
-       setClientTime(new Date().toLocaleTimeString());
-    }
+    setClientTime(new Date().toLocaleTimeString());
   }, []);
 
   return (
@@ -43,10 +39,19 @@ function ClientOnlyContent() {
   );
 }
 
+function FooterYear() {
+  const [year, setYear] = useState(new Date().getFullYear());
+
+  useEffect(() => {
+    // This runs only on the client, after hydration, ensuring no mismatch.
+    setYear(new Date().getFullYear());
+  }, []);
+
+  return <span>{year}</span>;
+}
+
 
 export default function LandingPage() {
-  const heroImage = PlaceHolderImages.find(p => p.id === "landing-hero");
-
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <header className="container mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
@@ -86,7 +91,7 @@ export default function LandingPage() {
         </section>
       </main>
       <footer className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-muted-foreground text-sm">
-        <p>&copy; {new Date().getFullYear()} BachelorBite. All rights reserved.</p>
+        <p>&copy; <FooterYear /> BachelorBite. All rights reserved.</p>
       </footer>
     </div>
   );
