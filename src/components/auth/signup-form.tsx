@@ -22,7 +22,7 @@ import { GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, up
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import { doc, getDoc, writeBatch, serverTimestamp, collection } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { GoogleIcon } from "../icons/google";
 
 const formSchema = z.object({
@@ -43,55 +43,19 @@ export function SignupForm() {
     defaultValues: { name: "", email: "", password: "" },
   });
 
-  const generateInviteCode = () => {
-    return Math.random().toString(36).substring(2, 8).toUpperCase();
-  };
-
   const createUserDocument = async (user: User) => {
     const userDocRef = doc(firestore, "users", user.uid);
     const userDoc = await getDoc(userDocRef);
 
     if (!userDoc.exists()) {
-        const batch = writeBatch(firestore);
-        
-        // 1. Create the Solo Group
-        const newGroupRef = doc(collection(firestore, "groups"));
-        const groupName = `${user.displayName}'s Solo Group`;
-        batch.set(newGroupRef, {
-            groupName,
-            invitationCode: generateInviteCode(),
-            adminId: user.uid,
-            createdAt: serverTimestamp(),
-            settings: {
-                mealTypes: ["Breakfast", "Lunch", "Dinner", "Snack"],
-                isMealItemNameRequired: false,
-                isExpenseDescriptionRequired: false,
-                isUtilityReceiptRequired: false,
-            }
-        });
-
-        // 2. Create the user document
-        batch.set(userDocRef, {
-            id: user.uid,
-            email: user.email,
-            displayName: user.displayName,
-            photoURL: user.photoURL,
-            groupId: newGroupRef.id, // Assign the new group ID
-            isAdmin: true, // User is admin of their own solo group
-        });
-
-        // 3. Add user to the group's members subcollection
-        const memberRef = doc(firestore, `groups/${newGroupRef.id}/members`, user.uid);
-        batch.set(memberRef, {
-            id: user.uid,
-            email: user.email,
-            displayName: user.displayName,
-            photoURL: user.photoURL,
-            role: 'admin',
-            joinedAt: serverTimestamp(),
-        });
-        
-        await batch.commit();
+      await setDoc(userDocRef, {
+        id: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+        photoURL: user.photoURL,
+        groupId: null,
+        isAdmin: false,
+      });
     }
   };
 
@@ -104,10 +68,9 @@ export function SignupForm() {
       
       await updateProfile(user, { displayName: values.name });
       
-      // We need to use auth.currentUser to get the updated profile
-      if (auth.currentUser) {
-        await createUserDocument(auth.currentUser);
-      }
+      // We need to use the user object from the credential, but after profile update for the name
+      const updatedUser = { ...user, displayName: values.name };
+      await createUserDocument(updatedUser as User);
       
       router.push('/dashboard');
 
