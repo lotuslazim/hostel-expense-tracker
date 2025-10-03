@@ -22,7 +22,7 @@ import { GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, up
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import { doc, getDoc, setDoc, writeBatch, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, setDoc, writeBatch, serverTimestamp, collection } from "firebase/firestore";
 import { GoogleIcon } from "../icons/google";
 
 const formSchema = z.object({
@@ -43,22 +43,52 @@ export function SignupForm() {
     defaultValues: { name: "", email: "", password: "" },
   });
 
-  const createUserDocument = async (user: User) => {
-    const userDocRef = doc(firestore, "users", user.uid);
-    const userDoc = await getDoc(userDocRef);
-
-    if (!userDoc.exists()) {
-      await setDoc(userDocRef, {
-        id: user.uid,
-        email: user.email,
-        displayName: user.displayName,
-        photoURL: user.photoURL,
-        groupId: null,
-        isAdmin: false,
-      });
-    }
+  const generateInviteCode = () => {
+    return Math.random().toString(36).substring(2, 8).toUpperCase();
   };
 
+  const createInitialUserData = async (user: User, name: string) => {
+    const batch = writeBatch(firestore);
+
+    // 1. Create a "Solo Group" for the new user
+    const newGroupRef = doc(collection(firestore, "groups"));
+    batch.set(newGroupRef, {
+      groupName: `${name}'s Solo Group`,
+      invitationCode: generateInviteCode(),
+      adminId: user.uid,
+      createdAt: serverTimestamp(),
+      settings: {
+        mealTypes: ["Breakfast", "Lunch", "Dinner", "Snack"],
+        isMealItemNameRequired: false,
+        isExpenseDescriptionRequired: false,
+        isUtilityReceiptRequired: false,
+      }
+    });
+
+    // 2. Add user to their own group's members subcollection
+    const memberRef = doc(firestore, `groups/${newGroupRef.id}/members`, user.uid);
+    batch.set(memberRef, {
+      id: user.uid,
+      email: user.email,
+      displayName: name,
+      photoURL: user.photoURL,
+      role: 'admin',
+      joinedAt: serverTimestamp(),
+    });
+
+    // 3. Update the user's main document with the new group info
+    const userDocRef = doc(firestore, "users", user.uid);
+    batch.set(userDocRef, {
+      id: user.uid,
+      email: user.email,
+      displayName: name,
+      photoURL: user.photoURL,
+      groupId: newGroupRef.id,
+      isAdmin: true,
+    });
+
+    await batch.commit();
+  };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
@@ -66,19 +96,12 @@ export function SignupForm() {
       const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
       
+      // Update profile and send verification email
       await updateProfile(user, { displayName: values.name });
       await sendEmailVerification(user);
 
-      // Create user document in Firestore
-      const userDocRef = doc(firestore, "users", user.uid);
-      await setDoc(userDocRef, {
-          id: user.uid,
-          email: user.email,
-          displayName: values.name,
-          photoURL: user.photoURL,
-          groupId: null,
-          isAdmin: false,
-      });
+      // Create all related user and group documents in a single batch
+      await createInitialUserData(user, values.name);
       
       toast({
         title: "Account Created!",
@@ -102,14 +125,19 @@ export function SignupForm() {
       setIsLoading(false);
     }
   }
-
+  
   const handleGoogleSignIn = async () => {
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       
-      await createUserDocument(user);
+      const userDocRef = doc(firestore, "users", user.uid);
+      const userDoc = await getDoc(userDocRef);
+
+      if (!userDoc.exists()) {
+        await createInitialUserData(user, user.displayName || user.email!.split('@')[0]);
+      }
       
       router.push('/dashboard');
     } catch (error) {
@@ -117,6 +145,7 @@ export function SignupForm() {
       toast({ variant: "destructive", title: "Google Sign-In Failed", description: "Could not sign in with Google. Please try again."})
     }
   };
+
 
   return (
     <AuthCard
