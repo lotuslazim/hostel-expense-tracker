@@ -70,6 +70,7 @@ export function LoginForm() {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
       if (!userCredential.user.emailVerified) {
+        await auth.signOut();
         setNeedsVerification(true);
         setIsLoading(false);
         return;

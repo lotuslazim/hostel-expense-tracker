@@ -17,14 +17,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
-import placeholderImages from "@/lib/placeholder-images.json";
 import { useAuth, useUser } from "@/firebase";
 import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "../ui/skeleton";
+import { LogOut, User, Shield, Settings } from "lucide-react";
+
 
 export function UserNav() {
-  const avatarImage = placeholderImages.placeholderImages.find(p => p.id === "user-avatar");
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const router = useRouter();
@@ -41,9 +41,14 @@ export function UserNav() {
   if (isUserLoading) {
     return <Skeleton className="h-9 w-9 rounded-full" />;
   }
+  
+  if (!user) {
+    return null; // Or a login button
+  }
 
-  const userName = user?.displayName || user?.email?.split('@')[0] || "User";
-  const userEmail = user?.email || "user@example.com";
+
+  const userName = user.displayName || user.email?.split('@')[0] || "User";
+  const userEmail = user.email || "user@example.com";
   const avatarFallback = userName.charAt(0).toUpperCase();
 
   return (
@@ -51,11 +56,10 @@ export function UserNav() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-9 w-9">
-            {avatarImage && (
+            {user.photoURL && (
               <AvatarImage 
-                src={avatarImage.imageUrl}
+                src={user.photoURL}
                 alt="User avatar" 
-                data-ai-hint={avatarImage.imageHint}
               />
             )}
             <AvatarFallback>{avatarFallback}</AvatarFallback>
@@ -74,14 +78,18 @@ export function UserNav() {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
-            <Link href="/profile">Profile</Link>
+            <Link href="/profile"><User className="mr-2 h-4 w-4" />Profile</Link>
+          </DropdownMenuItem>
+           <DropdownMenuItem asChild>
+            <Link href="/admin"><Shield className="mr-2 h-4 w-4" />Admin</Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/admin">Admin Panel</Link>
+            <Link href="/settings"><Settings className="mr-2 h-4 w-4" />Settings</Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+          <LogOut className="mr-2 h-4 w-4" />
           Log out
         </DropdownMenuItem>
       </DropdownMenuContent>
