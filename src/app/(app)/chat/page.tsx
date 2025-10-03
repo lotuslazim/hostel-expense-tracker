@@ -123,7 +123,7 @@ export default function ChatPage() {
   }
 
   async function onSubmit(values: z.infer<typeof chatSchema>) {
-    if (!currentUser || !groupId) {
+    if (!currentUser || !groupId || !currentUserData) {
       toast({
         variant: "destructive",
         title: "Error",
@@ -143,11 +143,11 @@ export default function ChatPage() {
       }
 
       const messageData = sanitizeFirestoreData({
-        text: values.message || "",
+        text: values.message,
         imageUrl: imageUrl,
         userId: currentUser.uid,
         userName: currentUser.displayName || currentUser.email?.split("@")[0],
-        userPhotoURL: currentUserData?.photoURL,
+        userPhotoURL: currentUserData.photoURL,
         groupId: groupId,
         createdAt: serverTimestamp(),
       });
