@@ -18,7 +18,7 @@ import { AuthCard } from "./auth-card";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
 import { useAuth, useFirebase } from "@/firebase";
-import { GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, updateProfile, type User } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, updateProfile, type User, sendEmailVerification } from "firebase/auth";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
@@ -48,19 +48,15 @@ export function SignupForm() {
     const userDoc = await getDoc(userDocRef);
 
     if (!userDoc.exists()) {
-      // For a brand new user, set their initial data.
-      // They won't be in a group yet.
       await setDoc(userDocRef, {
         id: user.uid,
         email: user.email,
         displayName: user.displayName,
         photoURL: user.photoURL,
         groupId: null,
-        isAdmin: false, // A new user is not an admin of any group yet
+        isAdmin: false,
       });
     }
-    // If the doc exists, it means it's a returning user (e.g. Google sign-in),
-    // so we don't overwrite their existing data.
   };
 
 
@@ -70,19 +66,22 @@ export function SignupForm() {
       const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
       
-      // Update the user's profile with the name.
       await updateProfile(user, { displayName: values.name });
-      
-      // Now create the user document in Firestore with the updated info.
-      // We manually pass the updated info to avoid race conditions.
+      await sendEmailVerification(user);
+
       const userWithProfileData = {
         ...user,
         displayName: values.name,
-        photoURL: user.photoURL, // It might be null, which is fine
+        photoURL: user.photoURL,
       };
       await createUserDocument(userWithProfileData as User);
       
-      router.push('/dashboard');
+      toast({
+        title: "Account Created!",
+        description: "We've sent a verification link to your email. Please verify to log in.",
+      });
+
+      form.reset();
 
     } catch (error: any) {
       console.error("Error creating user:", error);
@@ -106,7 +105,6 @@ export function SignupForm() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       
-      // This will create a document ONLY if one doesn't already exist.
       await createUserDocument(user);
       
       router.push('/dashboard');

@@ -17,12 +17,13 @@ import { Input } from "@/components/ui/input";
 import { AuthCard } from "./auth-card";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/firebase";
+import { useAuth, useFirebase } from "@/firebase";
 import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 import { GoogleIcon } from "../icons/google";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email." }),
@@ -33,6 +34,7 @@ export function LoginForm() {
   const router = useRouter();
   const auth = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [needsVerification, setNeedsVerification] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -45,8 +47,14 @@ export function LoginForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
+    setNeedsVerification(false);
     try {
-      await signInWithEmailAndPassword(auth, values.email, values.password);
+      const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
+      if (!userCredential.user.emailVerified) {
+        setNeedsVerification(true);
+        setIsLoading(false);
+        return;
+      }
       router.push('/dashboard');
     } catch (error: any) {
       console.error("Error signing in:", error);
@@ -60,7 +68,7 @@ export function LoginForm() {
         description: description,
       });
     } finally {
-      setIsLoading(false);
+      if(needsVerification === false) setIsLoading(false);
     }
   }
 
@@ -74,6 +82,25 @@ export function LoginForm() {
       toast({ variant: "destructive", title: "Google Sign-In Failed", description: "Could not sign in with Google. Please try again."})
     }
   };
+  
+  const handleResendVerification = async () => {
+    if (auth.currentUser) {
+      try {
+        await sendEmailVerification(auth.currentUser);
+        toast({
+          title: "Verification Email Sent",
+          description: "A new verification link has been sent to your email address.",
+        });
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Could not send verification email. Please try again later.",
+        });
+      }
+    }
+  };
+
 
   const handlePasswordReset = async () => {
     const email = form.getValues("email");
@@ -112,6 +139,18 @@ export function LoginForm() {
       footerLinkHref="/signup"
     >
       <div className="space-y-4">
+        {needsVerification && (
+            <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Email Not Verified</AlertTitle>
+                <AlertDescription>
+                    You must verify your email before logging in. Check your inbox for the verification link.
+                    <Button variant="link" className="p-0 h-auto ml-1 text-destructive font-bold" onClick={handleResendVerification}>
+                        Resend link
+                    </Button>
+                </AlertDescription>
+            </Alert>
+        )}
         <Button variant="outline" className="w-full" onClick={handleGoogleSignIn}>
            <GoogleIcon className="mr-2 h-4 w-4" />
           Sign in with Google
