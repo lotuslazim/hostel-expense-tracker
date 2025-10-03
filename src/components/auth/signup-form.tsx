@@ -43,65 +43,40 @@ export function SignupForm() {
     defaultValues: { name: "", email: "", password: "" },
   });
 
-  const generateInviteCode = () => {
-    return Math.random().toString(36).substring(2, 8).toUpperCase();
-  };
-
-  const createInitialUserData = async (user: User, name: string) => {
-    const batch = writeBatch(firestore);
-
-    // 1. Create a "Solo Group" for the new user
-    const newGroupRef = doc(collection(firestore, "groups"));
-    batch.set(newGroupRef, {
-      groupName: `${name}'s Solo Group`,
-      invitationCode: generateInviteCode(),
-      adminId: user.uid,
-      createdAt: serverTimestamp(),
-      settings: {
-        mealTypes: ["Breakfast", "Lunch", "Dinner", "Snack"],
-        isMealItemNameRequired: false,
-        isExpenseDescriptionRequired: false,
-        isUtilityReceiptRequired: false,
-      }
-    });
-
-    // 2. Add user to their own group's members subcollection
-    const memberRef = doc(firestore, `groups/${newGroupRef.id}/members`, user.uid);
-    batch.set(memberRef, {
-      id: user.uid,
-      email: user.email,
-      displayName: name,
-      photoURL: user.photoURL,
-      role: 'admin',
-      joinedAt: serverTimestamp(),
-    });
-
-    // 3. Update the user's main document with the new group info
+  // This function creates the user document in Firestore.
+  const createUserDocument = async (user: User, name: string) => {
     const userDocRef = doc(firestore, "users", user.uid);
-    batch.set(userDocRef, {
-      id: user.uid,
-      email: user.email,
-      displayName: name,
-      photoURL: user.photoURL,
-      groupId: newGroupRef.id,
-      isAdmin: true,
-    });
+    const userDoc = await getDoc(userDocRef);
 
-    await batch.commit();
+    // Only create the document if it doesn't already exist (for Google Sign-In)
+    if (!userDoc.exists()) {
+        await setDoc(userDocRef, {
+            id: user.uid,
+            email: user.email,
+            displayName: name,
+            photoURL: user.photoURL,
+            groupId: null, // User is not in a group initially
+            isAdmin: false, // User is not an admin initially
+        });
+    }
   };
+
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
+      // 1. Create the user in Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
       
-      // Update profile and send verification email
+      // 2. Update their profile display name
       await updateProfile(user, { displayName: values.name });
-      await sendEmailVerification(user);
 
-      // Create all related user and group documents in a single batch
-      await createInitialUserData(user, values.name);
+      // 3. Create their user document in Firestore
+      await createUserDocument(user, values.name);
+
+      // 4. Send the verification email
+      await sendEmailVerification(user);
       
       toast({
         title: "Account Created!",
@@ -132,13 +107,10 @@ export function SignupForm() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       
-      const userDocRef = doc(firestore, "users", user.uid);
-      const userDoc = await getDoc(userDocRef);
-
-      if (!userDoc.exists()) {
-        await createInitialUserData(user, user.displayName || user.email!.split('@')[0]);
-      }
+      // Create user document if it doesn't exist
+      await createUserDocument(user, user.displayName || user.email!.split('@')[0]);
       
+      // Redirect to dashboard as Google accounts are pre-verified
       router.push('/dashboard');
     } catch (error) {
       console.error("Error during Google sign-in:", error);
