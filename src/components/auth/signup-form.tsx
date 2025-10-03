@@ -18,11 +18,11 @@ import { AuthCard } from "./auth-card";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
 import { useAuth, useFirebase } from "@/firebase";
-import { GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, updateProfile, type User, sendEmailVerification } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, updateProfile, type User, sendEmailVerification, signInWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import { doc, getDoc, setDoc, writeBatch, serverTimestamp, collection } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { GoogleIcon } from "../icons/google";
 
 const formSchema = z.object({
@@ -43,40 +43,38 @@ export function SignupForm() {
     defaultValues: { name: "", email: "", password: "" },
   });
 
-  // This function creates the user document in Firestore.
   const createUserDocument = async (user: User, name: string) => {
     const userDocRef = doc(firestore, "users", user.uid);
     const userDoc = await getDoc(userDocRef);
 
-    // Only create the document if it doesn't already exist (for Google Sign-In)
     if (!userDoc.exists()) {
         await setDoc(userDocRef, {
             id: user.uid,
             email: user.email,
             displayName: name,
             photoURL: user.photoURL,
-            groupId: null, // User is not in a group initially
-            isAdmin: false, // User is not an admin initially
+            groupId: null,
+            isAdmin: false,
         });
     }
   };
 
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      // 1. Create the user in Firebase Auth
+      // 1. Try to create a new user
+      console.log("Attempting to create a new user...");
       const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+      console.log("Signup successful for:", userCredential.user.email);
       const user = userCredential.user;
       
-      // 2. Update their profile display name
+      // Update profile and create Firestore document
       await updateProfile(user, { displayName: values.name });
-
-      // 3. Create their user document in Firestore
       await createUserDocument(user, values.name);
 
-      // 4. Send the verification email
+      // Send verification email
       await sendEmailVerification(user);
+      console.log("Verification email sent.");
       
       toast({
         title: "Account Created!",
@@ -86,16 +84,49 @@ export function SignupForm() {
       form.reset();
 
     } catch (error: any) {
-      console.error("Error creating user:", error);
-      let description = "An unexpected error occurred. Please try again.";
+      // 2. If email is already in use, try to sign in instead
       if (error.code === 'auth/email-already-in-use') {
-        description = "This email address is already in use. Please try logging in.";
+        console.log("Email already in use. Attempting to sign in...");
+        try {
+          const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
+           console.log("Fallback login successful for:", userCredential.user.email);
+           
+           if (!userCredential.user.emailVerified) {
+               toast({
+                   variant: "destructive",
+                   title: "Login Failed",
+                   description: "Your email is not verified. Please check your inbox for the verification link.",
+               });
+           } else {
+               router.push('/dashboard');
+           }
+        } catch (signInError: any) {
+          console.error("Fallback sign-in error:", signInError);
+          let description = "An unexpected error occurred during login.";
+          if (signInError.code === 'auth/wrong-password' || signInError.code === 'auth/invalid-credential') {
+              description = "This email is already registered. Please enter the correct password to log in.";
+          }
+          toast({
+            variant: "destructive",
+            title: "Login Failed",
+            description: description,
+          });
+        }
+      } else {
+        // 3. Handle other signup errors
+        console.error("Error creating user:", error);
+        let description = "An unexpected error occurred. Please try again.";
+        if (error.code === 'auth/invalid-email') {
+          description = "Please enter a valid email address.";
+        } else if (error.code === 'auth/network-request-failed') {
+          description = "A network error occurred. Please check your connection and try again.";
+        }
+        toast({
+          variant: "destructive",
+          title: "Sign-Up Failed",
+          description: description,
+        });
       }
-      toast({
-        variant: "destructive",
-        title: "Sign-Up Failed",
-        description: description,
-      });
     } finally {
       setIsLoading(false);
     }
@@ -107,17 +138,14 @@ export function SignupForm() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       
-      // Create user document if it doesn't exist
       await createUserDocument(user, user.displayName || user.email!.split('@')[0]);
       
-      // Redirect to dashboard as Google accounts are pre-verified
       router.push('/dashboard');
     } catch (error) {
       console.error("Error during Google sign-in:", error);
       toast({ variant: "destructive", title: "Google Sign-In Failed", description: "Could not sign in with Google. Please try again."})
     }
   };
-
 
   return (
     <AuthCard
