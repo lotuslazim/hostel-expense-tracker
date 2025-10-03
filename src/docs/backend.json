@@ -81,14 +81,14 @@
         "groupId": { "type": "string", "description": "The ID of the group this expense belongs to." }, 
         "userId": { "type": "string", "description": "The ID of the user who logged the expense." }, 
         "userName": { "type": "string", "description": "The display name of the user who logged the expense." },
-        "description": { "type": "string", "description": "A description of the expense (e.g., 'Groceries' or 'September Electricity Bill')." }, 
+        "expenseItem": { "type": "string", "description": "A structured description of the expense (e.g., 'Rice, Oil' or 'Electricity Bill')." }, 
         "amount": { "type": "number", "description": "The total amount of the expense." }, 
         "date": { "type": "string", "format": "date-time", "description": "The date the expense was incurred." },
         "category": { "type": "string", "enum": ["Food & Groceries", "Electricity", "Gas", "Other"], "description": "The category of the expense." },
         "receiptPhotoUrl": { "type": "string", "format": "uri", "description": "An optional URL for a photo of the receipt." },
         "createdAt": { "type": "string", "format": "date-time", "description": "The timestamp when the expense was logged." }
       },
-      "required": ["id", "groupId", "userId", "userName", "description", "amount", "date", "category", "createdAt"]
+      "required": ["id", "groupId", "userId", "userName", "expenseItem", "amount", "date", "category", "createdAt"]
     },
     "ChatMessage": {
       "$schema": "http://json-schema.org/draft-07/schema#",
@@ -106,6 +106,41 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "groupId", "userId", "userName", "createdAt"]
+    },
+    "FoodItem": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "FoodItem",
+      "type": "object",
+      "description": "Represents a master food item in the inventory, including its monthly required quantity.",
+      "properties": {
+        "id": { "type": "string" },
+        "groupId": { "type": "string" },
+        "name": { "type": "string" },
+        "requiredQuantity": { "type": "number" },
+        "unit": { "type": "string" },
+        "category": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "groupId", "name", "requiredQuantity", "unit", "category", "createdAt"]
+    },
+    "Purchase": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Purchase",
+      "type": "object",
+      "description": "Represents a single purchase of a food item.",
+      "properties": {
+        "id": { "type": "string" },
+        "groupId": { "type": "string" },
+        "itemId": { "type": "string", "description": "The ID of the FoodItem this purchase is for." },
+        "itemName": { "type": "string" },
+        "quantity": { "type": "number" },
+        "cost": { "type": "number" },
+        "unitPrice": { "type": "number" },
+        "date": { "type": "string", "format": "date-time" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" }
+      },
+      "required": ["id", "groupId", "itemId", "itemName", "quantity", "cost", "unitPrice", "date", "userId", "userName"]
     }
   },
   "auth": { "providers": ["password", "google"] },
@@ -113,15 +148,15 @@
     "rules": {
       "profilePictures/{userId}": {
         "read": "allow read",
-        "write": "request.auth.uid == userId"
+        "write": "allow write: if request.auth.uid == userId;"
       },
       "chatImages/{groupId}/{imageId}": {
-        "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
-        "write": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
+        "read": "allow read: if exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid));",
+        "write": "allow write: if exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid));"
       },
        "receipts/{groupId}/{receiptId}": {
-        "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
-        "write": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
+        "read": "allow read: if exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid));",
+        "write": "allow write: if exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid));"
       }
     },
     "reasoning": "Storage rules are set to allow any authenticated member of a group to read and write images to folders scoped to their specific `groupId`. Profile pictures are public to read but can only be written by the owner of that profile. This prevents users from one group from accessing the images of another group and users from editing other users profile pictures."
@@ -192,8 +227,36 @@
           },
           "description": "Stores chat messages. Accessible only by members of the group. Users can only create their own messages."
         }
+      },
+       {
+        "path": "/groups/{groupId}/inventory/{itemId}",
+        "definition": {
+          "entityName": "FoodItem", "schema": { "$ref": "#/entities/FoodItem" },
+          "rules": {
+            "list, get": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "create, update, delete": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true"
+          },
+          "description": "Stores master food item list. Readable by all members, writable only by admins."
+        }
+      },
+      {
+        "path": "/groups/{groupId}/purchases/{purchaseId}",
+        "definition": {
+          "entityName": "Purchase", "schema": { "$ref": "#/entities/Purchase" },
+          "rules": {
+            "list, get": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "create": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && request.resource.data.userId == request.auth.uid",
+            "update, delete": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && resource.data.userId == request.auth.uid"
+          },
+          "description": "Stores individual purchase records. Accessible by all members. Users can only create/edit their own purchases."
+        }
       }
     ],
     "reasoning": "This structure enforces security by scoping all group-related data within a group's subcollections. The rule `exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))` is used consistently to verify that the requesting user is a member of the group they are trying to access. This is a secure and scalable pattern that prevents unauthorized data access. Write access is also based on group membership, with more restrictive admin-only writes on the core group document. Firestore's default-deny policy ensures any path not explicitly granted access is automatically blocked."
   }
 }
+
+
+
+    
+    
