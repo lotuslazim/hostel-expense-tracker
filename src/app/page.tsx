@@ -1,13 +1,14 @@
 
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Clock } from "lucide-react";
 import { Logo } from "@/components/icons/logo";
+import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState, useEffect } from "react";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 function ClientOnlyContent() {
   const [clientTime, setClientTime] = useState<string | null>(null);
@@ -15,7 +16,9 @@ function ClientOnlyContent() {
   useEffect(() => {
     // This code runs only on the client, after the initial server render.
     // This is the correct place for browser-specific logic or dynamic values.
-    setClientTime(new Date().toLocaleTimeString());
+    if (typeof window !== 'undefined') {
+       setClientTime(new Date().toLocaleTimeString());
+    }
   }, []);
 
   return (
@@ -44,7 +47,6 @@ function FooterYear() {
   const [year, setYear] = useState(new Date().getFullYear());
 
   useEffect(() => {
-    // This runs only on the client, after hydration, ensuring no mismatch.
     setYear(new Date().getFullYear());
   }, []);
 
