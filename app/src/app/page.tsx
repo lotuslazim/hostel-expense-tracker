@@ -18,14 +18,14 @@ export default function Home() {
         disableTransitionOnChange
       >
         <InventoryProvider>
-          <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800">
+          <div className="min-h-screen flex items-center justify-center bg-background">
             <div className="text-center space-y-8 max-w-2xl mx-auto px-4">
               <div className="space-y-4">
-                <h1 className="text-5xl font-bold text-gray-900 dark:text-gray-100">
-                  Welcome to Your App
+                <h1 className="text-5xl font-bold text-foreground">
+                  Welcome to NourishTrack
                 </h1>
-                <p className="text-xl text-gray-600 dark:text-gray-400">
-                  Your Next.js application is ready to go!
+                <p className="text-xl text-muted-foreground">
+                  Your journey to simplified meal and expense tracking starts here.
                 </p>
               </div>
               
@@ -35,9 +35,6 @@ export default function Home() {
                     Get Started
                   </Link>
                 </Button>
-                <div className="text-sm text-gray-500 dark:text-gray-400">
-                  No more 404 errors! 🎉
-                </div>
               </div>
             </div>
           </div>
