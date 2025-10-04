@@ -1,3 +1,4 @@
+"use client";
 import { AdminPanel, NewUserAdminPanel } from "@/components/admin/AdminPanel";
 import { useFirebase, useUser, useDoc } from "@/firebase";
 import { doc } from "firebase/firestore";

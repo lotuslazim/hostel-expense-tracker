@@ -1,3 +1,4 @@
+"use client";
 import { Report } from "@/components/report/Report";
 
 export default function ReportPage() {
