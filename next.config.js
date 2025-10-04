@@ -1,6 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  experimental: {
+    allowedDevOrigins: [
+      'https://6000-firebase-studio-*.cloudworkstations.dev',
+      'https://9000-firebase-studio-*.cloudworkstations.dev',
+    ],
+  },
   async redirects() {
     return [
       {
@@ -8,8 +14,8 @@ const nextConfig = {
         destination: '/login',
         permanent: false,
       },
-    ]
+    ];
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
