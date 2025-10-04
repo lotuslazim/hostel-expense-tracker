@@ -1,17 +1,34 @@
-"use client";
-
-import { AppHeader } from "@/components/app/header";
+import { Toaster } from "@/components/ui/toaster";
+import { ThemeProvider } from "@/components/theme-provider";
+import { I18nProvider } from "@/i18n/client-provider";
+import { InventoryProvider } from "@/contexts/InventoryContext";
+import './globals.css';
 import { FirebaseClientProvider } from "@/firebase/client-provider";
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <FirebaseClientProvider>
-      <div className="flex flex-col min-h-screen">
-        <AppHeader />
-        <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {children}
-        </main>
-      </div>
-    </FirebaseClientProvider>
+    <html lang="en" suppressHydrationWarning>
+      <body suppressHydrationWarning>
+        <I18nProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <InventoryProvider>
+              <FirebaseClientProvider>
+                {children}
+                <Toaster />
+              </FirebaseClientProvider>
+            </InventoryProvider>
+          </ThemeProvider>
+        </I18nProvider>
+      </body>
+    </html>
   );
 }

@@ -1,6 +1,9 @@
 import { SignupForm } from "@/components/auth/signup-form";
-import { WelcomeCard } from "@/components/app/welcome-card";
 
 export default function SignupPage() {
-  return <SignupForm />;
+    return (
+    <div className="flex min-h-screen items-center justify-center p-4 bg-background">
+      <SignupForm />
+    </div>
+  );
 }

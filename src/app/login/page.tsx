@@ -1,6 +1,9 @@
 import { LoginForm } from "@/components/auth/login-form";
-import { WelcomeCard } from "@/components/app/welcome-card";
 
 export default function LoginPage() {
-  return <LoginForm />;
+  return (
+    <div className="flex min-h-screen items-center justify-center p-4 bg-background">
+      <LoginForm />
+    </div>
+  );
 }
