@@ -1,3 +1,4 @@
+"use client";
 
 import Link from "next/link";
 import { Logo } from "@/components/icons/logo";
@@ -6,8 +7,18 @@ import { NavLink } from "./nav-link";
 import { Button } from "../ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, MessageSquare, LayoutDashboard, BarChart3, Package } from "lucide-react";
+import { useUser } from "@/firebase";
+import { Skeleton } from "../ui/skeleton";
+import { useState, useEffect } from "react";
 
 export function AppHeader() {
+  const { isUserLoading } = useUser();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const navLinks = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/report", label: "Monthly Report", icon: BarChart3 },
@@ -65,13 +76,19 @@ export function AppHeader() {
               <Logo />
            </div>
            <div className="flex items-center space-x-2">
-            <Button variant="ghost" size="icon" asChild>
-                <Link href="/chat">
-                  <MessageSquare />
-                  <span className="sr-only">Open Chat</span>
-                </Link>
-            </Button>
-            <UserNav />
+            {isClient && !isUserLoading ? (
+              <>
+                <Button variant="ghost" size="icon" asChild>
+                    <Link href="/chat">
+                      <MessageSquare />
+                      <span className="sr-only">Open Chat</span>
+                    </Link>
+                </Button>
+                <UserNav />
+              </>
+            ) : (
+              <Skeleton className="h-9 w-20 rounded-full" />
+            )}
            </div>
         </div>
       </div>

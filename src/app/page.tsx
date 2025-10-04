@@ -1,8 +1,56 @@
+"use client";
+
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { Logo } from "@/components/icons/logo";
+import { ArrowRight } from "lucide-react";
+import { useUser } from "@/firebase";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+
 export default function Home() {
+  const { user, isUserLoading } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isUserLoading && user) {
+      router.push('/dashboard');
+    }
+  }, [user, isUserLoading, router]);
+
+  if (isUserLoading || user) {
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-background">
+            <div className="text-center space-y-4">
+                <p className="text-xl text-muted-foreground">Loading...</p>
+            </div>
+        </div>
+    )
+  }
+
   return (
-    <div>
-      <h1>Welcome to Your App</h1>
-      <p>Your Next.js app is now working!</p>
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="text-center space-y-8 max-w-2xl mx-auto px-4">
+        <div className="flex justify-center">
+            <Logo isStacked />
+        </div>
+        <div className="space-y-4">
+          <h1 className="text-5xl font-bold font-headline text-foreground">
+            Welcome to NourishTrack
+          </h1>
+          <p className="text-xl text-muted-foreground">
+            Your journey to simplified meal and expense tracking starts here.
+          </p>
+        </div>
+        
+        <div className="space-y-4">
+          <Button asChild size="lg">
+            <Link href="/login">
+              Get Started <ArrowRight className="ml-2 h-5 w-5" />
+            </Link>
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
