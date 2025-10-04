@@ -1,9 +1,18 @@
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
-import { I18nProvider } from "@/i18n/client-provider";
 import { InventoryProvider } from "@/contexts/InventoryContext";
-import './globals.css';
+import "./globals.css";
 import { FirebaseClientProvider } from "@/firebase/client-provider";
+import { I18nProvider } from "@/i18n/client-provider";
+
+const inter = Inter({ subsets: ["latin"] });
+
+export const metadata: Metadata = {
+  title: "NourishTrack",
+  description: "Simplified meal and expense tracking.",
+};
 
 export default function RootLayout({
   children,
@@ -12,7 +21,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body suppressHydrationWarning>
+      <body className={inter.className} suppressHydrationWarning>
         <I18nProvider>
           <ThemeProvider
             attribute="class"
