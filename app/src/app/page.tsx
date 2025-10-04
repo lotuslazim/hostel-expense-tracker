@@ -1,54 +1,49 @@
-
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
-import { Logo } from "@/components/icons/logo";
+import Link from "next/link";
+import { Toaster } from "@/components/ui/toaster";
+import { ThemeProvider } from "@/components/theme-provider";
+import { I18nProvider } from "@/i18n/client-provider";
+import { InventoryProvider } from "@/contexts/InventoryContext";
+import './globals.css';
 
-export default function LandingPage() {
-
+export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen bg-background">
-      <header className="container mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-        <Logo />
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" asChild>
-            <Link href="/login">Log In</Link>
-          </Button>
-          <Button asChild>
-            <Link href="/signup">Sign Up</Link>
-          </Button>
-        </div>
-      </header>
-      <main className="flex-grow">
-        <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-          <div className="grid md:grid-cols-1 gap-12 items-center text-center">
-            <div className="space-y-6">
-              <div className="flex justify-center mb-8">
-                <div className="w-48 h-48 bg-card rounded-full flex items-center justify-center shadow-lg">
-                  <Logo isStacked={true} />
+    <I18nProvider>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
+      >
+        <InventoryProvider>
+          <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800">
+            <div className="text-center space-y-8 max-w-2xl mx-auto px-4">
+              <div className="space-y-4">
+                <h1 className="text-5xl font-bold text-gray-900 dark:text-gray-100">
+                  Welcome to Your App
+                </h1>
+                <p className="text-xl text-gray-600 dark:text-gray-400">
+                  Your Next.js application is ready to go!
+                </p>
+              </div>
+              
+              <div className="space-y-4">
+                <Button asChild size="lg">
+                  <Link href="/login">
+                    Get Started
+                  </Link>
+                </Button>
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  No more 404 errors! 🎉
                 </div>
               </div>
-              <h1 className="text-4xl md:text-5xl font-bold tracking-tighter font-headline">
-                Track meals, not heartbreaks.
-              </h1>
-              <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-                We can’t cook for you, but we can make your bachelor life a little less messy.
-              </p>
-              <Button size="lg" asChild>
-                <Link href="/signup">
-                  Get Started Free <ArrowRight className="ml-2" />
-                </Link>
-              </Button>
             </div>
           </div>
-        </section>
-      </main>
-      <footer className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-muted-foreground text-sm">
-        <p>&copy; {new Date().getFullYear()} BachelorBite. All rights reserved.</p>
-      </footer>
-    </div>
+          <Toaster />
+        </InventoryProvider>
+      </ThemeProvider>
+    </I18nProvider>
   );
 }
