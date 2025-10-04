@@ -92,7 +92,6 @@ export function Dashboard() {
                 ) : (
                     <ActivityFeed 
                       expenses={expenses || []} 
-                      selectedDate={selectedDate} 
                       currentMonth={currentMonth}
                       onMonthChange={handleMonthChange}
                     />
