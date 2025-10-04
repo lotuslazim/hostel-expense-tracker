@@ -14,12 +14,10 @@ function ClientOnlyContent() {
   const [clientTime, setClientTime] = useState<string | null>(null);
 
   useEffect(() => {
-    // This code runs only on the client, after the initial server render.
-    // This is the correct place for browser-specific logic or dynamic values.
-    if (typeof window !== 'undefined') {
-       setClientTime(new Date().toLocaleTimeString());
-    }
-  }, []);
+    // This effect runs only on the client, after the component has mounted.
+    // Setting the state here ensures no hydration mismatch.
+    setClientTime(new Date().toLocaleTimeString());
+  }, []); // The empty dependency array ensures this runs only once.
 
   return (
     <Card className="mt-12 max-w-xl mx-auto">
@@ -33,10 +31,11 @@ function ClientOnlyContent() {
       </CardHeader>
       <CardContent>
         <p className="text-lg font-medium">
-          Current Client Time: {clientTime ? clientTime : "Loading..."}
+          {/* Server renders "Loading...", client renders the actual time after mount. */}
+          Current Client Time: {clientTime ?? "Loading..."}
         </p>
         <p className="text-sm text-muted-foreground mt-2">
-          The server-rendered HTML for this part is "Loading...". The actual time is filled in by a `useEffect` hook on the client, avoiding a server-client mismatch.
+          The server-rendered HTML for this part shows "Loading...". The actual time is filled in by a `useEffect` hook on the client, avoiding a server-client mismatch.
         </p>
       </CardContent>
     </Card>
@@ -44,13 +43,15 @@ function ClientOnlyContent() {
 }
 
 function FooterYear() {
-  const [year, setYear] = useState(new Date().getFullYear());
+  const [year, setYear] = useState<number | null>(null);
 
   useEffect(() => {
+    // This effect runs only on the client.
     setYear(new Date().getFullYear());
   }, []);
 
-  return <span>{year}</span>;
+  // Render a fallback on the server and initial client render.
+  return <span>{year ?? new Date().getFullYear()}</span>;
 }
 
 
