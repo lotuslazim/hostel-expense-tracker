@@ -4,59 +4,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Clock } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Logo } from "@/components/icons/logo";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useState, useEffect } from "react";
-
-function ClientOnlyContent() {
-  const [clientTime, setClientTime] = useState<string | null>(null);
-
-  useEffect(() => {
-    // This effect runs only on the client, after the component has mounted.
-    // Setting the state here ensures no hydration mismatch.
-    setClientTime(new Date().toLocaleTimeString());
-  }, []); // The empty dependency array ensures this runs only once.
-
-  return (
-    <Card className="mt-12 max-w-xl mx-auto">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-xl">
-          <Clock /> Client-Only Content
-        </CardTitle>
-        <CardDescription>
-          This card demonstrates how to prevent hydration errors by rendering dynamic content only on the client-side.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <p className="text-lg font-medium">
-          {/* Server renders "Loading...", client renders the actual time after mount. */}
-          Current Client Time: {clientTime ?? "Loading..."}
-        </p>
-        <p className="text-sm text-muted-foreground mt-2">
-          The server-rendered HTML for this part shows "Loading...". The actual time is filled in by a `useEffect` hook on the client, avoiding a server-client mismatch.
-        </p>
-      </CardContent>
-    </Card>
-  );
-}
-
-function FooterYear() {
-  const [year, setYear] = useState<number | null>(null);
-
-  useEffect(() => {
-    // This effect runs only on the client.
-    setYear(new Date().getFullYear());
-  }, []);
-
-  // Render a fallback on the server and initial client render.
-  return <span>{year ?? new Date().getFullYear()}</span>;
-}
-
 
 export default function LandingPage() {
-  const heroImage = PlaceHolderImages.find(p => p.id === "landing-hero");
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -93,11 +44,10 @@ export default function LandingPage() {
               </Button>
             </div>
           </div>
-          <ClientOnlyContent />
         </section>
       </main>
       <footer className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-muted-foreground text-sm">
-        <p>&copy; <FooterYear /> BachelorBite. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} BachelorBite. All rights reserved.</p>
       </footer>
     </div>
   );

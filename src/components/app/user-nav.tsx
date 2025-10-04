@@ -1,4 +1,3 @@
-
 "use client";
 
 import {
@@ -30,14 +29,18 @@ export function UserNav() {
   const { auth, firestore } = useFirebase();
   const router = useRouter();
 
-  const currentUserRef = useMemo(() => user ? doc(firestore, "users", user.uid) : null, [firestore, user]);
-  const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
+  const currentUserRef = useMemo(
+    () => (user ? doc(firestore, "users", user.uid) : null),
+    [firestore, user]
+  );
 
+  const { data: currentUserData, isLoading: isCurrentUserDataLoading } =
+    useDoc(currentUserRef);
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      router.push('/');
+      router.push("/");
     } catch (error) {
       console.error("Error signing out: ", error);
     }
@@ -45,25 +48,32 @@ export function UserNav() {
 
   const isLoading = isUserLoading || isCurrentUserDataLoading;
 
-  if (isLoading) {
+  // 🔹 Important: while loading, render consistent placeholder
+  if (isLoading || !user) {
     return <Skeleton className="h-9 w-9 rounded-full" />;
   }
 
-  const userName = currentUserData?.displayName || user?.displayName || user?.email?.split('@')[0] || "User";
+  // 🔹 Safe values after hydration
+  const userName =
+    currentUserData?.displayName ||
+    user?.displayName ||
+    user?.email?.split("@")[0] ||
+    "User";
+
   const userEmail = user?.email || "user@example.com";
   const avatarFallback = userName.charAt(0).toUpperCase();
-  const photoURL = currentUserData?.photoURL || user?.photoURL;
+  const photoURL = currentUserData?.photoURL || user?.photoURL || undefined;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-9 w-9">
-             <AvatarImage 
-                src={photoURL}
-                alt="User avatar" 
-              />
-            <AvatarFallback>{avatarFallback}</AvatarFallback>
+            {photoURL ? (
+              <AvatarImage src={photoURL} alt="User avatar" />
+            ) : (
+              <AvatarFallback>{avatarFallback}</AvatarFallback>
+            )}
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
@@ -79,17 +89,26 @@ export function UserNav() {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
-            <Link href="/profile"><User className="mr-2 h-4 w-4" />Profile</Link>
+            <Link href="/profile">
+              <User className="mr-2 h-4 w-4" /> Profile
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/admin"><Shield className="mr-2 h-4 w-4" />Admin</Link>
+            <Link href="/admin">
+              <Shield className="mr-2 h-4 w-4" /> Admin
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/settings"><Settings className="mr-2 h-4 w-4" />Settings</Link>
+            <Link href="/settings">
+              <Settings className="mr-2 h-4 w-4" /> Settings
+            </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+        <DropdownMenuItem
+          onClick={handleLogout}
+          className="cursor-pointer"
+        >
           <LogOut className="mr-2 h-4 w-4" />
           Log out
         </DropdownMenuItem>

@@ -1,12 +1,9 @@
+"use client";
 
 import { AppHeader } from "@/components/app/header";
 import { FirebaseClientProvider } from "@/firebase/client-provider";
 
-export default function AppLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <FirebaseClientProvider>
       <div className="flex flex-col min-h-screen">
