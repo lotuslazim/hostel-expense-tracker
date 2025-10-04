@@ -1,14 +1,26 @@
 
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { PT_Sans, Poppins } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
 import { InventoryProvider } from "@/contexts/InventoryContext";
 import "./globals.css";
 import { FirebaseClientProvider } from "@/firebase/client-provider";
 import { I18nProvider } from "@/i18n/client-provider";
+import { cn } from "@/lib/utils";
 
-const inter = Inter({ subsets: ["latin"] });
+const ptSans = PT_Sans({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-pt-sans",
+});
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["700"],
+  variable: "--font-poppins",
+});
+
 
 export const metadata: Metadata = {
   title: "NourishTrack",
@@ -22,7 +34,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className} suppressHydrationWarning>
+      <body className={cn("font-body", ptSans.variable, poppins.variable)} suppressHydrationWarning>
         <I18nProvider>
           <ThemeProvider
             attribute="class"
