@@ -13,6 +13,7 @@ export default function ReportLayout({
       <AppHeader />
       <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-6">
+            <h1 className="text-3xl font-bold">Reports</h1>
             <ReportTabs />
             {children}
         </div>
