@@ -1,8 +1,9 @@
+
 "use client";
 
 import Link from "next/link";
 import { Logo } from "@/components/icons/logo";
-import { UserNav } from "@/components/app/user-nav";
+import { UserNav } from "@/app/(app)/user-nav";
 import { NavLink } from "./nav-link";
 import { Button } from "../ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
