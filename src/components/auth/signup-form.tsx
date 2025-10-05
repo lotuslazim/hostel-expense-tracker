@@ -118,19 +118,24 @@ export function SignupForm() {
     }
   }
   
-  const handleGoogleSignIn = async () => {
+  const handleGoogleSignIn = () => {
     const provider = new GoogleAuthProvider();
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      
-      await createUserDocument(user, user.displayName || user.email!.split('@')[0]);
-      
-      router.push('/dashboard');
-    } catch (error) {
-      console.error("Error during Google sign-in:", error);
-      toast({ variant: "destructive", title: "Google Sign-In Failed", description: "Could not sign in with Google. Please try again."})
-    }
+    signInWithPopup(auth, provider)
+      .then(async (result) => {
+        const user = result.user;
+        await createUserDocument(user, user.displayName || user.email!.split('@')[0]);
+        router.push('/dashboard');
+      })
+      .catch((error) => {
+        console.error("Error during Google sign-in:", error);
+        toast({ 
+          variant: "destructive", 
+          title: "Google Sign-In Failed", 
+          description: error.code === 'auth/popup-blocked' 
+            ? "Pop-up blocked by browser. Please allow pop-ups for this site."
+            : "Could not sign in with Google. Please try again."
+        });
+      });
   };
 
   return (
