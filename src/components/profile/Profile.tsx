@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
@@ -60,7 +61,7 @@ export function Profile() {
   const { data: members, isLoading: areMembersLoading } = useCollection(membersQuery);
   
   const expensesQuery = useMemo(() => {
-    if (!user) return null;
+    if (!user || !groupId) return null;
     return query(collection(firestore, `groups/${groupId}/expenses`), where("userId", "==", user.uid), orderBy("date", "desc"));
   }, [user, firestore, groupId]);
   const { data: expenses, isLoading: areExpensesLoading } = useCollection<Expense>(expensesQuery);
@@ -102,7 +103,7 @@ export function Profile() {
   };
 
   const handleSaveChanges = async () => {
-    if (!userRef) return;
+    if (!userRef || !user) return;
     setIsSaving(true);
     
     let photoURL = userData?.photoURL;

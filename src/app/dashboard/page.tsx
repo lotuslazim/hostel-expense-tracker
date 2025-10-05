@@ -1,3 +1,4 @@
+
 "use client";
 
 import { AddExpenseCard } from "@/components/dashboard/AddExpenseCard";
@@ -114,7 +115,6 @@ export default function DashboardPage() {
                             expenses={expenses || []} 
                             currentMonth={currentMonth}
                             onMonthChange={handleMonthChange}
-                            selectedDate={selectedDate}
                             />
                         )}
                     </div>

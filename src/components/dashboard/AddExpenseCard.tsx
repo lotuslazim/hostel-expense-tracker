@@ -158,7 +158,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     if(finalExpenseItem !== undefined && finalExpenseItem !== currentExpenseItem) {
       form.setValue('expenseItem', finalExpenseItem);
     }
-  }, [categoryValue, form, purchasedItemsString]);
+  }, [categoryValue, form, purchasedItemsString, purchasedItemsValue]);
   
   useEffect(() => {
     if (!isCameraDialogOpen) {
@@ -286,6 +286,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
             userName: currentUser.displayName || currentUser.email?.split('@')[0],
             date: Timestamp.fromDate(selectedDate),
             createdAt: serverTimestamp(),
+            groupId,
         });
         batch.set(expenseRef, expenseData);
 
@@ -569,5 +570,3 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     </Card>
   );
 }
-
-    

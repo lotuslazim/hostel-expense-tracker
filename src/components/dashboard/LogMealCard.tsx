@@ -44,7 +44,7 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
   const isMealItemNameRequired = useMemo(() => groupData?.settings?.isMealItemNameRequired ?? false, [groupData]);
 
   const mealSchema = useMemo(() => {
-    const safeMealTypes = mealTypes.length > 0 ? mealTypes : ["dummy"];
+    const safeMealTypes = mealTypes.length > 0 ? mealTypes.map(t => t.toLowerCase()) : ["dummy"];
     
     return z.object({
         mealType: z.enum(safeMealTypes as [string, ...string[]], {
@@ -92,6 +92,7 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
         userName: currentUser.displayName || currentUser.email?.split('@')[0],
         createdAt: serverTimestamp(),
         itemName: values.itemName || null,
+        groupId,
       });
 
       toast({
@@ -151,7 +152,7 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
                       {mealTypes.length > 0 ? mealTypes.map((type: string) => (
                           <FormItem key={type} className="flex items-center space-x-2 space-y-0">
                             <FormControl>
-                              <RadioGroupItem value={type} />
+                              <RadioGroupItem value={type.toLowerCase()} />
                             </FormControl>
                             <FormLabel className="font-normal capitalize">{type}</FormLabel>
                           </FormItem>
@@ -182,7 +183,7 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
                 <FormItem>
                   <FormLabel>Item Name {isMealItemNameRequired ? '' : '(Optional)'}</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Chicken Curry" {...field} />
+                    <Input placeholder="e.g., Chicken Curry" {...field} value={field.value ?? ''} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

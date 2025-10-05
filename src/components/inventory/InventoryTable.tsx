@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -9,9 +9,10 @@ import type { Purchase } from '@/lib/types';
 import { PackageOpen, ChevronDown } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
-import { format } from 'date-fns';
+import { format, toDate } from 'date-fns';
+import { Timestamp } from 'firebase/firestore';
+
 
 interface InventoryTableProps {
     purchases: Purchase[] | null;
@@ -133,10 +134,10 @@ export function InventoryTable({ purchases, isLoading }: InventoryTableProps) {
                                                 </TableRow>
                                             </TableHeader>
                                             <TableBody>
-                                                {item.contributions.sort((a,b) => (a.date as any).toDate() - (b.date as any).toDate()).map(contrib => (
+                                                {item.contributions.sort((a, b) => (a.date instanceof Timestamp ? a.date.toMillis() : a.date) - (b.date instanceof Timestamp ? b.date.toMillis() : b.date)).map(contrib => (
                                                     <TableRow key={contrib.id}>
                                                         <TableCell>{contrib.userName}</TableCell>
-                                                        <TableCell>{format((contrib.date as any).toDate(), 'MMM dd')}</TableCell>
+                                                        <TableCell>{format(contrib.date instanceof Timestamp ? contrib.date.toDate() : toDate(contrib.date), 'MMM dd')}</TableCell>
                                                         <TableCell className="text-right">{contrib.quantity.toFixed(2)} {contrib.unit}</TableCell>
                                                         <TableCell className="text-right">৳{contrib.cost.toFixed(2)}</TableCell>
                                                     </TableRow>

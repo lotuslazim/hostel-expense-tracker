@@ -50,10 +50,11 @@ interface ProcessedData {
 
 // Reusable utility functions
 const sortByDateDesc = (a: { date: Date | Timestamp }, b: { date: Date | Timestamp }) => {
-  const dateA = a.date instanceof Date ? a.date : (a.date as Timestamp)?.toDate?.();
-  const dateB = b.date instanceof Date ? b.date : (b.date as Timestamp)?.toDate?.();
-  return (dateB?.getTime() || 0) - (dateA?.getTime() || 0);
+  const dateA = a.date instanceof Date ? a.date.getTime() : (a.date as Timestamp)?.toMillis();
+  const dateB = b.date instanceof Date ? b.date.getTime() : (b.date as Timestamp)?.toMillis();
+  return (dateB || 0) - (dateA || 0);
 };
+
 
 const formatDateSafe = (date: Date | Timestamp | undefined): string => {
   if (!date) return "N/A";

@@ -1,9 +1,8 @@
 
-
 "use client";
 
 import { useMemo } from "react";
-import { format, isSameDay } from "date-fns";
+import { format } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ShoppingCart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -14,12 +13,11 @@ import { MonthSwitcher } from "../report/month-switcher";
 
 interface ActivityFeedProps {
   expenses: Expense[];
-  selectedDate: Date;
   currentMonth: Date;
   onMonthChange: (direction: "next" | "prev") => void;
 }
 
-export function ActivityFeed({ expenses, selectedDate, currentMonth, onMonthChange }: ActivityFeedProps) {
+export function ActivityFeed({ expenses, currentMonth, onMonthChange }: ActivityFeedProps) {
 
   const monthlyExpenses = useMemo(() => {
     if (!expenses) return [];
@@ -79,5 +77,3 @@ export function ActivityFeed({ expenses, selectedDate, currentMonth, onMonthChan
     </Card>
   );
 }
-
-    
