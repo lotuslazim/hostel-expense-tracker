@@ -20,7 +20,7 @@ import Link from "next/link";
 import { useAuth, useUser, useDoc, useFirebase } from "@/firebase";
 import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
-import { LogOut, User, Shield, Settings, Users } from "lucide-react";
+import { LogOut, User, Settings, Users } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 import { doc } from "firebase/firestore";
 

@@ -21,7 +21,7 @@ import { useAuth, useUser, useDoc, useFirebase } from "@/firebase";
 import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "../ui/skeleton";
-import { LogOut, User, Shield, Settings } from "lucide-react";
+import { LogOut, User, Settings, Users } from "lucide-react";
 import { useMemo } from "react";
 import { doc } from "firebase/firestore";
 
@@ -94,13 +94,11 @@ export function UserNav() {
               <User className="mr-2 h-4 w-4" /> Profile
             </Link>
           </DropdownMenuItem>
-          {isUserAdmin && (
-            <DropdownMenuItem asChild>
-                <Link href="/admin">
-                <Shield className="mr-2 h-4 w-4" /> Admin
-                </Link>
+           <DropdownMenuItem asChild>
+              <Link href="/admin">
+                <Users className="mr-2 h-4 w-4" />Group Details
+              </Link>
             </DropdownMenuItem>
-          )}
           <DropdownMenuItem asChild>
             <Link href="/settings">
               <Settings className="mr-2 h-4 w-4" /> Settings
