@@ -14,10 +14,10 @@ import { useState, useEffect } from "react";
 
 export function AppHeader() {
   const { isUserLoading } = useUser();
-  const [isClient, setIsClient] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setIsClient(true);
+    setMounted(true);
   }, []);
 
   const navLinks = [
@@ -26,39 +26,70 @@ export function AppHeader() {
     { href: "/inventory", label: "Inventory", icon: Package },
   ];
 
+  const renderUserSection = () => {
+    if (!mounted || isUserLoading) {
+      return <Skeleton className="h-9 w-20 rounded-full" />;
+    }
+    return (
+      <>
+        <Button variant="ghost" size="icon" asChild>
+          <Link href="/chat">
+            <MessageSquare />
+            <span className="sr-only">Open Chat</span>
+          </Link>
+        </Button>
+        <UserNav />
+      </>
+    );
+  };
+  
+  const renderMobileMenu = () => {
+    if (!mounted) {
+      return (
+        <Button variant="ghost" size="icon" disabled>
+          <Menu className="h-5 w-5" />
+          <span className="sr-only">Open navigation menu</span>
+        </Button>
+      );
+    }
+    return (
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button variant="ghost" size="icon">
+            <Menu className="h-5 w-5" />
+            <span className="sr-only">Open navigation menu</span>
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="left" className="w-[300px] sm:w-[350px]">
+          <div className="flex flex-col gap-4 py-6">
+            <div className="px-4 mb-4">
+              <Logo />
+            </div>
+            <nav className="flex flex-col gap-2 px-4">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="flex items-center gap-3 rounded-lg px-3 py-3 text-muted-foreground transition-all hover:text-primary text-base font-medium"
+                >
+                  <link.icon className="h-5 w-5" />
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+        </SheetContent>
+      </Sheet>
+    );
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
         
         {/* Mobile Menu */}
         <div className="md:hidden mr-4">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Open navigation menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-[300px] sm:w-[350px]">
-              <div className="flex flex-col gap-4 py-6">
-                <div className="px-4 mb-4">
-                  <Logo />
-                </div>
-                <nav className="flex flex-col gap-2 px-4">
-                  {navLinks.map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      className="flex items-center gap-3 rounded-lg px-3 py-3 text-muted-foreground transition-all hover:text-primary text-base font-medium"
-                    >
-                      <link.icon className="h-5 w-5" />
-                      {link.label}
-                    </Link>
-                  ))}
-                </nav>
-              </div>
-            </SheetContent>
-          </Sheet>
+          {renderMobileMenu()}
         </div>
 
         {/* Desktop Logo & Nav */}
@@ -77,19 +108,7 @@ export function AppHeader() {
               <Logo />
            </div>
            <div className="flex items-center space-x-2">
-            {isClient && !isUserLoading ? (
-              <>
-                <Button variant="ghost" size="icon" asChild>
-                    <Link href="/chat">
-                      <MessageSquare />
-                      <span className="sr-only">Open Chat</span>
-                    </Link>
-                </Button>
-                <UserNav />
-              </>
-            ) : (
-              <Skeleton className="h-9 w-20 rounded-full" />
-            )}
+            {renderUserSection()}
            </div>
         </div>
       </div>
