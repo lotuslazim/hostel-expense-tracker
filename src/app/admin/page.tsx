@@ -210,152 +210,19 @@ function NewUserAdminPanel({ user }: { user: any }) {
 }
 
 function AdminPanel({isUserAdmin}: {isUserAdmin: boolean}) {
-    const { firestore } = useFirebase();
-    const { toast } = useToast();
-    
-    // Admins can query all collections. Non-admins cannot.
-    const usersQuery = useMemo(() => isUserAdmin ? collection(firestore, 'users') : null, [firestore, isUserAdmin]);
-    const groupsQuery = useMemo(() => isUserAdmin ? collection(firestore, 'groups') : null, [firestore, isUserAdmin]);
-    const expensesQuery = useMemo(() => isUserAdmin ? query(collection(firestore, 'expenses'), where('isDeleted', '!=', true)) : null, [firestore, isUserAdmin]);
-
-    const { data: users, isLoading: usersLoading } = useCollection(usersQuery);
-    const { data: groups, isLoading: groupsLoading } = useCollection(groupsQuery);
-    const { data: expenses, isLoading: expensesLoading } = useCollection(expensesQuery);
-    
-    const totalExpenses = useMemo(() => expenses?.reduce((sum, expense) => sum + expense.amount, 0) ?? 0, [expenses]);
-
-    const handleCopyInviteCode = (code: string) => {
-        navigator.clipboard.writeText(code);
-        toast({ title: "Copied!", description: "Invite code copied to clipboard." });
-    };
-
-    if (usersLoading || groupsLoading || expensesLoading) {
-        return <AdminPageSkeleton />;
+    if (!isUserAdmin) {
+        return (
+             <div className="text-center py-16">
+                <h1 className="text-2xl font-bold">Access Denied</h1>
+                <p className="text-muted-foreground">You do not have administrative privileges.</p>
+            </div>
+        )
     }
 
     return (
         <div className="space-y-8">
-            <div>
-                <h1 className="text-3xl font-bold font-headline tracking-tight">Admin Dashboard</h1>
-                <p className="text-muted-foreground">Oversee users, groups, and expenses across the app.</p>
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-                        <Users className="h-5 w-5 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{users?.length ?? 0}</div>
-                        <p className="text-xs text-muted-foreground">All registered users</p>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
-                        <DollarSign className="h-5 w-5 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">৳{totalExpenses.toFixed(2)}</div>
-                        <p className="text-xs text-muted-foreground">Across all groups</p>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Active Groups</CardTitle>
-                        <Home className="h-5 w-5 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{groups?.length ?? 0}</div>
-                         <p className="text-xs text-muted-foreground">Hostels currently managed</p>
-                    </CardContent>
-                </Card>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-                <Card className="lg:col-span-3">
-                    <CardHeader>
-                        <CardTitle>User Management</CardTitle>
-                        <CardDescription>View and manage all registered users.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>User</TableHead>
-                                    <TableHead>Email</TableHead>
-                                    <TableHead>Group</TableHead>
-                                    <TableHead>Role</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {users?.map(user => {
-                                    const userGroup = groups?.find(g => g.id === user.groupId);
-                                    return (
-                                        <TableRow key={user.id}>
-                                            <TableCell>
-                                                <div className="flex items-center gap-3">
-                                                    <Avatar className="h-8 w-8">
-                                                        <AvatarImage src={user.photoURL} alt={user.displayName} />
-                                                        <AvatarFallback>{user.displayName?.charAt(0) ?? 'U'}</AvatarFallback>
-                                                    </Avatar>
-                                                    <span className="font-medium">{user.displayName}</span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell className="text-muted-foreground">{user.email}</TableCell>
-                                            <TableCell>
-                                                {user.groupId ? (
-                                                    <Badge variant="secondary">{userGroup?.groupName ?? "In a group"}</Badge>
-                                                ) : (
-                                                    <Badge variant="outline">No Group</Badge>
-                                                )}
-                                            </TableCell>
-                                            <TableCell>
-                                               {user.isAdmin ? <Badge>Admin</Badge> : <Badge variant="outline">Member</Badge>}
-                                            </TableCell>
-                                        </TableRow>
-                                    );
-                                })}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
-
-                <Card className="lg:col-span-2">
-                    <CardHeader>
-                         <CardTitle className="flex items-center gap-2"><Building /> Group Management</CardTitle>
-                        <CardDescription>Overview of all active groups.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                         <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Group Name</TableHead>
-                                    <TableHead>Members</TableHead>
-                                    <TableHead>Invite Code</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {groups?.map(group => (
-                                    <TableRow key={group.id}>
-                                        <TableCell className="font-medium">{group.groupName}</TableCell>
-                                        <TableCell>{users?.filter(u => u.groupId === group.id).length ?? 0}</TableCell>
-                                        <TableCell>
-                                            <div className="flex items-center gap-2">
-                                                <span className="font-mono text-sm bg-muted px-2 py-1 rounded">{group.invitationCode}</span>
-                                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleCopyInviteCode(group.invitationCode)}>
-                                                    <Copy className="h-4 w-4" />
-                                                </Button>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                         </Table>
-                    </CardContent>
-                </Card>
-            </div>
+            <h1 className="text-3xl font-bold font-headline tracking-tight">Admin Dashboard</h1>
+            <p>Admin dashboard content has been removed as requested.</p>
         </div>
     );
 }
@@ -416,3 +283,5 @@ export default function AdminPage() {
         </div>
     )
 }
+
+    
