@@ -72,12 +72,18 @@ export function SignupForm() {
       await createUserDocument(user, values.name);
 
       // Send verification email
-      await sendEmailVerification(user);
-      console.log("Verification email sent.");
-      
+      try {
+        await sendEmailVerification(user, {
+          url: window.location.origin + "/login",
+          handleCodeInApp: false
+        });
+        console.log("✅ Verification email sent to:", user.email);
+      } catch (emailError: any) {
+        console.error("❌ Email verification failed:", emailError.code, emailError.message);
+      }
       toast({
         title: "Account Created!",
-        description: "We've sent a verification link to your email. Please verify to log in.",
+        description: "Please check your email to verify your account before logging in.",
       });
 
       form.reset();

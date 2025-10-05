@@ -1,5 +1,5 @@
 
-import type { Meal, Expense, Item } from './types';
+import type { MealLog as Meal, Expense, Item } from './types';
 import type { GenerateMonthlySummaryInput } from '@/ai/flows/generate-monthly-summary';
 
 
@@ -7,8 +7,26 @@ import type { GenerateMonthlySummaryInput } from '@/ai/flows/generate-monthly-su
 export const MOCK_MEALS: Meal[] = [];
 
 export const MOCK_EXPENSES: Expense[] = [
-  { id: '1', description: 'Groceries', amount: 75.50, category: 'Food', date: new Date() },
-  { id: '2', description: 'Coffee', amount: 4.25, category: 'Dining Out', date: new Date() },
+  { 
+    id: '1', 
+    description: 'Groceries', 
+    amount: 75.50, 
+    category: 'Food & Groceries', 
+    expenseItem: 'Groceries',
+    userId: 'mock-user-1',
+    groupId: 'mock-group-1',
+    date: new Date() 
+  },
+  { 
+    id: '2', 
+    description: 'Coffee', 
+    amount: 4.25, 
+    category: 'Other',
+    expenseItem: 'Coffee',
+    userId: 'mock-user-1',
+    groupId: 'mock-group-1',
+    date: new Date() 
+  },
 ];
 
 export const MOCK_ITEMS: Item[] = [

@@ -225,10 +225,12 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
           canvas.toBlob(async (blob) => {
               if(blob) {
                   try {
-                    const compressedBlob = await imageCompression.lib.blobToFixged(blob, { maxSizeMB: 1, maxWidthOrHeight: 1024 });
-                    setCapturedImageBlob(compressedBlob);
+                    // Convert Blob to File for imageCompression
+                    const file = new File([blob], "camera-capture.jpg", { type: "image/jpeg" });
+                    const compressedFile = await imageCompression(file, { maxSizeMB: 1, maxWidthOrHeight: 1024 });
+                    setCapturedImageBlob(compressedFile);
                     form.setValue("receipt", undefined); // Clear file input
-                    setImagePreview(URL.createObjectURL(compressedBlob));
+                    setImagePreview(URL.createObjectURL(compressedFile));
                     setIsCameraDialogOpen(false);
                   } catch (error) {
                     toast({ variant: "destructive", title: "Error processing captured image." });

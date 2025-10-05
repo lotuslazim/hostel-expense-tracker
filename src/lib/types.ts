@@ -75,3 +75,12 @@ export interface PurchasedItem {
 }
 
     
+export interface Item {
+  id: string;
+  name: string;
+  quantity: number;
+  unit: string;
+  cost: number;
+  date: Date;
+}
+
