@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -20,7 +21,7 @@ import { useAuth, useUser, useDoc, useFirebase } from "@/firebase";
 import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "../ui/skeleton";
-import { LogOut, User, Shield, Settings, UserCog } from "lucide-react";
+import { LogOut, User, Shield, Settings } from "lucide-react";
 import { useMemo } from "react";
 import { doc } from "firebase/firestore";
 
@@ -95,16 +96,11 @@ export function UserNav() {
           </DropdownMenuItem>
           {isUserAdmin && (
             <DropdownMenuItem asChild>
-                <Link href="/admin-profile">
-                <UserCog className="mr-2 h-4 w-4" /> Admin Profile
+                <Link href="/admin">
+                <Shield className="mr-2 h-4 w-4" /> Admin
                 </Link>
             </DropdownMenuItem>
           )}
-          <DropdownMenuItem asChild>
-            <Link href="/admin">
-              <Shield className="mr-2 h-4 w-4" /> Admin
-            </Link>
-          </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href="/settings">
               <Settings className="mr-2 h-4 w-4" /> Settings
