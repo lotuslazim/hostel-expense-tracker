@@ -187,6 +187,20 @@ function AdminProfilePageContent() {
         return <AccessDenied />;
     }
     
+    if (!groupId || !groupData || !members) {
+        return (
+             <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
+                <Alert className="max-w-lg text-center">
+                    <Shield className="h-4 w-4" />
+                    <AlertTitle>No Group Found</AlertTitle>
+                    <AlertDescription>
+                        You are an admin, but not currently part of a group. Please create or join a group first.
+                    </AlertDescription>
+                </Alert>
+            </div>
+        )
+    }
+
     return (
         <div className="space-y-8">
             <div>

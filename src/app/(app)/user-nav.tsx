@@ -21,7 +21,7 @@ import { useUser, useDoc, useFirebase } from "@/firebase";
 import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { LogOut, User, Settings, Users, Shield } from "lucide-react";
-import { useEffect, useState, useMemo } from "react";
+import { useMemo } from "react";
 import { doc } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 
