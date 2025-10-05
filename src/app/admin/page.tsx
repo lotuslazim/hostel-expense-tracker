@@ -8,8 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Users, DollarSign, Home, Building, PlusCircle, LogIn, Loader2, Group } from "lucide-react";
-import { Bar, BarChart as RechartsBarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
+import { Users, DollarSign, Home, Building, PlusCircle, LogIn, Loader2, Group, Copy } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -212,11 +211,12 @@ function NewUserAdminPanel({ user }: { user: any }) {
 
 function AdminPanel({isUserAdmin}: {isUserAdmin: boolean}) {
     const { firestore } = useFirebase();
+    const { toast } = useToast();
     
     // Admins can query all collections. Non-admins cannot.
     const usersQuery = useMemo(() => isUserAdmin ? collection(firestore, 'users') : null, [firestore, isUserAdmin]);
     const groupsQuery = useMemo(() => isUserAdmin ? collection(firestore, 'groups') : null, [firestore, isUserAdmin]);
-    const expensesQuery = useMemo(() => isUserAdmin ? collection(firestore, 'expenses') : null, [firestore, isUserAdmin]);
+    const expensesQuery = useMemo(() => isUserAdmin ? query(collection(firestore, 'expenses'), where('isDeleted', '!=', true)) : null, [firestore, isUserAdmin]);
 
     const { data: users, isLoading: usersLoading } = useCollection(usersQuery);
     const { data: groups, isLoading: groupsLoading } = useCollection(groupsQuery);
@@ -224,14 +224,10 @@ function AdminPanel({isUserAdmin}: {isUserAdmin: boolean}) {
     
     const totalExpenses = useMemo(() => expenses?.reduce((sum, expense) => sum + expense.amount, 0) ?? 0, [expenses]);
 
-    const chartData = useMemo(() => {
-        if (!groups || !users) return [];
-        return groups.map(group => ({
-            name: group.groupName.length > 15 ? `${group.groupName.substring(0,12)}...` : group.groupName,
-            members: users.filter(u => u.groupId === group.id).length
-        }));
-    }, [groups, users]);
-
+    const handleCopyInviteCode = (code: string) => {
+        navigator.clipboard.writeText(code);
+        toast({ title: "Copied!", description: "Invite code copied to clipboard." });
+    };
 
     if (usersLoading || groupsLoading || expensesLoading) {
         return <AdminPageSkeleton />;
@@ -289,7 +285,8 @@ function AdminPanel({isUserAdmin}: {isUserAdmin: boolean}) {
                                 <TableRow>
                                     <TableHead>User</TableHead>
                                     <TableHead>Email</TableHead>
-                                    <TableHead>Group Status</TableHead>
+                                    <TableHead>Group</TableHead>
+                                    <TableHead>Role</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -314,6 +311,9 @@ function AdminPanel({isUserAdmin}: {isUserAdmin: boolean}) {
                                                     <Badge variant="outline">No Group</Badge>
                                                 )}
                                             </TableCell>
+                                            <TableCell>
+                                               {user.isAdmin ? <Badge>Admin</Badge> : <Badge variant="outline">Member</Badge>}
+                                            </TableCell>
                                         </TableRow>
                                     );
                                 })}
@@ -324,25 +324,35 @@ function AdminPanel({isUserAdmin}: {isUserAdmin: boolean}) {
 
                 <Card className="lg:col-span-2">
                     <CardHeader>
-                         <CardTitle className="flex items-center gap-2"><Building /> Group Overview</CardTitle>
-                        <CardDescription>Member distribution across groups.</CardDescription>
+                         <CardTitle className="flex items-center gap-2"><Building /> Group Management</CardTitle>
+                        <CardDescription>Overview of all active groups.</CardDescription>
                     </CardHeader>
                     <CardContent>
-                         <ResponsiveContainer width="100%" height={300}>
-                            <RechartsBarChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                                <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                                <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false}/>
-                                <Tooltip
-                                  contentStyle={{
-                                    backgroundColor: 'hsl(var(--background))',
-                                    borderColor: 'hsl(var(--border))',
-                                    color: 'hsl(var(--foreground))'
-                                  }}
-                                  labelStyle={{ color: 'hsl(var(--muted-foreground))' }}
-                                />
-                                <Bar dataKey="members" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                            </RechartsBarChart>
-                        </ResponsiveContainer>
+                         <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Group Name</TableHead>
+                                    <TableHead>Members</TableHead>
+                                    <TableHead>Invite Code</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {groups?.map(group => (
+                                    <TableRow key={group.id}>
+                                        <TableCell className="font-medium">{group.groupName}</TableCell>
+                                        <TableCell>{users?.filter(u => u.groupId === group.id).length ?? 0}</TableCell>
+                                        <TableCell>
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-mono text-sm bg-muted px-2 py-1 rounded">{group.invitationCode}</span>
+                                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleCopyInviteCode(group.invitationCode)}>
+                                                    <Copy className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                         </Table>
                     </CardContent>
                 </Card>
             </div>
@@ -406,5 +416,3 @@ export default function AdminPage() {
         </div>
     )
 }
-
-    
