@@ -8,13 +8,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Users, DollarSign, Home, BarChart, Building, PlusCircle, LogIn, Loader2, Group } from "lucide-react";
+import { Users, DollarSign, Home, Building, PlusCircle, LogIn, Loader2, Group } from "lucide-react";
 import { Bar, BarChart as RechartsBarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AppHeader } from "@/components/app/header";
 
 function AdminPageSkeleton() {
   return (
@@ -350,7 +351,7 @@ function AdminPanel() {
     );
 }
 
-export default function AdminPage() {
+const AdminPageContent = () => {
     const { user, isUserLoading } = useUser();
     const { firestore } = useFirebase();
 
@@ -393,6 +394,18 @@ export default function AdminPage() {
             </div>
         );
     }
+}
+
+
+export default function AdminPage() {
+    return (
+        <div className="flex flex-col min-h-screen">
+            <AppHeader />
+            <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <AdminPageContent />
+            </main>
+        </div>
+    )
 }
 
     
