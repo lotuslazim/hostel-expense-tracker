@@ -1,9 +1,9 @@
 
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useUser, useDoc, useFirebase, useCollection } from "@/firebase";
-import { doc, collection, query, where } from "firebase/firestore";
+import { doc, collection, query, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
 import { AppHeader } from "@/components/app/header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -11,8 +11,11 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { FileDown, Users, Shield, Copy, Edit, UserPlus, Settings, BarChart2, Package, MessageSquare } from "lucide-react";
+import { FileDown, Users, Shield, Copy, Settings, Package, Plus, Trash2, Loader2 } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 
 
 function AdminProfilePageSkeleton() {
@@ -44,9 +47,105 @@ function AccessDenied() {
     )
 }
 
+function AdminActionsCard({ groupRef, groupData }: { groupRef: any, groupData: any }) {
+    const { toast } = useToast();
+    const [newMealType, setNewMealType] = useState("");
+    const [isUpdating, setIsUpdating] = useState(false);
+    
+    const handleAddMealType = async () => {
+        if (!newMealType.trim() || !groupRef) return;
+        setIsUpdating(true);
+        try {
+            await updateDoc(groupRef, {
+                "settings.mealTypes": arrayUnion(newMealType.trim())
+            });
+            toast({ title: "Meal Type Added" });
+            setNewMealType("");
+        } catch (error) {
+            toast({ variant: "destructive", title: "Error adding meal type." });
+        } finally {
+            setIsUpdating(false);
+        }
+    };
+
+    const handleRemoveMealType = async (mealType: string) => {
+        if (!groupRef) return;
+        setIsUpdating(true);
+        try {
+            await updateDoc(groupRef, {
+                "settings.mealTypes": arrayRemove(mealType)
+            });
+            toast({ title: "Meal Type Removed" });
+        } catch (error) {
+            toast({ variant: "destructive", title: "Error removing meal type." });
+        } finally {
+            setIsUpdating(false);
+        }
+    };
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>Admin Actions</CardTitle>
+                <CardDescription>Control your group's settings and data.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                 <Dialog>
+                    <DialogTrigger asChild>
+                        <Button variant="outline" className="w-full justify-start gap-2"><Settings className="h-4 w-4"/> Manage Meal Types</Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Manage Meal Types</DialogTitle>
+                            <DialogDescription>
+                                Add or remove meal types for your group members to log.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                            <div className="flex gap-2">
+                                <Input 
+                                    value={newMealType}
+                                    onChange={(e) => setNewMealType(e.target.value)}
+                                    placeholder="e.g., Snack"
+                                />
+                                <Button onClick={handleAddMealType} disabled={isUpdating || !newMealType.trim()}>
+                                    {isUpdating ? <Loader2 className="animate-spin" /> : <Plus />}
+                                    <span className="ml-2">Add</span>
+                                </Button>
+                            </div>
+                            <div className="space-y-2">
+                                <h4 className="text-sm font-medium">Existing Types</h4>
+                                {groupData?.settings?.mealTypes?.map((type: string) => (
+                                    <div key={type} className="flex items-center justify-between p-2 rounded-md bg-muted">
+                                        <p className="font-medium">{type}</p>
+                                        <Button variant="ghost" size="icon" onClick={() => handleRemoveMealType(type)} disabled={isUpdating}>
+                                            <Trash2 className="h-4 w-4 text-destructive" />
+                                        </Button>
+                                    </div>
+                                ))}
+                                {(!groupData?.settings?.mealTypes || groupData.settings.mealTypes.length === 0) && (
+                                    <p className="text-sm text-muted-foreground text-center py-2">No meal types configured.</p>
+                                )}
+                            </div>
+                        </div>
+                    </DialogContent>
+                </Dialog>
+
+                <Button variant="outline" className="w-full justify-start gap-2" disabled>
+                    <Package className="h-4 w-4"/> Edit Purchased Items
+                </Button>
+                <Button variant="outline" className="w-full justify-start gap-2" disabled>
+                    <FileDown className="h-4 w-4"/> Export Group Data
+                </Button>
+            </CardContent>
+        </Card>
+    );
+}
+
 function AdminProfilePageContent() {
     const { user, isUserLoading } = useUser();
     const { firestore } = useFirebase();
+    const { toast } = useToast();
 
     const userDocRef = useMemo(() => {
         if (!user) return null;
@@ -71,6 +170,13 @@ function AdminProfilePageContent() {
 
     const { data: members, isLoading: areMembersLoading } = useCollection(membersQuery);
 
+    const handleCopyInviteCode = () => {
+        if (groupData?.invitationCode) {
+            navigator.clipboard.writeText(groupData.invitationCode);
+            toast({ title: "Copied!", description: "Invite code copied to clipboard." });
+        }
+    };
+    
     const isLoading = isUserLoading || isUserDataLoading || isGroupDataLoading || areMembersLoading;
     
     if (isLoading) {
@@ -111,7 +217,7 @@ function AdminProfilePageContent() {
                     </CardHeader>
                     <CardContent className="flex items-center gap-2">
                         <p className="text-2xl font-bold font-mono tracking-widest">{groupData?.invitationCode}</p>
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" onClick={handleCopyInviteCode}>
                             <Copy className="h-5 w-5"/>
                         </Button>
                     </CardContent>
@@ -156,17 +262,7 @@ function AdminProfilePageContent() {
                     </CardContent>
                 </Card>
 
-                 <Card>
-                    <CardHeader>
-                        <CardTitle>Admin Actions</CardTitle>
-                        <CardDescription>Control your group's settings and data.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <Button variant="outline" className="w-full justify-start gap-2"><Settings className="h-4 w-4"/> Manage Meal Types</Button>
-                        <Button variant="outline" className="w-full justify-start gap-2"><Package className="h-4 w-4"/> Edit Purchased Items</Button>
-                        <Button variant="outline" className="w-full justify-start gap-2"><FileDown className="h-4 w-4"/> Export Group Data</Button>
-                    </CardContent>
-                </Card>
+                <AdminActionsCard groupRef={groupDocRef} groupData={groupData} />
             </div>
         </div>
     )
@@ -183,3 +279,5 @@ export default function AdminProfilePage() {
     </div>
   );
 }
+
+    
