@@ -133,14 +133,14 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
 
   const categoryValue = form.watch("category");
   const purchasedItemsValue = form.watch("purchasedItems");
-  const purchasedItemsString = JSON.stringify(purchasedItemsValue);
+  const prevCategoryRef = useRef<string | undefined>();
 
   useEffect(() => {
     setShowReceipt(categoryValue === 'Electricity' || categoryValue === 'Gas');
     const isFood = categoryValue === 'Food & Groceries';
     setShowInventoryFields(isFood);
-    
-    if (!isFood) {
+
+    if (!isFood && prevCategoryRef.current === 'Food & Groceries') {
       form.setValue('purchasedItems', []);
       form.clearErrors('amount');
     }
@@ -158,7 +158,9 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     if(finalExpenseItem !== undefined && finalExpenseItem !== currentExpenseItem) {
       form.setValue('expenseItem', finalExpenseItem);
     }
-  }, [categoryValue, form, purchasedItemsString, purchasedItemsValue]);
+    
+    prevCategoryRef.current = categoryValue;
+  }, [categoryValue, form, purchasedItemsValue]);
   
   useEffect(() => {
     if (!isCameraDialogOpen) {
@@ -570,3 +572,5 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     </Card>
   );
 }
+
+    
