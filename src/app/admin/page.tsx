@@ -317,7 +317,7 @@ function GroupDetailsPanel({ groupId }: { groupId: string }) {
     );
 }
 
-const AdminPageContent = () => {
+export default function AdminPage() {
     const { user, isUserLoading } = useUser();
     const { firestore } = useFirebase();
 
@@ -329,37 +329,23 @@ const AdminPageContent = () => {
     const { data: userData, isLoading: isUserDataLoading } = useDoc(userDocRef);
 
     const isLoading = isUserLoading || isUserDataLoading;
-    
-    if (isLoading) {
-        return <AdminPageSkeleton />;
-    }
-    
-    if (!user) {
-        // This case should ideally not happen if routes are protected, but as a fallback:
-        return (
-             <div className="text-center py-16">
-                <h1 className="text-2xl font-bold">Authentication Error</h1>
-                <p className="text-muted-foreground">Please log in to access this page.</p>
-            </div>
-        )
-    }
-    
-    const groupId = userData?.groupId;
 
-    if (groupId) {
-        return <GroupDetailsPanel groupId={groupId} />;
-    } else {
-        return <NewUserAdminPanel user={user} />;
-    }
-}
-
-
-export default function AdminPage() {
     return (
         <div className="flex flex-col min-h-screen">
             <AppHeader />
             <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <AdminPageContent />
+                {isLoading ? (
+                    <AdminPageSkeleton />
+                ) : !user ? (
+                    <div className="text-center py-16">
+                       <h1 className="text-2xl font-bold">Authentication Error</h1>
+                       <p className="text-muted-foreground">Please log in to access this page.</p>
+                   </div>
+                ) : userData?.groupId ? (
+                    <GroupDetailsPanel groupId={userData.groupId} />
+                ) : (
+                    <NewUserAdminPanel user={user} />
+                )}
             </main>
         </div>
     )

@@ -47,16 +47,16 @@ function AccessDenied() {
     )
 }
 
-function AdminActionsCard({ groupRef, groupData }: { groupRef: any, groupData: any }) {
+function AdminActionsCard({ groupDocRef, groupData }: { groupDocRef: any, groupData: any }) {
     const { toast } = useToast();
     const [newMealType, setNewMealType] = useState("");
     const [isUpdating, setIsUpdating] = useState(false);
     
     const handleAddMealType = async () => {
-        if (!newMealType.trim() || !groupRef) return;
+        if (!newMealType.trim() || !groupDocRef) return;
         setIsUpdating(true);
         try {
-            await updateDoc(groupRef, {
+            await updateDoc(groupDocRef, {
                 "settings.mealTypes": arrayUnion(newMealType.trim())
             });
             toast({ title: "Meal Type Added" });
@@ -69,10 +69,10 @@ function AdminActionsCard({ groupRef, groupData }: { groupRef: any, groupData: a
     };
 
     const handleRemoveMealType = async (mealType: string) => {
-        if (!groupRef) return;
+        if (!groupDocRef) return;
         setIsUpdating(true);
         try {
-            await updateDoc(groupRef, {
+            await updateDoc(groupDocRef, {
                 "settings.mealTypes": arrayRemove(mealType)
             });
             toast({ title: "Meal Type Removed" });
@@ -262,7 +262,7 @@ function AdminProfilePageContent() {
                     </CardContent>
                 </Card>
 
-                <AdminActionsCard groupRef={groupDocRef} groupData={groupData} />
+                <AdminActionsCard groupDocRef={groupDocRef} groupData={groupData} />
             </div>
         </div>
     )

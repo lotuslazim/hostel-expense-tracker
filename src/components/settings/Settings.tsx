@@ -416,7 +416,7 @@ export function Settings() {
   const groupRef = useMemo(() => (groupId ? doc(firestore, `groups`, groupId) : null), [groupId, firestore]);
   const { data: groupData, isLoading: isGroupDataLoading } = useDoc(groupRef);
 
-  const membersQuery = useMemo(() => (groupId ? query(collection(firestore, `users`), where("groupId", "==", groupId)) : null), [groupId, firestore]);
+  const membersQuery = useMemo(() => (groupId ? collection(firestore, `groups/${groupId}/members`) : null), [groupId, firestore]);
   const { data: members, isLoading: areMembersLoading } = useCollection(membersQuery);
 
 
