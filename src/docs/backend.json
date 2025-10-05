@@ -10,9 +10,9 @@
         "id": { "type": "string", "description": "Unique identifier for the group entity." },
         "name": { "type": "string", "description": "The name of the group or flat." },
         "createdAt": { "type": "string", "format": "date-time", "description": "The timestamp when the group was created." },
-        "createdBy": { "type": "string", "description": "The ID of the user who created the group." }
+        "adminId": { "type": "string", "description": "The ID of the user who created the group." }
       },
-      "required": ["id", "name", "createdAt", "createdBy"]
+      "required": ["id", "name", "createdAt", "adminId"]
     },
     "User": {
       "$schema": "http://json-schema.org/draft-07/schema#",
@@ -34,7 +34,7 @@
       "type": "object",
       "description": "Represents a member within a group, containing their email and role.",
       "properties": {
-        "memberId": { "type": "string" },
+        "id": { "type": "string", "description": "The document ID, same as the user's UID." },
         "name": { "type": "string" },
         "email": { "type": "string", "description": "The member's email address.", "format": "email" },
         "role": { "type": "string", "enum": ["admin", "user"], "description": "The role of the member within the group." },
@@ -42,7 +42,7 @@
         "groupId": { "type": "string", "description": "The ID of the group the member belongs to." },
         "status": { "type": "string", "enum": ["active", "inactive"], "description": "The status of the member." }
       },
-      "required": ["memberId", "name", "email", "role", "joinedAt", "groupId", "status"]
+      "required": ["id", "name", "email", "role", "joinedAt", "groupId", "status"]
     },
     "Meal": {
       "$schema": "http://json-schema.org/draft-07/schema#",
@@ -50,7 +50,7 @@
       "type": "object",
       "description": "Represents a meal log entry for a user.",
       "properties": {
-        "mealId": { "type": "string" },
+        "id": { "type": "string" },
         "memberId": { "type": "string" },
         "mealType": { "type": "string", "enum": ["breakfast", "lunch", "dinner"] },
         "items": { "type": "array", "items": { "type": "string"} },
@@ -59,7 +59,7 @@
         "createdAt": { "type": "string", "format": "date-time" },
         "groupId": { "type": "string" }
       },
-      "required": ["mealId", "memberId", "mealType", "date", "createdAt", "groupId"]
+      "required": ["id", "memberId", "mealType", "date", "createdAt", "groupId"]
     },
     "Expense": {
       "$schema": "http://json-schema.org/draft-07/schema#",
@@ -84,13 +84,13 @@
       "type": "object",
       "description": "Represents a chat message within a group.",
       "properties": {
-        "messageId": { "type": "string" },
+        "id": { "type": "string" },
         "senderId": { "type": "string" },
         "content": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" },
         "groupId": { "type": "string" }
       },
-      "required": ["messageId", "senderId", "content", "createdAt", "groupId"]
+      "required": ["id", "senderId", "content", "createdAt", "groupId"]
     },
     "PurchasedItem": {
       "$schema": "http://json-schema.org/draft-07/schema#",
@@ -98,7 +98,7 @@
       "type": "object",
       "description": "Represents a single purchase of an item.",
       "properties": {
-        "itemId": { "type": "string" },
+        "id": { "type": "string" },
         "itemName": { "type": "string" },
         "quantity": { "type": "number" },
         "unitPrice": { "type": "number" },
@@ -107,7 +107,7 @@
         "groupId": { "type": "string" },
         "adminId": { "type": "string" }
       },
-      "required": ["itemId", "itemName", "quantity", "unitPrice", "totalCost", "purchasedAt", "groupId", "adminId"]
+      "required": ["id", "itemName", "quantity", "unitPrice", "totalCost", "purchasedAt", "groupId", "adminId"]
     }
   },
   "auth": { "providers": ["password", "google"] },
@@ -146,10 +146,9 @@
             "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid));",
             "list": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';",
             "create": "request.auth.uid != null;",
-            "update": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';",
-            "delete": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';"
+            "update, delete": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';"
           },
-          "description": "Stores group information. Readable by members. Listable, updatable, and deletable only by admins. Any authenticated user can create a group."
+          "description": "Stores group information. Readable by members. Listable and modifiable only by admins. Any authenticated user can create a group."
         }
       },
       {
@@ -212,5 +211,3 @@
     "reasoning": "This structure enforces security by scoping all group-related data within a group's subcollections. The rule `exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))` verifies that a user is a member of the group they are trying to access. The global `users` collection has a `role` field ('admin' or 'user'). This role is checked for all write operations on sensitive or group-wide collections, ensuring only admins can modify critical data. Regular users have more limited permissions, such as only being able to create their own meals or messages. This provides a clear and secure role-based access control system."
   }
 }
-
-    
