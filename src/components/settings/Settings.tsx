@@ -318,7 +318,7 @@ function AccountSettings({ user, userData, groupData, groupId }: { user: any, us
                          <p className="font-medium text-destructive">{t('settings.account_settings.actions.delete_account')}</p>
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
-                                <Button variant="destructive"><Trash2 className="mr-2 h-4 w-4"/> Delete Account</Button>
+                                <Button variant="destructive" className="text-white"><Trash2 className="mr-2 h-4 w-4"/> Delete Account</Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                                 <AlertDialogHeader>

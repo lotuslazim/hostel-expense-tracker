@@ -1,5 +1,3 @@
-
-
 {
   "entities": {
     "Group": {
@@ -11,7 +9,7 @@
         "id": { "type": "string", "description": "Unique identifier for the group entity." },
         "groupName": { "type": "string", "description": "The name of the group or flat." },
         "invitationCode": { "type": "string", "description": "Unique code used for users to join the group." },
-        "adminId": { "type": "string","- "description": "Reference to User who is the administrator of the group." },
+        "adminId": { "type": "string", "description": "Reference to User who is the administrator of the group." },
         "settings": {
           "type": "object",
           "description": "Customizable settings for the group.",
@@ -255,8 +253,3 @@
     "reasoning": "This structure enforces security by scoping all group-related data within a group's subcollections. The rule `exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))` is used consistently to verify that the requesting user is a member of the group they are trying to access. Adding `request.auth.token.email_verified == true` to the rules ensures that only users who have verified their email can access or modify data, enhancing security. This is a secure and scalable pattern that prevents unauthorized data access. Write access is also based on group membership, with more restrictive admin-only writes on the core group document. Firestore's default-deny policy ensures any path not explicitly granted access is automatically blocked."
   }
 }
-
-
-
-    
-    
