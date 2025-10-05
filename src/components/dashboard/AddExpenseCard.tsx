@@ -140,9 +140,9 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     const isFood = categoryValue === 'Food & Groceries';
     setShowInventoryFields(isFood);
 
-    if (!isFood && prevCategoryRef.current === 'Food & Groceries') {
-      form.setValue('purchasedItems', []);
-      form.clearErrors('amount');
+    // This logic clears the purchasedItems array only when category changes FROM Food & Groceries
+    if (prevCategoryRef.current === 'Food & Groceries' && !isFood) {
+        form.setValue('purchasedItems', []);
     }
 
     let finalExpenseItem: string | undefined;
@@ -154,13 +154,17 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
         finalExpenseItem = 'Gas Bill';
     }
     
-    const currentExpenseItem = form.getValues('expenseItem');
-    if(finalExpenseItem !== undefined && finalExpenseItem !== currentExpenseItem) {
-      form.setValue('expenseItem', finalExpenseItem);
+    // Only update the expenseItem if the category is not 'Other'
+    if (categoryValue !== 'Other') {
+        const currentExpenseItem = form.getValues('expenseItem');
+        if(finalExpenseItem !== undefined && finalExpenseItem !== currentExpenseItem) {
+          form.setValue('expenseItem', finalExpenseItem);
+        }
     }
     
     prevCategoryRef.current = categoryValue;
   }, [categoryValue, form, purchasedItemsValue]);
+
   
   useEffect(() => {
     if (!isCameraDialogOpen) {
@@ -572,5 +576,3 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     </Card>
   );
 }
-
-    

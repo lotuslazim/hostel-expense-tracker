@@ -177,7 +177,7 @@ function AdminProfilePageContent() {
         }
     };
     
-    const isLoading = isUserLoading || isUserDataLoading || isGroupDataLoading || areMembersLoading;
+    const isLoading = isUserLoading || isUserDataLoading || (!!groupId && (isGroupDataLoading || areMembersLoading));
     
     if (isLoading) {
         return <AdminProfilePageSkeleton />;
@@ -279,5 +279,3 @@ export default function AdminProfilePage() {
     </div>
   );
 }
-
-    
