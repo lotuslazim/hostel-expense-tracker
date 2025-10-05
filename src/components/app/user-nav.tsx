@@ -20,7 +20,7 @@ import { useAuth, useUser, useDoc, useFirebase } from "@/firebase";
 import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "../ui/skeleton";
-import { LogOut, User, Shield, Settings } from "lucide-react";
+import { LogOut, User, Shield, Settings, UserCog } from "lucide-react";
 import { useMemo } from "react";
 import { doc } from "firebase/firestore";
 
@@ -48,12 +48,12 @@ export function UserNav() {
 
   const isLoading = isUserLoading || isCurrentUserDataLoading;
 
-  // 🔹 Important: while loading, render consistent placeholder
   if (isLoading || !user) {
     return <Skeleton className="h-9 w-9 rounded-full" />;
   }
+  
+  const isUserAdmin = currentUserData?.isAdmin ?? false;
 
-  // 🔹 Safe values after hydration
   const userName =
     currentUserData?.displayName ||
     user?.displayName ||
@@ -93,6 +93,13 @@ export function UserNav() {
               <User className="mr-2 h-4 w-4" /> Profile
             </Link>
           </DropdownMenuItem>
+          {isUserAdmin && (
+            <DropdownMenuItem asChild>
+                <Link href="/admin-profile">
+                <UserCog className="mr-2 h-4 w-4" /> Admin Profile
+                </Link>
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem asChild>
             <Link href="/admin">
               <Shield className="mr-2 h-4 w-4" /> Admin
