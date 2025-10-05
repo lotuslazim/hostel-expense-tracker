@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -16,11 +17,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
-import { useAuth, useUser } from "@/firebase";
+import { useAuth, useUser, useDoc, useFirebase } from "@/firebase";
 import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { LogOut, User, Shield, Settings } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { doc } from "firebase/firestore";
 
 // Make Skeleton client-only here
 function Skeleton({ className }: { className?: string }) {
@@ -29,7 +31,7 @@ function Skeleton({ className }: { className?: string }) {
 
 export function UserNav() {
   const { user: serverUser, isUserLoading: serverLoading } = useUser();
-  const auth = useAuth();
+  const { auth, firestore } = useFirebase();
   const router = useRouter();
 
   // Client-side state to avoid hydration mismatch
@@ -38,6 +40,13 @@ export function UserNav() {
   useEffect(() => {
     setIsClient(true);
   }, []);
+  
+  const userDocRef = useMemo(() => {
+    if (!serverUser) return null;
+    return doc(firestore, 'users', serverUser.uid);
+  }, [serverUser, firestore]);
+
+  const { data: userData, isLoading: isUserDataLoading } = useDoc(userDocRef);
 
   const handleLogout = async () => {
     try {
@@ -48,7 +57,7 @@ export function UserNav() {
     }
   };
 
-  if (!isClient || serverLoading) {
+  if (!isClient || serverLoading || (serverUser && isUserDataLoading)) {
     // Render Skeleton only on client to prevent SSR mismatch
     return <Skeleton className="h-9 w-9 rounded-full" />;
   }
@@ -56,11 +65,13 @@ export function UserNav() {
   if (!serverUser) {
     return null; // or show a login button
   }
+  
+  const isUserAdmin = userData?.isAdmin ?? false;
 
-  const userName = serverUser.displayName || serverUser.email?.split("@")[0] || "User";
+  const userName = userData?.displayName || serverUser.displayName || serverUser.email?.split("@")[0] || "User";
   const userEmail = serverUser.email || "user@example.com";
   const avatarFallback = userName.charAt(0).toUpperCase();
-  const photoURL = serverUser.photoURL;
+  const photoURL = userData?.photoURL || serverUser.photoURL;
 
   return (
     <DropdownMenu>
@@ -85,11 +96,13 @@ export function UserNav() {
               <User className="mr-2 h-4 w-4" />Profile
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/admin">
-              <Shield className="mr-2 h-4 w-4" />Admin
-            </Link>
-          </DropdownMenuItem>
+          {isUserAdmin && (
+            <DropdownMenuItem asChild>
+              <Link href="/admin">
+                <Shield className="mr-2 h-4 w-4" />Admin
+              </Link>
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem asChild>
             <Link href="/settings">
               <Settings className="mr-2 h-4 w-4" />Settings
@@ -105,3 +118,5 @@ export function UserNav() {
     </DropdownMenu>
   );
 }
+
+    

@@ -210,14 +210,13 @@ function NewUserAdminPanel({ user }: { user: any }) {
   );
 }
 
-function AdminPanel() {
+function AdminPanel({isUserAdmin}: {isUserAdmin: boolean}) {
     const { firestore } = useFirebase();
     
-    // Note: This is a simplified query. For a large app, querying all users/groups/expenses is inefficient.
-    // This should be replaced with more targeted queries or summary collections in a production scenario.
-    const usersQuery = useMemo(() => collection(firestore, 'users'), [firestore]);
-    const groupsQuery = useMemo(() => collection(firestore, 'groups'), [firestore]);
-    const expensesQuery = useMemo(() => collection(firestore, 'expenses'), [firestore]);
+    // Admins can query all collections. Non-admins cannot.
+    const usersQuery = useMemo(() => isUserAdmin ? collection(firestore, 'users') : null, [firestore, isUserAdmin]);
+    const groupsQuery = useMemo(() => isUserAdmin ? collection(firestore, 'groups') : null, [firestore, isUserAdmin]);
+    const expensesQuery = useMemo(() => isUserAdmin ? collection(firestore, 'expenses') : null, [firestore, isUserAdmin]);
 
     const { data: users, isLoading: usersLoading } = useCollection(usersQuery);
     const { data: groups, isLoading: groupsLoading } = useCollection(groupsQuery);
@@ -382,7 +381,7 @@ const AdminPageContent = () => {
     const isUserAdmin = userData?.isAdmin ?? false;
 
     if (isUserAdmin) {
-        return <AdminPanel />;
+        return <AdminPanel isUserAdmin={isUserAdmin} />;
     } else if (!hasGroup) {
         return <NewUserAdminPanel user={user} />;
     } else {

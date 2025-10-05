@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "Group": {
@@ -165,8 +166,12 @@
         "path": "/users/{userId}",
         "definition": {
           "entityName": "User", "schema": { "$ref": "#/entities/User" },
-          "rules": { "read, write": "request.auth.uid == userId" },
-          "description": "Stores user profile information. Users can only access their own document."
+          "rules": { 
+              "read": "request.auth.uid == userId || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true",
+              "write": "request.auth.uid == userId || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true",
+              "list": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true"
+          },
+          "description": "Stores user profile information. Admins can list all users. Users can only read/write their own document unless they are an admin."
         }
       },
       {
@@ -175,9 +180,10 @@
           "entityName": "Group", "schema": { "$ref": "#/entities/Group" },
           "rules": {
             "read": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
-            "write": "request.auth.token.email_verified == true && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true"
+            "write": "request.auth.token.email_verified == true && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true",
+            "list": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true"
           },
-          "description": "Stores group information. Readable by members, writable only by the group admin. Email verification required."
+          "description": "Stores group information. Readable by members, writable and listable only by admins."
         }
       },
       {
@@ -210,9 +216,10 @@
           "rules": {
             "list, get": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
             "create": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && request.resource.data.userId == request.auth.uid",
-            "update, delete": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && resource.data.userId == request.auth.uid"
+            "update, delete": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && resource.data.userId == request.auth.uid",
+            "list_all": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true"
           },
-          "description": "Stores all expense entries. Accessible only by members of the group. Users can only create/edit their own expenses. Email verification required."
+          "description": "Stores all expense entries. Accessible only by members of the group. Users can only create/edit their own expenses. Admins can list all expenses across all groups."
         }
       },
       {
@@ -250,6 +257,8 @@
         }
       }
     ],
-    "reasoning": "This structure enforces security by scoping all group-related data within a group's subcollections. The rule `exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))` is used consistently to verify that the requesting user is a member of the group they are trying to access. Adding `request.auth.token.email_verified == true` to the rules ensures that only users who have verified their email can access or modify data, enhancing security. This is a secure and scalable pattern that prevents unauthorized data access. Write access is also based on group membership, with more restrictive admin-only writes on the core group document. Firestore's default-deny policy ensures any path not explicitly granted access is automatically blocked."
+    "reasoning": "This structure enforces security by scoping all group-related data within a group's subcollections. The rule `exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))` is used consistently to verify that the requesting user is a member of the group they are trying to access. The `isAdmin` flag on a user's document grants them broader read access to list all users and groups. Adding `request.auth.token.email_verified == true` to the rules ensures that only users who have verified their email can access or modify data, enhancing security. This is a secure and scalable pattern that prevents unauthorized data access. Firestore's default-deny policy ensures any path not explicitly granted access is automatically blocked."
   }
 }
+
+    
