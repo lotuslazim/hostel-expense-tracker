@@ -150,7 +150,7 @@ function NewUserAdminPanel({ user }: { user: any }) {
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
       <div className="text-center mb-8">
         <Group className="h-12 w-12 mx-auto text-primary mb-4" />
-        <h1 className="text-3xl font-bold font-headline">Admin Panel</h1>
+        <h1 className="text-3xl font-bold font-headline">Get Started with Your Group</h1>
         <p className="text-muted-foreground mt-2 max-w-md">
           A group allows you and your roommates to track meals and manage shared expenses together.
         </p>
@@ -209,20 +209,110 @@ function NewUserAdminPanel({ user }: { user: any }) {
   );
 }
 
-function AdminPanel({isUserAdmin}: {isUserAdmin: boolean}) {
-    if (!isUserAdmin) {
+function GroupDetailsPanel({ groupId }: { groupId: string }) {
+    const { firestore } = useFirebase();
+    const { toast } = useToast();
+
+    const groupRef = useMemo(() => doc(firestore, "groups", groupId), [firestore, groupId]);
+    const { data: groupData, isLoading: isGroupDataLoading } = useDoc(groupRef);
+
+    const membersQuery = useMemo(() => query(collection(firestore, `groups/${groupId}/members`)), [firestore, groupId]);
+    const { data: members, isLoading: areMembersLoading } = useCollection(membersQuery);
+
+    const handleCopyInviteCode = () => {
+        if (groupData?.invitationCode) {
+            navigator.clipboard.writeText(groupData.invitationCode);
+            toast({ title: "Copied!", description: "Invite code copied to clipboard." });
+        }
+    };
+
+    if (isGroupDataLoading || areMembersLoading) {
+        return <AdminPageSkeleton />;
+    }
+
+    if (!groupData) {
         return (
-             <div className="text-center py-16">
-                <h1 className="text-2xl font-bold">Access Denied</h1>
-                <p className="text-muted-foreground">You do not have administrative privileges.</p>
+            <div className="text-center py-16">
+                <h1 className="text-2xl font-bold">Group Not Found</h1>
+                <p className="text-muted-foreground">The group details could not be loaded.</p>
             </div>
-        )
+        );
     }
 
     return (
         <div className="space-y-8">
-            <h1 className="text-3xl font-bold font-headline tracking-tight">Admin Dashboard</h1>
-            <p>Admin dashboard content has been removed as requested.</p>
+            <div>
+                <h1 className="text-3xl font-bold font-headline tracking-tight">Group Details</h1>
+                <p className="text-muted-foreground">Information about your current group.</p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-lg">Group Name</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-2xl font-semibold">{groupData.groupName}</p>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-lg">Members</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                         <p className="text-2xl font-semibold">{members?.length || 0}</p>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-lg">Invite Code</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex items-center gap-2">
+                        <Input value={groupData.invitationCode} readOnly className="font-mono"/>
+                        <Button variant="outline" size="icon" onClick={handleCopyInviteCode}>
+                            <Copy className="h-4 w-4"/>
+                        </Button>
+                    </CardContent>
+                </Card>
+            </div>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Members</CardTitle>
+                </CardHeader>
+                <CardContent>
+                     <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Name</TableHead>
+                                <TableHead>Email</TableHead>
+                                <TableHead>Role</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {members?.map(member => (
+                                <TableRow key={member.id}>
+                                    <TableCell>
+                                        <div className="flex items-center gap-3">
+                                            <Avatar className="h-8 w-8">
+                                                <AvatarImage src={member.photoURL} />
+                                                <AvatarFallback>{member.displayName?.charAt(0)}</AvatarFallback>
+                                            </Avatar>
+                                            <span>{member.displayName}</span>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>{member.email}</TableCell>
+                                    <TableCell>
+                                        <Badge variant={member.role === 'admin' ? 'default' : 'secondary'}>
+                                            {member.role === 'admin' ? 'Admin' : 'Member'}
+                                        </Badge>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
         </div>
     );
 }
@@ -254,21 +344,12 @@ const AdminPageContent = () => {
         )
     }
     
-    const hasGroup = !!userData?.groupId;
-    const isUserAdmin = userData?.isAdmin ?? false;
+    const groupId = userData?.groupId;
 
-    if (isUserAdmin) {
-        return <AdminPanel isUserAdmin={isUserAdmin} />;
-    } else if (!hasGroup) {
-        return <NewUserAdminPanel user={user} />;
+    if (groupId) {
+        return <GroupDetailsPanel groupId={groupId} />;
     } else {
-        // A regular member is in a group but not an admin.
-        return (
-            <div className="text-center py-16">
-                <h1 className="text-2xl font-bold">Access Denied</h1>
-                <p className="text-muted-foreground">You do not have administrative privileges.</p>
-            </div>
-        );
+        return <NewUserAdminPanel user={user} />;
     }
 }
 
@@ -283,5 +364,3 @@ export default function AdminPage() {
         </div>
     )
 }
-
-    
