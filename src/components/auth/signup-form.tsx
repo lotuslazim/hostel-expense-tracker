@@ -71,20 +71,30 @@ export function SignupForm() {
       await updateProfile(user, { displayName: values.name });
       await createUserDocument(user, values.name);
 
-      // Send verification email
+      // --- FIX: Configure and send verification email correctly ---
+      const actionCodeSettings = {
+        // URL you want to redirect back to. The domain (www.example.com)
+        // must be whitelisted in the Firebase Console.
+        url: `${window.location.origin}/login`,
+        // This must be true.
+        handleCodeInApp: true,
+      };
+
       try {
-        await sendEmailVerification(user, {
-          url: window.location.origin + "/login",
-          handleCodeInApp: false
-        });
+        await sendEmailVerification(user, actionCodeSettings);
         console.log("✅ Verification email sent to:", user.email);
+        toast({
+          title: "Account Created!",
+          description: "Please check your email to verify your account before logging in.",
+        });
       } catch (emailError: any) {
         console.error("❌ Email verification failed:", emailError.code, emailError.message);
+        toast({
+          variant: "destructive",
+          title: "Account Created, But...",
+          description: "Your account was created, but we couldn't send a verification email. Please try logging in and resending it.",
+        });
       }
-      toast({
-        title: "Account Created!",
-        description: "Please check your email to verify your account before logging in.",
-      });
 
       form.reset();
 
