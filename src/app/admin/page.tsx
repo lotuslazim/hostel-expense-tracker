@@ -8,12 +8,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Users, DollarSign, Home, BarChart, Building, PlusCircle, LogIn, Loader2 } from "lucide-react";
+import { Users, DollarSign, Home, BarChart, Building, PlusCircle, LogIn, Loader2, Group } from "lucide-react";
 import { Bar, BarChart as RechartsBarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 function AdminPageSkeleton() {
   return (
@@ -146,47 +147,64 @@ function NewUserAdminPanel({ user }: { user: any }) {
 
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
-        <div className="text-center">
-            <h1 className="text-3xl font-bold font-headline">Get Started with Your Group</h1>
-            <p className="text-muted-foreground mt-2">Create a new hostel group or join one with an invite code.</p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><PlusCircle /> Create a New Group</CardTitle>
-                    <CardDescription>Start a new hostel group as an admin.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <Input 
-                        placeholder="Enter Hostel or Group Name" 
-                        value={groupName}
-                        onChange={(e) => setGroupName(e.target.value)}
-                    />
-                    <Button onClick={handleCreateGroup} className="w-full" disabled={isCreating}>
-                        {isCreating && <Loader2 className="mr-2 animate-spin" />}
-                        Create Group
-                    </Button>
-                </CardContent>
-            </Card>
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><LogIn /> Join an Existing Group</CardTitle>
-                    <CardDescription>Use an invite code to join a group.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <Input 
-                        placeholder="Enter Invite Code" 
-                        value={inviteCode}
-                        onChange={(e) => setInviteCode(e.target.value)}
-                    />
-                    <Button onClick={handleJoinGroup} variant="secondary" className="w-full" disabled={isJoining}>
-                        {isJoining && <Loader2 className="mr-2 animate-spin" />}
-                        Join Group
-                    </Button>
-                </CardContent>
-            </Card>
-        </div>
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
+      <div className="text-center mb-8">
+        <Group className="h-12 w-12 mx-auto text-primary mb-4" />
+        <h1 className="text-3xl font-bold font-headline">Get Started with Your Group</h1>
+        <p className="text-muted-foreground mt-2 max-w-md">
+          A group allows you and your roommates to track meals and manage shared expenses together.
+        </p>
+      </div>
+
+      <Tabs defaultValue="create" className="w-full max-w-md">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="create">
+            <PlusCircle className="mr-2 h-4 w-4" /> Create Group
+          </TabsTrigger>
+          <TabsTrigger value="join">
+            <LogIn className="mr-2 h-4 w-4" /> Join Group
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="create">
+          <Card>
+            <CardHeader>
+              <CardTitle>Create a New Group</CardTitle>
+              <CardDescription>Start a new hostel group and invite your roommates.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Input
+                placeholder="Enter Hostel or Group Name"
+                value={groupName}
+                onChange={(e) => setGroupName(e.target.value)}
+              />
+              <Button onClick={handleCreateGroup} className="w-full" disabled={isCreating}>
+                {isCreating && <Loader2 className="mr-2 animate-spin" />}
+                Create & Become Admin
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="join">
+          <Card>
+            <CardHeader>
+              <CardTitle>Join an Existing Group</CardTitle>
+              <CardDescription>Use an invite code from a roommate to join their group.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Input
+                placeholder="Enter Invite Code"
+                value={inviteCode}
+                onChange={(e) => setInviteCode(e.target.value)}
+                className="font-mono tracking-widest text-center"
+              />
+              <Button onClick={handleJoinGroup} variant="secondary" className="w-full" disabled={isJoining}>
+                {isJoining && <Loader2 className="mr-2 animate-spin" />}
+                Join Group
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
