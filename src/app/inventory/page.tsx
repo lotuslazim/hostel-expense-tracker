@@ -1,20 +1,28 @@
 
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback, useEffect } from "react";
 import { InventoryTable } from "@/components/inventory/InventoryTable";
 import { AppHeader } from "@/components/app/header";
-import { useUser, useDoc, useFirebase, useCollection } from "@/firebase";
-import { doc, collection, query, where, Timestamp } from "firebase/firestore";
+import { useUser, useDoc, useFirebase } from "@/firebase";
+import { doc, collection, query, where, Timestamp, getDocs, orderBy, limit, startAfter, QueryDocumentSnapshot, DocumentData } from "firebase/firestore";
 import type { Purchase } from "@/lib/types";
 import { addMonths, subMonths, startOfMonth, endOfMonth } from "date-fns";
 import { MonthSwitcher } from "@/components/report/month-switcher";
 import { WelcomeCard } from "@/components/app/welcome-card";
 
+const PURCHASE_PAGE_SIZE = 20;
+
 export default function InventoryPage() {
   const { firestore } = useFirebase();
   const { user: currentUser, isUserLoading } = useUser();
   const [currentMonth, setCurrentMonth] = useState(startOfMonth(new Date()));
+
+  const [purchases, setPurchases] = useState<Purchase[]>([]);
+  const [lastVisiblePurchase, setLastVisiblePurchase] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
+  const [hasMorePurchases, setHasMorePurchases] = useState(true);
+  const [arePurchasesLoading, setArePurchasesLoading] = useState(true);
+  const [isMorePurchasesLoading, setIsMorePurchasesLoading] = useState(false);
 
   const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
   const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
@@ -28,19 +36,68 @@ export default function InventoryPage() {
     };
   }, [currentMonth]);
   
-  const purchasesQuery = useMemo(() => {
+  const buildPurchasesQuery = useCallback((lastVisible: QueryDocumentSnapshot<DocumentData> | null) => {
     if (!groupId) return null;
-    return query(
+    let q = query(
       collection(firestore, `groups/${groupId}/purchases`),
       where("date", ">=", monthDateRange.start),
-      where("date", "<=", monthDateRange.end)
+      where("date", "<=", monthDateRange.end),
+      orderBy("date", "desc"),
+      limit(PURCHASE_PAGE_SIZE)
     );
+     if (lastVisible) {
+      q = query(q, startAfter(lastVisible));
+    }
+    return q;
   }, [firestore, groupId, monthDateRange]);
 
-  const { data: purchases, isLoading: arePurchasesLoading } = useCollection<Purchase>(purchasesQuery);
+  const fetchPurchases = useCallback(async (lastVisible: QueryDocumentSnapshot<DocumentData> | null) => {
+    const isInitialFetch = !lastVisible;
+    if (isInitialFetch) {
+      setArePurchasesLoading(true);
+    } else {
+      setIsMorePurchasesLoading(true);
+    }
+    
+    const q = buildPurchasesQuery(lastVisible);
+    if (!q) {
+      setArePurchasesLoading(false);
+      setIsMorePurchasesLoading(false);
+      return;
+    }
+
+    try {
+      const documentSnapshots = await getDocs(q);
+      const newPurchases = documentSnapshots.docs.map(doc => ({ id: doc.id, ...doc.data() } as Purchase));
+      const lastVisibleDoc = documentSnapshots.docs[documentSnapshots.docs.length-1];
+      
+      setPurchases(prev => isInitialFetch ? newPurchases : [...prev, ...newPurchases]);
+      setLastVisiblePurchase(lastVisibleDoc || null);
+      setHasMorePurchases(newPurchases.length === PURCHASE_PAGE_SIZE);
+
+    } catch (error) {
+        console.error("Error fetching purchases: ", error);
+    } finally {
+        setArePurchasesLoading(false);
+        setIsMorePurchasesLoading(false);
+    }
+  }, [buildPurchasesQuery]);
+
+  useEffect(() => {
+    setPurchases([]);
+    setLastVisiblePurchase(null);
+    setHasMorePurchases(true);
+    fetchPurchases(null);
+  }, [fetchPurchases, currentMonth]);
   
   const handleMonthChange = (direction: "next" | "prev") => {
     setCurrentMonth(prev => direction === 'next' ? addMonths(prev, 1) : subMonths(prev, 1));
+  }
+
+  const handleLoadMorePurchases = () => {
+    if (lastVisiblePurchase) {
+        fetchPurchases(lastVisiblePurchase);
+    }
   }
   
   const isLoading = isUserLoading || isCurrentUserDataLoading;
@@ -50,7 +107,7 @@ export default function InventoryPage() {
        <div className="flex flex-col min-h-screen">
           <AppHeader />
           <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <InventoryTable purchases={[]} isLoading={true} />
+            <InventoryTable purchases={[]} isLoading={true} onLoadMore={()=>{}} hasMore={false} isMoreLoading={false} />
           </main>
         </div>
     )
@@ -80,7 +137,13 @@ export default function InventoryPage() {
                 </div>
                 <MonthSwitcher currentDate={currentMonth} onMonthChange={handleMonthChange} />
             </div>
-            <InventoryTable purchases={purchases} isLoading={arePurchasesLoading} />
+            <InventoryTable 
+              purchases={purchases} 
+              isLoading={arePurchasesLoading}
+              onLoadMore={handleLoadMorePurchases}
+              hasMore={hasMorePurchases}
+              isMoreLoading={isMorePurchasesLoading}
+            />
         </div>
       </main>
     </div>

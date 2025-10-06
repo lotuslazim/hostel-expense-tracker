@@ -16,7 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Camera, User, Mail, Home, Users, Wallet, ChevronDown, Loader2, LogOut, Trash2, Copy } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { format } from "date-fns";
+import { format, startOfMonth, endOfMonth } from "date-fns";
 import type { Expense } from "@/lib/types";
 import imageCompression from "browser-image-compression";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -196,9 +196,16 @@ export function Profile() {
   const membersQuery = useMemo(() => (groupId ? collection(firestore, `groups/${groupId}/members`) : null), [groupId, firestore]);
   const { data: members, isLoading: areMembersLoading } = useCollection(membersQuery);
   
+  // Fetch only the last month of expenses for the profile page
   const expensesQuery = useMemo(() => {
     if (!user || !groupId) return null;
-    return query(collection(firestore, `groups/${groupId}/expenses`), where("userId", "==", user.uid), orderBy("date", "desc"));
+    const lastMonth = startOfMonth(new Date());
+    return query(
+        collection(firestore, `groups/${groupId}/expenses`), 
+        where("userId", "==", user.uid),
+        where("date", ">=", Timestamp.fromDate(lastMonth)),
+        orderBy("date", "desc")
+    );
   }, [user, firestore, groupId]);
   const { data: expenses, isLoading: areExpensesLoading } = useCollection<Expense>(expensesQuery);
 
@@ -389,7 +396,7 @@ export function Profile() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2"><Wallet/> Expense History</CardTitle>
-            <CardDescription>Your personal expense contributions.</CardDescription>
+            <CardDescription>Your personal expense contributions for the current month.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
@@ -417,7 +424,7 @@ export function Profile() {
                         </CollapsibleContent>
                     </Collapsible>
                 )) : (
-                    <p className="text-center text-muted-foreground py-6">No expenses logged yet.</p>
+                    <p className="text-center text-muted-foreground py-6">No expenses logged in the current month.</p>
                 )}
             </div>
           </CardContent>

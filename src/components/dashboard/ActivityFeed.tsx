@@ -1,25 +1,29 @@
 
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState }from "react";
 import { format } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { Expense } from "@/lib/types";
 import { MonthSwitcher } from "../report/month-switcher";
 import { Skeleton } from "../ui/skeleton";
+import { Button } from "../ui/button";
 
 interface ActivityFeedProps {
   expenses: Expense[];
   isLoading: boolean;
   currentMonth: Date;
   onMonthChange: (direction: "next" | "prev") => void;
+  onLoadMore: () => void;
+  hasMore: boolean;
+  isMoreLoading: boolean;
 }
 
-export function ActivityFeed({ expenses, isLoading, currentMonth, onMonthChange }: ActivityFeedProps) {
+export function ActivityFeed({ expenses, isLoading, currentMonth, onMonthChange, onLoadMore, hasMore, isMoreLoading }: ActivityFeedProps) {
 
   const monthlyExpenses = useMemo(() => {
     if (!expenses) return [];
@@ -44,7 +48,7 @@ export function ActivityFeed({ expenses, isLoading, currentMonth, onMonthChange 
         </div>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-[calc(85vh-100px)]">
+        <ScrollArea className="h-[calc(85vh-150px)]">
             {isLoading ? (
                  <div className="space-y-4">
                     {[...Array(10)].map((_, i) => (
@@ -83,6 +87,14 @@ export function ActivityFeed({ expenses, isLoading, currentMonth, onMonthChange 
                 </div>
             )}
         </ScrollArea>
+        {hasMore && (
+            <div className="pt-4 text-center">
+                <Button onClick={onLoadMore} disabled={isMoreLoading}>
+                    {isMoreLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Load More
+                </Button>
+            </div>
+        )}
       </CardContent>
     </Card>
   );
