@@ -127,6 +127,9 @@ export function SignupForm() {
         router.push('/dashboard');
       })
       .catch((error) => {
+        if (error.code === 'auth/popup-closed-by-user') {
+          return;
+        }
         console.error("Error during Google sign-in:", error);
         toast({ 
           variant: "destructive", 

@@ -64,7 +64,7 @@ export function LoginForm() {
   };
 
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>>) {
     setIsLoading(true);
     setNeedsVerification(false);
     try {
@@ -99,6 +99,9 @@ export function LoginForm() {
         router.push('/dashboard');
       })
       .catch((error) => {
+        if (error.code === 'auth/popup-closed-by-user') {
+          return;
+        }
         console.error("Error during Google sign-in:", error);
         toast({ 
           variant: "destructive", 
