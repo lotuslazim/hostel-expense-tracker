@@ -9,18 +9,15 @@ import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
 import { doc, collection, query, where, Timestamp } from "firebase/firestore";
 import { useMemo, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { format, startOfMonth, endOfMonth } from 'date-fns';
+import { format, startOfMonth, endOfMonth, addMonths, subMonths } from 'date-fns';
 import type { MealLog, Expense } from "@/lib/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { MonthSwitcher } from "./month-switcher";
 
-
-interface MonthlySummaryProps {
-  month: Date;
-}
 
 // Type definitions for processed data
 interface ProcessedMember {
@@ -163,9 +160,11 @@ function CollapsibleUtilityItem({
   );
 }
 
-export function MonthlySummary({ month }: MonthlySummaryProps) {
+export function MonthlySummary() {
   const { firestore } = useFirebase();
   const { user: currentUser, isUserLoading: isCurrentUserLoading } = useUser();
+  const [currentMonth, setCurrentMonth] = useState(startOfMonth(new Date()));
+
 
   const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
   const { data: currentUserData, isLoading: isCurrentUserDataLoading, error: currentUserDataError } = useDoc(currentUserRef);
@@ -174,10 +173,10 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
 
   const monthDateRange = useMemo(() => {
     return {
-      start: Timestamp.fromDate(startOfMonth(month)),
-      end: Timestamp.fromDate(endOfMonth(month)),
+      start: Timestamp.fromDate(startOfMonth(currentMonth)),
+      end: Timestamp.fromDate(endOfMonth(currentMonth)),
     };
-  }, [month]);
+  }, [currentMonth]);
 
   const membersQuery = useMemo(() =>
     (groupId ? collection(firestore, `groups/${groupId}/members`) : null),
@@ -209,6 +208,10 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
   const isAnyLoading = isCurrentUserLoading || isCurrentUserDataLoading || (!!groupId && (areMembersLoading || areMealsLoading || areExpensesLoading));
   const hasAnyErrors = currentUserDataError || membersError || mealsError || expensesError;
   
+  const handleMonthChange = (direction: "next" | "prev") => {
+    setCurrentMonth(prev => direction === 'next' ? addMonths(prev, 1) : subMonths(prev, 1));
+  }
+
   const processedData = useMemo((): ProcessedData | null => {
     if (!membersData || !mealsData || !expensesData) {
       return null;
@@ -312,6 +315,12 @@ export function MonthlySummary({ month }: MonthlySummaryProps) {
 
   return (
     <div className="space-y-6">
+        <div className="flex justify-end">
+            <MonthSwitcher 
+                currentDate={currentMonth}
+                onMonthChange={handleMonthChange}
+            />
+        </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="flex flex-col">
             <CardHeader>
