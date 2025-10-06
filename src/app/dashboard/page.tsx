@@ -19,13 +19,18 @@ const EXPENSE_PAGE_SIZE = 15;
 function DashboardSkeleton() {
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div>
+          <Skeleton className="h-9 w-48" />
+          <Skeleton className="h-4 w-72 mt-2" />
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1 space-y-6">
-          <Skeleton className="h-40 w-full" />
-          <Skeleton className="h-96 w-full" />
+          <Skeleton className="h-32 w-full rounded-lg" />
+          <Skeleton className="h-80 w-full rounded-lg" />
+          <Skeleton className="h-[28rem] w-full rounded-lg" />
         </div>
-        <div className="lg:col-span-2 space-y-6">
-           <Skeleton className="h-[85vh] w-full" />
+        <div className="lg:col-span-2">
+           <Skeleton className="h-[calc(100vh-10rem)] w-full rounded-lg" />
         </div>
       </div>
     </div>

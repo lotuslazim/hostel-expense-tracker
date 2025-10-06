@@ -24,18 +24,64 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 function ProfileSkeleton() {
   return (
     <div className="max-w-4xl mx-auto space-y-8">
-      <div className="flex flex-col sm:flex-row items-center gap-6">
-        <Skeleton className="h-24 w-24 rounded-full" />
-        <div className="space-y-2 text-center sm:text-left">
-          <Skeleton className="h-7 w-40" />
-          <Skeleton className="h-5 w-52" />
-        </div>
+      <div>
+        <Skeleton className="h-9 w-48" />
+        <Skeleton className="h-4 w-72 mt-2" />
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Skeleton className="h-32" />
-        <Skeleton className="h-32" />
+
+       <Card>
+        <CardHeader>
+           <Skeleton className="h-7 w-1/3" />
+        </CardHeader>
+        <CardContent className="space-y-6">
+            <div className="flex flex-col sm:flex-row items-center gap-6">
+              <Skeleton className="h-24 w-24 rounded-full" />
+              <div className="flex-grow w-full space-y-4">
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full" />
+              </div>
+            </div>
+        </CardContent>
+      </Card>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <Card>
+          <CardHeader><Skeleton className="h-7 w-1/2" /></CardHeader>
+          <CardContent className="space-y-4">
+            <Skeleton className="h-6 w-3/4" />
+            <Skeleton className="h-6 w-1/2" />
+            <Separator />
+            <Skeleton className="h-6 w-1/4 mb-2" />
+            <div className="space-y-3">
+                <div className="flex items-center gap-3"><Skeleton className="h-8 w-8 rounded-full" /><Skeleton className="h-5 w-28" /></div>
+                <div className="flex items-center gap-3"><Skeleton className="h-8 w-8 rounded-full" /><Skeleton className="h-5 w-32" /></div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-7 w-3/4" />
+            <Skeleton className="h-4 w-full mt-2" />
+          </CardHeader>
+          <CardContent>
+             <div className="space-y-2">
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+             </div>
+          </CardContent>
+        </Card>
       </div>
-      <Skeleton className="h-64" />
+
+      <Card>
+          <CardHeader><Skeleton className="h-7 w-1/4" /></CardHeader>
+          <CardContent className="space-y-4">
+            <Skeleton className="h-10 w-full" />
+            <Separator />
+            <Skeleton className="h-10 w-full" />
+            <Separator />
+            <Skeleton className="h-10 w-full" />
+          </CardContent>
+      </Card>
     </div>
   );
 }

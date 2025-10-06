@@ -35,18 +35,18 @@ function InventorySkeleton() {
     return (
         <Card>
             <CardHeader>
-                <Skeleton className="h-6 w-1/2" />
+                <Skeleton className="h-7 w-1/2" />
                 <Skeleton className="h-4 w-3/4 mt-2" />
             </CardHeader>
             <CardContent>
-                <div className="space-y-4">
+                <div className="border rounded-lg">
                     {[...Array(5)].map((_, i) => (
-                        <div key={i} className="flex items-center space-x-4 p-4">
-                            <div className="space-y-2 flex-grow">
-                                <Skeleton className="h-4 w-3/4" />
+                        <div key={i} className="flex items-center p-4 border-b last:border-b-0">
+                            <div className="flex-1 space-y-2">
+                                <Skeleton className="h-6 w-1/4" />
                                 <Skeleton className="h-4 w-1/2" />
                             </div>
-                            <Skeleton className="h-10 w-24" />
+                            <Skeleton className="h-8 w-8 ml-2" />
                         </div>
                     ))}
                 </div>

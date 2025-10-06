@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
-import { useFirebase, useUser, useDoc } from "@/firebase";
+import { useFirebase, useUser, useDoc, addDocumentNonBlocking } from "@/firebase";
 import { doc, addDoc, collection, serverTimestamp, Timestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Utensils } from "lucide-react";
@@ -81,9 +81,17 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
       return;
     }
 
-    setIsSubmitting(true);
+    // Optimistic UI update
+    toast({
+        title: "Meal Logged!",
+        description: `Your ${values.mealType} has been successfully logged.`,
+    });
+    form.reset({ mealCount: 1, mealType: undefined, itemName: "" });
+
+    // Perform the database operation in the background
     try {
-      await addDoc(collection(firestore, `groups/${groupId}/meals`), {
+      const mealCollectionRef = collection(firestore, `groups/${groupId}/meals`);
+      await addDoc(mealCollectionRef, {
         mealType: values.mealType,
         mealNumber: values.mealCount,
         description: `${values.mealCount} ${values.mealType}(s) logged. ${values.itemName ? `Item: ${values.itemName}` : ''}`,
@@ -94,21 +102,15 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
         itemName: values.itemName || null,
         groupId,
       });
-
-      toast({
-        title: "Meal Logged",
-        description: `Your ${values.mealType} ${values.itemName ? `(${values.itemName})` : ''} has been successfully logged.`,
-      });
-      form.reset({ mealCount: 1, mealType: undefined, itemName: "" });
     } catch (error) {
       console.error("Error logging meal:", error);
+      // Rollback: Inform user of the failure
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Could not log meal. Please try again.",
+        title: "Logging Failed",
+        description: "Could not save your meal. Please try again.",
       });
-    } finally {
-      setIsSubmitting(false);
+      // Optionally, restore form state here if needed
     }
   }
   
@@ -120,7 +122,24 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
                   <CardDescription>Loading group settings...</CardDescription>
               </CardHeader>
               <CardContent>
-                  <Skeleton className="h-48 w-full" />
+                  <div className="space-y-6">
+                    <div className="space-y-3">
+                        <Skeleton className="h-4 w-1/4" />
+                        <div className="flex flex-wrap gap-x-4 gap-y-2">
+                          <Skeleton className="h-5 w-20" />
+                          <Skeleton className="h-5 w-20" />
+                        </div>
+                    </div>
+                     <div className="space-y-2">
+                        <Skeleton className="h-4 w-1/4" />
+                        <Skeleton className="h-10 w-full" />
+                    </div>
+                     <div className="space-y-2">
+                        <Skeleton className="h-4 w-1/3" />
+                        <Skeleton className="h-10 w-full" />
+                    </div>
+                    <Skeleton className="h-10 w-full" />
+                  </div>
               </CardContent>
           </Card>
       );

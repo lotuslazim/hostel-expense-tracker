@@ -21,14 +21,59 @@ import { useToast } from "@/hooks/use-toast";
 function AdminProfilePageSkeleton() {
   return (
     <div className="space-y-8">
-      <Skeleton className="h-9 w-48" />
-      <Skeleton className="h-4 w-72 mt-2" />
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div>
+        <Skeleton className="h-9 w-48" />
+        <Skeleton className="h-4 w-72 mt-2" />
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Skeleton className="h-32 rounded-lg" />
         <Skeleton className="h-32 rounded-lg" />
         <Skeleton className="h-32 rounded-lg" />
       </div>
-      <Skeleton className="h-96 rounded-lg" />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <Card>
+            <CardHeader>
+                <Skeleton className="h-7 w-2/3" />
+                <Skeleton className="h-4 w-1/2 mt-2" />
+            </CardHeader>
+            <CardContent>
+                 <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead><Skeleton className="h-5 w-24"/></TableHead>
+                            <TableHead><Skeleton className="h-5 w-32"/></TableHead>
+                            <TableHead><Skeleton className="h-5 w-16"/></TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {[...Array(3)].map((_, i) => (
+                             <TableRow key={i}>
+                                 <TableCell>
+                                     <div className="flex items-center gap-3">
+                                         <Skeleton className="h-8 w-8 rounded-full" />
+                                         <Skeleton className="h-5 w-28" />
+                                     </div>
+                                 </TableCell>
+                                 <TableCell><Skeleton className="h-5 w-40" /></TableCell>
+                                 <TableCell><Skeleton className="h-6 w-20" /></TableCell>
+                             </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
+         <Card>
+            <CardHeader>
+                <Skeleton className="h-7 w-1/3" />
+                <Skeleton className="h-4 w-3/4 mt-2" />
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+            </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
@@ -142,7 +187,7 @@ function AdminActionsCard({ groupDocRef, groupData }: { groupDocRef: any, groupD
     );
 }
 
-function AdminProfilePageContent() {
+export default function AdminProfilePage() {
     const { user, isUserLoading } = useUser();
     const { firestore } = useFirebase();
     const { toast } = useToast();
@@ -179,117 +224,102 @@ function AdminProfilePageContent() {
     
     const isLoading = isUserLoading || isUserDataLoading || (!!groupId && (isGroupDataLoading || areMembersLoading));
     
-    if (isLoading) {
-        return <AdminProfilePageSkeleton />;
-    }
-
-    if (!userData?.isAdmin) {
-        return <AccessDenied />;
-    }
-    
-    if (!groupId || !groupData || !members) {
-        return (
-             <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
-                <Alert className="max-w-lg text-center">
-                    <Shield className="h-4 w-4" />
-                    <AlertTitle>No Group Found</AlertTitle>
-                    <AlertDescription>
-                        You are an admin, but not currently part of a group. Please create or join a group first.
-                    </AlertDescription>
-                </Alert>
-            </div>
-        )
-    }
-
     return (
-        <div className="space-y-8">
-            <div>
-                <h1 className="text-3xl font-bold font-headline">Admin Profile</h1>
-                <p className="text-muted-foreground">Manage your group, members, and settings.</p>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="text-lg flex items-center gap-2"><Users/>Group Members</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-3xl font-bold">{members?.length || 0}</p>
-                    </CardContent>
-                </Card>
-                 <Card>
-                    <CardHeader>
-                        <CardTitle className="text-lg">Group Name</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-3xl font-bold">{groupData?.groupName}</p>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="text-lg">Invitation Code</CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex items-center gap-2">
-                        <p className="text-2xl font-bold font-mono tracking-widest">{groupData?.invitationCode}</p>
-                        <Button variant="ghost" size="icon" onClick={handleCopyInviteCode}>
-                            <Copy className="h-5 w-5"/>
-                        </Button>
-                    </CardContent>
-                </Card>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Member Management</CardTitle>
-                        <CardDescription>View and manage all members of your group.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Member</TableHead>
-                                    <TableHead>Email</TableHead>
-                                    <TableHead>Role</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {members?.map(member => (
-                                    <TableRow key={member.id}>
-                                        <TableCell>
-                                            <div className="flex items-center gap-3">
-                                                <Avatar className="h-8 w-8">
-                                                    <AvatarImage src={member.photoURL} />
-                                                    <AvatarFallback>{member.displayName?.charAt(0)}</AvatarFallback>
-                                                </Avatar>
-                                                <span>{member.displayName}</span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>{member.email}</TableCell>
-                                        <TableCell>
-                                            <Badge variant={member.role === 'admin' ? 'default' : 'secondary'}>{member.role}</Badge>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
-
-                <AdminActionsCard groupDocRef={groupDocRef} groupData={groupData} />
-            </div>
+        <div className="flex flex-col min-h-screen">
+          <AppHeader />
+          <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {isLoading ? <AdminProfilePageSkeleton /> :
+            !userData?.isAdmin ? <AccessDenied /> :
+            !groupId || !groupData || !members ? (
+                 <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
+                    <Alert className="max-w-lg text-center">
+                        <Shield className="h-4 w-4" />
+                        <AlertTitle>No Group Found</AlertTitle>
+                        <AlertDescription>
+                            You are an admin, but not currently part of a group. Please create or join a group first.
+                        </AlertDescription>
+                    </Alert>
+                </div>
+            ) : (
+                <div className="space-y-8">
+                    <div>
+                        <h1 className="text-3xl font-bold font-headline">Admin Profile</h1>
+                        <p className="text-muted-foreground">Manage your group, members, and settings.</p>
+                    </div>
+        
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="text-lg flex items-center gap-2"><Users/>Group Members</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-3xl font-bold">{members?.length || 0}</p>
+                            </CardContent>
+                        </Card>
+                         <Card>
+                            <CardHeader>
+                                <CardTitle className="text-lg">Group Name</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-3xl font-bold">{groupData?.groupName}</p>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="text-lg">Invitation Code</CardTitle>
+                            </CardHeader>
+                            <CardContent className="flex items-center gap-2">
+                                <p className="text-2xl font-bold font-mono tracking-widest">{groupData?.invitationCode}</p>
+                                <Button variant="ghost" size="icon" onClick={handleCopyInviteCode}>
+                                    <Copy className="h-5 w-5"/>
+                                </Button>
+                            </CardContent>
+                        </Card>
+                    </div>
+        
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Member Management</CardTitle>
+                                <CardDescription>View and manage all members of your group.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Member</TableHead>
+                                            <TableHead>Email</TableHead>
+                                            <TableHead>Role</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {members?.map(member => (
+                                            <TableRow key={member.id}>
+                                                <TableCell>
+                                                    <div className="flex items-center gap-3">
+                                                        <Avatar className="h-8 w-8">
+                                                            <AvatarImage src={member.photoURL} />
+                                                            <AvatarFallback>{member.displayName?.charAt(0)}</AvatarFallback>
+                                                        </Avatar>
+                                                        <span>{member.displayName}</span>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>{member.email}</TableCell>
+                                                <TableCell>
+                                                    <Badge variant={member.role === 'admin' ? 'default' : 'secondary'}>{member.role}</Badge>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </CardContent>
+                        </Card>
+        
+                        <AdminActionsCard groupDocRef={groupDocRef} groupData={groupData} />
+                    </div>
+                </div>
+            )}
+          </main>
         </div>
-    )
-}
-
-
-export default function AdminProfilePage() {
-  return (
-    <div className="flex flex-col min-h-screen">
-      <AppHeader />
-      <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <AdminProfilePageContent />
-      </main>
-    </div>
-  );
+      );
 }
