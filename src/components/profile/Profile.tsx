@@ -3,8 +3,10 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useUser, useFirebase, useDoc, useCollection } from "@/firebase";
-import { doc, updateDoc, collection, query, where, Timestamp, orderBy } from "firebase/firestore";
+import { doc, updateDoc, collection, query, where, Timestamp, orderBy, writeBatch, getDocs, deleteDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { signOut, sendPasswordResetEmail, deleteUser } from "firebase/auth";
+import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,11 +14,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { Camera, User, Mail, Home, Users, Wallet, ChevronDown, Loader2 } from "lucide-react";
+import { Camera, User, Mail, Home, Users, Wallet, ChevronDown, Loader2, LogOut, Trash2, Copy } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { format } from "date-fns";
 import type { Expense } from "@/lib/types";
 import imageCompression from "browser-image-compression";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 function ProfileSkeleton() {
   return (
@@ -35,6 +38,139 @@ function ProfileSkeleton() {
       <Skeleton className="h-64" />
     </div>
   );
+}
+
+function AccountSettings({ user, userData, groupData, groupId }: { user: any, userData: any, groupData: any, groupId: string | null }) {
+    const { auth, firestore } = useFirebase();
+    const router = useRouter();
+    const { toast } = useToast();
+
+    const handleCopyInviteCode = () => {
+        if (groupData?.invitationCode) {
+            navigator.clipboard.writeText(groupData.invitationCode);
+            toast({ title: "Copied!", description: "Invite code copied to clipboard." });
+        }
+    };
+
+    const handleLeaveGroup = async () => {
+        if (!user || !groupId) return;
+
+        if (userData?.isAdmin) {
+             const membersQuery = query(collection(firestore, `groups/${groupId}/members`));
+             const membersSnapshot = await getDocs(membersQuery);
+             const adminMembers = membersSnapshot.docs.filter(doc => doc.data().role === 'admin');
+
+             if (adminMembers.length <= 1) {
+                 toast({
+                    variant: "destructive",
+                    title: "Action Not Allowed",
+                    description: "You are the only admin. Please assign another admin before leaving the group.",
+                });
+                return;
+             }
+        }
+        
+        const batch = writeBatch(firestore);
+        const userRef = doc(firestore, "users", user.uid);
+        const memberRef = doc(firestore, `groups/${groupId}/members`, user.uid);
+
+        batch.update(userRef, { groupId: null, isAdmin: false });
+        batch.delete(memberRef);
+
+        try {
+            await batch.commit();
+            toast({ title: "You have left the group." });
+        } catch (error) {
+            toast({ variant: "destructive", title: "Error", description: "Could not leave the group." });
+        }
+    };
+    
+    const handlePasswordReset = async () => {
+        if (!user.email) return;
+        try {
+            await sendPasswordResetEmail(auth, user.email);
+            toast({ title: "Password Reset Email Sent", description: "Check your inbox for instructions."});
+        } catch (error) {
+            toast({ variant: "destructive", title: "Error", description: "Could not send reset email."});
+        }
+    }
+
+    const handleDeleteAccount = async () => {
+        if (!user) return;
+        try {
+            // First, sign out the user to invalidate tokens
+            await signOut(auth);
+            
+            const userRef = doc(firestore, "users", user.uid);
+            await deleteDoc(userRef);
+
+            // This action is sensitive and requires recent sign-in.
+            await deleteUser(user);
+            
+            toast({ title: "Account Deleted", description: "Your account has been permanently deleted." });
+            router.push("/");
+        } catch (error: any) {
+            toast({ variant: "destructive", title: "Deletion Failed", description: error.message || "Please sign in again to delete your account." });
+        }
+    };
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>Account Actions</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                 <div className="flex items-center justify-between">
+                    <p className="font-medium">Password Reset</p>
+                    <Button variant="outline" onClick={handlePasswordReset}>
+                        Send Reset Link
+                    </Button>
+                </div>
+                 <Separator />
+                <div className="flex items-center justify-between">
+                    <p className="font-medium text-destructive">Leave Group</p>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="destructive" disabled={!groupId}><LogOut className="mr-2 h-4 w-4"/> Leave</Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Are you sure you want to leave?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    You will lose access to all group data. This action can only be undone by being re-invited by an admin.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleLeaveGroup} className="bg-destructive hover:bg-destructive/90">Confirm Leave</AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </div>
+                <Separator />
+                <div className="flex items-center justify-between">
+                     <p className="font-medium text-destructive">Delete Account</p>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="destructive" className="text-white"><Trash2 className="mr-2 h-4 w-4"/> Delete Account</Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This action cannot be undone. This will permanently delete your account and remove your data from our servers.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleDeleteAccount} className="bg-destructive hover:bg-destructive/90">Yes, Delete Everything</AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </div>
+            </CardContent>
+        </Card>
+    )
 }
 
 export function Profile() {
@@ -143,7 +279,7 @@ export function Profile() {
 
   const roommates = useMemo(() => members?.filter(member => member.id !== user?.uid), [members, user]);
 
-  const isLoading = isUserLoading || isUserDataLoading || isGroupDataLoading || areMembersLoading || areExpensesLoading;
+  const isLoading = isUserLoading || isUserDataLoading || (!!groupId && (isGroupDataLoading || areMembersLoading || areExpensesLoading));
 
   if (isLoading) {
     return <ProfileSkeleton />;
@@ -156,7 +292,7 @@ export function Profile() {
   return (
     <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">My Profile</h1>
+        <h1 className="text-3xl font-bold tracking-tight font-headline">My Profile</h1>
         <p className="text-muted-foreground">View and edit your personal and group information.</p>
       </div>
 
@@ -244,7 +380,7 @@ export function Profile() {
              ) : (
                 <div className="text-center py-6">
                     <p className="text-muted-foreground">You are not part of any group.</p>
-                     <Button variant="link" className="mt-2" onClick={() => window.location.href='/admin'}>Create or Join a Group</Button>
+                     <Button variant="link" className="mt-2" onClick={() => router.push('/admin')}>Create or Join a Group</Button>
                 </div>
              )}
           </CardContent>
@@ -287,6 +423,8 @@ export function Profile() {
           </CardContent>
         </Card>
       </div>
+
+       <AccountSettings user={user} userData={userData} groupData={groupData} groupId={groupId} />
     </div>
   );
 }

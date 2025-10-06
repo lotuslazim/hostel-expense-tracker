@@ -1,3 +1,4 @@
+
 import { Profile } from "@/components/profile/Profile";
 import { AppHeader } from "@/components/app/header";
 

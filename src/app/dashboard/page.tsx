@@ -6,17 +6,13 @@ import { LogMealCard } from "@/components/dashboard/LogMealCard";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { DateCard } from "@/components/dashboard/DateCard";
 import { AppHeader } from "@/components/app/header";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { WelcomeCard } from "@/components/app/welcome-card";
-import { useUser, useDoc, useFirebase } from "@/firebase";
-import { useMemo } from "react";
-import { doc } from "firebase/firestore";
+import { useUser, useDoc, useFirebase, useCollection } from "@/firebase";
+import { doc, collection, query, where, Timestamp, orderBy } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Expense } from "@/lib/types";
-import { collection, query, where, Timestamp, orderBy } from "firebase/firestore";
-import { useCollection } from "@/firebase/firestore/use-collection";
 import { addMonths, subMonths, startOfMonth, endOfMonth } from "date-fns";
-
 
 function DashboardSkeleton() {
   return (
@@ -39,7 +35,6 @@ export default function DashboardPage() {
   const { user: currentUser, isUserLoading } = useUser();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [currentMonth, setCurrentMonth] = useState(startOfMonth(new Date()));
-
 
   const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
   const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
@@ -108,15 +103,12 @@ export default function DashboardPage() {
                         <AddExpenseCard selectedDate={selectedDate} />
                     </div>
                     <div className="lg:col-span-2">
-                        {areExpensesLoading ? (
-                            <Skeleton className="h-[85vh] w-full" />
-                        ) : (
-                            <ActivityFeed 
+                        <ActivityFeed 
                             expenses={expenses || []} 
+                            isLoading={areExpensesLoading}
                             currentMonth={currentMonth}
                             onMonthChange={handleMonthChange}
-                            />
-                        )}
+                        />
                     </div>
                 </div>
             </div>
