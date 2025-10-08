@@ -1,32 +1,29 @@
 
 "use client";
 
-import { useMemo, useState }from "react";
+import { useMemo }from "react";
 import { format } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { ShoppingCart, Loader2 } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { Expense } from "@/lib/types";
 import { MonthSwitcher } from "../report/month-switcher";
 import { Skeleton } from "../ui/skeleton";
-import { Button } from "../ui/button";
 
 interface ActivityFeedProps {
   expenses: Expense[];
   isLoading: boolean;
   currentMonth: Date;
   onMonthChange: (direction: "next" | "prev") => void;
-  onLoadMore: () => void;
-  hasMore: boolean;
-  isMoreLoading: boolean;
 }
 
-export function ActivityFeed({ expenses, isLoading, currentMonth, onMonthChange, onLoadMore, hasMore, isMoreLoading }: ActivityFeedProps) {
+export function ActivityFeed({ expenses, isLoading, currentMonth, onMonthChange }: ActivityFeedProps) {
 
-  const monthlyExpenses = useMemo(() => {
+  const sortedExpenses = useMemo(() => {
     if (!expenses) return [];
+    // The query now handles sorting, but we can ensure it here as a fallback
     return expenses.sort((a, b) => (b.date as any).toDate() - (a.date as any).toDate());
   }, [expenses]);
 
@@ -57,7 +54,7 @@ export function ActivityFeed({ expenses, isLoading, currentMonth, onMonthChange,
                         </div>
                     ))}
                 </div>
-            ) : monthlyExpenses.length > 0 ? (
+            ) : sortedExpenses.length > 0 ? (
                  <Table>
                     <TableHeader>
                         <TableRow>
@@ -69,7 +66,7 @@ export function ActivityFeed({ expenses, isLoading, currentMonth, onMonthChange,
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {monthlyExpenses.map((item) => (
+                        {sortedExpenses.map((item) => (
                             <TableRow key={`expense-${item.id}`}>
                                 <TableCell>{format((item.date as any).toDate(), "MMM d")}</TableCell>
                                 <TableCell>{item.userName}</TableCell>
@@ -81,20 +78,12 @@ export function ActivityFeed({ expenses, isLoading, currentMonth, onMonthChange,
                     </TableBody>
                 </Table>
             ) : (
-                <div className="text-center py-16 text-muted-foreground flex flex-col items-center justify-center h-[calc(85vh-100px)]">
+                <div className="text-center py-16 text-muted-foreground flex flex-col items-center justify-center h-full">
                     <ShoppingCart className="h-10 w-10 mb-2" />
                     <p>No expenses logged for this month.</p>
                 </div>
             )}
         </ScrollArea>
-        {hasMore && (
-            <div className="pt-4 text-center">
-                <Button onClick={onLoadMore} disabled={isMoreLoading}>
-                    {isMoreLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Load More
-                </Button>
-            </div>
-        )}
       </CardContent>
     </Card>
   );

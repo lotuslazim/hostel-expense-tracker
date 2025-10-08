@@ -8,13 +8,11 @@ import { DateCard } from "@/components/dashboard/DateCard";
 import { AppHeader } from "@/components/app/header";
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { WelcomeCard } from "@/components/app/welcome-card";
-import { useUser, useDoc, useFirebase } from "@/firebase";
-import { doc, collection, query, where, Timestamp, orderBy, limit, startAfter, getDocs, DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
+import { useUser, useDoc, useFirebase, useCollection } from "@/firebase";
+import { doc, collection, query, where, Timestamp, orderBy } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Expense } from "@/lib/types";
 import { addMonths, subMonths, startOfMonth, endOfMonth } from "date-fns";
-
-const EXPENSE_PAGE_SIZE = 15;
 
 function DashboardSkeleton() {
   return (
@@ -43,12 +41,6 @@ export default function DashboardPage() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [currentMonth, setCurrentMonth] = useState(startOfMonth(new Date()));
 
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [lastVisibleExpense, setLastVisibleExpense] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
-  const [hasMoreExpenses, setHasMoreExpenses] = useState(true);
-  const [areExpensesLoading, setAreExpensesLoading] = useState(true);
-  const [isMoreExpensesLoading, setIsMoreExpensesLoading] = useState(false);
-
   const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
   const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
   
@@ -59,70 +51,22 @@ export default function DashboardPage() {
     end: endOfMonth(currentMonth),
   }), [currentMonth]);
   
-  const buildExpensesQuery = useCallback((lastVisible: QueryDocumentSnapshot<DocumentData> | null) => {
+  const expensesQuery = useMemo(() => {
     if (!groupId) return null;
-    let q = query(
+    return query(
       collection(firestore, `groups/${groupId}/expenses`),
       where("date", ">=", Timestamp.fromDate(monthDateRange.start)),
       where("date", "<=", Timestamp.fromDate(monthDateRange.end)),
-      orderBy("date", "desc"),
-      limit(EXPENSE_PAGE_SIZE)
+      orderBy("date", "desc")
     );
-    if (lastVisible) {
-      q = query(q, startAfter(lastVisible));
-    }
-    return q;
   }, [firestore, groupId, monthDateRange]);
 
-  const fetchExpenses = useCallback(async (lastVisible: QueryDocumentSnapshot<DocumentData> | null) => {
-    const isInitialFetch = !lastVisible;
-    if (isInitialFetch) {
-      setAreExpensesLoading(true);
-    } else {
-      setIsMoreExpensesLoading(true);
-    }
-
-    const q = buildExpensesQuery(lastVisible);
-    if (!q) {
-      setAreExpensesLoading(false);
-      setIsMoreExpensesLoading(false);
-      return;
-    }
-    
-    try {
-      const documentSnapshots = await getDocs(q);
-      const newExpenses = documentSnapshots.docs.map(doc => ({ id: doc.id, ...doc.data() } as Expense));
-      const lastVisibleDoc = documentSnapshots.docs[documentSnapshots.docs.length - 1];
-      
-      setExpenses(prev => isInitialFetch ? newExpenses : [...prev, ...newExpenses]);
-      setLastVisibleExpense(lastVisibleDoc || null);
-      setHasMoreExpenses(newExpenses.length === EXPENSE_PAGE_SIZE);
-    } catch (error) {
-      console.error("Error fetching expenses: ", error);
-    } finally {
-      setAreExpensesLoading(false);
-      setIsMoreExpensesLoading(false);
-    }
-  }, [buildExpensesQuery]);
-
-  useEffect(() => {
-    setExpenses([]);
-    setLastVisibleExpense(null);
-    setHasMoreExpenses(true);
-    fetchExpenses(null);
-  }, [fetchExpenses, currentMonth]);
-
+  const { data: expenses, isLoading: areExpensesLoading } = useCollection<Expense>(expensesQuery);
 
   const handleMonthChange = (direction: "next" | "prev") => {
     setCurrentMonth(prev => direction === 'next' ? addMonths(prev, 1) : subMonths(prev, 1));
   }
   
-  const handleLoadMoreExpenses = () => {
-    if (lastVisibleExpense) {
-      fetchExpenses(lastVisibleExpense);
-    }
-  };
-
   const isLoading = isUserLoading || isCurrentUserDataLoading;
 
   if (isLoading) {
@@ -165,13 +109,10 @@ export default function DashboardPage() {
                     </div>
                     <div className="lg:col-span-2">
                         <ActivityFeed 
-                            expenses={expenses} 
+                            expenses={expenses || []} 
                             isLoading={areExpensesLoading}
                             currentMonth={currentMonth}
                             onMonthChange={handleMonthChange}
-                            onLoadMore={handleLoadMoreExpenses}
-                            hasMore={hasMoreExpenses}
-                            isMoreLoading={isMoreExpensesLoading}
                         />
                     </div>
                 </div>
