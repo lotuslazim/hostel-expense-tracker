@@ -10,10 +10,11 @@ import { FirebaseErrorListener } from '@/components/FirebaseErrorListener'
 
 interface FirebaseProviderProps {
   children: ReactNode;
-  firebaseApp: FirebaseApp;
-  firestore: Firestore;
-  auth: Auth;
-  storage: FirebaseStorage;
+  firebaseApp?: FirebaseApp;
+  firestore?: Firestore;
+  auth?: Auth;
+  storage?: FirebaseStorage;
+  servicesLoading: boolean;
 }
 
 // Internal state for user authentication
@@ -30,6 +31,7 @@ export interface FirebaseContextState {
   firestore: Firestore | null;
   auth: Auth | null; // The Auth service instance
   storage: FirebaseStorage | null;
+  servicesLoading: boolean;
   // User authentication state
   user: User | null;
   isUserLoading: boolean; // True during initial auth check
@@ -42,6 +44,7 @@ export interface FirebaseServicesAndUser {
   firestore: Firestore;
   auth: Auth;
   storage: FirebaseStorage;
+  servicesLoading: boolean;
   user: User | null;
   isUserLoading: boolean;
   userError: Error | null;
@@ -66,6 +69,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   firestore,
   auth,
   storage,
+  servicesLoading
 }) => {
   const [userAuthState, setUserAuthState] = useState<UserAuthState>({
     user: null,
@@ -76,7 +80,9 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   // Effect to subscribe to Firebase auth state changes
   useEffect(() => {
     if (!auth) { // If no Auth service instance, cannot determine user state
-      setUserAuthState({ user: null, isUserLoading: false, userError: new Error("Auth service not provided.") });
+      if (!servicesLoading) {
+         setUserAuthState({ user: null, isUserLoading: false, userError: new Error("Auth service not provided.") });
+      }
       return;
     }
 
@@ -93,7 +99,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       }
     );
     return () => unsubscribe(); // Cleanup
-  }, [auth]); // Depends on the auth instance
+  }, [auth, servicesLoading]); // Depends on the auth instance
 
   // Memoize the context value
   const contextValue = useMemo((): FirebaseContextState => {
@@ -104,11 +110,12 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       firestore: servicesAvailable ? firestore : null,
       auth: servicesAvailable ? auth : null,
       storage: servicesAvailable ? storage : null,
+      servicesLoading,
       user: userAuthState.user,
       isUserLoading: userAuthState.isUserLoading,
       userError: userAuthState.userError,
     };
-  }, [firebaseApp, firestore, auth, storage, userAuthState]);
+  }, [firebaseApp, firestore, auth, storage, userAuthState, servicesLoading]);
 
   return (
     <FirebaseContext.Provider value={contextValue}>
@@ -130,14 +137,24 @@ export const useFirebase = (): FirebaseServicesAndUser => {
   }
 
   if (!context.areServicesAvailable || !context.firebaseApp || !context.firestore || !context.auth || !context.storage) {
-    throw new Error('Firebase core services not available. Check FirebaseProvider props.');
+    // During the initial render, services might not be available yet.
+    // Instead of throwing, we could return a loading state or a specific value.
+    // However, if the services are truly missing after loading, an error is appropriate.
+    if (context.servicesLoading) {
+      // This is an expected state during lazy loading, we can return a "loading" version of the context
+      // but the components using it must be prepared to handle nulls or a loading flag.
+      // For simplicity, we'll let components check servicesLoading.
+    } else {
+        throw new Error('Firebase core services not available. Check FirebaseProvider props.');
+    }
   }
 
   return {
-    firebaseApp: context.firebaseApp,
-    firestore: context.firestore,
-    auth: context.auth,
-    storage: context.storage,
+    firebaseApp: context.firebaseApp!,
+    firestore: context.firestore!,
+    auth: context.auth!,
+    storage: context.storage!,
+    servicesLoading: context.servicesLoading,
     user: context.user,
     isUserLoading: context.isUserLoading,
     userError: context.userError,
@@ -146,7 +163,12 @@ export const useFirebase = (): FirebaseServicesAndUser => {
 
 /** Hook to access Firebase Auth instance. */
 export const useAuth = (): Auth => {
-  const { auth } = useFirebase();
+  const { auth, servicesLoading } = useFirebase();
+  if (servicesLoading) {
+    // This could return a dummy or null object, but throwing might be safer
+    // to ensure components wait for the real auth object.
+    // For now, let's allow it to return null and let the component handle it.
+  }
   return auth;
 };
 

@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { AuthCard } from "./auth-card";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
-import { useAuth, useFirebase } from "@/firebase";
+import { useFirebase } from "@/firebase";
 import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification } from "firebase/auth";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -33,8 +33,7 @@ const formSchema = z.object({
 
 export function LoginForm() {
   const router = useRouter();
-  const auth = useAuth();
-  const { firestore } = useFirebase();
+  const { auth, firestore, servicesLoading } = useFirebase();
   const [isLoading, setIsLoading] = useState(false);
   const [needsVerification, setNeedsVerification] = useState(false);
   const { toast } = useToast();
@@ -64,6 +63,10 @@ export function LoginForm() {
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (servicesLoading) {
+        toast({ title: "Services initializing...", description: "Please wait a moment and try again."});
+        return;
+    }
     setIsLoading(true);
     setNeedsVerification(false);
     try {
@@ -91,6 +94,10 @@ export function LoginForm() {
   }
 
   const handleGoogleSignIn = () => {
+    if (servicesLoading) {
+        toast({ title: "Services initializing...", description: "Please wait a moment and try again."});
+        return;
+    }
     const provider = new GoogleAuthProvider();
     signInWithPopup(auth, provider)
       .then(async (result) => {
@@ -162,7 +169,7 @@ export function LoginForm() {
   return (
     <AuthCard
       title="Welcome Back"
-      description="Log in to your BachelorBite account"
+      description="Log in to your NourishTrack account"
       footerText="Don't have an account?"
       footerLinkText="Sign Up"
       footerLinkHref="/signup"
@@ -180,8 +187,8 @@ export function LoginForm() {
                 </AlertDescription>
             </Alert>
         )}
-        <Button variant="outline" className="w-full" onClick={handleGoogleSignIn}>
-           <GoogleIcon className="mr-2 h-4 w-4" />
+        <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={servicesLoading}>
+           {servicesLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon className="mr-2 h-4 w-4" />}
           Sign in with Google
         </Button>
         <div className="relative">
@@ -232,8 +239,8 @@ export function LoginForm() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={isLoading}>
-               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button type="submit" className="w-full" disabled={isLoading || servicesLoading}>
+               {(isLoading || servicesLoading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Log In
             </Button>
           </form>

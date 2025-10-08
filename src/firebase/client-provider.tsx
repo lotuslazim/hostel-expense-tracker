@@ -41,26 +41,24 @@ async function getFirebaseServices() {
 
 export function FirebaseClientProvider({ children }: FirebaseClientProviderProps) {
   const [services, setServices] = useState<typeof firebaseServices>(null);
+  const [servicesLoading, setServicesLoading] = useState(true);
 
   useEffect(() => {
-    getFirebaseServices().then(setServices);
+    getFirebaseServices().then(loadedServices => {
+        setServices(loadedServices);
+        setServicesLoading(false);
+    });
   }, []);
-
-  // Render a loading state or null while services are being initialized
-  if (!services) {
-    return null; // Or a full-page loader
-  }
 
   return (
     <FirebaseProvider
-      firebaseApp={services.firebaseApp}
-      auth={services.auth}
-      firestore={services.firestore}
-      storage={services.storage}
+      firebaseApp={services?.firebaseApp}
+      auth={services?.auth}
+      firestore={services?.firestore}
+      storage={services?.storage}
+      servicesLoading={servicesLoading}
     >
       {children}
     </FirebaseProvider>
   );
 }
-
-    
