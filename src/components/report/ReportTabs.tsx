@@ -1,17 +1,36 @@
 "use client";
 
-import { NavLink } from "@/components/app/nav-link";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
+
+function ReportNavLink({ href, children }: { href: string, children: React.ReactNode }) {
+    const pathname = usePathname();
+    const isActive = pathname === href;
+    return (
+        <Link 
+            href={href} 
+            className={cn(
+                "px-4 py-2 text-muted-foreground transition-colors",
+                "hover:text-primary",
+                isActive && "border-b-2 border-primary text-primary"
+            )}
+        >
+            {children}
+        </Link>
+    )
+}
 
 export function ReportTabs() {
   return (
     <div className="space-y-4">
       <div className="flex gap-2 border-b">
-        <NavLink href="/report">
-            <button className="px-4 py-2 data-[active=true]:border-b-2 data-[active=true]:border-primary data-[active=true]:text-primary">Monthly Summary</button>
-        </NavLink>
-        <NavLink href="/report/meals">
-            <button className="px-4 py-2 data-[active=true]:border-b-2 data-[active=true]:border-primary data-[active=true]:text-primary">Meals</button>
-        </NavLink>
+        <ReportNavLink href="/report">
+            Monthly Summary
+        </ReportNavLink>
+        <ReportNavLink href="/report/meals">
+            Meals
+        </ReportNavLink>
       </div>
     </div>
   );
