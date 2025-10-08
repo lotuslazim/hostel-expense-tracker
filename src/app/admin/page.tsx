@@ -261,11 +261,12 @@ function GroupDetailsPanel({ groupId }: { groupId: string }) {
     const groupRef = useMemo(() => doc(firestore, "groups", groupId), [firestore, groupId]);
     const { data: groupData, isLoading: isGroupDataLoading } = useDoc(groupRef);
 
-    const membersQuery = useMemo(() => query(collection(firestore, `groups/${groupId}/members`)), [firestore, groupId]);
-    const { data: members, isLoading: areMembersLoading } = useCollection<Member>(membersQuery);
+    const membersQuery = useMemo(() => query(collection(firestore, `groups/${groupId}/members`), where('status', '==', 'active')), [firestore, groupId]);
+    const { data: activeMembers, isLoading: areMembersLoading } = useCollection<Member>(membersQuery);
+    
+    const pastMembersQuery = useMemo(() => query(collection(firestore, `groups/${groupId}/members`), where('status', '==', 'inactive')), [firestore, groupId]);
+    const { data: pastMembers, isLoading: arePastMembersLoading } = useCollection<Member>(pastMembersQuery);
 
-    const activeMembers = useMemo(() => members?.filter(m => m.status === 'active') || [], [members]);
-    const pastMembers = useMemo(() => members?.filter(m => m.status === 'inactive') || [], [members]);
 
     const handleCopyInviteCode = () => {
         if (groupData?.invitationCode) {
@@ -274,7 +275,7 @@ function GroupDetailsPanel({ groupId }: { groupId: string }) {
         }
     };
 
-    if (isGroupDataLoading || areMembersLoading) {
+    if (isGroupDataLoading || areMembersLoading || arePastMembersLoading) {
         return <AdminPageSkeleton />;
     }
 
@@ -362,7 +363,7 @@ function GroupDetailsPanel({ groupId }: { groupId: string }) {
                 </CardContent>
             </Card>
 
-            {pastMembers.length > 0 && (
+            {pastMembers && pastMembers.length > 0 && (
                  <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2"><History /> Past Members</CardTitle>
@@ -426,3 +427,5 @@ export default function AdminPage() {
         </div>
     )
 }
+
+    
