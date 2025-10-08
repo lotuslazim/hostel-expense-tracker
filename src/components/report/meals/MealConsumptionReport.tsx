@@ -215,6 +215,5 @@ export function MealConsumptionReport() {
                 ))}
             </div>
         </div>
-    )
-
-    
+    );
+}
