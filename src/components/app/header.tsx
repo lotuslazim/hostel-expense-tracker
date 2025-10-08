@@ -6,11 +6,10 @@ import { Logo } from "@/components/icons/logo";
 import { UserNav } from "@/app/(app)/user-nav";
 import { NavLink } from "./nav-link";
 import { Button } from "../ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, MessageSquare, LayoutDashboard, BarChart3, Package } from "lucide-react";
 import { useUser } from "@/firebase";
 import { Skeleton } from "../ui/skeleton";
-import { useState, useEffect } from "react";
 
 export function AppHeader() {
   const { isUserLoading } = useUser();
@@ -48,6 +47,9 @@ export function AppHeader() {
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="w-[300px] sm:w-[350px]">
+           <SheetHeader>
+            <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+          </SheetHeader>
           <div className="flex flex-col gap-4 py-6">
             <div className="px-4 mb-4">
               <Logo />
