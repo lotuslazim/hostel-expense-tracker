@@ -43,7 +43,7 @@ export function AppHeader() {
     );
   };
   
-  const renderMobileMenu = () => {
+  const renderNavMenu = () => {
     if (!mounted) {
       return (
         <Button variant="ghost" size="icon" disabled>
@@ -87,26 +87,23 @@ export function AppHeader() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
         
-        {/* Mobile Menu */}
-        <div className="md:hidden mr-4">
-          {renderMobileMenu()}
+        {/* Unified Nav Menu */}
+        <div className="mr-4">
+          {renderNavMenu()}
         </div>
 
-        {/* Desktop Logo & Nav */}
-        <div className="hidden md:flex items-center gap-6">
+        {/* Logo in the middle for desktop */}
+        <div className="hidden md:flex flex-1 items-center justify-center">
+            <Logo />
+        </div>
+
+        {/* Logo for mobile */}
+        <div className="md:hidden flex-1">
           <Logo />
-          <nav className="flex items-center gap-6 text-sm font-medium">
-            <NavLink href="/dashboard">Dashboard</NavLink>
-            <NavLink href="/report">Monthly Report</NavLink>
-            <NavLink href="/inventory">Inventory</NavLink>
-          </nav>
         </div>
 
         {/* Right side icons */}
-        <div className="flex flex-1 items-center justify-end space-x-2">
-           <div className="md:hidden">
-              <Logo />
-           </div>
+        <div className="flex items-center justify-end space-x-2">
            <div className="flex items-center space-x-2">
             {renderUserSection()}
            </div>
