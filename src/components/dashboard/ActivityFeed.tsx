@@ -70,7 +70,7 @@ export function ActivityFeed({ expenses, isLoading, currentMonth, onMonthChange 
                             <TableRow key={`expense-${item.id}`}>
                                 <TableCell>{format((item.date as any).toDate(), "MMM d")}</TableCell>
                                 <TableCell>{item.userName}</TableCell>
-                                <TableCell>{item.expenseItem || item.description || "N/A"}</TableCell>
+                                <TableCell>{item.expenseItem || "N/A"}</TableCell>
                                 <TableCell><Badge variant="secondary">{item.category}</Badge></TableCell>
                                 <TableCell className="text-right font-semibold">৳{item.amount.toFixed(2)}</TableCell>
                             </TableRow>
