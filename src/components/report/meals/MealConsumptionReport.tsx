@@ -106,7 +106,7 @@ export function MealConsumptionReport() {
         });
     }, [members, meals, purchases]);
 
-    const isLoading = isCurrentUserLoading || areMembersLoading || areMealsLoading || arePurchasesLoading;
+    const isLoading = isCurrentUserLoading || isCurrentUserDataLoading || areMembersLoading || areMealsLoading || arePurchasesLoading;
 
     if (isLoading) {
         return <ReportSkeleton />
