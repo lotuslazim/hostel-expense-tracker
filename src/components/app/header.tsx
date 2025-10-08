@@ -14,11 +14,6 @@ import { useState, useEffect } from "react";
 
 export function AppHeader() {
   const { isUserLoading } = useUser();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const navLinks = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -27,7 +22,7 @@ export function AppHeader() {
   ];
 
   const renderUserSection = () => {
-    if (!mounted || isUserLoading) {
+    if (isUserLoading) {
       return <Skeleton className="h-9 w-20 rounded-full" />;
     }
     return (
@@ -44,14 +39,6 @@ export function AppHeader() {
   };
   
   const renderNavMenu = () => {
-    if (!mounted) {
-      return (
-        <Button variant="ghost" size="icon" disabled>
-          <Menu className="h-5 w-5" />
-          <span className="sr-only">Open navigation menu</span>
-        </Button>
-      );
-    }
     return (
       <Sheet>
         <SheetTrigger asChild>
