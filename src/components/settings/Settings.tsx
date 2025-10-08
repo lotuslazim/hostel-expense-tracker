@@ -3,7 +3,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useUser, useFirebase, useDoc, useCollection } from "@/firebase";
-import { doc, updateDoc, deleteDoc, getDocs, collection, query, where, writeBatch } from "firebase/firestore";
+import { doc, updateDoc, deleteDoc, getDocs, collection, query, where, writeBatch, serverTimestamp } from "firebase/firestore";
 import { signOut, sendPasswordResetEmail, deleteUser } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
@@ -91,8 +91,14 @@ function AdminControls({ groupData, members, groupId }: { groupData: any, member
   
    const handleAssignAdmin = async (memberId: string, currentIsAdmin: boolean) => {
     const userRef = doc(firestore, 'users', memberId);
+    const memberRef = doc(firestore, `groups/${groupId}/members`, memberId);
+    const batch = writeBatch(firestore);
+
+    batch.update(userRef, { isAdmin: !currentIsAdmin });
+    batch.update(memberRef, { role: !currentIsAdmin ? 'admin' : 'member' });
+
     try {
-      await updateDoc(userRef, { isAdmin: !currentIsAdmin });
+      await batch.commit();
       toast({
         title: 'Admin Status Updated',
         description: `User's admin status has been toggled.`,
@@ -103,6 +109,20 @@ function AdminControls({ groupData, members, groupId }: { groupData: any, member
         title: 'Update Failed',
         description: 'Could not update user role.',
       });
+    }
+  };
+
+  const handleRemoveMember = async (memberId: string) => {
+    const memberRef = doc(firestore, `groups/${groupId}/members`, memberId);
+    const userRef = doc(firestore, 'users', memberId);
+    const batch = writeBatch(firestore);
+    try {
+        batch.update(memberRef, { status: 'inactive', leftAt: serverTimestamp() });
+        batch.update(userRef, { groupId: null, isAdmin: false });
+        await batch.commit();
+        toast({ title: "Member Removed", description: "The member has been removed from the group." });
+    } catch (error) {
+        toast({ variant: "destructive", title: "Error", description: "Could not remove the member." });
     }
   };
 
@@ -153,26 +173,44 @@ function AdminControls({ groupData, members, groupId }: { groupData: any, member
                             <div className="flex items-center gap-2">
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>
-                                        <Button size="sm" variant={member.isAdmin ? "secondary" : "outline"}>
-                                            {member.isAdmin ? "Admin" : "Make Admin"}
+                                        <Button size="sm" variant={member.role === 'admin' ? "secondary" : "outline"}>
+                                            {member.role === 'admin' ? "Admin" : "Make Admin"}
                                         </Button>
                                     </AlertDialogTrigger>
                                     <AlertDialogContent>
                                         <AlertDialogHeader>
                                             <AlertDialogTitle>Confirm Role Change</AlertDialogTitle>
                                             <AlertDialogDescription>
-                                                Are you sure you want to {member.isAdmin ? 'remove admin privileges from' : 'grant admin privileges to'} {member.displayName}?
+                                                Are you sure you want to {member.role === 'admin' ? 'remove admin privileges from' : 'grant admin privileges to'} {member.displayName}?
                                             </AlertDialogDescription>
                                         </AlertDialogHeader>
                                         <AlertDialogFooter>
                                             <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                            <AlertDialogAction onClick={() => handleAssignAdmin(member.id, member.isAdmin)}>
+                                            <AlertDialogAction onClick={() => handleAssignAdmin(member.id, member.role === 'admin')}>
                                                 Confirm
                                             </AlertDialogAction>
                                         </AlertDialogFooter>
                                     </AlertDialogContent>
                                 </AlertDialog>
-                                <Button size="sm" variant="destructive">Remove</Button>
+                                 <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button size="sm" variant="destructive">Remove</Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Remove {member.displayName}?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                Are you sure you want to remove this member? Their status will be set to 'inactive' and their data will be preserved.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => handleRemoveMember(member.id)} className="bg-destructive hover:bg-destructive/90">
+                                                Confirm Removal
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
                             </div>
                         </div>
                     ))}
@@ -213,7 +251,7 @@ function AccountSettings({ user, userData, groupData, groupId }: { user: any, us
         const memberRef = doc(firestore, `groups/${groupId}/members`, user.uid);
 
         batch.update(userRef, { groupId: null });
-        batch.delete(memberRef);
+        batch.update(memberRef, { status: 'inactive', leftAt: serverTimestamp() });
 
         try {
             await batch.commit();
@@ -416,7 +454,7 @@ export function Settings() {
   const groupRef = useMemo(() => (groupId ? doc(firestore, `groups`, groupId) : null), [groupId, firestore]);
   const { data: groupData, isLoading: isGroupDataLoading } = useDoc(groupRef);
 
-  const membersQuery = useMemo(() => (groupId ? collection(firestore, `groups/${groupId}/members`) : null), [groupId, firestore]);
+  const membersQuery = useMemo(() => (groupId ? query(collection(firestore, `groups/${groupId}/members`), where('status', '==', 'active')) : null), [groupId, firestore]);
   const { data: members, isLoading: areMembersLoading } = useCollection(membersQuery);
 
 

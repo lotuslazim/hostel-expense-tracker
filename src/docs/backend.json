@@ -50,9 +50,11 @@
         "displayName": { "type": "string", "description": "The user's display name." },
         "photoURL": { "type": "string", "format": "uri", "description": "URL of the member's profile picture." },
         "role": { "type": "string", "description": "The role of the member within the group (e.g., 'admin', 'member')." },
-        "joinedAt": { "type": "string", "description": "The timestamp when the member joined the group.", "format": "date-time" }
+        "status": { "type": "string", "enum": ["active", "inactive"], "description": "The current status of the member within the group." },
+        "joinedAt": { "type": "string", "description": "The timestamp when the member joined the group.", "format": "date-time" },
+        "leftAt": { "type": ["string", "null"], "description": "The timestamp when the member left the group.", "format": "date-time" }
       },
-      "required": ["id", "email", "displayName", "role", "joinedAt"]
+      "required": ["id", "email", "displayName", "role", "status", "joinedAt"]
     },
     "MealLog": {
       "$schema": "http://json-schema.org/draft-07/schema#",
@@ -286,5 +288,3 @@
     "reasoning": "This structure enforces security by scoping all group-related data within a group's subcollections. The rule `exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))` is used consistently to verify that the requesting user is a member of the group they are trying to access. The `isAdmin` flag on a user's document grants them broader read access to list all users and groups. Adding `request.auth.token.email_verified == true` to the rules ensures that only users who have verified their email can access or modify data, enhancing security. This is a secure and scalable pattern that prevents unauthorized data access. Firestore's default-deny policy ensures any path not explicitly granted access is automatically blocked."
   }
 }
-
-    

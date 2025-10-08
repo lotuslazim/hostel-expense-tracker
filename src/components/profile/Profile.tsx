@@ -3,7 +3,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useUser, useFirebase, useDoc, useCollection } from "@/firebase";
-import { doc, updateDoc, collection, query, where, Timestamp, orderBy, writeBatch, getDocs, deleteDoc } from "firebase/firestore";
+import { doc, updateDoc, collection, query, where, Timestamp, orderBy, writeBatch, getDocs, deleteDoc, serverTimestamp } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { signOut, sendPasswordResetEmail, deleteUser } from "firebase/auth";
 import { useRouter } from "next/navigation";
@@ -17,7 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Camera, User, Mail, Home, Users, Wallet, ChevronDown, Loader2, LogOut, Trash2, Copy } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { format, startOfMonth, endOfMonth } from "date-fns";
-import type { Expense } from "@/lib/types";
+import type { Expense, Member } from "@/lib/types";
 import imageCompression from "browser-image-compression";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
@@ -99,37 +99,38 @@ function AccountSettings({ user, userData, groupData, groupId }: { user: any, us
     };
 
     const handleLeaveGroup = async () => {
-        if (!user || !groupId) return;
+      if (!user || !groupId) return;
+  
+      if (userData?.isAdmin) {
+           const membersQuery = query(collection(firestore, `groups/${groupId}/members`), where('status', '==', 'active'));
+           const membersSnapshot = await getDocs(membersQuery);
+           const adminMembers = membersSnapshot.docs.filter(doc => doc.data().role === 'admin');
 
-        if (userData?.isAdmin) {
-             const membersQuery = query(collection(firestore, `groups/${groupId}/members`));
-             const membersSnapshot = await getDocs(membersQuery);
-             const adminMembers = membersSnapshot.docs.filter(doc => doc.data().role === 'admin');
+           if (adminMembers.length <= 1) {
+               toast({
+                  variant: "destructive",
+                  title: "Action Not Allowed",
+                  description: "You are the only admin. Please assign another admin before leaving the group.",
+              });
+              return;
+           }
+      }
+      
+      const batch = writeBatch(firestore);
+      const userRef = doc(firestore, "users", user.uid);
+      const memberRef = doc(firestore, `groups/${groupId}/members`, user.uid);
 
-             if (adminMembers.length <= 1) {
-                 toast({
-                    variant: "destructive",
-                    title: "Action Not Allowed",
-                    description: "You are the only admin. Please assign another admin before leaving the group.",
-                });
-                return;
-             }
-        }
-        
-        const batch = writeBatch(firestore);
-        const userRef = doc(firestore, "users", user.uid);
-        const memberRef = doc(firestore, `groups/${groupId}/members`, user.uid);
+      batch.update(userRef, { groupId: null, isAdmin: false });
+      // Instead of deleting, set status to inactive
+      batch.update(memberRef, { status: 'inactive', leftAt: serverTimestamp() });
 
-        batch.update(userRef, { groupId: null, isAdmin: false });
-        batch.delete(memberRef);
-
-        try {
-            await batch.commit();
-            toast({ title: "You have left the group." });
-        } catch (error) {
-            toast({ variant: "destructive", title: "Error", description: "Could not leave the group." });
-        }
-    };
+      try {
+          await batch.commit();
+          toast({ title: "You have left the group." });
+      } catch (error) {
+          toast({ variant: "destructive", title: "Error", description: "Could not leave the group." });
+      }
+  };
     
     const handlePasswordReset = async () => {
         if (!user.email) return;
@@ -239,8 +240,8 @@ export function Profile() {
   const groupRef = useMemo(() => (groupId ? doc(firestore, `groups`, groupId) : null), [groupId, firestore]);
   const { data: groupData, isLoading: isGroupDataLoading } = useDoc(groupRef);
 
-  const membersQuery = useMemo(() => (groupId ? collection(firestore, `groups/${groupId}/members`) : null), [groupId, firestore]);
-  const { data: members, isLoading: areMembersLoading } = useCollection(membersQuery);
+  const membersQuery = useMemo(() => (groupId ? query(collection(firestore, `groups/${groupId}/members`), where('status', '==', 'active')) : null), [groupId, firestore]);
+  const { data: members, isLoading: areMembersLoading } = useCollection<Member>(membersQuery);
   
   // Fetch only the last month of expenses for the profile page
   const expensesQuery = useMemo(() => {
@@ -487,5 +488,3 @@ export function Profile() {
     </div>
   );
 }
-
-    

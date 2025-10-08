@@ -94,5 +94,14 @@ export interface Item {
 }
 
 
-
+export interface Member {
+  id: string;
+  email: string;
+  displayName: string;
+  photoURL?: string;
+  role: 'admin' | 'member';
+  status: 'active' | 'inactive';
+  joinedAt: Timestamp;
+  leftAt?: Timestamp | null;
+}
     

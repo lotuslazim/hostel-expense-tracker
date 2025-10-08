@@ -2,19 +2,20 @@
 "use client";
 
 import { useUser, useDoc, useFirebase, useCollection } from "@/firebase";
-import { doc, collection, query, addDoc, serverTimestamp, updateDoc, where, getDocs, writeBatch } from "firebase/firestore";
+import { doc, collection, query, addDoc, serverTimestamp, updateDoc, where, getDocs, writeBatch, getDoc, setDoc } from "firebase/firestore";
 import { useMemo, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Users, DollarSign, Home, Building, PlusCircle, LogIn, Loader2, Group, Copy } from "lucide-react";
+import { Users, DollarSign, Home, Building, PlusCircle, LogIn, Loader2, Group, Copy, History } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AppHeader } from "@/components/app/header";
+import type { Member } from "@/lib/types";
 
 function AdminPageSkeleton() {
   return (
@@ -109,7 +110,9 @@ function NewUserAdminPanel({ user }: { user: any }) {
         displayName: user.displayName,
         photoURL: user.photoURL,
         role: "admin",
-        joinedAt: serverTimestamp()
+        status: "active",
+        joinedAt: serverTimestamp(),
+        leftAt: null,
       });
 
       await batch.commit();
@@ -125,51 +128,67 @@ function NewUserAdminPanel({ user }: { user: any }) {
 
   const handleJoinGroup = async () => {
     if (!inviteCode.trim()) {
-      toast({ variant: "destructive", title: "Invite code is required." });
-      return;
+        toast({ variant: "destructive", title: "Invite code is required." });
+        return;
     }
     if (!user) return;
     setIsJoining(true);
 
     try {
-      const groupsRef = collection(firestore, "groups");
-      const q = query(groupsRef, where("invitationCode", "==", inviteCode.trim()));
-      const querySnapshot = await getDocs(q);
+        const groupsRef = collection(firestore, "groups");
+        const q = query(groupsRef, where("invitationCode", "==", inviteCode.trim()));
+        const querySnapshot = await getDocs(q);
 
-      if (querySnapshot.empty) {
-        toast({ variant: "destructive", title: "Invalid Code", description: "No group found with that invite code." });
-        setIsJoining(false);
-        return;
-      }
+        if (querySnapshot.empty) {
+            toast({ variant: "destructive", title: "Invalid Code", description: "No group found with that invite code." });
+            setIsJoining(false);
+            return;
+        }
 
-      const groupDoc = querySnapshot.docs[0];
-      const groupId = groupDoc.id;
-      
-      const userRef = doc(firestore, "users", user.uid);
-      const memberRef = doc(firestore, `groups/${groupId}/members`, user.uid);
+        const groupDoc = querySnapshot.docs[0];
+        const groupId = groupDoc.id;
+        
+        const userRef = doc(firestore, "users", user.uid);
+        const memberRef = doc(firestore, `groups/${groupId}/members`, user.uid);
+        const memberDoc = await getDoc(memberRef);
 
-      const batch = writeBatch(firestore);
-      batch.update(userRef, { groupId: groupId, isAdmin: false }); // New members are not admins by default
-      batch.set(memberRef, {
-        id: user.uid,
-        email: user.email,
-        displayName: user.displayName,
-        photoURL: user.photoURL,
-        role: "member",
-        joinedAt: serverTimestamp()
-      });
+        const batch = writeBatch(firestore);
+        
+        // Update user document
+        batch.update(userRef, { groupId: groupId, isAdmin: false });
 
-      await batch.commit();
-      
-      toast({ title: "Welcome to the Group!", description: `You have successfully joined "${groupDoc.data().groupName}".` });
+        if (memberDoc.exists()) {
+            // User is rejoining, update their status
+            batch.update(memberRef, {
+                status: 'active',
+                leftAt: null,
+                role: 'member' // reset role on rejoin
+            });
+        } else {
+            // New member
+            batch.set(memberRef, {
+                id: user.uid,
+                email: user.email,
+                displayName: user.displayName,
+                photoURL: user.photoURL,
+                role: "member",
+                status: "active",
+                joinedAt: serverTimestamp(),
+                leftAt: null
+            });
+        }
+
+        await batch.commit();
+        
+        toast({ title: "Welcome to the Group!", description: `You have successfully joined "${groupDoc.data().groupName}".` });
 
     } catch (error) {
-      console.error("Error joining group: ", error);
-      toast({ variant: "destructive", title: "Error", description: "Could not join the group." });
+        console.error("Error joining group: ", error);
+        toast({ variant: "destructive", title: "Error", description: "Could not join the group." });
     } finally {
-      setIsJoining(false);
+        setIsJoining(false);
     }
-  };
+};
 
 
   return (
@@ -243,7 +262,10 @@ function GroupDetailsPanel({ groupId }: { groupId: string }) {
     const { data: groupData, isLoading: isGroupDataLoading } = useDoc(groupRef);
 
     const membersQuery = useMemo(() => query(collection(firestore, `groups/${groupId}/members`)), [firestore, groupId]);
-    const { data: members, isLoading: areMembersLoading } = useCollection(membersQuery);
+    const { data: members, isLoading: areMembersLoading } = useCollection<Member>(membersQuery);
+
+    const activeMembers = useMemo(() => members?.filter(m => m.status === 'active') || [], [members]);
+    const pastMembers = useMemo(() => members?.filter(m => m.status === 'inactive') || [], [members]);
 
     const handleCopyInviteCode = () => {
         if (groupData?.invitationCode) {
@@ -283,10 +305,10 @@ function GroupDetailsPanel({ groupId }: { groupId: string }) {
                 </Card>
                 <Card>
                     <CardHeader>
-                        <CardTitle className="text-lg">Members</CardTitle>
+                        <CardTitle className="text-lg">Active Members</CardTitle>
                     </CardHeader>
                     <CardContent>
-                         <p className="text-2xl font-semibold">{members?.length || 0}</p>
+                         <p className="text-2xl font-semibold">{activeMembers?.length || 0}</p>
                     </CardContent>
                 </Card>
                 <Card>
@@ -304,7 +326,7 @@ function GroupDetailsPanel({ groupId }: { groupId: string }) {
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Members</CardTitle>
+                    <CardTitle>Active Members</CardTitle>
                 </CardHeader>
                 <CardContent>
                      <Table>
@@ -316,7 +338,7 @@ function GroupDetailsPanel({ groupId }: { groupId: string }) {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {members?.map(member => (
+                            {activeMembers?.map(member => (
                                 <TableRow key={member.id}>
                                     <TableCell>
                                         <div className="flex items-center gap-3">
@@ -339,6 +361,34 @@ function GroupDetailsPanel({ groupId }: { groupId: string }) {
                     </Table>
                 </CardContent>
             </Card>
+
+            {pastMembers.length > 0 && (
+                 <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><History /> Past Members</CardTitle>
+                        <CardDescription>Members who have previously left the group.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-2">
+                            {pastMembers.map(member => (
+                                <div key={member.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                                    <div className="flex items-center gap-3">
+                                        <Avatar className="h-8 w-8">
+                                            <AvatarImage src={member.photoURL} />
+                                            <AvatarFallback>{member.displayName?.charAt(0)}</AvatarFallback>
+                                        </Avatar>
+                                        <div>
+                                            <p className="font-medium">{member.displayName}</p>
+                                            <p className="text-xs text-muted-foreground">{member.email}</p>
+                                        </div>
+                                    </div>
+                                    <Button variant="outline" size="sm">View History</Button>
+                                </div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
         </div>
     );
 }
