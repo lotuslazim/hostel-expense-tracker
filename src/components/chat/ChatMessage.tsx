@@ -20,44 +20,43 @@ export function ChatMessage({ message, currentUserId }: ChatMessageProps) {
         : new Date(); // Fallback for optimistic updates
     
     return (
-        <div className={cn("flex items-end gap-2", isCurrentUser && "justify-end")}>
+        <div className={cn("flex items-end gap-2 group", isCurrentUser && "justify-end")}>
             {!isCurrentUser && (
-                <Avatar className="h-8 w-8">
+                <Avatar className="h-8 w-8 shrink-0">
                     <AvatarImage src={message.userPhotoURL} />
                     <AvatarFallback>{message.userName?.charAt(0) ?? 'U'}</AvatarFallback>
                 </Avatar>
             )}
             <div
                 className={cn(
-                    "max-w-xs md:max-w-md lg:max-w-lg p-3 rounded-lg flex flex-col",
+                    "max-w-[70%] p-3 rounded-xl flex flex-col",
                     isCurrentUser
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted"
+                        ? "bg-primary text-primary-foreground rounded-br-none"
+                        : "bg-muted rounded-bl-none"
                 )}
             >
-                {!isCurrentUser && <p className="text-xs font-bold mb-1">{message.userName}</p>}
+                {!isCurrentUser && <p className="text-xs font-bold mb-1 text-primary">{message.userName}</p>}
                 
                 {message.imageUrl && (
-                     <a href={message.imageUrl} target="_blank" rel="noopener noreferrer">
+                     <a href={message.imageUrl} target="_blank" rel="noopener noreferrer" className="mb-2">
                         <img 
                             src={message.imageUrl} 
-                            alt="Chat image" 
-                            className="rounded-md max-w-full h-auto cursor-pointer"
+                            alt="Chat attachment" 
+                            className="rounded-lg max-w-full h-auto cursor-pointer border-2 border-background"
                             style={{ maxHeight: '300px' }}
                         />
                      </a>
                 )}
-                {message.text && <p className="whitespace-pre-wrap">{message.text}</p>}
-                
-                <p className={cn(
-                    "text-xs mt-2 opacity-70",
-                    isCurrentUser ? "text-right" : "text-left"
-                )}>
-                    {format(messageDate, 'p')}
-                </p>
+                {message.text && <p className="whitespace-pre-wrap leading-relaxed">{message.text}</p>}
             </div>
+             <p className={cn(
+                "text-[10px] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity",
+                isCurrentUser ? "mr-2" : "ml-2"
+            )}>
+                {format(messageDate, 'p')}
+            </p>
              {isCurrentUser && (
-                <Avatar className="h-8 w-8">
+                <Avatar className="h-8 w-8 shrink-0">
                     <AvatarImage src={message.userPhotoURL} />
                     <AvatarFallback>{message.userName?.charAt(0) ?? 'U'}</AvatarFallback>
                 </Avatar>
@@ -65,3 +64,4 @@ export function ChatMessage({ message, currentUserId }: ChatMessageProps) {
         </div>
     );
 }
+

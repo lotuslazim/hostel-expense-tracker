@@ -26,26 +26,24 @@ interface ChatProps {
 function ChatSkeleton() {
     return (
         <div className="flex flex-col h-full">
-            {/* Header Skeleton */}
-            <div className="p-4 border-b">
-                <Skeleton className="h-6 w-1/4" />
-            </div>
-            {/* Message List Skeleton */}
-            <div className="flex-grow p-4 space-y-4">
+            <div className="flex-grow p-4 space-y-6">
                 <div className="flex items-end gap-2">
                     <Skeleton className="h-8 w-8 rounded-full" />
-                    <Skeleton className="h-16 w-3/5 rounded-lg" />
+                    <Skeleton className="h-16 w-3/5 rounded-xl" />
                 </div>
                 <div className="flex items-end gap-2 justify-end">
-                    <Skeleton className="h-24 w-1/2 rounded-lg" />
+                    <Skeleton className="h-24 w-1/2 rounded-xl" />
                     <Skeleton className="h-8 w-8 rounded-full" />
                 </div>
                  <div className="flex items-end gap-2">
                     <Skeleton className="h-8 w-8 rounded-full" />
-                    <Skeleton className="h-12 w-2/5 rounded-lg" />
+                    <Skeleton className="h-12 w-2/5 rounded-xl" />
+                </div>
+                 <div className="flex items-end gap-2 justify-end">
+                    <Skeleton className="h-16 w-3/4 rounded-xl" />
+                    <Skeleton className="h-8 w-8 rounded-full" />
                 </div>
             </div>
-            {/* Input Skeleton */}
             <div className="p-4 border-t">
                 <div className="flex items-center gap-2">
                     <Skeleton className="flex-grow h-10 rounded-lg" />
@@ -65,7 +63,7 @@ export function Chat({ groupId, currentUser }: ChatProps) {
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [isSending, setIsSending] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const scrollAreaRef = useRef<HTMLDivElement>(null);
+    const scrollAreaViewportRef = useRef<HTMLDivElement>(null);
 
     const messagesQuery = useMemo(() => {
         return query(
@@ -77,9 +75,9 @@ export function Chat({ groupId, currentUser }: ChatProps) {
     const { data: messages, isLoading } = useCollection<ChatMessageType>(messagesQuery);
     
     useEffect(() => {
-      if (scrollAreaRef.current) {
-        scrollAreaRef.current.scrollTo({
-            top: scrollAreaRef.current.scrollHeight,
+      if (scrollAreaViewportRef.current) {
+        scrollAreaViewportRef.current.scrollTo({
+            top: scrollAreaViewportRef.current.scrollHeight,
             behavior: 'smooth'
         });
       }
@@ -149,13 +147,13 @@ export function Chat({ groupId, currentUser }: ChatProps) {
     };
 
     return (
-        <Card className="h-[calc(100vh-12rem)] flex flex-col">
-            <CardHeader>
+        <Card className="h-[calc(100vh-12rem)] flex flex-col shadow-lg">
+            <CardHeader className="border-b">
                 <CardTitle>Group Chat</CardTitle>
             </CardHeader>
             <CardContent className="flex-grow p-0 overflow-hidden">
-                <ScrollArea className="h-full" ref={scrollAreaRef}>
-                     <div className="p-4 space-y-4">
+                <ScrollArea className="h-full" viewportRef={scrollAreaViewportRef}>
+                     <div className="p-4 sm:p-6 space-y-6">
                         {isLoading ? (
                            <ChatSkeleton />
                         ) : messages && messages.length > 0 ? (
@@ -164,21 +162,25 @@ export function Chat({ groupId, currentUser }: ChatProps) {
                             ))
                         ) : (
                             <div className="flex items-center justify-center h-full text-muted-foreground">
-                                <p>No messages yet. Start the conversation!</p>
+                                <div className="text-center">
+                                    <MessageSquare className="h-12 w-12 mx-auto text-muted" />
+                                    <p className="mt-4">No messages yet.</p>
+                                    <p className="text-sm">Start the conversation!</p>
+                                </div>
                             </div>
                         )}
                     </div>
                 </ScrollArea>
             </CardContent>
-            <CardFooter className="p-4 border-t">
+            <CardFooter className="p-2 sm:p-4 border-t bg-muted/50">
                 <div className="flex flex-col w-full gap-2">
                     {imagePreview && (
-                        <div className="relative w-24 h-24">
-                            <img src={imagePreview} alt="Preview" className="rounded-md object-cover w-full h-full" />
+                        <div className="relative w-24 h-24 ml-2">
+                            <img src={imagePreview} alt="Preview" className="rounded-md object-cover w-full h-full border" />
                             <Button
                                 variant="destructive"
                                 size="icon"
-                                className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                                className="absolute -top-2 -right-2 h-6 w-6 rounded-full shadow-md"
                                 onClick={clearImageSelection}
                             >
                                 <X className="h-4 w-4" />
@@ -186,14 +188,6 @@ export function Chat({ groupId, currentUser }: ChatProps) {
                         </div>
                     )}
                     <div className="flex items-center gap-2">
-                        <Input
-                            type="text"
-                            placeholder="Type a message..."
-                            value={newMessage}
-                            onChange={(e) => setNewMessage(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && !isSending && handleSendMessage()}
-                            disabled={isSending}
-                        />
                         <input
                             type="file"
                             ref={fileInputRef}
@@ -202,14 +196,24 @@ export function Chat({ groupId, currentUser }: ChatProps) {
                             onChange={handleFileChange}
                         />
                          <Button
-                            variant="outline"
+                            variant="ghost"
                             size="icon"
+                            className="shrink-0"
                             onClick={() => fileInputRef.current?.click()}
                             disabled={isSending}
                         >
-                            <ImageIcon className="h-5 w-5" />
+                            <ImageIcon className="h-5 w-5 text-muted-foreground" />
                         </Button>
-                        <Button onClick={handleSendMessage} disabled={isSending}>
+                        <Input
+                            type="text"
+                            placeholder="Type a message..."
+                            className="h-10 bg-background"
+                            value={newMessage}
+                            onChange={(e) => setNewMessage(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && !isSending && handleSendMessage()}
+                            disabled={isSending}
+                        />
+                        <Button onClick={handleSendMessage} disabled={isSending || (!newMessage.trim() && !imageFile)} size="icon" className="shrink-0">
                             {isSending ? <Loader2 className="animate-spin" /> : <Send />}
                         </Button>
                     </div>
