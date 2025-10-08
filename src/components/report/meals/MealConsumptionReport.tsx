@@ -11,10 +11,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, Utensils, ShoppingCart } from "lucide-react";
+import { ChevronDown, Utensils, ShoppingCart, LeafyGreen } from "lucide-react";
 import { MonthSwitcher } from "../month-switcher";
 import { Table, TableBody, TableCell, TableHeader, TableRow, TableHead } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 
 function ReportSkeleton() {
     return (
@@ -37,12 +38,6 @@ function ReportSkeleton() {
              </div>
         </div>
     )
-}
-
-interface ProcessedActivity {
-    date: string;
-    activities: (MealLog | Purchase)[];
-    type: 'meal' | 'purchase';
 }
 
 export function MealConsumptionReport() {
@@ -81,27 +76,26 @@ export function MealConsumptionReport() {
             const memberPurchases = purchases.filter(purchase => purchase.userId === member.id);
             
             const totalMealCount = memberMeals.reduce((sum, meal) => sum + meal.mealNumber, 0);
+            const totalFoodExpenses = memberPurchases.reduce((sum, p) => sum + p.cost, 0);
 
-            const allActivities = [
-                ...memberMeals.map(m => ({ ...m, type: 'meal' })),
-                ...memberPurchases.map(p => ({ ...p, type: 'purchase' }))
-            ];
-
-            const activitiesByDate = allActivities.reduce((acc, activity) => {
-                const dateStr = format((activity.date as Timestamp).toDate(), 'yyyy-MM-dd');
+            const mealsByDate = memberMeals.reduce((acc, meal) => {
+                const dateStr = format((meal.date as Timestamp).toDate(), 'yyyy-MM-dd');
                 if (!acc[dateStr]) {
-                    acc[dateStr] = { date: dateStr, activities: [] };
+                    acc[dateStr] = { date: dateStr, meals: [] };
                 }
-                acc[dateStr].activities.push(activity);
+                acc[dateStr].meals.push(meal);
                 return acc;
-            }, {} as Record<string, { date: string, activities: any[] }>);
+            }, {} as Record<string, { date: string, meals: MealLog[] }>);
 
-            const sortedActivitiesByDate = Object.values(activitiesByDate).sort((a,b) => b.date.localeCompare(a.date));
+            const sortedMealsByDate = Object.values(mealsByDate).sort((a,b) => b.date.localeCompare(a.date));
+            const sortedPurchases = memberPurchases.sort((a,b) => (b.date.toMillis()) - (a.date.toMillis()));
 
             return {
                 ...member,
                 totalMealCount,
-                dailyActivities: sortedActivitiesByDate,
+                totalFoodExpenses,
+                dailyMeals: sortedMealsByDate,
+                monthlyPurchases: sortedPurchases,
             }
         });
     }, [members, meals, purchases]);
@@ -134,9 +128,14 @@ export function MealConsumptionReport() {
                                     </Avatar>
                                     <div>
                                         <p className="font-bold text-lg">{member.displayName}</p>
-                                        <p className="text-muted-foreground">
-                                            Total Meals Logged: <span className="font-semibold text-primary">{member.totalMealCount}</span>
-                                        </p>
+                                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                                            <span>
+                                                Total Meals: <span className="font-semibold text-primary">{member.totalMealCount}</span>
+                                            </span>
+                                             <span>
+                                                Food Expenses: <span className="font-semibold text-primary">৳{member.totalFoodExpenses.toFixed(2)}</span>
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                                 <CollapsibleTrigger asChild>
@@ -146,46 +145,68 @@ export function MealConsumptionReport() {
                                 </CollapsibleTrigger>
                              </div>
                              <CollapsibleContent>
-                                <div className="px-4 pb-4">
-                                    {member.dailyActivities.length > 0 ? (
-                                        member.dailyActivities.map(day => (
-                                            <div key={day.date} className="mt-4 p-4 border rounded-lg bg-muted/50">
-                                                <h4 className="font-semibold mb-2">{format(new Date(day.date), "MMMM d, yyyy")}</h4>
-                                                <Table>
-                                                    <TableHeader>
-                                                        <TableRow>
-                                                            <TableHead>Type</TableHead>
-                                                            <TableHead>Details</TableHead>
-                                                            <TableHead className="text-right">Quantity / Cost</TableHead>
-                                                        </TableRow>
-                                                    </TableHeader>
-                                                     <TableBody>
-                                                        {day.activities.map(activity => (
-                                                            <TableRow key={activity.id}>
-                                                                <TableCell>
-                                                                    {activity.type === 'meal' ? 
-                                                                        <Badge variant="secondary" className="capitalize"><Utensils className="h-3 w-3 mr-1"/>{activity.mealType}</Badge> : 
-                                                                        <Badge variant="outline"><ShoppingCart className="h-3 w-3 mr-1" />Purchase</Badge>
-                                                                    }
-                                                                </TableCell>
-                                                                <TableCell>
-                                                                    {activity.type === 'meal' ? activity.itemName || `Meal Log` : activity.itemName}
-                                                                </TableCell>
-                                                                 <TableCell className="text-right">
-                                                                     {activity.type === 'meal' ? `x ${activity.mealNumber}` : `৳${activity.cost.toFixed(2)}`}
-                                                                 </TableCell>
-                                                            </TableRow>
+                                <div className="px-4 pb-4 space-y-6">
+                                    {/* Daily Meal Section */}
+                                    <div>
+                                        <h3 className="text-lg font-semibold flex items-center gap-2 mb-2"><Utensils /> Daily Meal Log</h3>
+                                        {member.dailyMeals.length > 0 ? (
+                                            member.dailyMeals.map(day => (
+                                                <div key={day.date} className="mt-2 p-3 border rounded-lg bg-muted/50">
+                                                    <h4 className="font-semibold mb-2">{format(new Date(day.date), "MMMM d, yyyy")}</h4>
+                                                    <div className="space-y-1 text-sm">
+                                                        {day.meals.map(meal => (
+                                                            <div key={meal.id} className="flex justify-between items-center">
+                                                                <div className="flex items-center gap-2">
+                                                                    <Badge variant="secondary" className="capitalize w-24 justify-center">{meal.mealType}</Badge>
+                                                                    <span>{meal.itemName || `Meal Log`}</span>
+                                                                </div>
+                                                                <span>x {meal.mealNumber}</span>
+                                                            </div>
                                                         ))}
-                                                    </TableBody>
-                                                </Table>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="text-center py-6 text-muted-foreground">
+                                                <LeafyGreen className="h-8 w-8 mx-auto mb-2" />
+                                                <p>No meals logged by {member.displayName} this month.</p>
                                             </div>
-                                        ))
-                                    ) : (
-                                        <div className="text-center py-8 text-muted-foreground">
-                                            <Utensils className="h-8 w-8 mx-auto mb-2" />
-                                            <p>No activity logged by {member.displayName} this month.</p>
-                                        </div>
-                                    )}
+                                        )}
+                                    </div>
+
+                                    <Separator />
+                                    
+                                    {/* Monthly Purchases Section */}
+                                    <div>
+                                        <h3 className="text-lg font-semibold flex items-center gap-2 mb-2"><ShoppingCart /> Monthly Food Purchases</h3>
+                                        {member.monthlyPurchases.length > 0 ? (
+                                            <Table>
+                                                <TableHeader>
+                                                    <TableRow>
+                                                        <TableHead>Date</TableHead>
+                                                        <TableHead>Item Name</TableHead>
+                                                        <TableHead>Qty</TableHead>
+                                                        <TableHead className="text-right">Cost</TableHead>
+                                                    </TableRow>
+                                                </TableHeader>
+                                                <TableBody>
+                                                    {member.monthlyPurchases.map(purchase => (
+                                                        <TableRow key={purchase.id}>
+                                                            <TableCell>{format(purchase.date.toDate(), 'MMM dd')}</TableCell>
+                                                            <TableCell>{purchase.itemName}</TableCell>
+                                                            <TableCell>{purchase.quantity} {purchase.unit}</TableCell>
+                                                            <TableCell className="text-right">৳{purchase.cost.toFixed(2)}</TableCell>
+                                                        </TableRow>
+                                                    ))}
+                                                </TableBody>
+                                            </Table>
+                                        ) : (
+                                             <div className="text-center py-6 text-muted-foreground">
+                                                <ShoppingCart className="h-8 w-8 mx-auto mb-2" />
+                                                <p>No food items purchased by {member.displayName} this month.</p>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                              </CollapsibleContent>
                         </Collapsible>
