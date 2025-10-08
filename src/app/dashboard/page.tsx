@@ -13,6 +13,7 @@ import { doc, collection, query, where, Timestamp, orderBy } from "firebase/fire
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Expense } from "@/lib/types";
 import { addMonths, subMonths, startOfMonth, endOfMonth } from "date-fns";
+import { SendReminderCard } from "@/components/dashboard/SendReminderCard";
 
 function DashboardSkeleton() {
   return (
@@ -26,6 +27,7 @@ function DashboardSkeleton() {
           <Skeleton className="h-32 w-full rounded-lg" />
           <Skeleton className="h-80 w-full rounded-lg" />
           <Skeleton className="h-[28rem] w-full rounded-lg" />
+          <Skeleton className="h-48 w-full rounded-lg" />
         </div>
         <div className="lg:col-span-2">
            <Skeleton className="h-[calc(100vh-10rem)] w-full rounded-lg" />
@@ -106,6 +108,7 @@ export default function DashboardPage() {
                         <DateCard date={selectedDate} setDate={setSelectedDate} />
                         <LogMealCard selectedDate={selectedDate} />
                         <AddExpenseCard selectedDate={selectedDate} />
+                        <SendReminderCard />
                     </div>
                     <div className="lg:col-span-2">
                         <ActivityFeed 
@@ -122,3 +125,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    

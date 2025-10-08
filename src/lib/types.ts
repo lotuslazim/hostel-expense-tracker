@@ -43,6 +43,15 @@ export interface ChatMessage {
   groupId: string;
 }
 
+export interface Reminder {
+    id: string;
+    groupId: string;
+    senderId: string;
+    senderName: string;
+    messageText: string;
+    createdAt: Timestamp;
+}
+
 export interface FoodItem {
     id: string;
     name: string;
@@ -84,3 +93,6 @@ export interface Item {
   date: Date;
 }
 
+
+
+    

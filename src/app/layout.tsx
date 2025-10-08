@@ -1,3 +1,4 @@
+
 import type { Metadata } from "next";
 import { PT_Sans, Poppins } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
@@ -7,6 +8,7 @@ import "./globals.css";
 import { FirebaseClientProvider } from "@/firebase/client-provider";
 import { I18nProvider } from "@/i18n/client-provider";
 import { cn } from "@/lib/utils";
+import { ReminderListener } from "@/components/app/ReminderListener";
 
 const ptSans = PT_Sans({
   subsets: ["latin"],
@@ -45,6 +47,7 @@ export default function RootLayout({
               <FirebaseClientProvider>
                 {children}
                 <Toaster />
+                <ReminderListener />
               </FirebaseClientProvider>
             </InventoryProvider>
           </ThemeProvider>
@@ -53,3 +56,5 @@ export default function RootLayout({
     </html>
   );
 }
+
+    

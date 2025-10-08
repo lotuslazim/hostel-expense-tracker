@@ -8,11 +8,21 @@
       "description": "Represents a group or flat within the NourishTrack application, enabling shared meal and expense tracking.",
       "properties": {
         "id": { "type": "string", "description": "Unique identifier for the group entity." },
-        "name": { "type": "string", "description": "The name of the group or flat." },
-        "createdAt": { "type": "string", "format": "date-time", "description": "The timestamp when the group was created." },
-        "adminId": { "type": "string", "description": "The ID of the user who created the group." }
+        "groupName": { "type": "string", "description": "The name of the group or flat." },
+        "invitationCode": { "type": "string", "description": "Unique code used for users to join the group." },
+        "adminId": { "type": "string", "description": "Reference to User who is the administrator of the group." },
+        "settings": {
+          "type": "object",
+          "description": "Customizable settings for the group.",
+          "properties": {
+            "mealTypes": { "type": "array", "items": { "type": "string" }, "description": "List of available meal types for logging." },
+            "isMealItemNameRequired": { "type": "boolean", "description": "Whether the item name for a meal is mandatory." },
+            "isExpenseDescriptionRequired": { "type": "boolean", "description": "Whether the description for an expense is mandatory." },
+            "isUtilityReceiptRequired": { "type": "boolean", "description": "Whether a receipt upload is mandatory for utility expenses." }
+          }
+        }
       },
-      "required": ["id", "name", "createdAt", "adminId"]
+      "required": ["id", "groupName", "invitationCode", "adminId"]
     },
     "User": {
       "$schema": "http://json-schema.org/draft-07/schema#",
@@ -24,7 +34,8 @@
         "email": { "type": "string", "description": "The user's email address.", "format": "email" },
         "displayName": { "type": "string", "description": "The user's display name." },
         "photoURL": { "type": "string", "format": "uri", "description": "URL of the user's profile picture." },
-        "role": { "type": "string", "enum": ["admin", "user"], "description": "The role of the user."}
+        "groupId": { "type": ["string", "null"], "description": "Reference to Group that the user belongs to." },
+        "isAdmin": { "type": "boolean", "description": "Indicates whether the user is an administrator of a group." }
       },
       "required": ["id", "email"]
     },
@@ -34,49 +45,49 @@
       "type": "object",
       "description": "Represents a member within a group, containing their email and role.",
       "properties": {
-        "id": { "type": "string", "description": "The document ID, same as the user's UID." },
-        "name": { "type": "string" },
+        "id": { "type": "string" },
         "email": { "type": "string", "description": "The member's email address.", "format": "email" },
-        "role": { "type": "string", "enum": ["admin", "user"], "description": "The role of the member within the group." },
-        "joinedAt": { "type": "string", "description": "The timestamp when the member joined the group.", "format": "date-time" },
-        "groupId": { "type": "string", "description": "The ID of the group the member belongs to." },
-        "status": { "type": "string", "enum": ["active", "inactive"], "description": "The status of the member." }
+        "displayName": { "type": "string", "description": "The user's display name." },
+        "photoURL": { "type": "string", "format": "uri", "description": "URL of the member's profile picture." },
+        "role": { "type": "string", "description": "The role of the member within the group (e.g., 'admin', 'member')." },
+        "joinedAt": { "type": "string", "description": "The timestamp when the member joined the group.", "format": "date-time" }
       },
-      "required": ["id", "name", "email", "role", "joinedAt", "groupId", "status"]
+      "required": ["id", "email", "displayName", "role", "joinedAt"]
     },
-    "Meal": {
+    "MealLog": {
       "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Meal",
+      "title": "MealLog",
       "type": "object",
       "description": "Represents a meal log entry for a user.",
       "properties": {
-        "id": { "type": "string" },
-        "memberId": { "type": "string" },
-        "mealType": { "type": "string", "enum": ["breakfast", "lunch", "dinner"] },
-        "items": { "type": "array", "items": { "type": "string"} },
-        "quantity": { "type": "number" },
+        "id": { "type": "string" }, "groupId": { "type": "string" }, "userId": { "type": "string" }, "userName": { "type": "string" },
+        "mealType": { "type": "string", "enum": ["breakfast", "lunch", "dinner", "snack"] },
         "date": { "type": "string", "format": "date-time" },
+        "description": { "type": "string" },
+        "mealNumber": { "type": "number" },
         "createdAt": { "type": "string", "format": "date-time" },
-        "groupId": { "type": "string" }
+        "itemName": { "type": ["string", "null"] }
       },
-      "required": ["id", "memberId", "mealType", "date", "createdAt", "groupId"]
+      "required": ["id", "groupId", "userId", "userName", "mealType", "date", "description", "mealNumber", "createdAt"]
     },
     "Expense": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Expense",
       "type": "object",
-      "description": "Represents a shared expense incurred for the group.",
+      "description": "Represents a shared expense incurred for the group. This includes both food purchases and utility bills.",
       "properties": {
         "id": { "type": "string", "description": "Unique identifier for the expense." }, 
-        "amount": { "type": "number", "description": "The total amount of the expense." },
-        "category": { "type": "string", "description": "The category of the expense." },
-        "description": { "type": "string", "description": "A description of the expense." },
-        "date": { "type": "string", "format": "date-time", "description": "The date the expense was incurred." },
-        "createdAt": { "type": "string", "format": "date-time", "description": "The timestamp when the expense was logged." },
         "groupId": { "type": "string", "description": "The ID of the group this expense belongs to." }, 
-        "adminId": { "type": "string", "description": "The ID of the admin who logged the expense." }
+        "userId": { "type": "string", "description": "The ID of the user who logged the expense." }, 
+        "userName": { "type": "string", "description": "The display name of the user who logged the expense." },
+        "expenseItem": { "type": "string", "description": "A structured description of the expense (e.g., 'Rice, Oil' or 'Electricity Bill')." }, 
+        "amount": { "type": "number", "description": "The total amount of the expense." }, 
+        "date": { "type": "string", "format": "date-time", "description": "The date the expense was incurred." },
+        "category": { "type": "string", "enum": ["Food & Groceries", "Electricity", "Gas", "Other"], "description": "The category of the expense." },
+        "receiptPhotoUrl": { "type": "string", "format": "uri", "description": "An optional URL for a photo of the receipt." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "The timestamp when the expense was logged." }
       },
-      "required": ["id", "amount", "category", "date", "createdAt", "groupId", "adminId"]
+      "required": ["id", "groupId", "userId", "userName", "expenseItem", "amount", "date", "category", "createdAt"]
     },
     "ChatMessage": {
       "$schema": "http://json-schema.org/draft-07/schema#",
@@ -85,29 +96,65 @@
       "description": "Represents a chat message within a group.",
       "properties": {
         "id": { "type": "string" },
-        "senderId": { "type": "string" },
-        "content": { "type": "string" },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "groupId": { "type": "string" }
+        "groupId": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "userPhotoURL": { "type": "string", "format": "uri" },
+        "text": { "type": "string" },
+        "imageUrl": { "type": "string", "format": "uri" },
+        "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["id", "senderId", "content", "createdAt", "groupId"]
+      "required": ["id", "groupId", "userId", "userName", "createdAt"]
     },
-    "PurchasedItem": {
+    "FoodItem": {
       "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "PurchasedItem",
+      "title": "FoodItem",
       "type": "object",
-      "description": "Represents a single purchase of an item.",
+      "description": "Represents a master food item in the inventory, including its monthly required quantity.",
       "properties": {
         "id": { "type": "string" },
+        "groupId": { "type": "string" },
+        "name": { "type": "string" },
+        "requiredQuantity": { "type": "number" },
+        "unit": { "type": "string" },
+        "category": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "groupId", "name", "requiredQuantity", "unit", "category", "createdAt"]
+    },
+    "Purchase": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Purchase",
+      "type": "object",
+      "description": "Represents a single purchase of a food item.",
+      "properties": {
+        "id": { "type": "string" },
+        "groupId": { "type": "string" },
+        "itemId": { "type": "string", "description": "The ID of the FoodItem this purchase is for." },
         "itemName": { "type": "string" },
         "quantity": { "type": "number" },
+        "cost": { "type": "number" },
         "unitPrice": { "type": "number" },
-        "totalCost": { "type": "number" },
-        "purchasedAt": { "type": "string", "format": "date-time" },
-        "groupId": { "type": "string" },
-        "adminId": { "type": "string" }
+        "date": { "type": "string", "format": "date-time" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" }
       },
-      "required": ["id", "itemName", "quantity", "unitPrice", "totalCost", "purchasedAt", "groupId", "adminId"]
+      "required": ["id", "groupId", "itemId", "itemName", "quantity", "cost", "unitPrice", "date", "userId", "userName"]
+    },
+    "Reminder": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Reminder",
+        "type": "object",
+        "description": "Represents a reminder message sent to all group members.",
+        "properties": {
+            "id": { "type": "string" },
+            "groupId": { "type": "string" },
+            "senderId": { "type": "string" },
+            "senderName": { "type": "string" },
+            "messageText": { "type": "string" },
+            "createdAt": { "type": "string", "format": "date-time" }
+        },
+        "required": ["id", "groupId", "senderId", "senderName", "messageText", "createdAt"]
     }
   },
   "auth": { "providers": ["password", "google"] },
@@ -115,14 +162,18 @@
     "rules": {
       "profilePictures/{userId}": {
         "read": "allow read",
-        "write": "allow write: if request.auth != null && request.auth.uid == userId;"
+        "write": "allow write: if request.auth != null && request.auth.uid == userId && request.auth.token.email_verified == true;"
       },
-      "groupImages/{groupId}/{imageId}": {
-        "read": "allow read: if request.auth != null && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid));",
-        "write": "allow write: if request.auth != null && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid));"
+      "chatImages/{groupId}/{imageId}": {
+        "read": "allow read: if request.auth != null && request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+        "write": "allow write: if request.auth != null && request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
+      },
+       "receipts/{groupId}/{receiptId}": {
+        "read": "allow read: if request.auth != null && request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+        "write": "allow write: if request.auth != null && request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))"
       }
     },
-    "reasoning": "Storage rules are set to allow any member of a group to read and write images to folders scoped to their `groupId`. Profile pictures are public to read but can only be written by the owner."
+    "reasoning": "Storage rules are set to allow any authenticated member of a group to read and write images to folders scoped to their specific `groupId`. Profile pictures are public to read but can only be written by the owner of that profile. This prevents users from one group from accessing the images of another group and users from editing other users profile pictures. A check for request.auth.token.email_verified ensures only verified users can write."
   },
   "firestore": {
     "structure": [
@@ -130,12 +181,12 @@
         "path": "/users/{userId}",
         "definition": {
           "entityName": "User", "schema": { "$ref": "#/entities/User" },
-          "rules": {
-            "read": "allow read;",
-            "list": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';",
-            "write": "request.auth.uid == userId || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';"
+          "rules": { 
+              "read": "request.auth.uid == userId || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true",
+              "write": "request.auth.uid == userId || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true",
+              "list": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true"
           },
-          "description": "Stores user profiles. Admins can list and write to any user document. Users can only write to their own."
+          "description": "Stores user profile information. Admins can list all users. Users can only read/write their own document unless they are an admin."
         }
       },
       {
@@ -143,12 +194,11 @@
         "definition": {
           "entityName": "Group", "schema": { "$ref": "#/entities/Group" },
           "rules": {
-            "read": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid));",
-            "list": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';",
-            "create": "request.auth.uid != null;",
-            "update, delete": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';"
+            "read": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "write": "request.auth.token.email_verified == true && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true",
+            "list": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true"
           },
-          "description": "Stores group information. Readable by members. Listable and modifiable only by admins. Any authenticated user can create a group."
+          "description": "Stores group information. Readable by members, writable and listable only by admins."
         }
       },
       {
@@ -156,22 +206,22 @@
         "definition": {
           "entityName": "Member", "schema": { "$ref": "#/entities/Member" },
           "rules": {
-            "read, list": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid));",
-            "write": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';"
+            "read": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "write": "request.auth.token.email_verified == true && (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true || request.auth.uid == memberId)"
           },
-          "description": "Stores group member info. Readable by any group member, but only writable by an admin."
+          "description": "Stores basic info about group members. Readable by all members. Writable by admins or the member themselves. Email verification required."
         }
       },
       {
         "path": "/groups/{groupId}/meals/{mealId}",
         "definition": {
-          "entityName": "Meal", "schema": { "$ref": "#/entities/Meal" },
-          "rules": {
-            "read, list": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid));",
-            "create": "request.resource.data.memberId == request.auth.uid;",
-            "update, delete": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';"
+          "entityName": "MealLog", "schema": { "$ref": "#/entities/MealLog" },
+          "rules": { 
+            "list, get": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "create": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && request.resource.data.userId == request.auth.uid",
+            "update, delete": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && resource.data.userId == request.auth.uid"
           },
-          "description": "Meal logs. Readable by members. Members can only create their own meals. Only admins can update/delete."
+          "description": "Stores meal logs. Accessible only by members of the group. Users can only create/edit their own meals. Email verification required."
         }
       },
       {
@@ -179,10 +229,12 @@
         "definition": {
           "entityName": "Expense", "schema": { "$ref": "#/entities/Expense" },
           "rules": {
-            "read, list": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid));",
-            "write": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';"
+            "list, get": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "create": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && request.resource.data.userId == request.auth.uid",
+            "update, delete": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && resource.data.userId == request.auth.uid",
+            "list_all": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true"
           },
-          "description": "Expense logs. Readable by members, but only writable by an admin."
+          "description": "Stores all expense entries. Accessible only by members of the group. Users can only create/edit their own expenses. Admins can list all expenses across all groups."
         }
       },
       {
@@ -190,24 +242,49 @@
         "definition": {
           "entityName": "ChatMessage", "schema": { "$ref": "#/entities/ChatMessage" },
           "rules": {
-            "read, list": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid));",
-            "create": "request.resource.data.senderId == request.auth.uid;"
+            "list, get": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "create": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && request.resource.data.userId == request.auth.uid"
           },
-          "description": "Chat messages. Readable by members. Members can only create messages as themselves."
+          "description": "Stores chat messages. Accessible only by members of the group. Users can only create their own messages. Email verification required."
+        }
+      },
+       {
+        "path": "/groups/{groupId}/inventory/{itemId}",
+        "definition": {
+          "entityName": "FoodItem", "schema": { "$ref": "#/entities/FoodItem" },
+          "rules": {
+            "list, get": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "create, update, delete": "request.auth.token.email_verified == true && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true"
+          },
+          "description": "Stores master food item list. Readable by all members, writable only by admins. Email verification required."
         }
       },
       {
-        "path": "/groups/{groupId}/purchasedItems/{itemId}",
+        "path": "/groups/{groupId}/purchases/{purchaseId}",
         "definition": {
-          "entityName": "PurchasedItem", "schema": { "$ref": "#/entities/PurchasedItem" },
+          "entityName": "Purchase", "schema": { "$ref": "#/entities/Purchase" },
           "rules": {
-            "read, list": "exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid));",
-            "write": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';"
+            "list, get": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "create": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && request.resource.data.userId == request.auth.uid",
+            "update, delete": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && resource.data.userId == request.auth.uid"
           },
-          "description": "Purchase records. Readable by members, but only writable by an admin."
+          "description": "Stores individual purchase records. Accessible by all members. Users can only create/edit their own purchases. Email verification required."
+        }
+      },
+      {
+        "path": "/groups/{groupId}/reminders/{reminderId}",
+        "definition": {
+          "entityName": "Reminder", "schema": { "$ref": "#/entities/Reminder" },
+          "rules": {
+            "list, get": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "create": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && request.resource.data.senderId == request.auth.uid"
+          },
+          "description": "Stores reminders for a group. Any verified group member can create and read reminders."
         }
       }
     ],
-    "reasoning": "This structure enforces security by scoping all group-related data within a group's subcollections. The rule `exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))` verifies that a user is a member of the group they are trying to access. The global `users` collection has a `role` field ('admin' or 'user'). This role is checked for all write operations on sensitive or group-wide collections, ensuring only admins can modify critical data. Regular users have more limited permissions, such as only being able to create their own meals or messages. This provides a clear and secure role-based access control system."
+    "reasoning": "This structure enforces security by scoping all group-related data within a group's subcollections. The rule `exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))` is used consistently to verify that the requesting user is a member of the group they are trying to access. The `isAdmin` flag on a user's document grants them broader read access to list all users and groups. Adding `request.auth.token.email_verified == true` to the rules ensures that only users who have verified their email can access or modify data, enhancing security. This is a secure and scalable pattern that prevents unauthorized data access. Firestore's default-deny policy ensures any path not explicitly granted access is automatically blocked."
   }
 }
+
+    
