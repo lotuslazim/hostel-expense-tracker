@@ -1,12 +1,66 @@
+
+"use client";
+
 import { Chat } from "@/components/chat/Chat";
 import { AppHeader } from "@/components/app/header";
+import { useUser, useDoc, useFirebase } from "@/firebase";
+import { useMemo } from "react";
+import { doc } from "firebase/firestore";
+import { WelcomeCard } from "@/components/app/welcome-card";
+import { Skeleton } from "@/components/ui/skeleton";
+
+function ChatPageSkeleton() {
+    return (
+        <div className="flex flex-col h-[calc(100vh-12rem)]">
+            {/* Header Skeleton */}
+            <div className="p-4 border-b">
+                <Skeleton className="h-6 w-1/4" />
+            </div>
+            {/* Message List Skeleton */}
+            <div className="flex-grow p-4 space-y-4">
+                <div className="flex items-end gap-2">
+                    <Skeleton className="h-8 w-8 rounded-full" />
+                    <Skeleton className="h-16 w-3/5 rounded-lg" />
+                </div>
+                <div className="flex items-end gap-2 justify-end">
+                    <Skeleton className="h-24 w-1/2 rounded-lg" />
+                    <Skeleton className="h-8 w-8 rounded-full" />
+                </div>
+                 <div className="flex items-end gap-2">
+                    <Skeleton className="h-8 w-8 rounded-full" />
+                    <Skeleton className="h-12 w-2/5 rounded-lg" />
+                </div>
+            </div>
+            {/* Input Skeleton */}
+            <div className="p-4 border-t">
+                <div className="flex items-center gap-2">
+                    <Skeleton className="flex-grow h-10 rounded-lg" />
+                    <Skeleton className="h-10 w-10 rounded-lg" />
+                    <Skeleton className="h-10 w-20 rounded-lg" />
+                </div>
+            </div>
+        </div>
+    )
+}
+
 
 export default function ChatPage() {
+    const { firestore } = useFirebase();
+    const { user: currentUser, isUserLoading } = useUser();
+
+    const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
+    const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
+
+    const isLoading = isUserLoading || isCurrentUserDataLoading;
+    const groupId = currentUserData?.groupId;
+
     return (
     <div className="flex flex-col h-screen">
       <AppHeader />
-      <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8 overflow-auto">
-        <Chat />
+      <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8 overflow-hidden">
+        {isLoading ? <ChatPageSkeleton /> : 
+         !groupId ? <WelcomeCard /> :
+         <Chat groupId={groupId} currentUser={currentUser} />}
       </main>
     </div>
   );

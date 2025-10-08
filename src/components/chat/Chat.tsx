@@ -1,10 +1,221 @@
+
 "use client";
 
-export function Chat() {
-  return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Chat</h1>
-      <p>Chat interface goes here</p>
-    </div>
-  );
+import { useState, useMemo, useRef, useEffect } from "react";
+import { useCollection } from "@/firebase";
+import { collection, query, orderBy, addDoc, serverTimestamp, Timestamp } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { useFirebase } from "@/firebase";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
+import type { User } from 'firebase/auth';
+import type { ChatMessage as ChatMessageType } from "@/lib/types";
+import { Loader2, Send, Image as ImageIcon, X } from "lucide-react";
+import { ChatMessage } from "./ChatMessage";
+import imageCompression from "browser-image-compression";
+
+interface ChatProps {
+    groupId: string;
+    currentUser: User | null;
 }
+
+function ChatSkeleton() {
+    return (
+        <div className="flex flex-col h-full">
+            {/* Header Skeleton */}
+            <div className="p-4 border-b">
+                <Skeleton className="h-6 w-1/4" />
+            </div>
+            {/* Message List Skeleton */}
+            <div className="flex-grow p-4 space-y-4">
+                <div className="flex items-end gap-2">
+                    <Skeleton className="h-8 w-8 rounded-full" />
+                    <Skeleton className="h-16 w-3/5 rounded-lg" />
+                </div>
+                <div className="flex items-end gap-2 justify-end">
+                    <Skeleton className="h-24 w-1/2 rounded-lg" />
+                    <Skeleton className="h-8 w-8 rounded-full" />
+                </div>
+                 <div className="flex items-end gap-2">
+                    <Skeleton className="h-8 w-8 rounded-full" />
+                    <Skeleton className="h-12 w-2/5 rounded-lg" />
+                </div>
+            </div>
+            {/* Input Skeleton */}
+            <div className="p-4 border-t">
+                <div className="flex items-center gap-2">
+                    <Skeleton className="flex-grow h-10 rounded-lg" />
+                    <Skeleton className="h-10 w-10 rounded-lg" />
+                    <Skeleton className="h-10 w-20 rounded-lg" />
+                </div>
+            </div>
+        </div>
+    )
+}
+
+export function Chat({ groupId, currentUser }: ChatProps) {
+    const { firestore, storage } = useFirebase();
+    const { toast } = useToast();
+    const [newMessage, setNewMessage] = useState("");
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [isSending, setIsSending] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+    const messagesQuery = useMemo(() => {
+        return query(
+            collection(firestore, `groups/${groupId}/messages`),
+            orderBy("createdAt", "asc")
+        );
+    }, [firestore, groupId]);
+
+    const { data: messages, isLoading } = useCollection<ChatMessageType>(messagesQuery);
+    
+    useEffect(() => {
+      if (scrollAreaRef.current) {
+        scrollAreaRef.current.scrollTo({
+            top: scrollAreaRef.current.scrollHeight,
+            behavior: 'smooth'
+        });
+      }
+    }, [messages]);
+
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            try {
+                const compressedFile = await imageCompression(file, { maxSizeMB: 1, maxWidthOrHeight: 1024 });
+                setImageFile(compressedFile);
+                setImagePreview(URL.createObjectURL(compressedFile));
+            } catch (error) {
+                toast({ variant: "destructive", title: "Error compressing image." });
+            }
+        }
+    };
+    
+    const clearImageSelection = () => {
+        setImageFile(null);
+        setImagePreview(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+    };
+
+
+    const handleSendMessage = async () => {
+        if (!currentUser) return;
+        if (!newMessage.trim() && !imageFile) return;
+
+        setIsSending(true);
+
+        try {
+            let imageUrl: string | undefined = undefined;
+
+            if (imageFile) {
+                const imageRef = ref(storage, `chatImages/${groupId}/${Date.now()}_${imageFile.name}`);
+                const snapshot = await uploadBytes(imageRef, imageFile);
+                imageUrl = await getDownloadURL(snapshot.ref);
+            }
+
+            await addDoc(collection(firestore, `groups/${groupId}/messages`), {
+                text: newMessage.trim(),
+                imageUrl: imageUrl || null,
+                createdAt: serverTimestamp(),
+                userId: currentUser.uid,
+                userName: currentUser.displayName || currentUser.email?.split('@')[0],
+                userPhotoURL: currentUser.photoURL,
+                groupId,
+            });
+            
+            setNewMessage("");
+            clearImageSelection();
+
+        } catch (error) {
+            console.error("Error sending message:", error);
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Failed to send message. Please try again."
+            });
+        } finally {
+            setIsSending(false);
+        }
+    };
+
+    return (
+        <Card className="h-[calc(100vh-12rem)] flex flex-col">
+            <CardHeader>
+                <CardTitle>Group Chat</CardTitle>
+            </CardHeader>
+            <CardContent className="flex-grow p-0 overflow-hidden">
+                <ScrollArea className="h-full" ref={scrollAreaRef}>
+                     <div className="p-4 space-y-4">
+                        {isLoading ? (
+                           <ChatSkeleton />
+                        ) : messages && messages.length > 0 ? (
+                            messages.map(msg => (
+                                <ChatMessage key={msg.id} message={msg} currentUserId={currentUser?.uid ?? ''} />
+                            ))
+                        ) : (
+                            <div className="flex items-center justify-center h-full text-muted-foreground">
+                                <p>No messages yet. Start the conversation!</p>
+                            </div>
+                        )}
+                    </div>
+                </ScrollArea>
+            </CardContent>
+            <CardFooter className="p-4 border-t">
+                <div className="flex flex-col w-full gap-2">
+                    {imagePreview && (
+                        <div className="relative w-24 h-24">
+                            <img src={imagePreview} alt="Preview" className="rounded-md object-cover w-full h-full" />
+                            <Button
+                                variant="destructive"
+                                size="icon"
+                                className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                                onClick={clearImageSelection}
+                            >
+                                <X className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    )}
+                    <div className="flex items-center gap-2">
+                        <Input
+                            type="text"
+                            placeholder="Type a message..."
+                            value={newMessage}
+                            onChange={(e) => setNewMessage(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && !isSending && handleSendMessage()}
+                            disabled={isSending}
+                        />
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            className="hidden"
+                            accept="image/*"
+                            onChange={handleFileChange}
+                        />
+                         <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={isSending}
+                        >
+                            <ImageIcon className="h-5 w-5" />
+                        </Button>
+                        <Button onClick={handleSendMessage} disabled={isSending}>
+                            {isSending ? <Loader2 className="animate-spin" /> : <Send />}
+                        </Button>
+                    </div>
+                </div>
+            </CardFooter>
+        </Card>
+    );
+}
+
