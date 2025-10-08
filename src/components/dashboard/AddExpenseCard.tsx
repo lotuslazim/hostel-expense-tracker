@@ -136,38 +136,24 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   });
 
   const categoryValue = form.watch("category");
-  const purchasedItemsValue = form.watch("purchasedItems");
-  const prevCategoryRef = useRef<string | undefined>();
-
+  
   useEffect(() => {
-    setShowReceipt(categoryValue === 'Electricity' || categoryValue === 'Gas');
     const isFood = categoryValue === 'Food & Groceries';
+    const isUtility = categoryValue === 'Electricity' || categoryValue === 'Gas';
+
+    setShowReceipt(isUtility);
     setShowInventoryFields(isFood);
 
-    // This logic clears the purchasedItems array only when category changes FROM Food & Groceries
-    if (prevCategoryRef.current === 'Food & Groceries' && !isFood) {
-        form.setValue('purchasedItems', []);
+    // Automatically set expenseItem for non-'Other' categories
+    if (categoryValue === 'Electricity') {
+      form.setValue('expenseItem', 'Electricity Bill');
+    } else if (categoryValue === 'Gas') {
+      form.setValue('expenseItem', 'Gas Bill');
+    } else if (!isFood && categoryValue !== 'Other') {
+       form.setValue('expenseItem', '');
     }
 
-    let finalExpenseItem: string | undefined;
-    if (categoryValue === 'Food & Groceries') {
-       finalExpenseItem = purchasedItemsValue?.map(item => item.name).filter(Boolean).join(', ') || 'Groceries';
-    } else if (categoryValue === 'Electricity') {
-        finalExpenseItem = 'Electricity Bill';
-    } else if (categoryValue === 'Gas') {
-        finalExpenseItem = 'Gas Bill';
-    }
-    
-    // Only update the expenseItem if the category is not 'Other'
-    if (categoryValue !== 'Other') {
-        const currentExpenseItem = form.getValues('expenseItem');
-        if(finalExpenseItem !== undefined && finalExpenseItem !== currentExpenseItem) {
-          form.setValue('expenseItem', finalExpenseItem);
-        }
-    }
-    
-    prevCategoryRef.current = categoryValue;
-  }, [categoryValue, form, purchasedItemsValue]);
+  }, [categoryValue, form]);
 
   
   useEffect(() => {
@@ -287,9 +273,15 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
         const batch = writeBatch(firestore);
         const expenseRef = doc(collection(firestore, `groups/${groupId}/expenses`));
 
+        // Generate expenseItem string right before submission
+        let finalExpenseItem = values.expenseItem;
+        if (values.category === 'Food & Groceries') {
+            finalExpenseItem = values.purchasedItems?.map(item => item.name).filter(Boolean).join(', ') || 'Groceries';
+        }
+
         const expenseData = sanitizeFirestoreData({
             amount: values.amount,
-            expenseItem: values.expenseItem,
+            expenseItem: finalExpenseItem,
             category: values.category,
             receiptPhotoUrl: receiptUrl,
             userId: currentUser.uid,
@@ -580,5 +572,3 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     </Card>
   );
 }
-
-    
