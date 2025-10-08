@@ -264,7 +264,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                 receiptToUpload = new File([receiptToUpload], `receipt-${Date.now()}.jpg`, { type: 'image/jpeg' });
             }
             if (receiptToUpload instanceof File) {
-                const storageRef = ref(storage, `receipts/${groupId}/${Date.now()}_${receiptToUpload.name}`);
+                const storageRef = ref(storage, `groups/${groupId}/receipts/${Date.now()}_${receiptToUpload.name}`);
                 const snapshot = await uploadBytes(storageRef, receiptToUpload);
                 receiptUrl = await getDownloadURL(snapshot.ref);
             }
@@ -572,3 +572,5 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     </Card>
   );
 }
+
+    

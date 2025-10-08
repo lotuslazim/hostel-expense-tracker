@@ -16,7 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Camera, User, Mail, Home, Users, Wallet, ChevronDown, Loader2, LogOut, Trash2, Copy } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { format, startOfMonth, endOfMonth } from "date-fns";
+import { format, startOfMonth } from "date-fns";
 import type { Expense, Member } from "@/lib/types";
 import imageCompression from "browser-image-compression";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -306,7 +306,7 @@ export function Profile() {
 
     try {
       if (profileImageFile) {
-        const imageRef = ref(storage, `profilePictures/${user?.uid}/${profileImageFile.name}`);
+        const imageRef = ref(storage, `profilePictures/${user.uid}/${profileImageFile.name}`);
         const snapshot = await uploadBytes(imageRef, profileImageFile);
         photoURL = await getDownloadURL(snapshot.ref);
       }
@@ -488,3 +488,5 @@ export function Profile() {
     </div>
   );
 }
+
+    
