@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
+import { useFirebase, useUser, useDoc } from "@/firebase";
 import { doc, addDoc, collection, serverTimestamp, Timestamp, writeBatch, query, getDocs, where } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useToast } from "@/hooks/use-toast";
@@ -31,10 +31,14 @@ import { Loader2, ShoppingCart, Camera, Upload, X, Plus, Trash2 } from "lucide-r
 import { sanitizeFirestoreData } from "@/lib/utils";
 import { Skeleton } from "../ui/skeleton";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
-import imageCompression from "browser-image-compression";
 import { Alert, AlertTitle, AlertDescription } from "../ui/alert";
 import { useInventory } from "@/contexts/InventoryContext";
-import { cn } from "@/lib/utils";
+
+// Lazy load the image compression library
+const compressImage = async (file: File): Promise<File> => {
+    const imageCompression = (await import('browser-image-compression')).default;
+    return imageCompression(file, { maxSizeMB: 1, maxWidthOrHeight: 1024 });
+};
 
 interface AddExpenseCardProps {
   selectedDate: Date;
@@ -180,7 +184,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     if (file) {
       try {
         setCapturedImageBlob(null); // Clear any captured blob
-        const compressedFile = await imageCompression(file, { maxSizeMB: 1, maxWidthOrHeight: 1024 });
+        const compressedFile = await compressImage(file);
         form.setValue("receipt", compressedFile);
         setImagePreview(URL.createObjectURL(compressedFile));
       } catch (error) {
@@ -233,7 +237,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                   try {
                     // Convert Blob to File for imageCompression
                     const file = new File([blob], "camera-capture.jpg", { type: "image/jpeg" });
-                    const compressedFile = await imageCompression(file, { maxSizeMB: 1, maxWidthOrHeight: 1024 });
+                    const compressedFile = await compressImage(file);
                     setCapturedImageBlob(compressedFile);
                     form.setValue("receipt", undefined); // Clear file input
                     setImagePreview(URL.createObjectURL(compressedFile));
@@ -576,3 +580,5 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     </Card>
   );
 }
+
+    
