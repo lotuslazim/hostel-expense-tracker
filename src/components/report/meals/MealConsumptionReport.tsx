@@ -73,7 +73,7 @@ export function MealConsumptionReport() {
         if (!members || !meals || !purchases) return [];
         return members.map(member => {
             const memberMeals = meals.filter(meal => meal.userId === member.id);
-            const memberPurchases = purchases.filter(purchase => purchase.userId === member.id);
+            const memberPurchases = purchases.filter(purchase => purchase.userId === member.id && purchase.cost > 0);
             
             const totalMealCount = memberMeals.reduce((sum, meal) => sum + meal.mealNumber, 0);
             const totalFoodExpenses = memberPurchases.reduce((sum, p) => sum + p.cost, 0);
@@ -88,10 +88,11 @@ export function MealConsumptionReport() {
             }, {} as Record<string, { date: string, meals: MealLog[] }>);
 
             const sortedMealsByDate = Object.values(mealsByDate).sort((a,b) => b.date.localeCompare(a.date));
-            const sortedPurchases = memberPurchases.sort((a,b) => (b.date.toMillis()) - (a.date.toMillis()));
+            const sortedPurchases = memberPurchases.sort((a,b) => (b.date as any).toMillis() - (a.date as any).toMillis());
 
             return {
                 ...member,
+                displayName: member.displayName || member.email?.split('@')[0] || 'Unnamed Member',
                 totalMealCount,
                 totalFoodExpenses,
                 dailyMeals: sortedMealsByDate,
@@ -215,4 +216,5 @@ export function MealConsumptionReport() {
             </div>
         </div>
     )
-}
+
+    
