@@ -249,15 +249,21 @@ export function Profile() {
     return query(
         collection(firestore, `groups/${groupId}/expenses`), 
         where("userId", "==", user.uid),
-        where("date", ">=", Timestamp.fromDate(lastMonth)),
-        orderBy("date", "desc")
+        where("date", ">=", Timestamp.fromDate(lastMonth))
     );
   }, [user, firestore, groupId]);
   const { data: expenses, isLoading: areExpensesLoading } = useCollection<Expense>(expensesQuery);
 
   const monthlyExpenses = useMemo(() => {
     if (!expenses) return {};
-    return expenses.reduce((acc, expense) => {
+    // Sort expenses by date descending on the client
+    const sortedExpenses = [...expenses].sort((a, b) => {
+        const dateA = a.date instanceof Timestamp ? a.date.toMillis() : 0;
+        const dateB = b.date instanceof Timestamp ? b.date.toMillis() : 0;
+        return dateB - dateA;
+    });
+
+    return sortedExpenses.reduce((acc, expense) => {
       const month = format((expense.date as Timestamp).toDate(), "MMMM yyyy");
       if (!acc[month]) {
         acc[month] = { total: 0, items: [] };
@@ -481,3 +487,5 @@ export function Profile() {
     </div>
   );
 }
+
+    
