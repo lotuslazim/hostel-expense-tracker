@@ -334,7 +334,7 @@ function AccountSettings({ user, userData, groupData, groupId }: { user: any, us
                         <p className="font-medium text-destructive">{t('settings.account_settings.actions.leave_group')}</p>
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
-                                <Button variant="destructive" disabled={!groupId || userData?.isAdmin}><LogOut className="mr-2 h-4 w-4"/> Leave</Button>
+                                <Button variant="destructive" disabled={!groupId}><LogOut className="mr-2 h-4 w-4"/> Leave</Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                                 <AlertDialogHeader>
