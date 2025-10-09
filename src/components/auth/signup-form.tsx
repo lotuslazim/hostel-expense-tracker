@@ -18,7 +18,7 @@ import { AuthCard } from "./auth-card";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
 import { useFirebase } from "@/firebase";
-import { GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, updateProfile, type User, sendEmailVerification } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, updateProfile, type User, sendEmailVerification, signOut } from "firebase/auth";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Eye, EyeOff } from "lucide-react";
@@ -92,6 +92,10 @@ export function SignupForm() {
         });
       }
 
+      if (auth.currentUser) {
+        await signOut(auth); // Sign out user after sending verification email
+      }
+      
       router.push('/login');
       form.reset();
 
@@ -151,8 +155,9 @@ export function SignupForm() {
       footerLinkHref="/login"
     >
       <div className="space-y-4">
-        <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={servicesLoading}>
-           {servicesLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon className="mr-2 h-4 w-4" />}
+        <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading || servicesLoading}>
+           {(servicesLoading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+           {!servicesLoading && <GoogleIcon className="mr-2 h-4 w-4" />}
           Sign up with Google
         </Button>
         <div className="relative">

@@ -18,7 +18,7 @@ import { AuthCard } from "./auth-card";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
 import { useFirebase } from "@/firebase";
-import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, signOut, type UserCredential } from "firebase/auth";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
@@ -37,6 +37,7 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [needsVerification, setNeedsVerification] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [userCredentialForVerification, setUserCredentialForVerification] = useState<UserCredential | null>(null);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -73,9 +74,10 @@ export function LoginForm() {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
       if (!userCredential.user.emailVerified) {
-        await auth.signOut();
+        setUserCredentialForVerification(userCredential); // Keep user credential
         setNeedsVerification(true);
         setIsLoading(false);
+        // DO NOT SIGN OUT HERE. User needs to be authenticated to resend verification.
         return;
       }
       router.push('/dashboard');
@@ -121,36 +123,35 @@ export function LoginForm() {
   };
   
   const handleResendVerification = async () => {
-    if (servicesLoading) {
+     if (servicesLoading) {
         toast({ title: "Services initializing...", description: "Please wait a moment and try again."});
         return;
     }
-    const email = form.getValues("email");
-    if (!email) return;
+    if (!userCredentialForVerification || !userCredentialForVerification.user) {
+        toast({ variant: "destructive", title: "Error", description: "Could not find user session. Please try logging in again."});
+        return;
+    }
 
     try {
-        const tempUserCredential = await signInWithEmailAndPassword(auth, email, form.getValues("password"));
-        if (tempUserCredential.user && !tempUserCredential.user.emailVerified) {
-            const actionCodeSettings = {
-                url: `${window.location.origin}/login`,
-                handleCodeInApp: true,
-            };
-            await sendEmailVerification(tempUserCredential.user, actionCodeSettings);
-            toast({
-                title: "Verification Email Sent",
-                description: "A new verification link has been sent to your email address.",
-            });
-        }
+        const actionCodeSettings = {
+            url: `${window.location.origin}/login`,
+            handleCodeInApp: true,
+        };
+        await sendEmailVerification(userCredentialForVerification.user, actionCodeSettings);
+        toast({
+            title: "Verification Email Sent",
+            description: "A new verification link has been sent to your email address.",
+        });
     } catch (error) {
          toast({
           variant: "destructive",
           title: "Error",
-          description: "Could not send verification email. Please check your credentials or try again later.",
+          description: "Could not send verification email. Please try again later.",
         });
     } finally {
-        if (auth.currentUser) {
-            await auth.signOut();
-        }
+        // Sign out after attempting to resend, so user has to log in again with verified email
+        await signOut(auth);
+        setUserCredentialForVerification(null);
     }
   };
 
@@ -213,8 +214,9 @@ export function LoginForm() {
                 </AlertDescription>
             </Alert>
         )}
-        <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={servicesLoading}>
-           {servicesLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon className="mr-2 h-4 w-4" />}
+        <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading || servicesLoading}>
+           {(servicesLoading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+           {!servicesLoading && <GoogleIcon className="mr-2 h-4 w-4" />}
           Sign in with Google
         </Button>
         <div className="relative">
