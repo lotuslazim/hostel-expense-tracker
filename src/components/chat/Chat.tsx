@@ -14,7 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import type { User } from 'firebase/auth';
 import type { ChatMessage as ChatMessageType } from "@/lib/types";
-import { Loader2, Send, Image as ImageIcon, X } from "lucide-react";
+import { Loader2, Send, Image as ImageIcon, X, MessageSquare } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
 import imageCompression from "browser-image-compression";
 
@@ -222,4 +222,3 @@ export function Chat({ groupId, currentUser }: ChatProps) {
         </Card>
     );
 }
-
