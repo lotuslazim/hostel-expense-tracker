@@ -69,15 +69,11 @@ export function SignupForm() {
       const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
       
-      // Update profile and create Firestore document
       await updateProfile(user, { displayName: values.name });
       await createUserDocument(user, values.name);
 
-      // --- FIX: Configure and send verification email correctly ---
       const actionCodeSettings = {
-        // URL you want to redirect back to. The domain must be authorized in the Firebase Console.
         url: `${window.location.origin}/login`,
-        // This must be true.
         handleCodeInApp: true,
       };
 
