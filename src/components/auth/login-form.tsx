@@ -126,11 +126,7 @@ export function LoginForm() {
     }
 
     try {
-        const actionCodeSettings = {
-            url: `${window.location.origin}/login`,
-            handleCodeInApp: true,
-        };
-        await sendEmailVerification(userForVerification, actionCodeSettings);
+        await sendEmailVerification(userForVerification);
         toast({
             title: "Verification Email Sent",
             description: "A new verification link has been sent to your email address. Please check your inbox.",
@@ -156,13 +152,8 @@ export function LoginForm() {
       return;
     }
     
-    const actionCodeSettings = {
-      url: `${window.location.origin}/login`,
-      handleCodeInApp: true,
-    };
-    
     try {
-      await sendPasswordResetEmail(auth, email, actionCodeSettings);
+      await sendPasswordResetEmail(auth, email);
       toast({
         title: "Password Reset Email Sent",
         description: "Check your inbox for a link to reset your password.",
