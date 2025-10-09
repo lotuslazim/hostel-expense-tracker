@@ -7,7 +7,7 @@ import { UserNav } from "@/app/(app)/user-nav";
 import { NavLink } from "./nav-link";
 import { Button } from "../ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, MessageSquare, LayoutDashboard, BarChart3, Package } from "lucide-react";
+import { Menu, MessageCircle, LayoutDashboard, BarChart3, Package } from "lucide-react";
 import { useUser } from "@/firebase";
 import { Skeleton } from "../ui/skeleton";
 
@@ -28,7 +28,7 @@ export function AppHeader() {
       <>
         <Button variant="ghost" size="icon" asChild>
           <Link href="/chat">
-            <MessageSquare />
+            <MessageCircle />
             <span className="sr-only">Open Chat</span>
           </Link>
         </Button>
