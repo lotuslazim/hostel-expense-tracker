@@ -121,24 +121,36 @@ export function LoginForm() {
   };
   
   const handleResendVerification = async () => {
-    if (auth.currentUser) {
-      const actionCodeSettings = {
-        url: `${window.location.origin}/login`,
-        handleCodeInApp: true,
-      };
-      try {
-        await sendEmailVerification(auth.currentUser, actionCodeSettings);
-        toast({
-          title: "Verification Email Sent",
-          description: "A new verification link has been sent to your email address.",
-        });
-      } catch (error) {
-        toast({
+    if (servicesLoading) {
+        toast({ title: "Services initializing...", description: "Please wait a moment and try again."});
+        return;
+    }
+    const email = form.getValues("email");
+    if (!email) return;
+
+    try {
+        const tempUserCredential = await signInWithEmailAndPassword(auth, email, form.getValues("password"));
+        if (tempUserCredential.user && !tempUserCredential.user.emailVerified) {
+            const actionCodeSettings = {
+                url: `${window.location.origin}/login`,
+                handleCodeInApp: true,
+            };
+            await sendEmailVerification(tempUserCredential.user, actionCodeSettings);
+            toast({
+                title: "Verification Email Sent",
+                description: "A new verification link has been sent to your email address.",
+            });
+        }
+    } catch (error) {
+         toast({
           variant: "destructive",
           title: "Error",
-          description: "Could not send verification email. Please try again later.",
+          description: "Could not send verification email. Please check your credentials or try again later.",
         });
-      }
+    } finally {
+        if (auth.currentUser) {
+            await auth.signOut();
+        }
     }
   };
 
@@ -148,6 +160,10 @@ export function LoginForm() {
     if (!email) {
       form.setError("email", { type: "manual", message: "Please enter your email to reset your password." });
       return;
+    }
+    if (servicesLoading) {
+        toast({ title: "Services initializing...", description: "Please wait a moment and try again."});
+        return;
     }
     
     const actionCodeSettings = {
