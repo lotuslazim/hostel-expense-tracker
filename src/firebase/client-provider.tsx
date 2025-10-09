@@ -34,21 +34,13 @@ async function getFirebaseServices() {
       const { initializeFirebase, getSdks } = await import('@/firebase/index');
       const { firebaseApp } = initializeFirebase();
 
-      // Dynamically handle Auth initialization for different environments
-      const isDev = process.env.NODE_ENV === 'development';
-      let auth: Auth;
-
-      if (isDev && typeof window !== 'undefined') {
-        // For development/preview, use initializeAuth to work with dynamic preview domains
-        auth = initializeAuth(firebaseApp, {
-          persistence: [indexedDBLocalPersistence, browserLocalPersistence],
-          // This allows sign-in popups from the dynamically generated preview URLs
-          popupRedirectResolver: undefined,
-        });
-      } else {
-        // For production, use the standard getAuth
-        auth = (await import('firebase/auth')).getAuth(firebaseApp);
-      }
+      // For all environments (dev, preview, prod), use initializeAuth to ensure consistency
+      // and proper handling of persistence and dynamic domains.
+      const auth = initializeAuth(firebaseApp, {
+        persistence: [indexedDBLocalPersistence, browserLocalPersistence],
+        // This allows sign-in popups from dynamically generated preview URLs
+        popupRedirectResolver: undefined,
+      });
       
       firebaseServices = getSdks(firebaseApp, auth);
       return firebaseServices;
