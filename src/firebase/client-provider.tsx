@@ -27,21 +27,22 @@ export function FirebaseClientProvider({ children }: FirebaseClientProviderProps
   useEffect(() => {
     // This function will only run once on the client.
     const initialize = async () => {
-      // Dynamically import Firebase services
-      const { initializeFirebase, getSdks } = await import('@/firebase/index');
-      
-      const { firebaseApp } = initializeFirebase();
+      // Dynamically import Firebase services to ensure they only run on the client
+      const { initializeApp } = await import('firebase/app');
+      const { getFirestore } = await import('firebase/firestore');
+      const { getStorage } = await import('firebase/storage');
+      const { firebaseConfig } = await import('@/firebase/config');
 
-      // Use initializeAuth for consistent behavior across all environments.
-      // It correctly handles persistence and dynamic domains for popups.
-      const auth = initializeAuth(firebaseApp, {
+      const app = initializeApp(firebaseConfig);
+      
+      const auth = initializeAuth(app, {
         persistence: [indexedDBLocalPersistence, browserLocalPersistence],
-        popupRedirectResolver: undefined, // Allows popups from dynamic preview URLs
       });
       
-      const sdkServices = getSdks(firebaseApp, auth);
+      const firestore = getFirestore(app);
+      const storage = getStorage(app);
       
-      setServices(sdkServices);
+      setServices({ firebaseApp: app, auth, firestore, storage });
       setServicesLoading(false);
     };
 

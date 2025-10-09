@@ -35,6 +35,7 @@ export function SignupForm() {
   const router = useRouter();
   const { auth, firestore, servicesLoading } = useFirebase();
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
 
@@ -43,7 +44,7 @@ export function SignupForm() {
     defaultValues: { name: "", email: "", password: "" },
   });
 
-  const createUserDocument = async (user: User, name?: string | null) => {
+  const createUserDocument = async (user: User, name?: string) => {
     const userDocRef = doc(firestore, "users", user.uid);
     const userDoc = await getDoc(userDocRef);
 
@@ -77,23 +78,14 @@ export function SignupForm() {
         handleCodeInApp: true,
       };
 
-      try {
-        await sendEmailVerification(user, actionCodeSettings);
-        toast({
-          title: "Account Created!",
-          description: "Please check your email to verify your account before logging in.",
-        });
-      } catch (emailError: any) {
-        console.error("Email verification failed:", emailError.code, emailError.message);
-        toast({
-          variant: "destructive",
-          title: "Account Created, But...",
-          description: "Your account was created, but we couldn't send a verification email. Please try logging in and resending it.",
-        });
-      }
+      await sendEmailVerification(user, actionCodeSettings);
+      toast({
+        title: "Account Created!",
+        description: "Please check your email to verify your account before logging in.",
+      });
 
       if (auth.currentUser) {
-        await signOut(auth); // Sign out user after sending verification email
+        await signOut(auth);
       }
       
       router.push('/login');
@@ -108,6 +100,8 @@ export function SignupForm() {
           description = "Please enter a valid email address.";
         } else if (error.code === 'auth/network-request-failed') {
           description = "A network error occurred. Please check your connection and try again.";
+        } else if (error.code === 'auth/weak-password') {
+          description = "Your password is too weak. Please choose a stronger password.";
         }
         toast({
           variant: "destructive",
@@ -119,31 +113,31 @@ export function SignupForm() {
     }
   }
   
-  const handleGoogleSignIn = () => {
+  const handleGoogleSignIn = async () => {
     if (servicesLoading) {
         toast({ title: "Services initializing...", description: "Please wait a moment and try again."});
         return;
     }
+    setIsGoogleLoading(true);
     const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider)
-      .then(async (result) => {
-        const user = result.user;
-        await createUserDocument(user);
-        router.push('/dashboard');
-      })
-      .catch((error) => {
-        if (error.code === 'auth/popup-closed-by-user') {
-          return;
-        }
-        console.error("Error during Google sign-in:", error);
-        toast({ 
-          variant: "destructive", 
-          title: "Google Sign-In Failed", 
-          description: error.code === 'auth/popup-blocked' 
-            ? "Pop-up blocked by browser. Please allow pop-ups for this site."
-            : "Could not sign in with Google. Please try again."
-        });
-      });
+    try {
+      const result = await signInWithPopup(auth, provider);
+      await createUserDocument(result.user);
+      router.push('/dashboard');
+    } catch (error: any) {
+       if (error.code !== 'auth/popup-closed-by-user') {
+            console.error("Error during Google sign-in:", error);
+            toast({ 
+              variant: "destructive", 
+              title: "Google Sign-In Failed", 
+              description: error.code === 'auth/popup-blocked' 
+                ? "Pop-up blocked by browser. Please allow pop-ups for this site."
+                : "Could not sign in with Google. Please try again."
+            });
+       }
+    } finally {
+        setIsGoogleLoading(false);
+    }
   };
 
   return (
@@ -155,9 +149,9 @@ export function SignupForm() {
       footerLinkHref="/login"
     >
       <div className="space-y-4">
-        <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading || servicesLoading}>
-           {(servicesLoading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-           {!servicesLoading && <GoogleIcon className="mr-2 h-4 w-4" />}
+        <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading || isGoogleLoading || servicesLoading}>
+           {(isGoogleLoading || servicesLoading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+           {!(isGoogleLoading || servicesLoading) && <GoogleIcon className="mr-2 h-4 w-4" />}
           Sign up with Google
         </Button>
         <div className="relative">
@@ -230,7 +224,7 @@ export function SignupForm() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={isLoading || servicesLoading}>
+            <Button type="submit" className="w-full" disabled={isLoading || isGoogleLoading || servicesLoading}>
                {(isLoading || servicesLoading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Create Account
             </Button>
@@ -240,4 +234,3 @@ export function SignupForm() {
     </AuthCard>
   );
 }
-

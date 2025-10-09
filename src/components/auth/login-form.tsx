@@ -18,7 +18,7 @@ import { AuthCard } from "./auth-card";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
 import { useFirebase } from "@/firebase";
-import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, signOut, type UserCredential, type User } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, signOut, type User } from "firebase/auth";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
@@ -35,20 +35,18 @@ export function LoginForm() {
   const router = useRouter();
   const { auth, firestore, servicesLoading } = useFirebase();
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [needsVerification, setNeedsVerification] = useState(false);
+  const [userForVerification, setUserForVerification] = useState<User | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [userCredentialForVerification, setUserCredentialForVerification] = useState<UserCredential | null>(null);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
+    defaultValues: { email: "", password: "" },
   });
   
-  const createUserDocument = async (user: User) => {
+  const createUserDocument = async (user: User, name?: string) => {
     const userDocRef = doc(firestore, "users", user.uid);
     const userDoc = await getDoc(userDocRef);
 
@@ -56,7 +54,7 @@ export function LoginForm() {
       await setDoc(userDocRef, {
         id: user.uid,
         email: user.email,
-        displayName: user.displayName,
+        displayName: name || user.displayName || user.email?.split('@')[0],
         photoURL: user.photoURL,
         groupId: null,
         isAdmin: false,
@@ -71,16 +69,23 @@ export function LoginForm() {
     }
     setIsLoading(true);
     setNeedsVerification(false);
+    setUserForVerification(null);
+
     try {
       const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
+      
       if (!userCredential.user.emailVerified) {
-        setUserCredentialForVerification(userCredential); // Keep user credential
+        setUserForVerification(userCredential.user);
         setNeedsVerification(true);
         setIsLoading(false);
-        // DO NOT SIGN OUT HERE. User needs to be authenticated to resend verification.
+        // DO NOT sign out here. User needs to be authenticated to resend verification email.
         return;
       }
+      
+      // On successful login for a verified user, create their doc if it doesn't exist
+      await createUserDocument(userCredential.user);
       router.push('/dashboard');
+
     } catch (error: any) {
       console.error("Error signing in:", error);
       let description = "An unexpected error occurred. Please try again.";
@@ -92,42 +97,44 @@ export function LoginForm() {
         title: "Login Failed",
         description: description,
       });
-      setIsLoading(false);
+    } finally {
+        setIsLoading(false);
     }
   }
 
-  const handleGoogleSignIn = () => {
+  const handleGoogleSignIn = async () => {
     if (servicesLoading) {
         toast({ title: "Services initializing...", description: "Please wait a moment and try again."});
         return;
     }
+    setIsGoogleLoading(true);
     const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider)
-      .then(async (result) => {
-        await createUserDocument(result.user);
-        router.push('/dashboard');
-      })
-      .catch((error) => {
-        if (error.code === 'auth/popup-closed-by-user') {
-          return;
-        }
-        console.error("Error during Google sign-in:", error);
-        toast({ 
-          variant: "destructive", 
-          title: "Google Sign-In Failed", 
-          description: error.code === 'auth/popup-blocked' 
-            ? "Pop-up blocked by browser. Please allow pop-ups for this site."
-            : "Could not sign in with Google. Please try again."
-        });
-      });
+    try {
+      const result = await signInWithPopup(auth, provider);
+      await createUserDocument(result.user);
+      router.push('/dashboard');
+    } catch (error: any) {
+      if (error.code !== 'auth/popup-closed-by-user') {
+          console.error("Error during Google sign-in:", error);
+          toast({ 
+            variant: "destructive", 
+            title: "Google Sign-In Failed", 
+            description: error.code === 'auth/popup-blocked' 
+              ? "Pop-up blocked by browser. Please allow pop-ups for this site."
+              : "Could not sign in with Google. Please try again."
+          });
+      }
+    } finally {
+      setIsGoogleLoading(false);
+    }
   };
   
   const handleResendVerification = async () => {
-     if (servicesLoading) {
+    if (servicesLoading) {
         toast({ title: "Services initializing...", description: "Please wait a moment and try again."});
         return;
     }
-    if (!userCredentialForVerification || !userCredentialForVerification.user) {
+    if (!userForVerification) {
         toast({ variant: "destructive", title: "Error", description: "Could not find user session. Please try logging in again."});
         return;
     }
@@ -137,7 +144,7 @@ export function LoginForm() {
             url: `${window.location.origin}/login`,
             handleCodeInApp: true,
         };
-        await sendEmailVerification(userCredentialForVerification.user, actionCodeSettings);
+        await sendEmailVerification(userForVerification, actionCodeSettings);
         toast({
             title: "Verification Email Sent",
             description: "A new verification link has been sent to your email address.",
@@ -149,13 +156,12 @@ export function LoginForm() {
           description: "Could not send verification email. Please try again later.",
         });
     } finally {
-        // Sign out after attempting to resend, so user has to log in again with verified email
+        // Now sign out, so user has to log in again with verified email
         await signOut(auth);
-        setUserCredentialForVerification(null);
-        setNeedsVerification(false); // Hide the verification banner
+        setUserForVerification(null);
+        setNeedsVerification(false);
     }
   };
-
 
   const handlePasswordReset = async () => {
     const email = form.getValues("email");
@@ -193,7 +199,6 @@ export function LoginForm() {
     }
   };
 
-
   return (
     <AuthCard
       title="Welcome Back"
@@ -215,9 +220,9 @@ export function LoginForm() {
                 </AlertDescription>
             </Alert>
         )}
-        <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading || servicesLoading}>
-           {(servicesLoading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-           {!servicesLoading && <GoogleIcon className="mr-2 h-4 w-4" />}
+        <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading || isGoogleLoading || servicesLoading}>
+           {(isGoogleLoading || servicesLoading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+           {!(isGoogleLoading || servicesLoading) && <GoogleIcon className="mr-2 h-4 w-4" />}
           Sign in with Google
         </Button>
         <div className="relative">
@@ -286,7 +291,7 @@ export function LoginForm() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={isLoading || servicesLoading}>
+            <Button type="submit" className="w-full" disabled={isLoading || isGoogleLoading || servicesLoading}>
                {(isLoading || servicesLoading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Log In
             </Button>
@@ -296,4 +301,3 @@ export function LoginForm() {
     </AuthCard>
   );
 }
-
