@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -17,9 +16,8 @@ import { Input } from "@/components/ui/input";
 import { AuthCard } from "./auth-card";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
-import { auth } from "@/firebase/config"; // Direct import
-import { firestore } from "@/firebase/config"; // Direct import
-import { GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, updateProfile, type User, sendEmailVerification, signOut } from "firebase/auth";
+import { auth, firestore } from "@/firebase/config";
+import { GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, updateProfile, type User, sendEmailVerification } from "firebase/auth";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Eye, EyeOff } from "lucide-react";
@@ -75,10 +73,6 @@ export function SignupForm() {
         title: "Account Created!",
         description: "Please check your email to verify your account before logging in.",
       });
-
-      if (auth.currentUser) {
-        await signOut(auth);
-      }
       
       router.push('/login');
       form.reset();
