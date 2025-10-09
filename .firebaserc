@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "studio-1103431681-ca557"
-  }
+  },
+  "targets": {
+    "studio-1103431681-ca557": {
+      "hosting": {
+        "bachelorbite": [
+          "bachelor-bite"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

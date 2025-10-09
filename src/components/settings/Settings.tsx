@@ -271,16 +271,9 @@ function AccountSettings({ user, userData, groupData, groupId }: { user: any, us
     const handleDeleteAccount = async () => {
         if (!user) return;
         try {
-            // First, sign out the user to invalidate tokens
-            await signOut(auth);
-            
-            // Note: Deleting user from Auth will trigger a function (if set up) to clean up Firestore data.
-            // For client-side only, you might need to manually delete user doc BEFORE deleting auth user.
             const userRef = doc(firestore, "users", user.uid);
             await deleteDoc(userRef);
 
-            // This action is sensitive and requires recent sign-in.
-            // In a real app, you would re-authenticate the user first.
             await deleteUser(user);
             
             toast({ title: "Account Deleted", description: "Your account has been permanently deleted." });
@@ -334,7 +327,7 @@ function AccountSettings({ user, userData, groupData, groupId }: { user: any, us
                         <p className="font-medium text-destructive">{t('settings.account_settings.actions.leave_group')}</p>
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
-                                <Button variant="destructive" disabled={!groupId}><LogOut className="mr-2 h-4 w-4"/> Leave</Button>
+                                <Button variant="destructive" disabled={!groupId || userData?.isAdmin}><LogOut className="mr-2 h-4 w-4"/> Leave</Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                                 <AlertDialogHeader>

@@ -146,9 +146,6 @@ function AccountSettings({ user, userData, groupData, groupId }: { user: any, us
     const handleDeleteAccount = async () => {
         if (!user) return;
         try {
-            // First, sign out the user to invalidate tokens
-            await signOut(auth);
-            
             const userRef = doc(firestore, "users", user.uid);
             await deleteDoc(userRef);
 
@@ -487,5 +484,3 @@ export function Profile() {
     </div>
   );
 }
-
-    
