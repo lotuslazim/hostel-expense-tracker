@@ -152,6 +152,7 @@ export function LoginForm() {
         // Sign out after attempting to resend, so user has to log in again with verified email
         await signOut(auth);
         setUserCredentialForVerification(null);
+        setNeedsVerification(false); // Hide the verification banner
     }
   };
 
