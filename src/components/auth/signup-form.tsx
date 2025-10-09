@@ -65,9 +65,7 @@ export function SignupForm() {
     }
     setIsLoading(true);
     try {
-      console.log("Attempting to create a new user...");
       const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
-      console.log("Signup successful for:", userCredential.user.email);
       const user = userCredential.user;
       
       // Update profile and create Firestore document
@@ -76,8 +74,7 @@ export function SignupForm() {
 
       // --- FIX: Configure and send verification email correctly ---
       const actionCodeSettings = {
-        // URL you want to redirect back to. The domain (www.example.com)
-        // must be whitelisted in the Firebase Console.
+        // URL you want to redirect back to. The domain must be authorized in the Firebase Console.
         url: `${window.location.origin}/login`,
         // This must be true.
         handleCodeInApp: true,
@@ -85,13 +82,12 @@ export function SignupForm() {
 
       try {
         await sendEmailVerification(user, actionCodeSettings);
-        console.log("✅ Verification email sent to:", user.email);
         toast({
           title: "Account Created!",
           description: "Please check your email to verify your account before logging in.",
         });
       } catch (emailError: any) {
-        console.error("❌ Email verification failed:", emailError.code, emailError.message);
+        console.error("Email verification failed:", emailError.code, emailError.message);
         toast({
           variant: "destructive",
           title: "Account Created, But...",
@@ -99,6 +95,7 @@ export function SignupForm() {
         });
       }
 
+      router.push('/login');
       form.reset();
 
     } catch (error: any) {
