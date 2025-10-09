@@ -243,21 +243,19 @@ export function Profile() {
   const membersQuery = useMemo(() => (groupId ? query(collection(firestore, `groups/${groupId}/members`), where('status', '==', 'active')) : null), [groupId, firestore]);
   const { data: members, isLoading: areMembersLoading } = useCollection<Member>(membersQuery);
   
-  // Fetch only the last month of expenses for the profile page
   const expensesQuery = useMemo(() => {
     if (!user || !groupId) return null;
     const lastMonth = startOfMonth(new Date());
     return query(
         collection(firestore, `groups/${groupId}/expenses`), 
-        where("userId", "==", user.uid),
-        where("date", ">=", Timestamp.fromDate(lastMonth))
+        where("userId", "==", user.uid)
     );
   }, [user, firestore, groupId]);
   const { data: expenses, isLoading: areExpensesLoading } = useCollection<Expense>(expensesQuery);
 
   const monthlyExpenses = useMemo(() => {
     if (!expenses) return {};
-    // Sort expenses by date descending on the client
+    
     const sortedExpenses = [...expenses].sort((a, b) => {
         const dateA = a.date instanceof Timestamp ? a.date.toMillis() : 0;
         const dateB = b.date instanceof Timestamp ? b.date.toMillis() : 0;
@@ -316,7 +314,6 @@ export function Profile() {
         photoURL: photoURL,
       });
 
-      // Also update the corresponding member document
       if (groupId && user) {
         const memberRef = doc(firestore, `groups/${groupId}/members`, user.uid);
         await updateDoc(memberRef, {
@@ -367,8 +364,10 @@ export function Profile() {
                   <AvatarImage src={imagePreview || userData?.photoURL} alt={displayName} />
                   <AvatarFallback>{displayName?.charAt(0).toUpperCase()}</AvatarFallback>
                 </Avatar>
-                <label htmlFor="profile-photo-upload" className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                  <Camera className="h-6 w-6 text-white" />
+                <label htmlFor="profile-photo-upload" className="absolute inset-0 flex items-center justify-center rounded-full cursor-pointer">
+                  <span className="absolute bottom-0 right-0 bg-primary text-primary-foreground p-1 rounded-full">
+                    <Camera className="h-4 w-4" />
+                  </span>
                   <input id="profile-photo-upload" type="file" className="sr-only" accept="image/*" onChange={handleImageChange} />
                 </label>
               </div>
@@ -488,5 +487,3 @@ export function Profile() {
     </div>
   );
 }
-
-    
