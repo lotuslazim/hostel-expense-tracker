@@ -18,7 +18,7 @@ import { AuthCard } from "./auth-card";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
 import { useFirebase } from "@/firebase";
-import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, signOut, type UserCredential } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, signOut, type UserCredential, type User } from "firebase/auth";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
@@ -48,7 +48,7 @@ export function LoginForm() {
     },
   });
   
-  const createUserDocument = async (user: any) => {
+  const createUserDocument = async (user: User) => {
     const userDocRef = doc(firestore, "users", user.uid);
     const userDoc = await getDoc(userDocRef);
 
@@ -296,3 +296,5 @@ export function LoginForm() {
     </AuthCard>
   );
 }
+
+    

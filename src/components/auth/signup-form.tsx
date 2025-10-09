@@ -43,7 +43,7 @@ export function SignupForm() {
     defaultValues: { name: "", email: "", password: "" },
   });
 
-  const createUserDocument = async (user: User, name: string) => {
+  const createUserDocument = async (user: User, name?: string | null) => {
     const userDocRef = doc(firestore, "users", user.uid);
     const userDoc = await getDoc(userDocRef);
 
@@ -51,7 +51,7 @@ export function SignupForm() {
         await setDoc(userDocRef, {
             id: user.uid,
             email: user.email,
-            displayName: name,
+            displayName: name || user.displayName || user.email?.split('@')[0],
             photoURL: user.photoURL,
             groupId: null,
             isAdmin: false,
@@ -128,7 +128,7 @@ export function SignupForm() {
     signInWithPopup(auth, provider)
       .then(async (result) => {
         const user = result.user;
-        await createUserDocument(user, user.displayName || user.email!.split('@')[0]);
+        await createUserDocument(user);
         router.push('/dashboard');
       })
       .catch((error) => {
@@ -240,3 +240,5 @@ export function SignupForm() {
     </AuthCard>
   );
 }
+
+    
