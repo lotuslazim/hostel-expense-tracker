@@ -3,7 +3,7 @@
 
 import { firebaseConfig } from '@/firebase/config';
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { Auth, getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, differenceInDays } from 'date-fns';
@@ -13,13 +13,15 @@ export function initializeFirebase() {
   // This is the recommended way to initialize firebase in a Next.js app
   // to prevent re-initialization on hot reloads.
   const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-  return getSdks(app);
+  const firestore = getFirestore(app);
+  const storage = getStorage(app);
+  return { firebaseApp: app, firestore, storage };
 }
 
-export function getSdks(firebaseApp: FirebaseApp) {
+export function getSdks(firebaseApp: FirebaseApp, auth?: Auth) {
   return {
     firebaseApp,
-    auth: getAuth(firebaseApp),
+    auth: auth || getAuth(firebaseApp),
     firestore: getFirestore(firebaseApp),
     storage: getStorage(firebaseApp),
   };
