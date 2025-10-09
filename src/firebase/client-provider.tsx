@@ -13,52 +13,39 @@ interface FirebaseClientProviderProps {
   children: ReactNode;
 }
 
-// Lazy-loaded Firebase services
-let firebaseServices: {
+type FirebaseServices = {
   firebaseApp: FirebaseApp;
   auth: Auth;
   firestore: Firestore;
   storage: FirebaseStorage;
-} | null = null;
-
-// Promise to ensure Firebase is initialized only once
-let firebaseInitializationPromise: Promise<typeof firebaseServices> | null = null;
-
-async function getFirebaseServices() {
-  if (firebaseServices) {
-    return firebaseServices;
-  }
-
-  if (!firebaseInitializationPromise) {
-    firebaseInitializationPromise = (async () => {
-      const { initializeFirebase, getSdks } = await import('@/firebase/index');
-      const { firebaseApp } = initializeFirebase();
-
-      // For all environments (dev, preview, prod), use initializeAuth to ensure consistency
-      // and proper handling of persistence and dynamic domains.
-      const auth = initializeAuth(firebaseApp, {
-        persistence: [indexedDBLocalPersistence, browserLocalPersistence],
-        // This allows sign-in popups from dynamically generated preview URLs
-        popupRedirectResolver: undefined,
-      });
-      
-      firebaseServices = getSdks(firebaseApp, auth);
-      return firebaseServices;
-    })();
-  }
-  
-  return firebaseInitializationPromise;
-}
+};
 
 export function FirebaseClientProvider({ children }: FirebaseClientProviderProps) {
-  const [services, setServices] = useState<typeof firebaseServices>(null);
+  const [services, setServices] = useState<FirebaseServices | null>(null);
   const [servicesLoading, setServicesLoading] = useState(true);
 
   useEffect(() => {
-    getFirebaseServices().then(loadedServices => {
-        setServices(loadedServices);
-        setServicesLoading(false);
-    });
+    // This function will only run once on the client.
+    const initialize = async () => {
+      // Dynamically import Firebase services
+      const { initializeFirebase, getSdks } = await import('@/firebase/index');
+      
+      const { firebaseApp } = initializeFirebase();
+
+      // Use initializeAuth for consistent behavior across all environments.
+      // It correctly handles persistence and dynamic domains for popups.
+      const auth = initializeAuth(firebaseApp, {
+        persistence: [indexedDBLocalPersistence, browserLocalPersistence],
+        popupRedirectResolver: undefined, // Allows popups from dynamic preview URLs
+      });
+      
+      const sdkServices = getSdks(firebaseApp, auth);
+      
+      setServices(sdkServices);
+      setServicesLoading(false);
+    };
+
+    initialize();
   }, []);
 
   return (
