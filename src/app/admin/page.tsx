@@ -1,7 +1,8 @@
 
 "use client";
 
-import { useUser, useDoc, useFirebase, useCollection } from "@/firebase";
+import { useUser, useDoc, useCollection } from "@/firebase";
+import { firestore } from "@/firebase/config";
 import { doc, collection, query, addDoc, serverTimestamp, updateDoc, where, getDocs, writeBatch, getDoc, setDoc } from "firebase/firestore";
 import { useMemo, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -64,7 +65,6 @@ function AdminPageSkeleton() {
 }
 
 function NewUserAdminPanel({ user }: { user: any }) {
-  const { firestore } = useFirebase();
   const { toast } = useToast();
   const [isCreating, setIsCreating] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
@@ -255,16 +255,15 @@ function NewUserAdminPanel({ user }: { user: any }) {
 }
 
 function GroupDetailsPanel({ groupId }: { groupId: string }) {
-    const { firestore } = useFirebase();
     const { toast } = useToast();
 
-    const groupRef = useMemo(() => doc(firestore, "groups", groupId), [firestore, groupId]);
+    const groupRef = useMemo(() => doc(firestore, "groups", groupId), [groupId]);
     const { data: groupData, isLoading: isGroupDataLoading } = useDoc(groupRef);
 
-    const membersQuery = useMemo(() => query(collection(firestore, `groups/${groupId}/members`), where('status', '==', 'active')), [firestore, groupId]);
+    const membersQuery = useMemo(() => query(collection(firestore, `groups/${groupId}/members`), where('status', '==', 'active')), [groupId]);
     const { data: activeMembers, isLoading: areMembersLoading } = useCollection<Member>(membersQuery);
     
-    const pastMembersQuery = useMemo(() => query(collection(firestore, `groups/${groupId}/members`), where('status', '==', 'inactive')), [firestore, groupId]);
+    const pastMembersQuery = useMemo(() => query(collection(firestore, `groups/${groupId}/members`), where('status', '==', 'inactive')), [groupId]);
     const { data: pastMembers, isLoading: arePastMembersLoading } = useCollection<Member>(pastMembersQuery);
 
 
@@ -396,12 +395,11 @@ function GroupDetailsPanel({ groupId }: { groupId: string }) {
 
 export default function AdminPage() {
     const { user, isUserLoading } = useUser();
-    const { firestore } = useFirebase();
 
     const userDocRef = useMemo(() => {
         if (!user) return null;
         return doc(firestore, 'users', user.uid);
-    }, [user, firestore]);
+    }, [user]);
     
     const { data: userData, isLoading: isUserDataLoading } = useDoc(userDocRef);
 
@@ -427,5 +425,3 @@ export default function AdminPage() {
         </div>
     )
 }
-
-    

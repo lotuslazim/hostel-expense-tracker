@@ -17,7 +17,8 @@ import { Input } from "@/components/ui/input";
 import { AuthCard } from "./auth-card";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
-import { useFirebase } from "@/firebase";
+import { auth } from "@/firebase/config"; // Direct import
+import { firestore } from "@/firebase/config"; // Direct import
 import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, signOut, type User } from "firebase/auth";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -31,22 +32,7 @@ const formSchema = z.object({
   password: z.string().min(1, { message: "Password is required." }),
 });
 
-export function LoginForm() {
-  const router = useRouter();
-  const { auth, firestore, servicesLoading } = useFirebase();
-  const [isLoading, setIsLoading] = useState(false);
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  const [needsVerification, setNeedsVerification] = useState(false);
-  const [userForVerification, setUserForVerification] = useState<User | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
-  const { toast } = useToast();
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: { email: "", password: "" },
-  });
-  
-  const createUserDocument = async (user: User, name?: string) => {
+const createUserDocument = async (user: User, name?: string) => {
     const userDocRef = doc(firestore, "users", user.uid);
     const userDoc = await getDoc(userDocRef);
 
@@ -60,13 +46,23 @@ export function LoginForm() {
         isAdmin: false,
       });
     }
-  };
+};
+
+export function LoginForm() {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [needsVerification, setNeedsVerification] = useState(false);
+  const [userForVerification, setUserForVerification] = useState<User | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const { toast } = useToast();
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: { email: "", password: "" },
+  });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (servicesLoading) {
-        toast({ title: "Services initializing...", description: "Please wait a moment and try again."});
-        return;
-    }
     setIsLoading(true);
     setNeedsVerification(false);
     setUserForVerification(null);
@@ -82,12 +78,10 @@ export function LoginForm() {
         return;
       }
       
-      // On successful login for a verified user, create their doc if it doesn't exist
       await createUserDocument(userCredential.user);
       router.push('/dashboard');
 
     } catch (error: any) {
-      console.error("Error signing in:", error);
       let description = "An unexpected error occurred. Please try again.";
       if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
         description = "Invalid email or password. Please check your credentials and try again.";
@@ -103,10 +97,6 @@ export function LoginForm() {
   }
 
   const handleGoogleSignIn = async () => {
-    if (servicesLoading) {
-        toast({ title: "Services initializing...", description: "Please wait a moment and try again."});
-        return;
-    }
     setIsGoogleLoading(true);
     const provider = new GoogleAuthProvider();
     try {
@@ -130,10 +120,6 @@ export function LoginForm() {
   };
   
   const handleResendVerification = async () => {
-    if (servicesLoading) {
-        toast({ title: "Services initializing...", description: "Please wait a moment and try again."});
-        return;
-    }
     if (!userForVerification) {
         toast({ variant: "destructive", title: "Error", description: "Could not find user session. Please try logging in again."});
         return;
@@ -147,7 +133,7 @@ export function LoginForm() {
         await sendEmailVerification(userForVerification, actionCodeSettings);
         toast({
             title: "Verification Email Sent",
-            description: "A new verification link has been sent to your email address.",
+            description: "A new verification link has been sent to your email address. Please check your inbox.",
         });
     } catch (error) {
          toast({
@@ -169,10 +155,6 @@ export function LoginForm() {
       form.setError("email", { type: "manual", message: "Please enter your email to reset your password." });
       return;
     }
-    if (servicesLoading) {
-        toast({ title: "Services initializing...", description: "Please wait a moment and try again."});
-        return;
-    }
     
     const actionCodeSettings = {
       url: `${window.location.origin}/login`,
@@ -186,7 +168,6 @@ export function LoginForm() {
         description: "Check your inbox for a link to reset your password.",
       });
     } catch (error: any) {
-      console.error("Error sending password reset email:", error);
       let description = "An unexpected error occurred.";
       if (error.code === 'auth/user-not-found') {
         description = "No account found with this email address.";
@@ -220,9 +201,9 @@ export function LoginForm() {
                 </AlertDescription>
             </Alert>
         )}
-        <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading || isGoogleLoading || servicesLoading}>
-           {(isGoogleLoading || servicesLoading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-           {!(isGoogleLoading || servicesLoading) && <GoogleIcon className="mr-2 h-4 w-4" />}
+        <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading || isGoogleLoading}>
+           {isGoogleLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+           {!isGoogleLoading && <GoogleIcon className="mr-2 h-4 w-4" />}
           Sign in with Google
         </Button>
         <div className="relative">
@@ -291,8 +272,8 @@ export function LoginForm() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={isLoading || isGoogleLoading || servicesLoading}>
-               {(isLoading || servicesLoading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button type="submit" className="w-full" disabled={isLoading || isGoogleLoading}>
+               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Log In
             </Button>
           </form>

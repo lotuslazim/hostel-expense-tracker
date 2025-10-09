@@ -17,23 +17,24 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
-import { useUser, useDoc, useFirebase } from "@/firebase";
+import { useUser, useDoc } from "@/firebase";
+import { auth } from "@/firebase/config";
 import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { LogOut, User, Settings, Users, Shield } from "lucide-react";
 import { useMemo } from "react";
 import { doc } from "firebase/firestore";
+import { firestore } from "@/firebase/config";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function UserNav() {
   const { user, isUserLoading } = useUser();
-  const { auth, firestore } = useFirebase();
   const router = useRouter();
 
   const userDocRef = useMemo(() => {
     if (!user) return null;
     return doc(firestore, 'users', user.uid);
-  }, [user, firestore]);
+  }, [user]);
 
   const { data: userData, isLoading: isUserDataLoading } = useDoc(userDocRef);
 

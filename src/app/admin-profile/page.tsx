@@ -2,7 +2,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useUser, useDoc, useFirebase, useCollection } from "@/firebase";
+import { useUser, useDoc, useCollection } from "@/firebase";
+import { firestore } from "@/firebase/config";
 import { doc, collection, query, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
 import { AppHeader } from "@/components/app/header";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -189,13 +190,12 @@ function AdminActionsCard({ groupDocRef, groupData }: { groupDocRef: any, groupD
 
 export default function AdminProfilePage() {
     const { user, isUserLoading } = useUser();
-    const { firestore } = useFirebase();
     const { toast } = useToast();
 
     const userDocRef = useMemo(() => {
         if (!user) return null;
         return doc(firestore, 'users', user.uid);
-    }, [user, firestore]);
+    }, [user]);
     
     const { data: userData, isLoading: isUserDataLoading } = useDoc(userDocRef);
 
@@ -204,14 +204,14 @@ export default function AdminProfilePage() {
     const groupDocRef = useMemo(() => {
         if (!groupId) return null;
         return doc(firestore, 'groups', groupId);
-    }, [groupId, firestore]);
+    }, [groupId]);
 
     const { data: groupData, isLoading: isGroupDataLoading } = useDoc(groupDocRef);
     
     const membersQuery = useMemo(() => {
         if (!groupId) return null;
         return query(collection(firestore, `groups/${groupId}/members`));
-    }, [groupId, firestore]);
+    }, [groupId]);
 
     const { data: members, isLoading: areMembersLoading } = useCollection(membersQuery);
 

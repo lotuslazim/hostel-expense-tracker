@@ -3,9 +3,9 @@
 
 import { useState, useMemo, useRef, useEffect } from "react";
 import { useCollection } from "@/firebase";
-import { collection, query, orderBy, addDoc, serverTimestamp, Timestamp } from "firebase/firestore";
+import { collection, query, orderBy, addDoc, serverTimestamp } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { useFirebase } from "@/firebase";
+import { firestore, storage } from "@/firebase/config";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -56,7 +56,6 @@ function ChatSkeleton() {
 }
 
 export function Chat({ groupId, currentUser }: ChatProps) {
-    const { firestore, storage } = useFirebase();
     const { toast } = useToast();
     const [newMessage, setNewMessage] = useState("");
     const [imageFile, setImageFile] = useState<File | null>(null);
@@ -70,7 +69,7 @@ export function Chat({ groupId, currentUser }: ChatProps) {
             collection(firestore, `groups/${groupId}/messages`),
             orderBy("createdAt", "asc")
         );
-    }, [firestore, groupId]);
+    }, [groupId]);
 
     const { data: messages, isLoading } = useCollection<ChatMessageType>(messagesQuery);
     

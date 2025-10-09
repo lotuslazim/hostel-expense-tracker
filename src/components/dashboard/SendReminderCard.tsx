@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useFirebase, useUser, useDoc } from "@/firebase";
+import { useUser, useDoc } from "@/firebase";
+import { firestore } from "@/firebase/config";
 import { doc, addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Bell } from "lucide-react";
@@ -19,12 +20,11 @@ const reminderSchema = z.object({
 });
 
 export function SendReminderCard() {
-  const { firestore } = useFirebase();
   const { user: currentUser } = useUser();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
+  const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [currentUser]);
   const { data: currentUserData } = useDoc(currentUserRef);
   const groupId = currentUserData?.groupId;
 
@@ -107,5 +107,3 @@ export function SendReminderCard() {
     </Card>
   );
 }
-
-    

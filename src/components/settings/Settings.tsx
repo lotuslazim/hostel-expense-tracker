@@ -1,15 +1,16 @@
 
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
-import { useUser, useFirebase, useDoc, useCollection } from "@/firebase";
+import { useState, useMemo } from "react";
+import { useUser, useDoc, useCollection } from "@/firebase";
+import { auth, firestore } from "@/firebase/config";
 import { doc, updateDoc, deleteDoc, getDocs, collection, query, where, writeBatch, serverTimestamp } from "firebase/firestore";
 import { signOut, sendPasswordResetEmail, deleteUser } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { useI18n } from "@/i18n/client-provider";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,11 +36,9 @@ import {
   LogOut,
   Trash2,
   Copy,
-  Users,
   KeyRound,
   FileDown,
   Edit,
-  UserPlus
 } from "lucide-react";
 import { Label } from "../ui/label";
 import { Switch } from "../ui/switch";
@@ -76,7 +75,6 @@ function SettingsSkeleton() {
 function AdminControls({ groupData, members, groupId }: { groupData: any, members: any[], groupId: string }) {
   const { t } = useI18n();
   const { toast } = useToast();
-  const { firestore } = useFirebase();
 
   const handleResetInviteCode = async () => {
     const newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -233,7 +231,6 @@ function AdminControls({ groupData, members, groupId }: { groupData: any, member
 
 
 function AccountSettings({ user, userData, groupData, groupId }: { user: any, userData: any, groupData: any, groupId: string | null }) {
-    const { auth, firestore } = useFirebase();
     const router = useRouter();
     const { toast } = useToast();
     const { t } = useI18n();
@@ -443,18 +440,17 @@ function AppSettings() {
 
 export function Settings() {
   const { user, isUserLoading } = useUser();
-  const { firestore } = useFirebase();
   const { t } = useI18n();
 
-  const userRef = useMemo(() => (user ? doc(firestore, "users", user.uid) : null), [user, firestore]);
+  const userRef = useMemo(() => (user ? doc(firestore, "users", user.uid) : null), [user]);
   const { data: userData, isLoading: isUserDataLoading } = useDoc(userRef);
 
   const groupId = userData?.groupId;
 
-  const groupRef = useMemo(() => (groupId ? doc(firestore, `groups`, groupId) : null), [groupId, firestore]);
+  const groupRef = useMemo(() => (groupId ? doc(firestore, `groups`, groupId) : null), [groupId]);
   const { data: groupData, isLoading: isGroupDataLoading } = useDoc(groupRef);
 
-  const membersQuery = useMemo(() => (groupId ? query(collection(firestore, `groups/${groupId}/members`), where('status', '==', 'active')) : null), [groupId, firestore]);
+  const membersQuery = useMemo(() => (groupId ? query(collection(firestore, `groups/${groupId}/members`), where('status', '==', 'active')) : null), [groupId]);
   const { data: members, isLoading: areMembersLoading } = useCollection(membersQuery);
 
 

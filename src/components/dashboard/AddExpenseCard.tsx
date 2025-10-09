@@ -23,7 +23,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useFirebase, useUser, useDoc } from "@/firebase";
+import { useUser, useDoc } from "@/firebase";
+import { firestore, storage } from "@/firebase/config";
 import { doc, addDoc, collection, serverTimestamp, Timestamp, writeBatch, query, getDocs, where } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useToast } from "@/hooks/use-toast";
@@ -54,7 +55,6 @@ const purchasedItemSchema = z.object({
 
 
 export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
-  const { firestore, storage } = useFirebase();
   const { user: currentUser } = useUser();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -74,11 +74,11 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   const [showInventoryFields, setShowInventoryFields] = useState(false);
 
 
-  const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
+  const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [currentUser]);
   const { data: currentUserData } = useDoc(currentUserRef);
   const groupId = currentUserData?.groupId;
 
-  const groupRef = useMemo(() => (groupId ? doc(firestore, "groups", groupId) : null), [firestore, groupId]);
+  const groupRef = useMemo(() => (groupId ? doc(firestore, "groups", groupId) : null), [groupId]);
   const { data: groupData, isLoading: isGroupDataLoading } = useDoc(groupRef);
 
   const isUtilityReceiptRequired = useMemo(() => groupData?.settings?.isUtilityReceiptRequired ?? false, [groupData]);
@@ -572,5 +572,3 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     </Card>
   );
 }
-
-    

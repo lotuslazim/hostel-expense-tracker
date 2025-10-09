@@ -2,19 +2,19 @@
 "use client";
 
 import { useEffect, useMemo, useRef } from 'react';
-import { useUser, useDoc, useFirebase } from '@/firebase';
+import { useUser, useDoc } from '@/firebase';
+import { firestore } from '@/firebase/config';
 import { collection, query, where, onSnapshot, Timestamp } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import type { Reminder } from '@/lib/types';
 import { doc } from 'firebase/firestore';
 
 export function ReminderListener() {
-    const { firestore } = useFirebase();
     const { user: currentUser } = useUser();
     const { toast } = useToast();
     const lastReminderTimestampRef = useRef<Timestamp | null>(null);
 
-    const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
+    const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [currentUser]);
     const { data: currentUserData } = useDoc(currentUserRef);
 
     const groupId = currentUserData?.groupId;
@@ -58,9 +58,7 @@ export function ReminderListener() {
         });
 
         return () => unsubscribe();
-    }, [groupId, currentUser, firestore, toast]);
+    }, [groupId, currentUser, toast]);
 
     return null; // This component does not render anything
 }
-
-    

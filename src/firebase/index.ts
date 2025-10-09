@@ -1,7 +1,7 @@
 
 'use client';
 
-// This file is being simplified as initialization is now handled directly in the client provider.
+// This file is being simplified as initialization is now handled directly in the config file.
 // It will now primarily re-export modules for easier access.
 
 export * from './provider';

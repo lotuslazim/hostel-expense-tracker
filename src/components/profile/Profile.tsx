@@ -2,10 +2,12 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { useUser, useFirebase, useDoc, useCollection } from "@/firebase";
+import { useUser } from "@/firebase";
+import { auth, firestore, storage } from "@/firebase/config";
 import { doc, updateDoc, collection, query, where, Timestamp, orderBy, writeBatch, getDocs, deleteDoc, serverTimestamp } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { signOut, sendPasswordResetEmail, deleteUser } from "firebase/auth";
+import { useDoc, useCollection } from "@/firebase";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -87,7 +89,6 @@ function ProfileSkeleton() {
 }
 
 function AccountSettings({ user, userData, groupData, groupId }: { user: any, userData: any, groupData: any, groupId: string | null }) {
-    const { auth, firestore } = useFirebase();
     const router = useRouter();
     const { toast } = useToast();
 
@@ -222,10 +223,9 @@ function AccountSettings({ user, userData, groupData, groupId }: { user: any, us
 
 export function Profile() {
   const { user, isUserLoading } = useUser();
-  const { firestore, storage } = useFirebase();
   const { toast } = useToast();
 
-  const userRef = useMemo(() => (user ? doc(firestore, "users", user.uid) : null), [user, firestore]);
+  const userRef = useMemo(() => (user ? doc(firestore, "users", user.uid) : null), [user]);
   const { data: userData, isLoading: isUserDataLoading } = useDoc(userRef);
 
   const [displayName, setDisplayName] = useState("");
@@ -237,10 +237,10 @@ export function Profile() {
 
   const groupId = userData?.groupId;
 
-  const groupRef = useMemo(() => (groupId ? doc(firestore, `groups`, groupId) : null), [groupId, firestore]);
+  const groupRef = useMemo(() => (groupId ? doc(firestore, `groups`, groupId) : null), [groupId]);
   const { data: groupData, isLoading: isGroupDataLoading } = useDoc(groupRef);
 
-  const membersQuery = useMemo(() => (groupId ? query(collection(firestore, `groups/${groupId}/members`), where('status', '==', 'active')) : null), [groupId, firestore]);
+  const membersQuery = useMemo(() => (groupId ? query(collection(firestore, `groups/${groupId}/members`), where('status', '==', 'active')) : null), [groupId]);
   const { data: members, isLoading: areMembersLoading } = useCollection<Member>(membersQuery);
   
   const expensesQuery = useMemo(() => {
@@ -250,7 +250,7 @@ export function Profile() {
         collection(firestore, `groups/${groupId}/expenses`), 
         where("userId", "==", user.uid)
     );
-  }, [user, firestore, groupId]);
+  }, [user, groupId]);
   const { data: expenses, isLoading: areExpensesLoading } = useCollection<Expense>(expensesQuery);
 
   const monthlyExpenses = useMemo(() => {

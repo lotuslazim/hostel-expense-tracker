@@ -17,7 +17,8 @@ import { Input } from "@/components/ui/input";
 import { AuthCard } from "./auth-card";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
-import { useFirebase } from "@/firebase";
+import { auth } from "@/firebase/config"; // Direct import
+import { firestore } from "@/firebase/config"; // Direct import
 import { GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, updateProfile, type User, sendEmailVerification, signOut } from "firebase/auth";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -31,20 +32,7 @@ const formSchema = z.object({
   password: z.string().min(8, { message: "Password must be at least 8 characters." }),
 });
 
-export function SignupForm() {
-  const router = useRouter();
-  const { auth, firestore, servicesLoading } = useFirebase();
-  const [isLoading, setIsLoading] = useState(false);
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const { toast } = useToast();
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: { name: "", email: "", password: "" },
-  });
-
-  const createUserDocument = async (user: User, name?: string) => {
+const createUserDocument = async (user: User, name?: string) => {
     const userDocRef = doc(firestore, "users", user.uid);
     const userDoc = await getDoc(userDocRef);
 
@@ -58,13 +46,21 @@ export function SignupForm() {
             isAdmin: false,
         });
     }
-  };
+};
+
+export function SignupForm() {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const { toast } = useToast();
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: { name: "", email: "", password: "" },
+  });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (servicesLoading) {
-        toast({ title: "Services initializing...", description: "Please wait a moment and try again."});
-        return;
-    }
     setIsLoading(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
@@ -79,6 +75,7 @@ export function SignupForm() {
       };
 
       await sendEmailVerification(user, actionCodeSettings);
+      
       toast({
         title: "Account Created!",
         description: "Please check your email to verify your account before logging in.",
@@ -92,16 +89,9 @@ export function SignupForm() {
       form.reset();
 
     } catch (error: any) {
-        console.error("Error creating user:", error);
         let description = "An unexpected error occurred. Please try again.";
         if (error.code === 'auth/email-already-in-use') {
             description = "This email is already registered. Please log in instead.";
-        } else if (error.code === 'auth/invalid-email') {
-          description = "Please enter a valid email address.";
-        } else if (error.code === 'auth/network-request-failed') {
-          description = "A network error occurred. Please check your connection and try again.";
-        } else if (error.code === 'auth/weak-password') {
-          description = "Your password is too weak. Please choose a stronger password.";
         }
         toast({
           variant: "destructive",
@@ -114,10 +104,6 @@ export function SignupForm() {
   }
   
   const handleGoogleSignIn = async () => {
-    if (servicesLoading) {
-        toast({ title: "Services initializing...", description: "Please wait a moment and try again."});
-        return;
-    }
     setIsGoogleLoading(true);
     const provider = new GoogleAuthProvider();
     try {
@@ -149,9 +135,9 @@ export function SignupForm() {
       footerLinkHref="/login"
     >
       <div className="space-y-4">
-        <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading || isGoogleLoading || servicesLoading}>
-           {(isGoogleLoading || servicesLoading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-           {!(isGoogleLoading || servicesLoading) && <GoogleIcon className="mr-2 h-4 w-4" />}
+        <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading || isGoogleLoading}>
+           {isGoogleLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+           {!isGoogleLoading && <GoogleIcon className="mr-2 h-4 w-4" />}
           Sign up with Google
         </Button>
         <div className="relative">
@@ -224,8 +210,8 @@ export function SignupForm() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={isLoading || isGoogleLoading || servicesLoading}>
-               {(isLoading || servicesLoading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button type="submit" className="w-full" disabled={isLoading || isGoogleLoading}>
+               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Create Account
             </Button>
           </form>

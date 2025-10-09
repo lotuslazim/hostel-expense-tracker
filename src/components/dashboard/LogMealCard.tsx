@@ -17,7 +17,8 @@ import {
 } from "@/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
-import { useFirebase, useUser, useDoc, addDocumentNonBlocking } from "@/firebase";
+import { useUser, useDoc, addDocumentNonBlocking } from "@/firebase";
+import { firestore } from "@/firebase/config";
 import { doc, addDoc, collection, serverTimestamp, Timestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Utensils } from "lucide-react";
@@ -28,16 +29,15 @@ interface LogMealCardProps {
 }
 
 export function LogMealCard({ selectedDate }: LogMealCardProps) {
-  const { firestore } = useFirebase();
   const { user: currentUser } = useUser();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
+  const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [currentUser]);
   const { data: currentUserData } = useDoc(currentUserRef);
   const groupId = currentUserData?.groupId;
 
-  const groupRef = useMemo(() => (groupId) ? doc(firestore, "groups", groupId) : null, [firestore, groupId]);
+  const groupRef = useMemo(() => (groupId) ? doc(firestore, "groups", groupId) : null, [groupId]);
   const { data: groupData, isLoading: isGroupDataLoading } = useDoc(groupRef);
 
   const mealTypes = useMemo(() => groupData?.settings?.mealTypes ?? ["Lunch", "Dinner"], [groupData]);
