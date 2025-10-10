@@ -1,7 +1,7 @@
 
 {
   "storage": {
-    "rules": "src/docs/backend.json"
+    "rules": "src/firebase/storage.rules"
   },
   "hosting": [
     {

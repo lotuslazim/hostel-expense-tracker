@@ -160,9 +160,6 @@
     }
   },
   "auth": { "providers": ["password", "google"] },
-  "storage": {
-    "rules": "service firebase.storage {\n  match /b/{bucket}/o {\n    // Rules for profile pictures\n    match /profilePictures/{userId}/{fileName} {\n      // Anyone can read profile pictures\n      allow read;\n      // Only the authenticated user can write to their own profile picture path\n      allow write: if request.auth != null && request.auth.uid == userId\n                    && request.resource.size < 2 * 1024 * 1024 // Max 2MB\n                    && request.resource.contentType.matches('image/.*');\n    }\n\n    // Rules for group-specific images (chat and receipts)\n    match /groups/{groupId}/{imageType}/{fileName} where imageType in ['chatImages', 'receipts'] {\n      // A user can read a file if they are a member of that group\n      allow read: if request.auth != null && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid));\n      // A user can write a file if they are a member of that group\n      allow write: if request.auth != null && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))\n                     && request.resource.size < 5 * 1024 * 1024 // Max 5MB\n                     && request.resource.contentType.matches('image/.*');\n    }\n  }\n}\n"
-  },
   "firestore": {
     "structure": [
       {
@@ -274,5 +271,3 @@
     "reasoning": "This structure enforces security by scoping all group-related data within a group's subcollections. The rule `exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))` is used consistently to verify that the requesting user is a member of the group they are trying to access. The `isAdmin` flag on a user's document grants them broader read access to list all users and groups. Adding `request.auth.token.email_verified == true` to the rules ensures that only users who have verified their email can access or modify data, enhancing security. This is a secure and scalable pattern that prevents unauthorized data access. Firestore's default-deny policy ensures any path not explicitly granted access is automatically blocked."
   }
 }
-
-    
