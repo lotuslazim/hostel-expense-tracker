@@ -35,7 +35,7 @@ export default function Home() {
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center space-y-8 max-w-2xl mx-auto px-4">
+        <div className="text-center space-y-4 max-w-2xl mx-auto px-4">
           <div className="flex justify-center">
               <Logo isStacked={true} />
           </div>
@@ -48,7 +48,7 @@ export default function Home() {
             </p>
           </div>
           
-          <div className="space-y-4">
+          <div className="space-y-4 pt-4">
             <Button asChild size="lg">
               <Link href="/login">
                 Get Started <ArrowRight className="ml-2 h-5 w-5" />
