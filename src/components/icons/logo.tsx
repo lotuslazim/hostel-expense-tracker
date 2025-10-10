@@ -1,6 +1,6 @@
+
 "use client";
 
-import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { ComponentProps } from 'react';
 import Image from 'next/image';
@@ -10,11 +10,11 @@ export function Logo({ isStacked = false }: { isStacked?: boolean }) {
     <div
       className={cn(
         "flex items-center",
-        isStacked ? "flex-col gap-1" : "gap-3"
+        isStacked ? "flex-col" : "gap-3"
       )}
       aria-label="BachelorBite Home"
     >
-      <div className={cn("relative shrink-0", isStacked ? "w-32 h-20" : "w-12 h-12")}>
+      <div className={cn("relative shrink-0", isStacked ? "w-32 h-12" : "w-12 h-12")}>
         <Image 
           src="/logo.png" 
           alt="BachelorBite Logo" 
