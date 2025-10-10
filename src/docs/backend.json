@@ -259,17 +259,16 @@
       {
         "path": "/groups/{groupId}/reminders/{reminderId}",
         "definition": {
-          "entityName": "Reminder", "schema": { "$ref": "#/entities/Reminder" },
+          "entityName": "Reminder",
+          "schema": { "$ref": "#/entities/Reminder" },
           "rules": {
-            "list, get": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))",
+            "list, get": "request.auth != null && request.auth.token.email_verified == true",
             "create": "request.auth.token.email_verified == true && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)) && request.resource.data.senderId == request.auth.uid"
           },
-          "description": "Stores reminders for a group. Any verified group member can create and read reminders."
+          "description": "Stores reminders for a group. Any verified group member can create reminders, and any authenticated, verified user can read them."
         }
       }
     ],
     "reasoning": "This structure enforces security by scoping all group-related data within a group's subcollections. The rule `exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))` is used consistently to verify that the requesting user is a member of the group they are trying to access. The `isAdmin` flag on a user's document grants them broader read access to list all users and groups. Adding `request.auth.token.email_verified == true` to the rules ensures that only users who have verified their email can access or modify data, enhancing security. This is a secure and scalable pattern that prevents unauthorized data access. Firestore's default-deny policy ensures any path not explicitly granted access is automatically blocked."
   }
 }
-
-    
