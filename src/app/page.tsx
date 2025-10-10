@@ -21,7 +21,7 @@ export default function Home() {
     }
   }, [user, isUserLoading, router]);
 
-  const heroImage = PlaceHolderImages.find(p => p.id === 'landing-hero-2');
+  const heroImage = PlaceHolderImages.find(p => p.id === 'landing-hero');
 
   if (isUserLoading) {
     return (
