@@ -29,14 +29,15 @@ export function Logo({ isStacked = false }: { isStacked?: boolean }) {
           sizes="(max-width: 768px) 10vw, 5vw"
         />
       </div>
-      <span
+      <div
         className={cn(
-          "font-headline text-2xl font-bold tracking-tight text-foreground",
+          "font-headline text-2xl font-bold tracking-tight",
           isStacked && "text-center"
         )}
       >
-        BachelorBite
-      </span>
+        <span className="text-foreground">Bachelor</span>
+        <span className="text-primary">Bite</span>
+      </div>
     </LinkComponent>
   );
 }
