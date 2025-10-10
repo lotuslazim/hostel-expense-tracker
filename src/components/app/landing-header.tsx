@@ -18,7 +18,9 @@ export function LandingHeader() {
         </div>
         
         <div className="md:hidden flex-1">
-          <Logo />
+          <Link href="/">
+            <Logo />
+          </Link>
         </div>
 
         <div className="flex flex-1 items-center justify-end space-x-2">
