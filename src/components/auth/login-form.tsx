@@ -173,7 +173,7 @@ export function LoginForm() {
   return (
     <AuthCard
       title="Welcome Back"
-      description="Log in to your NourishTrack account"
+      description="Log in to your BachelorBite account"
       footerText="Don't have an account?"
       footerLinkText="Sign Up"
       footerLinkHref="/signup"

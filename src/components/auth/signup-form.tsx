@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -118,7 +119,7 @@ export function SignupForm() {
   return (
     <AuthCard
       title="Create an Account"
-      description="Join NourishTrack and simplify your flat's finances."
+      description="Join BachelorBite and simplify your flat's finances."
       footerText="Already have an account?"
       footerLinkText="Log In"
       footerLinkHref="/login"
