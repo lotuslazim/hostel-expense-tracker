@@ -58,7 +58,6 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   const { user: currentUser } = useUser();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showReceipt, setShowReceipt] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [receiptImageFile, setReceiptImageFile] = useState<File | null>(null);
   const { triggerUpdate } = useInventory();
@@ -71,6 +70,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   const [isCameraDialogOpen, setIsCameraDialogOpen] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
   const [showInventoryFields, setShowInventoryFields] = useState(false);
+  const [showReceipt, setShowReceipt] = useState(false);
 
 
   const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [currentUser]);
@@ -245,9 +245,9 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     }
 
     setIsSubmitting(true);
-    let receiptUrl: string | undefined = undefined;
-
+    
     try {
+        let receiptUrl: string | undefined = undefined;
         if (receiptImageFile) {
             const storageRef = ref(storage, `groups/${groupId}/receipts/${Date.now()}_${receiptImageFile.name}`);
             const snapshot = await uploadBytes(storageRef, receiptImageFile);
@@ -550,5 +550,3 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     </Card>
   );
 }
-
-    
