@@ -20,7 +20,7 @@ export function Logo({ isStacked = false }: { isStacked?: boolean }) {
       )}
       aria-label="BachelorBite Home"
     >
-      <div className={cn("relative shrink-0", isStacked ? "w-24 h-24" : "w-12 h-12")}>
+      <div className={cn("relative shrink-0", isStacked ? "w-32 h-32" : "w-12 h-12")}>
         <Image 
           src="/logo.png" 
           alt="BachelorBite Logo" 
