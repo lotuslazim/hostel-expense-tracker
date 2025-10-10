@@ -8,8 +8,8 @@ import { useUser } from "@/firebase";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { LandingHeader } from "@/components/app/landing-header";
-import Image from "next/image";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { Logo } from "@/components/icons/logo";
+
 
 export default function Home() {
   const { user, isUserLoading } = useUser();
@@ -21,7 +21,6 @@ export default function Home() {
     }
   }, [user, isUserLoading, router]);
 
-  const heroImage = PlaceHolderImages.find(p => p.id === 'landing-hero');
 
   if (isUserLoading) {
     return (
@@ -38,24 +37,12 @@ export default function Home() {
       <div className="min-h-screen flex flex-col bg-background">
         <LandingHeader />
         <main className="flex-grow flex items-center justify-center text-center">
-            <div className="absolute inset-0 z-0">
-                {heroImage && (
-                    <Image
-                        src={heroImage.imageUrl}
-                        alt={heroImage.description}
-                        fill
-                        className="object-cover"
-                        data-ai-hint={heroImage.imageHint}
-                        priority
-                    />
-                )}
-                <div className="absolute inset-0 bg-black/60"></div>
-            </div>
-            <div className="relative z-10 text-white p-4 space-y-6 max-w-3xl mx-auto">
-                <h1 className="text-4xl md:text-6xl font-bold font-headline drop-shadow-md">
+            <div className="p-4 space-y-4 max-w-3xl mx-auto flex flex-col items-center">
+                <Logo isStacked />
+                <h1 className="text-4xl md:text-5xl font-bold font-headline text-foreground">
                     BachelorBite won’t cook for you, but it’ll make your messy life easier.
                 </h1>
-                <p className="text-lg md:text-2xl text-white/80 drop-shadow-sm">
+                <p className="text-lg md:text-xl text-muted-foreground">
                     Skip the heartbreaks, count the meals.
                 </p>
                 <div className="pt-4">
