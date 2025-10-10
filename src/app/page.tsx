@@ -41,7 +41,7 @@ export default function Home() {
           </div>
           <div className="space-y-4">
             <h1 className="text-5xl font-bold font-headline text-foreground">
-              Welcome to BachelorBite
+              Don’t track heartbreaks. Track meals
             </h1>
             <p className="text-xl text-muted-foreground">
               Your journey to simplified meal and expense tracking starts here.
