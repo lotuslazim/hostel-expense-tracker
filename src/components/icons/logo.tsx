@@ -29,13 +29,7 @@ export function Logo({ isStacked = false }: { isStacked?: boolean }) {
           sizes="(max-width: 768px) 10vw, 5vw"
         />
       </div>
-      <div className={cn(
-        "flex items-baseline",
-        isStacked && "flex-col items-center gap-1"
-      )}>
-        <span className={cn("font-headline font-bold text-foreground", isStacked ? "text-3xl" : "text-xl")}>Bachelor</span>
-        <span className={cn("font-headline font-bold text-primary", isStacked ? "text-3xl" : "text-xl")}>Bite</span>
-      </div>
+      {/* The text has been removed so only the logo image is displayed. */}
     </LinkComponent>
   );
 }
