@@ -15,8 +15,8 @@ export function Logo({ isStacked = false }: { isStacked?: boolean }) {
     <LinkComponent
       href="/"
       className={cn(
-        "flex items-center gap-2",
-        isStacked && "flex-col"
+        "flex items-center",
+        isStacked ? "flex-col gap-2" : "gap-3"
       )}
       aria-label="BachelorBite Home"
     >
