@@ -39,7 +39,7 @@ export default function Home() {
         <main className="flex-grow flex items-center justify-center text-center">
             <div className="p-4 space-y-4 max-w-3xl mx-auto flex flex-col items-center">
                 <Logo isStacked />
-                <h1 className="text-4xl md:text-5xl font-bold font-headline text-foreground">
+                <h1 className="text-3xl md:text-4xl font-bold font-headline text-foreground">
                     BachelorBite won’t cook for you, but it’ll make your messy life easier.
                 </h1>
                 <p className="text-lg md:text-xl text-muted-foreground">
