@@ -40,7 +40,7 @@ export default function Home() {
               <Logo isStacked={true} />
           </div>
           <div className="space-y-4">
-            <h1 className="text-5xl font-bold font-headline text-foreground">
+            <h1 className="text-4xl font-bold font-headline text-foreground">
               BachelorBite won’t cook for you, but it’ll make your messy life easier.
             </h1>
             <p className="text-xl text-muted-foreground">
