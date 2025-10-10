@@ -90,7 +90,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
         category: z.enum(["Food & Groceries", "Electricity", "Gas", "Other"], {
             required_error: "Please select a category.",
         }),
-        receipt: z.instanceof(File).optional(),
+        receipt: z.any().optional(),
         purchasedItems: z.array(purchasedItemSchema).optional(),
     }).refine(data => { // Receipt validation for utilities
         if((data.category === 'Electricity' || data.category === 'Gas') && isUtilityReceiptRequired) {
@@ -572,3 +572,5 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     </Card>
   );
 }
+
+    
