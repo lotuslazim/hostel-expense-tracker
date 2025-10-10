@@ -36,9 +36,9 @@ import { Alert, AlertTitle, AlertDescription } from "../ui/alert";
 import { useInventory } from "@/contexts/InventoryContext";
 
 // Lazy load the image compression library
-const compressImage = async (file: File): Promise<File> => {
+const compressImage = async (file: File | Blob): Promise<Blob> => {
     const imageCompression = (await import('browser-image-compression')).default;
-    return imageCompression(file, { maxSizeMB: 1, maxWidthOrHeight: 1024 });
+    return imageCompression(file as File, { maxSizeMB: 1, maxWidthOrHeight: 1024 });
 };
 
 interface AddExpenseCardProps {
@@ -65,6 +65,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const [isCameraDialogOpen, setIsCameraDialogOpen] = useState(false);
@@ -134,7 +135,6 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     setShowReceipt(isUtility);
     setShowInventoryFields(isFood);
 
-    // Automatically set expenseItem for non-'Other' categories
     if (categoryValue === 'Electricity') {
       form.setValue('expenseItem', 'Electricity Bill');
     } else if (categoryValue === 'Gas') {
@@ -147,11 +147,11 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
 
   
   useEffect(() => {
-    const stream = videoRef.current?.srcObject as MediaStream;
-    if (!isCameraDialogOpen && stream) {
-        stream.getTracks().forEach(track => track.stop());
+    if (!isCameraDialogOpen && streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
         if (videoRef.current) {
-            videoRef.current!.srcObject = null;
+            videoRef.current.srcObject = null;
         }
     }
   }, [isCameraDialogOpen]);
@@ -161,7 +161,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     if (file) {
       try {
         const compressedFile = await compressImage(file);
-        setReceiptImageFile(compressedFile);
+        setReceiptImageFile(new File([compressedFile], file.name, { type: compressedFile.type }));
         setImagePreview(URL.createObjectURL(compressedFile));
       } catch (error) {
         toast({ variant: "destructive", title: "Error compressing image." });
@@ -178,50 +178,58 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   }
 
   const getCameraPermission = async () => {
-      if(hasCameraPermission === null || (hasCameraPermission && !videoRef.current?.srcObject)) {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({video: true});
-            setHasCameraPermission(true);
-            if (videoRef.current) {
-                videoRef.current.srcObject = stream;
-            }
-        } catch (error) {
-            console.error('Error accessing camera:', error);
-            setHasCameraPermission(false);
-        }
+      if (hasCameraPermission === false) return; // Don't re-request if denied
+      try {
+          const stream = await navigator.mediaDevices.getUserMedia({video: true});
+          streamRef.current = stream;
+          if (videoRef.current) {
+              videoRef.current.srcObject = stream;
+          }
+          setHasCameraPermission(true);
+      } catch (error) {
+          console.error('Error accessing camera:', error);
+          setHasCameraPermission(false);
       }
   };
   
-  const handleCapture = async () => {
-      if(videoRef.current && canvasRef.current) {
-          setIsCapturing(true);
-          const video = videoRef.current;
-          const canvas = canvasRef.current;
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
-          const context = canvas.getContext('2d');
-          context?.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+ const handleCapture = async () => {
+      if (videoRef.current && canvasRef.current) {
+        setIsCapturing(true);
+        const video = videoRef.current;
+        const canvas = canvasRef.current;
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        
+        if (ctx) {
+          ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
           
-          canvas.toBlob(async (blob) => {
-              if(blob) {
-                  try {
-                    const file = new File([blob], "camera-capture.jpg", { type: "image/jpeg" });
-                    const compressedFile = await compressImage(file);
-                    setReceiptImageFile(compressedFile);
-                    setImagePreview(URL.createObjectURL(compressedFile));
-                  } catch (error) {
-                    toast({ variant: "destructive", title: "Error processing captured image." });
-                  } finally {
-                    setIsCapturing(false);
-                    setIsCameraDialogOpen(false);
-                  }
-              } else {
-                 setIsCapturing(false);
-                 setIsCameraDialogOpen(false);
-              }
-          }, 'image/jpeg');
+          try {
+            const blob = await new Promise<Blob | null>((resolve) => {
+              canvas.toBlob(resolve, 'image/jpeg', 0.95);
+            });
+            
+            if (blob) {
+              const compressedBlob = await compressImage(blob);
+              const file = new File([compressedBlob], `receipt-${Date.now()}.jpg`, { type: 'image/jpeg' });
+              
+              setReceiptImageFile(file);
+              setImagePreview(URL.createObjectURL(compressedBlob));
+              
+              setIsCameraDialogOpen(false); // Close dialog only on success
+            }
+          } catch (error) {
+            console.error('Error processing captured image:', error);
+            toast({ variant: 'destructive', title: 'Could not process image. Please try again.'});
+            setIsCameraDialogOpen(false);
+          } finally {
+             setIsCapturing(false);
+          }
+        } else {
+            setIsCapturing(false);
+        }
       }
-  };
+    };
 
   const findMasterItemId = async (itemName: string) => {
     if (!groupId) return undefined;
@@ -257,7 +265,6 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
         const batch = writeBatch(firestore);
         const expenseRef = doc(collection(firestore, `groups/${groupId}/expenses`));
 
-        // Generate expenseItem string right before submission
         let finalExpenseItem = values.expenseItem;
         if (values.category === 'Food & Groceries') {
             finalExpenseItem = values.purchasedItems?.map(item => item.name).filter(Boolean).join(', ') || 'Groceries';
@@ -306,7 +313,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
         });
 
         if (values.category === 'Food & Groceries') {
-            triggerUpdate(); // Notify inventory page of the update
+            triggerUpdate(); 
         }
 
         form.reset({ amount: '' as unknown as number, expenseItem: "", category: undefined, purchasedItems: [] });
