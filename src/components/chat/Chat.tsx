@@ -219,3 +219,5 @@ export function Chat({ groupId, currentUser }: ChatProps) {
         </Card>
     );
 }
+
+    
