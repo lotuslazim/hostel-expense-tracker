@@ -23,7 +23,7 @@ import imageCompression from "browser-image-compression";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent as ReceiptDialogContent, DialogHeader as ReceiptDialogHeader, DialogTitle as ReceiptDialogTitle, DialogTrigger as ReceiptDialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { uploadFile } from "../../../cloudinary";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 
 
 function ProfileSkeleton() {
@@ -287,7 +287,7 @@ export function Profile() {
       const file = e.target.files[0];
        try {
         const compressedFile = await imageCompression(file, { maxSizeMB: 1, maxWidthOrHeight: 1024 });
-        setProfileImageFile(compressedFile);
+        setProfileImageFile(compressedFile as File);
         setImagePreview(URL.createObjectURL(compressedFile));
         setIsEditing(true);
       } catch (error) {
@@ -304,7 +304,7 @@ export function Profile() {
 
     try {
       if (profileImageFile) {
-        photoURL = await uploadFile(profileImageFile);
+        photoURL = await uploadToCloudinary(profileImageFile);
       }
 
       await updateDoc(userRef, {
@@ -504,4 +504,3 @@ export function Profile() {
     </div>
   );
 }
-

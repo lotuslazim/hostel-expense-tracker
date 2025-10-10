@@ -33,11 +33,10 @@ import { Skeleton } from "../ui/skeleton";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { Alert, AlertTitle, AlertDescription } from "../ui/alert";
 import { useInventory } from "@/contexts/InventoryContext";
-import { uploadFile } from "../../../cloudinary";
+import { uploadToCloudinary } from "@/lib/cloudinary";
+import imageCompression from "browser-image-compression";
 
-// Lazy load the image compression library
 const compressImage = async (file: File | Blob): Promise<Blob> => {
-    const imageCompression = (await import('browser-image-compression')).default;
     return imageCompression(file as File, { maxSizeMB: 1, maxWidthOrHeight: 1024 });
 };
 
@@ -193,7 +192,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   };
   
  const handleCapture = async () => {
-    if (!videoRef.current || !canvasRef.current) return;
+    if (!videoRef.current || !canvasRef.current || isCapturing) return;
     setIsCapturing(true);
 
     const video = videoRef.current;
@@ -202,9 +201,10 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     canvas.height = video.videoHeight;
     const ctx = canvas.getContext('2d');
 
-    if (ctx) {
-        ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-        try {
+    try {
+        if (ctx) {
+            ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+            
             const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.95));
 
             if (blob) {
@@ -213,20 +213,19 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                 
                 setReceiptImageFile(file);
                 setImagePreview(URL.createObjectURL(compressedBlob));
-                setIsCameraDialogOpen(false); // Close dialog on success
-            }
-        } catch (error) {
-            console.error('Error processing captured image:', error);
-            toast({ variant: 'destructive', title: 'Could not process image.' });
-        } finally {
-            setIsCapturing(false);
-            if (streamRef.current) {
-                streamRef.current.getTracks().forEach(track => track.stop());
-                streamRef.current = null;
+                setIsCameraDialogOpen(false);
             }
         }
-    } else {
+    } catch (error) {
+        console.error('Error processing captured image:', error);
+        toast({ variant: 'destructive', title: 'Could not process image.' });
+        setIsCameraDialogOpen(false);
+    } finally {
         setIsCapturing(false);
+        if (streamRef.current) {
+            streamRef.current.getTracks().forEach(track => track.stop());
+            streamRef.current = null;
+        }
     }
 };
 
@@ -256,7 +255,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     try {
         let receiptUrl: string | undefined = undefined;
         if (receiptImageFile) {
-            receiptUrl = await uploadFile(receiptImageFile);
+            receiptUrl = await uploadToCloudinary(receiptImageFile);
         }
         
         const batch = writeBatch(firestore);

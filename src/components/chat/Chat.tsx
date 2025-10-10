@@ -16,7 +16,7 @@ import type { ChatMessage as ChatMessageType } from "@/lib/types";
 import { Loader2, Send, Image as ImageIcon, X, MessageSquare } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
 import imageCompression from "browser-image-compression";
-import { uploadFile } from "../../../cloudinary";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 
 interface ChatProps {
     groupId: string;
@@ -115,7 +115,7 @@ export function Chat({ groupId, currentUser }: ChatProps) {
             let imageUrl: string | undefined = undefined;
 
             if (imageFile) {
-                imageUrl = await uploadFile(imageFile);
+                imageUrl = await uploadToCloudinary(imageFile);
             }
 
             await addDoc(collection(firestore, `groups/${groupId}/messages`), {
