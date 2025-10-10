@@ -44,7 +44,7 @@ export default function Home() {
               Skip the heartbreaks — just count your meals.
             </h1>
             <p className="text-xl text-muted-foreground">
-              Your journey to simplified meal and expense tracking starts here.
+              BachelorBite won’t cook for you — but it’ll make your messy life easier.
             </p>
           </div>
           
