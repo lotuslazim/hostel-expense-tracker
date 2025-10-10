@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 const config = {
@@ -20,7 +21,7 @@ const config = {
     extend: {
       fontFamily: {
         body: ["var(--font-pt-sans)"],
-        headline: ["var(--font-poppins)"],
+        headline: ["var(--font-playfair-display)"],
       },
       colors: {
         border: "hsl(var(--border))",

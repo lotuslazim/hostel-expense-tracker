@@ -1,6 +1,6 @@
 
 import type { Metadata } from "next";
-import { PT_Sans, Poppins } from "next/font/google";
+import { PT_Sans, Playfair_Display } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
 import { InventoryProvider } from "@/contexts/InventoryContext";
@@ -16,10 +16,10 @@ const ptSans = PT_Sans({
   variable: "--font-pt-sans",
 });
 
-const poppins = Poppins({
+const playfairDisplay = Playfair_Display({
   subsets: ["latin"],
   weight: ["700"],
-  variable: "--font-poppins",
+  variable: "--font-playfair-display",
 });
 
 
@@ -35,7 +35,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={cn("font-body", ptSans.variable, poppins.variable)} suppressHydrationWarning>
+      <body className={cn("font-body", ptSans.variable, playfairDisplay.variable)} suppressHydrationWarning>
         <I18nProvider>
           <ThemeProvider
             attribute="class"
