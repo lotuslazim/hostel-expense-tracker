@@ -4,7 +4,7 @@
 import { useState, useMemo } from "react";
 import { useUser, useDoc, useCollection } from "@/firebase";
 import { auth, firestore } from "@/firebase/config";
-import { doc, updateDoc, deleteDoc, getDocs, collection, query, where, writeBatch, serverTimestamp } from "firebase/firestore";
+import { doc, updateDoc, deleteDoc, getDocs, collection, query, where, writeBatch, serverTimestamp, Timestamp } from "firebase/firestore";
 import { signOut, sendPasswordResetEmail, deleteUser } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
@@ -39,11 +39,14 @@ import {
   KeyRound,
   FileDown,
   Edit,
+  Loader2,
 } from "lucide-react";
 import { Label } from "../ui/label";
 import { Switch } from "../ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { startOfMonth, endOfMonth, format } from "date-fns";
+
 
 function SettingsSkeleton() {
   return (
@@ -75,6 +78,7 @@ function SettingsSkeleton() {
 function AdminControls({ groupData, members, groupId }: { groupData: any, members: any[], groupId: string }) {
   const { t } = useI18n();
   const { toast } = useToast();
+  const [isExporting, setIsExporting] = useState(false);
 
   const handleResetInviteCode = async () => {
     const newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -123,6 +127,66 @@ function AdminControls({ groupData, members, groupId }: { groupData: any, member
         toast({ variant: "destructive", title: "Error", description: "Could not remove the member." });
     }
   };
+  
+  const handleExportData = async () => {
+        setIsExporting(true);
+        try {
+            const currentMonth = new Date();
+            const monthStart = startOfMonth(currentMonth);
+            const monthEnd = endOfMonth(currentMonth);
+
+            const expensesQuery = query(
+                collection(firestore, `groups/${groupId}/expenses`),
+                where("date", ">=", Timestamp.fromDate(monthStart)),
+                where("date", "<=", Timestamp.fromDate(monthEnd))
+            );
+            const mealsQuery = query(
+                collection(firestore, `groups/${groupId}/meals`),
+                where("date", ">=", Timestamp.fromDate(monthStart)),
+                where("date", "<=", Timestamp.fromDate(monthEnd))
+            );
+
+            const [expensesSnapshot, mealsSnapshot] = await Promise.all([
+                getDocs(expensesQuery),
+                getDocs(mealsQuery)
+            ]);
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+            
+            const combinedHeaders = "Type,Date,Member,Details,Category/Type,Amount/Count,Meal Item\n";
+             const combinedRows = [
+                ...expensesSnapshot.docs.map(doc => {
+                    const data = doc.data();
+                    const date = data.date instanceof Timestamp ? data.date.toDate() : new Date();
+                    return ["Expense", format(date, 'yyyy-MM-dd'), `"${data.userName}"`, `"${data.expenseItem}"`, data.category, data.amount, ''].join(',');
+                }),
+                ...mealsSnapshot.docs.map(doc => {
+                    const data = doc.data();
+                    const date = data.date instanceof Timestamp ? data.date.toDate() : new Date();
+                    return ["Meal", format(date, 'yyyy-MM-dd'), `"${data.userName}"`, `"${data.description}"`, data.mealType, data.mealNumber, `"${data.itemName || ''}"`].join(',');
+                })
+            ].join('\n');
+            
+            csvContent += combinedHeaders + combinedRows;
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            const monthName = format(currentMonth, "MMMM-yyyy");
+            link.setAttribute("download", `bachelorbite-export-${groupData.groupName}-${monthName}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            toast({ title: "Export Successful", description: "Your data has been downloaded." });
+
+        } catch (error) {
+            console.error("Error exporting data: ", error);
+            toast({ variant: "destructive", title: "Export Failed", description: "Could not export group data." });
+        } finally {
+            setIsExporting(false);
+        }
+    };
 
 
   return (
@@ -221,7 +285,10 @@ function AdminControls({ groupData, members, groupId }: { groupData: any, member
                 </CardHeader>
                 <CardContent className="flex items-center justify-between">
                     <p className="text-sm text-muted-foreground">{t('settings.admin_controls.data_reports.export_data')}</p>
-                    <Button variant="outline"><FileDown className="mr-2 h-4 w-4" /> Export</Button>
+                    <Button variant="outline" onClick={handleExportData} disabled={isExporting}>
+                        {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <FileDown className="mr-2 h-4 w-4"/>}
+                        Export
+                    </Button>
                 </CardContent>
             </Card>
         </div>
