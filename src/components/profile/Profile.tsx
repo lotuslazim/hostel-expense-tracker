@@ -16,12 +16,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { Camera, User, Mail, Home, Users, Wallet, ChevronDown, Loader2, LogOut, Trash2, Copy } from "lucide-react";
+import { Camera, User, Mail, Home, Users, Wallet, ChevronDown, Loader2, LogOut, Trash2, Copy, Receipt } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { format, startOfMonth } from "date-fns";
 import type { Expense, Member } from "@/lib/types";
 import imageCompression from "browser-image-compression";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent as ReceiptDialogContent, DialogHeader as ReceiptDialogHeader, DialogTitle as ReceiptDialogTitle, DialogTrigger as ReceiptDialogTrigger } from "@/components/ui/dialog";
+
 
 function ProfileSkeleton() {
   return (
@@ -445,10 +447,10 @@ export function Profile() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2"><Wallet/> Expense History</CardTitle>
-            <CardDescription>Your personal expense contributions for the current month.</CardDescription>
+            <CardDescription>Your personal expense contributions.</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
+            <div className="space-y-2 max-h-80 overflow-y-auto">
                 {Object.keys(monthlyExpenses).length > 0 ? Object.entries(monthlyExpenses).map(([month, data]) => (
                     <Collapsible key={month}>
                         <CollapsibleTrigger className="w-full flex justify-between items-center p-3 rounded-lg hover:bg-muted/50 transition-colors group">
@@ -462,25 +464,44 @@ export function Profile() {
                             <div className="space-y-2 mt-2 border-t pt-2">
                                 {data.items.map(item => (
                                     <div key={item.id} className="flex justify-between items-center text-sm">
-                                        <div>
+                                        <div className="flex-1">
                                           <p>{item.expenseItem}</p>
                                           <p className="text-xs text-muted-foreground">{format((item.date as Timestamp).toDate(), "do MMM, yyyy")}</p>
                                         </div>
-                                        <p className="font-medium">৳{item.amount.toFixed(2)}</p>
+                                        <div className="flex items-center gap-2">
+                                            {item.receiptPhotoUrl && (
+                                                <ReceiptDialogTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="h-7 w-7">
+                                                        <Receipt className="h-4 w-4" />
+                                                    </Button>
+                                                </ReceiptDialogTrigger>
+                                            )}
+                                            <p className="font-medium w-20 text-right">৳{item.amount.toFixed(2)}</p>
+                                        </div>
+                                         <ReceiptDialogContent>
+                                            <ReceiptDialogHeader>
+                                                <ReceiptDialogTitle>Receipt for {item.expenseItem}</ReceiptDialogTitle>
+                                            </ReceiptDialogHeader>
+                                            <div className="py-4">
+                                                <img src={item.receiptPhotoUrl} alt="Receipt" className="w-full h-auto rounded-md" />
+                                            </div>
+                                        </ReceiptDialogContent>
                                     </div>
                                 ))}
                             </div>
                         </CollapsibleContent>
                     </Collapsible>
                 )) : (
-                    <p className="text-center text-muted-foreground py-6">No expenses logged in the current month.</p>
+                    <p className="text-center text-muted-foreground py-6">No expenses logged yet.</p>
                 )}
             </div>
           </CardContent>
         </Card>
       </div>
-
-       <AccountSettings user={user} userData={userData} groupData={groupData} groupId={groupId} />
+      
+      <ReceiptDialog>
+        <AccountSettings user={user} userData={userData} groupData={groupData} groupId={groupId} />
+      </ReceiptDialog>
     </div>
   );
 }

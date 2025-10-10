@@ -4,13 +4,15 @@
 import { useMemo }from "react";
 import { format } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, Receipt } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { Expense } from "@/lib/types";
 import { MonthSwitcher } from "../report/month-switcher";
 import { Skeleton } from "../ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
+import { Button } from "../ui/button";
 
 interface ActivityFeedProps {
   expenses: Expense[];
@@ -63,6 +65,7 @@ export function ActivityFeed({ expenses, isLoading, currentMonth, onMonthChange 
                             <TableHead>Expense Item</TableHead>
                             <TableHead>Category</TableHead>
                             <TableHead className="text-right">Amount</TableHead>
+                            <TableHead className="text-center">Receipt</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -73,6 +76,27 @@ export function ActivityFeed({ expenses, isLoading, currentMonth, onMonthChange 
                                 <TableCell>{item.expenseItem || "N/A"}</TableCell>
                                 <TableCell><Badge variant="secondary">{item.category}</Badge></TableCell>
                                 <TableCell className="text-right font-semibold">৳{item.amount.toFixed(2)}</TableCell>
+                                <TableCell className="text-center">
+                                    {item.receiptPhotoUrl ? (
+                                        <Dialog>
+                                            <DialogTrigger asChild>
+                                                <Button variant="ghost" size="icon">
+                                                    <Receipt className="h-4 w-4" />
+                                                </Button>
+                                            </DialogTrigger>
+                                            <DialogContent className="max-w-3xl">
+                                                <DialogHeader>
+                                                    <DialogTitle>Receipt for {item.expenseItem}</DialogTitle>
+                                                </DialogHeader>
+                                                <div className="py-4">
+                                                    <img src={item.receiptPhotoUrl} alt="Receipt" className="w-full h-auto rounded-md" />
+                                                </div>
+                                            </DialogContent>
+                                        </Dialog>
+                                    ) : (
+                                        <span className="text-muted-foreground text-xs">-</span>
+                                    )}
+                                </TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
