@@ -271,3 +271,5 @@
     "reasoning": "This structure enforces security by scoping all group-related data within a group's subcollections. The rule `exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid))` is used consistently to verify that the requesting user is a member of the group they are trying to access. The `isAdmin` flag on a user's document grants them broader read access to list all users and groups. Adding `request.auth.token.email_verified == true` to the rules ensures that only users who have verified their email can access or modify data, enhancing security. This is a secure and scalable pattern that prevents unauthorized data access. Firestore's default-deny policy ensures any path not explicitly granted access is automatically blocked."
   }
 }
+
+    
