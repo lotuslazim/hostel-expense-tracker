@@ -37,7 +37,7 @@ export default function Home() {
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center space-y-8 max-w-2xl mx-auto px-4">
           <div className="flex justify-center">
-              <Logo isStacked />
+              <Logo />
           </div>
           <div className="space-y-4">
             <h1 className="text-5xl font-bold font-headline text-foreground">
