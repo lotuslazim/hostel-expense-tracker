@@ -60,9 +60,8 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showReceipt, setShowReceipt] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [receiptImageFile, setReceiptImageFile] = useState<File | null>(null);
   const { triggerUpdate } = useInventory();
-  const [capturedImageBlob, setCapturedImageBlob] = useState<Blob | null>(null);
-
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -90,16 +89,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
         category: z.enum(["Food & Groceries", "Electricity", "Gas", "Other"], {
             required_error: "Please select a category.",
         }),
-        receipt: z.any().optional(),
         purchasedItems: z.array(purchasedItemSchema).optional(),
-    }).refine(data => { // Receipt validation for utilities
-        if((data.category === 'Electricity' || data.category === 'Gas') && isUtilityReceiptRequired) {
-            return !!data.receipt || !!capturedImageBlob;
-        }
-        return true;
-    }, {
-        message: "A receipt is required for utility expenses.",
-        path: ['receipt'],
     }).refine(data => { // Food & Groceries amount validation
         if (data.category === 'Food & Groceries' && data.purchasedItems && data.purchasedItems.length > 0) {
             const itemsTotal = data.purchasedItems.reduce((sum, item) => sum + (item.cost || 0), 0);
@@ -119,7 +109,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
       message: "Expense Item is required for 'Other' category.",
       path: ['expenseItem']
     });
-  }, [isUtilityReceiptRequired, capturedImageBlob]);
+  }, []);
 
   const form = useForm<z.infer<typeof expenseSchema>>({
     resolver: zodResolver(expenseSchema),
@@ -160,7 +150,9 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     const stream = videoRef.current?.srcObject as MediaStream;
     if (!isCameraDialogOpen && stream) {
         stream.getTracks().forEach(track => track.stop());
-        videoRef.current!.srcObject = null;
+        if (videoRef.current) {
+            videoRef.current!.srcObject = null;
+        }
     }
   }, [isCameraDialogOpen]);
 
@@ -168,9 +160,8 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     const file = event.target.files?.[0];
     if (file) {
       try {
-        setCapturedImageBlob(null); // Clear any captured blob
         const compressedFile = await compressImage(file);
-        form.setValue("receipt", compressedFile);
+        setReceiptImageFile(compressedFile);
         setImagePreview(URL.createObjectURL(compressedFile));
       } catch (error) {
         toast({ variant: "destructive", title: "Error compressing image." });
@@ -179,8 +170,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   };
 
   const clearImage = () => {
-      form.setValue("receipt", undefined);
-      setCapturedImageBlob(null);
+      setReceiptImageFile(null);
       setImagePreview(null);
       if(fileInputRef.current) {
           fileInputRef.current.value = "";
@@ -217,8 +207,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                   try {
                     const file = new File([blob], "camera-capture.jpg", { type: "image/jpeg" });
                     const compressedFile = await compressImage(file);
-                    setCapturedImageBlob(compressedFile);
-                    form.setValue("receipt", undefined);
+                    setReceiptImageFile(compressedFile);
                     setImagePreview(URL.createObjectURL(compressedFile));
                   } catch (error) {
                     toast({ variant: "destructive", title: "Error processing captured image." });
@@ -250,21 +239,19 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
       return;
     }
 
+    if ((values.category === 'Electricity' || values.category === 'Gas') && isUtilityReceiptRequired && !receiptImageFile) {
+        toast({ variant: "destructive", title: "Receipt Required", description: "A receipt image is required for utility bills." });
+        return;
+    }
+
     setIsSubmitting(true);
     let receiptUrl: string | undefined = undefined;
 
     try {
-        let receiptToUpload: File | Blob | null = values.receipt || capturedImageBlob;
-        
-        if (receiptToUpload) {
-            if (!(receiptToUpload instanceof File) && receiptToUpload instanceof Blob) {
-                receiptToUpload = new File([receiptToUpload], `receipt-${Date.now()}.jpg`, { type: 'image/jpeg' });
-            }
-            if (receiptToUpload instanceof File) {
-                const storageRef = ref(storage, `groups/${groupId}/receipts/${Date.now()}_${receiptToUpload.name}`);
-                const snapshot = await uploadBytes(storageRef, receiptToUpload);
-                receiptUrl = await getDownloadURL(snapshot.ref);
-            }
+        if (receiptImageFile) {
+            const storageRef = ref(storage, `groups/${groupId}/receipts/${Date.now()}_${receiptImageFile.name}`);
+            const snapshot = await uploadBytes(storageRef, receiptImageFile);
+            receiptUrl = await getDownloadURL(snapshot.ref);
         }
         
         const batch = writeBatch(firestore);
@@ -322,7 +309,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
             triggerUpdate(); // Notify inventory page of the update
         }
 
-        form.reset({ amount: '' as unknown as number, expenseItem: "", category: undefined, receipt: undefined, purchasedItems: [] });
+        form.reset({ amount: '' as unknown as number, expenseItem: "", category: undefined, purchasedItems: [] });
         clearImage();
 
     } catch (error) {
@@ -504,60 +491,54 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                 )}
 
                 {showReceipt && (
-                  <FormField
-                    control={form.control}
-                    name="receipt"
-                    render={({ field }) => (
-                      <FormItem>
-                          <FormLabel>Receipt {isUtilityReceiptRequired ? '' : '(Optional)'}</FormLabel>
-                           {imagePreview ? (
-                            <div className="relative w-24 h-24">
-                              <img src={imagePreview} alt="Receipt preview" className="w-full h-full object-cover rounded-md border"/>
-                              <Button variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6 rounded-full" onClick={clearImage}>
-                                <X className="h-4 w-4"/>
-                              </Button>
-                            </div>
-                          ) : (
-                            <div className="flex gap-2">
-                                <Dialog open={isCameraDialogOpen} onOpenChange={setIsCameraDialogOpen}>
-                                    <DialogTrigger asChild>
-                                        <Button type="button" variant="outline" className="flex-1" onClick={getCameraPermission}>
-                                            <Camera className="mr-2"/> Take Photo
-                                        </Button>
-                                    </DialogTrigger>
-                                    <DialogContent>
-                                        <DialogHeader>
-                                            <DialogTitle>Take a Photo</DialogTitle>
-                                            <DialogDescription>Center the receipt in the frame and click capture.</DialogDescription>
-                                        </DialogHeader>
-                                        <div className="py-4">
-                                            <video ref={videoRef} className="w-full aspect-video rounded-md bg-muted" autoPlay playsInline muted />
-                                            <canvas ref={canvasRef} className="hidden" />
-                                            {hasCameraPermission === false && (
-                                                <Alert variant="destructive" className="mt-4">
-                                                    <AlertTitle>Camera Access Denied</AlertTitle>
-                                                    <AlertDescription>Please enable camera permissions in your browser settings.</AlertDescription>
-                                                </Alert>
-                                            )}
-                                        </div>
-                                        <Button onClick={handleCapture} disabled={!hasCameraPermission || isCapturing}>
-                                            {isCapturing && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
-                                            Capture
-                                        </Button>
-                                    </DialogContent>
-                                </Dialog>
-                                <Button type="button" variant="outline" className="flex-1" onClick={() => fileInputRef.current?.click()}>
-                                    <Upload className="mr-2"/> Upload
-                                </Button>
-                                <FormControl>
-                                    <Input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleFileChange}/>
-                                </FormControl>
-                            </div>
-                          )}
-                          <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <FormItem>
+                      <FormLabel>Receipt {isUtilityReceiptRequired ? '' : '(Optional)'}</FormLabel>
+                       {imagePreview ? (
+                        <div className="relative w-24 h-24">
+                          <img src={imagePreview} alt="Receipt preview" className="w-full h-full object-cover rounded-md border"/>
+                          <Button variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6 rounded-full" onClick={clearImage}>
+                            <X className="h-4 w-4"/>
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex gap-2">
+                            <Dialog open={isCameraDialogOpen} onOpenChange={setIsCameraDialogOpen}>
+                                <DialogTrigger asChild>
+                                    <Button type="button" variant="outline" className="flex-1" onClick={getCameraPermission}>
+                                        <Camera className="mr-2"/> Take Photo
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>Take a Photo</DialogTitle>
+                                        <DialogDescription>Center the receipt in the frame and click capture.</DialogDescription>
+                                    </DialogHeader>
+                                    <div className="py-4">
+                                        <video ref={videoRef} className="w-full aspect-video rounded-md bg-muted" autoPlay playsInline muted />
+                                        <canvas ref={canvasRef} className="hidden" />
+                                        {hasCameraPermission === false && (
+                                            <Alert variant="destructive" className="mt-4">
+                                                <AlertTitle>Camera Access Denied</AlertTitle>
+                                                <AlertDescription>Please enable camera permissions in your browser settings.</AlertDescription>
+                                            </Alert>
+                                        )}
+                                    </div>
+                                    <Button onClick={handleCapture} disabled={!hasCameraPermission || isCapturing}>
+                                        {isCapturing && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+                                        Capture
+                                    </Button>
+                                </DialogContent>
+                            </Dialog>
+                            <Button type="button" variant="outline" className="flex-1" onClick={() => fileInputRef.current?.click()}>
+                                <Upload className="mr-2"/> Upload
+                            </Button>
+                            <FormControl>
+                                <Input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleFileChange}/>
+                            </FormControl>
+                        </div>
+                      )}
+                      <FormMessage />
+                  </FormItem>
                 )}
                 <Button type="submit" disabled={isSubmitting} className="w-full">
                     {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
