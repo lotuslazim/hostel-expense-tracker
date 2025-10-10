@@ -23,6 +23,7 @@ import type { Expense, Member } from "@/lib/types";
 import imageCompression from "browser-image-compression";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent as ReceiptDialogContent, DialogHeader as ReceiptDialogHeader, DialogTitle as ReceiptDialogTitle, DialogTrigger as ReceiptDialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 
 
 function ProfileSkeleton() {
@@ -168,14 +169,14 @@ function AccountSettings({ user, userData, groupData, groupId }: { user: any, us
             </CardHeader>
             <CardContent className="space-y-4">
                  <div className="flex items-center justify-between">
-                    <p className="font-medium">Password Reset</p>
+                    <Label>Password Reset</Label>
                     <Button variant="outline" onClick={handlePasswordReset}>
                         Send Reset Link
                     </Button>
                 </div>
                  <Separator />
                 <div className="flex items-center justify-between">
-                    <p className="font-medium text-destructive">Leave Group</p>
+                    <Label className="text-destructive">Leave Group</Label>
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
                             <Button variant="destructive" disabled={!groupId}><LogOut className="mr-2 h-4 w-4"/> Leave</Button>
@@ -196,7 +197,7 @@ function AccountSettings({ user, userData, groupData, groupId }: { user: any, us
                 </div>
                 <Separator />
                 <div className="flex items-center justify-between">
-                     <p className="font-medium text-destructive">Delete Account</p>
+                     <Label className="text-destructive">Delete Account</Label>
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
                             <Button variant="destructive" className="text-white"><Trash2 className="mr-2 h-4 w-4"/> Delete Account</Button>
@@ -505,3 +506,5 @@ export function Profile() {
     </div>
   );
 }
+
+    
