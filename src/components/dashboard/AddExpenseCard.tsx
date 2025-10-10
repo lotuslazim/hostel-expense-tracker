@@ -157,11 +157,10 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
 
   
   useEffect(() => {
-    if (!isCameraDialogOpen) {
-      if (videoRef.current && videoRef.current.srcObject) {
-        const stream = videoRef.current.srcObject as MediaStream;
+    const stream = videoRef.current?.srcObject as MediaStream;
+    if (!isCameraDialogOpen && stream) {
         stream.getTracks().forEach(track => track.stop());
-      }
+        videoRef.current!.srcObject = null;
     }
   }, [isCameraDialogOpen]);
 
@@ -189,23 +188,18 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   }
 
   const getCameraPermission = async () => {
-    if(hasCameraPermission === null) {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({video: true});
-        setHasCameraPermission(true);
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
+      if(hasCameraPermission === null || (hasCameraPermission && !videoRef.current?.srcObject)) {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({video: true});
+            setHasCameraPermission(true);
+            if (videoRef.current) {
+                videoRef.current.srcObject = stream;
+            }
+        } catch (error) {
+            console.error('Error accessing camera:', error);
+            setHasCameraPermission(false);
         }
-      } catch (error) {
-        console.error('Error accessing camera:', error);
-        setHasCameraPermission(false);
       }
-    } else if (hasCameraPermission && videoRef.current && !videoRef.current.srcObject) {
-        const stream = await navigator.mediaDevices.getUserMedia({video: true});
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-    }
   };
   
   const handleCapture = async () => {
@@ -221,18 +215,21 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
           canvas.toBlob(async (blob) => {
               if(blob) {
                   try {
-                    // Convert Blob to File for imageCompression
                     const file = new File([blob], "camera-capture.jpg", { type: "image/jpeg" });
                     const compressedFile = await compressImage(file);
                     setCapturedImageBlob(compressedFile);
-                    form.setValue("receipt", undefined); // Clear file input
+                    form.setValue("receipt", undefined);
                     setImagePreview(URL.createObjectURL(compressedFile));
-                    setIsCameraDialogOpen(false);
                   } catch (error) {
                     toast({ variant: "destructive", title: "Error processing captured image." });
+                  } finally {
+                    setIsCapturing(false);
+                    setIsCameraDialogOpen(false);
                   }
+              } else {
+                 setIsCapturing(false);
+                 setIsCameraDialogOpen(false);
               }
-              setIsCapturing(false);
           }, 'image/jpeg');
       }
   };
