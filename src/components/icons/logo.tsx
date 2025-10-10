@@ -10,7 +10,7 @@ export function Logo({ isStacked = false }: { isStacked?: boolean }) {
     <div
       className={cn(
         "flex items-center",
-        isStacked ? "flex-col" : "gap-3"
+        isStacked ? "flex-col gap-1" : "gap-3"
       )}
       aria-label="BachelorBite Home"
     >
