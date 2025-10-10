@@ -1,5 +1,8 @@
 
 {
+  "storage": {
+    "rules": "src/docs/backend.json"
+  },
   "hosting": [
     {
       "target": "bachelorbite",
@@ -18,4 +21,3 @@
     }
   ]
 }
-
