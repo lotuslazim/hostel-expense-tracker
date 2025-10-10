@@ -4,7 +4,7 @@
 import { useMemo, useState } from "react";
 import { useUser, useDoc, useCollection } from "@/firebase";
 import { firestore } from "@/firebase/config";
-import { doc, collection, query, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
+import { doc, collection, query, updateDoc, arrayUnion, arrayRemove, getDocs, where, Timestamp } from "firebase/firestore";
 import { AppHeader } from "@/components/app/header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -17,6 +17,7 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { startOfMonth, endOfMonth, format } from "date-fns";
 
 
 function AdminProfilePageSkeleton() {
@@ -93,10 +94,11 @@ function AccessDenied() {
     )
 }
 
-function AdminActionsCard({ groupDocRef, groupData }: { groupDocRef: any, groupData: any }) {
+function AdminActionsCard({ groupDocRef, groupData, groupId }: { groupDocRef: any, groupData: any, groupId: string }) {
     const { toast } = useToast();
     const [newMealType, setNewMealType] = useState("");
     const [isUpdating, setIsUpdating] = useState(false);
+    const [isExporting, setIsExporting] = useState(false);
     
     const handleAddMealType = async () => {
         if (!newMealType.trim() || !groupDocRef) return;
@@ -128,6 +130,97 @@ function AdminActionsCard({ groupDocRef, groupData }: { groupDocRef: any, groupD
             setIsUpdating(false);
         }
     };
+
+    const handleExportData = async () => {
+        setIsExporting(true);
+        try {
+            const currentMonth = new Date();
+            const monthStart = startOfMonth(currentMonth);
+            const monthEnd = endOfMonth(currentMonth);
+
+            const expensesQuery = query(
+                collection(firestore, `groups/${groupId}/expenses`),
+                where("date", ">=", Timestamp.fromDate(monthStart)),
+                where("date", "<=", Timestamp.fromDate(monthEnd))
+            );
+            const mealsQuery = query(
+                collection(firestore, `groups/${groupId}/meals`),
+                where("date", ">=", Timestamp.fromDate(monthStart)),
+                where("date", "<=", Timestamp.fromDate(monthEnd))
+            );
+
+            const [expensesSnapshot, mealsSnapshot] = await Promise.all([
+                getDocs(expensesQuery),
+                getDocs(mealsQuery)
+            ]);
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+            
+            // CSV Headers
+            const expenseHeaders = "Type,Date,Member,Item,Category,Amount\n";
+            const mealHeaders = "Type,Date,Member,Meal Type,Meal Count,Item Name\n";
+
+            // Process Expenses
+            let expenseRows = expensesSnapshot.docs.map(doc => {
+                const data = doc.data();
+                const row = [
+                    "Expense",
+                    format(data.date.toDate(), 'yyyy-MM-dd'),
+                    `"${data.userName}"`,
+                    `"${data.expenseItem}"`,
+                    data.category,
+                    data.amount
+                ];
+                return row.join(",");
+            }).join("\n");
+
+            // Process Meals
+            let mealRows = mealsSnapshot.docs.map(doc => {
+                const data = doc.data();
+                const row = [
+                    "Meal",
+                    format(data.date.toDate(), 'yyyy-MM-dd'),
+                    `"${data.userName}"`,
+                    data.mealType,
+                    data.mealNumber,
+                    `"${data.itemName || ''}"`
+                ];
+                return row.join(",");
+            }).join("\n");
+            
+            const combinedHeaders = "Type,Date,Member,Details,Category/Type,Amount/Count,Meal Item\n";
+             const combinedRows = [
+                ...expensesSnapshot.docs.map(doc => {
+                    const data = doc.data();
+                    return ["Expense", format(data.date.toDate(), 'yyyy-MM-dd'), `"${data.userName}"`, `"${data.expenseItem}"`, data.category, data.amount, ''].join(',');
+                }),
+                ...mealsSnapshot.docs.map(doc => {
+                    const data = doc.data();
+                    return ["Meal", format(data.date.toDate(), 'yyyy-MM-dd'), `"${data.userName}"`, `"${data.description}"`, data.mealType, data.mealNumber, `"${data.itemName || ''}"`].join(',');
+                })
+            ].join('\n');
+            
+            csvContent += combinedHeaders + combinedRows;
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            const monthName = format(currentMonth, "MMMM-yyyy");
+            link.setAttribute("download", `bachelorbite-export-${groupData.groupName}-${monthName}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            toast({ title: "Export Successful", description: "Your data has been downloaded." });
+
+        } catch (error) {
+            console.error("Error exporting data: ", error);
+            toast({ variant: "destructive", title: "Export Failed", description: "Could not export group data." });
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
 
     return (
         <Card>
@@ -180,8 +273,9 @@ function AdminActionsCard({ groupDocRef, groupData }: { groupDocRef: any, groupD
                 <Button variant="outline" className="w-full justify-start gap-2" disabled>
                     <Package className="h-4 w-4"/> Edit Purchased Items
                 </Button>
-                <Button variant="outline" className="w-full justify-start gap-2" disabled>
-                    <FileDown className="h-4 w-4"/> Export Group Data
+                <Button variant="outline" className="w-full justify-start gap-2" onClick={handleExportData} disabled={isExporting}>
+                    {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <FileDown className="mr-2 h-4 w-4"/>}
+                    Export Group Data
                 </Button>
             </CardContent>
         </Card>
@@ -315,7 +409,7 @@ export default function AdminProfilePage() {
                             </CardContent>
                         </Card>
         
-                        <AdminActionsCard groupDocRef={groupDocRef} groupData={groupData} />
+                        <AdminActionsCard groupDocRef={groupDocRef} groupData={groupData} groupId={groupId} />
                     </div>
                 </div>
             )}
@@ -323,3 +417,5 @@ export default function AdminProfilePage() {
         </div>
       );
 }
+
+    
