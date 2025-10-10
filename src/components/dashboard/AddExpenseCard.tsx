@@ -550,3 +550,5 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     </Card>
   );
 }
+
+    
