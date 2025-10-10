@@ -41,10 +41,10 @@ export default function Home() {
           </div>
           <div className="space-y-4">
             <h1 className="text-5xl font-bold font-headline text-foreground">
-              Skip the heartbreaks — just count your meals.
+              BachelorBite won’t cook for you, but it’ll make your messy life easier.
             </h1>
             <p className="text-xl text-muted-foreground">
-              BachelorBite won’t cook for you — but it’ll make your messy life easier.
+              Your journey to simplified meal and expense tracking starts here.
             </p>
           </div>
           
