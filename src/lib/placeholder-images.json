@@ -7,6 +7,12 @@
       "imageHint": "friends cooking"
     },
     {
+      "id": "landing-hero-2",
+      "description": "A group of friends laughing and sharing a meal at a rustic wooden table.",
+      "imageUrl": "https://images.unsplash.com/photo-1517048676732-d65bc937f952?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wzNDE5ODJ8MHwxfHNlYXJjaHwzfHxmcmllbmRzJTIwZWF0aW5nfGVufDB8fHx8MTc2MDM3OTc0MXww&ixlib=rb-4.0.3&q=80&w=1920",
+      "imageHint": "friends eating"
+    },
+    {
       "id": "user-avatar",
       "description": "A woman with a glowing face and veil.",
       "imageUrl": "https://images.unsplash.com/photo-1718663261202-36750275a5a1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wzNDE5ODJ8MHwxfGFsbHx8fHx8fHx8fDE3MTk0MjU4ODZ8&ixlib=rb-4.0.3&q=80&w=1080",
