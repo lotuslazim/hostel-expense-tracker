@@ -1,8 +1,5 @@
 
 {
-  "storage": {
-    "rules": "src/firebase/storage.rules"
-  },
   "hosting": [
     {
       "target": "bachelorbite",

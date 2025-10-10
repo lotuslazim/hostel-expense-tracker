@@ -4,8 +4,7 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { useCollection } from "@/firebase";
 import { collection, query, orderBy, addDoc, serverTimestamp } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { firestore, storage } from "@/firebase/config";
+import { firestore } from "@/firebase/config";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +16,7 @@ import type { ChatMessage as ChatMessageType } from "@/lib/types";
 import { Loader2, Send, Image as ImageIcon, X, MessageSquare } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
 import imageCompression from "browser-image-compression";
+import { uploadFile } from "../../../cloudinary";
 
 interface ChatProps {
     groupId: string;
@@ -115,9 +115,7 @@ export function Chat({ groupId, currentUser }: ChatProps) {
             let imageUrl: string | undefined = undefined;
 
             if (imageFile) {
-                const imageRef = ref(storage, `chatImages/${groupId}/${Date.now()}_${imageFile.name}`);
-                const snapshot = await uploadBytes(imageRef, imageFile);
-                imageUrl = await getDownloadURL(snapshot.ref);
+                imageUrl = await uploadFile(imageFile);
             }
 
             await addDoc(collection(firestore, `groups/${groupId}/messages`), {

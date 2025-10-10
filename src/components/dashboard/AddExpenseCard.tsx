@@ -24,9 +24,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useUser, useDoc } from "@/firebase";
-import { firestore, storage } from "@/firebase/config";
+import { firestore } from "@/firebase/config";
 import { doc, addDoc, collection, serverTimestamp, Timestamp, writeBatch, query, getDocs, where } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, ShoppingCart, Camera, Upload, X, Plus, Trash2 } from "lucide-react";
 import { sanitizeFirestoreData } from "@/lib/utils";
@@ -34,6 +33,7 @@ import { Skeleton } from "../ui/skeleton";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { Alert, AlertTitle, AlertDescription } from "../ui/alert";
 import { useInventory } from "@/contexts/InventoryContext";
+import { uploadFile } from "../../../cloudinary";
 
 // Lazy load the image compression library
 const compressImage = async (file: File | Blob): Promise<Blob> => {
@@ -193,43 +193,42 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   };
   
  const handleCapture = async () => {
-      if (videoRef.current && canvasRef.current) {
-        setIsCapturing(true);
-        const video = videoRef.current;
-        const canvas = canvasRef.current;
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        const ctx = canvas.getContext('2d');
-        
-        if (ctx) {
-          ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-          
-          try {
-            const blob = await new Promise<Blob | null>((resolve) => {
-              canvas.toBlob(resolve, 'image/jpeg', 0.95);
-            });
-            
+    if (!videoRef.current || !canvasRef.current) return;
+    setIsCapturing(true);
+
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+
+    if (ctx) {
+        ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+        try {
+            const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.95));
+
             if (blob) {
-              const compressedBlob = await compressImage(blob);
-              const file = new File([compressedBlob], `receipt-${Date.now()}.jpg`, { type: 'image/jpeg' });
-              
-              setReceiptImageFile(file);
-              setImagePreview(URL.createObjectURL(compressedBlob));
-              
-              setIsCameraDialogOpen(false); // Close dialog only on success
+                const compressedBlob = await compressImage(blob);
+                const file = new File([compressedBlob], `receipt-${Date.now()}.jpg`, { type: 'image/jpeg' });
+                
+                setReceiptImageFile(file);
+                setImagePreview(URL.createObjectURL(compressedBlob));
+                setIsCameraDialogOpen(false); // Close dialog on success
             }
-          } catch (error) {
+        } catch (error) {
             console.error('Error processing captured image:', error);
-            toast({ variant: 'destructive', title: 'Could not process image. Please try again.'});
-            setIsCameraDialogOpen(false);
-          } finally {
-             setIsCapturing(false);
-          }
-        } else {
+            toast({ variant: 'destructive', title: 'Could not process image.' });
+        } finally {
             setIsCapturing(false);
+            if (streamRef.current) {
+                streamRef.current.getTracks().forEach(track => track.stop());
+                streamRef.current = null;
+            }
         }
-      }
-    };
+    } else {
+        setIsCapturing(false);
+    }
+};
 
   const findMasterItemId = async (itemName: string) => {
     if (!groupId) return undefined;
@@ -257,9 +256,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     try {
         let receiptUrl: string | undefined = undefined;
         if (receiptImageFile) {
-            const storageRef = ref(storage, `groups/${groupId}/receipts/${Date.now()}_${receiptImageFile.name}`);
-            const snapshot = await uploadBytes(storageRef, receiptImageFile);
-            receiptUrl = await getDownloadURL(snapshot.ref);
+            receiptUrl = await uploadFile(receiptImageFile);
         }
         
         const batch = writeBatch(firestore);
@@ -557,5 +554,3 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     </Card>
   );
 }
-
-    

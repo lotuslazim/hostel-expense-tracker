@@ -3,9 +3,8 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useUser } from "@/firebase";
-import { auth, firestore, storage } from "@/firebase/config";
+import { auth, firestore } from "@/firebase/config";
 import { doc, updateDoc, collection, query, where, Timestamp, orderBy, writeBatch, getDocs, deleteDoc, serverTimestamp } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { signOut, sendPasswordResetEmail, deleteUser } from "firebase/auth";
 import { useDoc, useCollection } from "@/firebase";
 import { useRouter } from "next/navigation";
@@ -24,6 +23,7 @@ import imageCompression from "browser-image-compression";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent as ReceiptDialogContent, DialogHeader as ReceiptDialogHeader, DialogTitle as ReceiptDialogTitle, DialogTrigger as ReceiptDialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { uploadFile } from "../../../cloudinary";
 
 
 function ProfileSkeleton() {
@@ -304,9 +304,7 @@ export function Profile() {
 
     try {
       if (profileImageFile) {
-        const imageRef = ref(storage, `profilePictures/${user.uid}/${profileImageFile.name}`);
-        const snapshot = await uploadBytes(imageRef, profileImageFile);
-        photoURL = await getDownloadURL(snapshot.ref);
+        photoURL = await uploadFile(profileImageFile);
       }
 
       await updateDoc(userRef, {
@@ -507,4 +505,3 @@ export function Profile() {
   );
 }
 
-    
