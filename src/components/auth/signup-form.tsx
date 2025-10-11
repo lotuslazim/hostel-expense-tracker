@@ -18,7 +18,7 @@ import { AuthCard } from "./auth-card";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
 import { auth, firestore } from "@/firebase/config";
-import { GoogleAuthProvider, signInWithPopup, signInWithRedirect, createUserWithEmailAndPassword, updateProfile, type User, sendEmailVerification } from "firebase/auth";
+import { GoogleAuthProvider, signInWithRedirect, createUserWithEmailAndPassword, updateProfile, type User, sendEmailVerification } from "firebase/auth";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Eye, EyeOff } from "lucide-react";
@@ -96,35 +96,17 @@ export function SignupForm() {
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
     const provider = new GoogleAuthProvider();
-    
     try {
-      const result = await signInWithPopup(auth, provider);
-      await createUserDocument(result.user);
-      
-      toast({
-        title: "Successfully signed up!",
-        description: `Welcome to BachelorBite, ${result.user.displayName || result.user.email}`,
-      });
-      
-      router.push('/dashboard');
-      
+      await signInWithRedirect(auth, provider);
+      // The user is redirected, so this part of the code won't execute until they return.
+      // The redirect result is handled in FirebaseProvider.
     } catch (error: any) {
-      console.error("Error during Google sign-up:", error);
-      
-      if (error.code === 'auth/popup-blocked') {
-        toast({
-            title: "Pop-up Blocked",
-            description: "Please allow pop-ups for this site to sign in with Google. Trying redirect method...",
-        });
-        await signInWithRedirect(auth, provider);
-      } else {
-        toast({ 
-          variant: "destructive", 
-          title: "Google Sign-Up Failed", 
-          description: error.message || "Could not sign up with Google. Please try again."
-        });
-      }
-    } finally {
+      console.error("Error during Google sign-up redirect:", error);
+      toast({ 
+        variant: "destructive", 
+        title: "Google Sign-Up Failed", 
+        description: error.message || "Could not start sign up with Google. Please try again."
+      });
       setIsGoogleLoading(false);
     }
   };
