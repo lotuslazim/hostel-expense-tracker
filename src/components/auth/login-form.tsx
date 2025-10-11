@@ -18,8 +18,8 @@ import { AuthCard } from "./auth-card";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
 import { auth, firestore } from "@/firebase/config";
-import { GoogleAuthProvider, signInWithRedirect, getRedirectResult, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, signOut, type User } from "firebase/auth";
-import { useEffect, useState } from "react";
+import { GoogleAuthProvider, signInWithRedirect, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, signOut, type User } from "firebase/auth";
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { GoogleIcon } from "../icons/google";
@@ -55,31 +55,6 @@ export function LoginForm() {
   const [userForVerification, setUserForVerification] = useState<User | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
-
-  useEffect(() => {
-    const handleRedirectResult = async () => {
-        setIsGoogleLoading(true);
-        try {
-            const result = await getRedirectResult(auth);
-            if (result && result.user) {
-                await createUserDocument(result.user);
-                router.push('/dashboard');
-            }
-        } catch (error: any) {
-            console.error("Error handling redirect result:", error);
-            if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
-                toast({
-                    variant: "destructive",
-                    title: "Google Sign-In Failed",
-                    description: "Could not complete sign-in with Google. Please try again."
-                });
-            }
-        } finally {
-            setIsGoogleLoading(false);
-        }
-    };
-    handleRedirectResult();
-  }, [router, toast]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
