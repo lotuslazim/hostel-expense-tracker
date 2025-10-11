@@ -69,66 +69,25 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     isUserLoading: true, // Start loading until first auth event
     userError: null,
   });
-  const [isProcessingRedirect, setIsProcessingRedirect] = useState(true);
 
   useEffect(() => {
-    // This listener handles user state changes (login, logout)
-    const unsubscribe = onAuthStateChanged(
-      auth,
-      (firebaseUser) => {
-        setUserAuthState({ user: firebaseUser, isUserLoading: false, userError: null });
-        // After auth state is resolved, handle any pending redirect
-        handleRedirectResult();
-      },
-      (error) => {
-        console.error("FirebaseProvider: onAuthStateChanged error:", error);
-        setUserAuthState({ user: null, isUserLoading: false, userError: error });
-        setIsProcessingRedirect(false);
-      }
-    );
-    
-    // This effect runs once after the initial auth state is determined
-    const handleRedirectResult = async () => {
-      try {
-        const result = await getRedirectResult(auth);
-        if (result && result.user) {
-          await createUserDocument(firestore, result.user);
-          
-          if (window.location.pathname === '/login' || window.location.pathname === '/signup' || window.location.pathname === '/') {
-             router.push('/dashboard');
-          }
-          toast({
-            title: "Signed In",
-            description: "Welcome back!",
-          });
-        }
-      } catch (error: any) {
-        // Ignore user-cancelled pop-up errors, but log others
-        if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
-           console.error("Error handling redirect result:", error);
-           toast({
-            variant: "destructive",
-            title: "Google Sign-In Failed",
-            description: "Could not complete sign-in with Google. Please try again."
-          });
-        }
-      } finally {
-        setIsProcessingRedirect(false);
-      }
-    };
-
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUserAuthState({ user, isUserLoading: false, userError: null });
+    }, (error) => {
+      console.error("FirebaseProvider: onAuthStateChanged error:", error);
+      setUserAuthState({ user: null, isUserLoading: false, userError: error });
+    });
 
     return () => unsubscribe();
-  }, [auth, firestore, router, toast]);
+  }, [auth]);
+
 
   const contextValue = useMemo((): FirebaseContextState => ({
     firebaseApp,
     firestore,
     auth,
     ...userAuthState,
-    // We adjust isUserLoading to account for the redirect processing as well
-    isUserLoading: userAuthState.isUserLoading || isProcessingRedirect,
-  }), [firebaseApp, firestore, auth, userAuthState, isProcessingRedirect]);
+  }), [firebaseApp, firestore, auth, userAuthState]);
 
   return (
     <FirebaseContext.Provider value={contextValue}>
