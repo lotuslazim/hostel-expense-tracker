@@ -17,7 +17,7 @@ export default function Home() {
 
   useEffect(() => {
     if (!isUserLoading && user) {
-      router.push('/dashboard');
+      router.replace('/dashboard');
     }
   }, [user, isUserLoading, router]);
 
@@ -32,6 +32,7 @@ export default function Home() {
     )
   }
 
+  // If user is loaded and not logged in, show the landing page.
   if (!user) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
@@ -57,7 +58,8 @@ export default function Home() {
       </div>
     );
   }
-
+  
+  // If user is logged in, show loading while redirecting.
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="text-center space-y-4">

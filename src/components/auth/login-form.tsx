@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -18,7 +17,15 @@ import { AuthCard } from "./auth-card";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
 import { auth, firestore } from "@/firebase/config";
-import { GoogleAuthProvider, signInWithRedirect, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, signOut, type User } from "firebase/auth";
+import { 
+  GoogleAuthProvider, 
+  signInWithPopup,
+  signInWithEmailAndPassword, 
+  sendPasswordResetEmail, 
+  sendEmailVerification, 
+  signOut, 
+  type User 
+} from "firebase/auth";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
@@ -97,17 +104,49 @@ export function LoginForm() {
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
     const provider = new GoogleAuthProvider();
+    
     try {
-      await signInWithRedirect(auth, provider);
-      // The user is redirected, so this part of the code won't execute until they return.
-      // The redirect result is handled in FirebaseProvider.
+      console.log("Starting Google sign-in...");
+      const result = await signInWithPopup(auth, provider);
+      console.log("Google sign-in success:", result.user.email);
+      
+      // Create user document
+      await createUserDocument(result.user);
+      
+      toast({
+        title: "Success!",
+        description: "Signed in with Google successfully.",
+      });
+      
+      router.push('/dashboard');
+      
     } catch (error: any) {
-      console.error("Error during Google sign-in redirect:", error);
+      console.error("Google sign-in error:", error);
+      console.error("Error code:", error.code);
+      console.error("Error message:", error.message);
+      
+      let errorMessage = "Could not sign in with Google. Please try again.";
+      
+      if (error.code === 'auth/popup-blocked') {
+        errorMessage = "Popup was blocked. Please allow popups for this site.";
+      } else if (error.code === 'auth/popup-closed-by-user') {
+        errorMessage = "Sign-in cancelled.";
+        setIsGoogleLoading(false);
+        return; // Don't show error toast for user cancellation
+      } else if (error.code === 'auth/unauthorized-domain') {
+        errorMessage = "This domain is not authorized. Please contact support.";
+      } else if (error.code === 'auth/cancelled-popup-request') {
+        // Multiple popup requests, ignore
+        setIsGoogleLoading(false);
+        return;
+      }
+      
       toast({ 
         variant: "destructive", 
         title: "Google Sign-In Failed", 
-        description: error.message || "Could not start sign in with Google. Please try again."
+        description: errorMessage
       });
+    } finally {
       setIsGoogleLoading(false);
     }
   };

@@ -6,7 +6,7 @@ import { LogMealCard } from "@/components/dashboard/LogMealCard";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { DateCard } from "@/components/dashboard/DateCard";
 import { AppHeader } from "@/components/app/header";
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo } from "react";
 import { WelcomeCard } from "@/components/app/welcome-card";
 import { useUser, useDoc, useFirebase, useCollection } from "@/firebase";
 import { doc, collection, query, where, Timestamp, orderBy } from "firebase/firestore";
@@ -37,16 +37,10 @@ function DashboardSkeleton() {
   );
 }
 
-export default function DashboardPage() {
+function DashboardContent({ groupId }: { groupId: string }) {
   const { firestore } = useFirebase();
-  const { user: currentUser, isUserLoading } = useUser();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [currentMonth, setCurrentMonth] = useState(startOfMonth(new Date()));
-
-  const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
-  const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
-  
-  const groupId = currentUserData?.groupId;
 
   const monthDateRange = useMemo(() => ({
     start: startOfMonth(currentMonth),
@@ -54,7 +48,6 @@ export default function DashboardPage() {
   }), [currentMonth]);
   
   const expensesQuery = useMemo(() => {
-    if (!groupId) return null;
     return query(
       collection(firestore, `groups/${groupId}/expenses`),
       where("date", ">=", Timestamp.fromDate(monthDateRange.start)),
@@ -68,6 +61,41 @@ export default function DashboardPage() {
   const handleMonthChange = (direction: "next" | "prev") => {
     setCurrentMonth(prev => direction === 'next' ? addMonths(prev, 1) : subMonths(prev, 1));
   }
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight font-headline">Dashboard</h1>
+        <p className="text-muted-foreground">Log your meals and expenses for the day.</p>
+      </div>
+      <div className="space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-1 space-y-6">
+            <DateCard date={selectedDate} setDate={setSelectedDate} />
+            <LogMealCard selectedDate={selectedDate} />
+            <AddExpenseCard selectedDate={selectedDate} />
+            <SendReminderCard />
+          </div>
+          <div className="lg:col-span-2">
+            <ActivityFeed 
+              expenses={expenses || []} 
+              isLoading={areExpensesLoading}
+              currentMonth={currentMonth}
+              onMonthChange={handleMonthChange}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function DashboardPage() {
+  const { firestore } = useFirebase();
+  const { user: currentUser, isUserLoading } = useUser();
+
+  const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
+  const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
   
   const isLoading = isUserLoading || isCurrentUserDataLoading;
 
@@ -82,48 +110,14 @@ export default function DashboardPage() {
     )
   }
 
-  if (!groupId) {
-     return (
-      <div className="flex flex-col min-h-screen">
-        <AppHeader />
-        <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <WelcomeCard />
-        </main>
-      </div>
-    )
-  }
+  const groupId = currentUserData?.groupId;
 
   return (
     <div className="flex flex-col min-h-screen">
       <AppHeader />
       <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight font-headline">Dashboard</h1>
-                <p className="text-muted-foreground">Log your meals and expenses for the day.</p>
-            </div>
-             <div className="space-y-8">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div className="lg:col-span-1 space-y-6">
-                        <DateCard date={selectedDate} setDate={setSelectedDate} />
-                        <LogMealCard selectedDate={selectedDate} />
-                        <AddExpenseCard selectedDate={selectedDate} />
-                        <SendReminderCard />
-                    </div>
-                    <div className="lg:col-span-2">
-                        <ActivityFeed 
-                            expenses={expenses || []} 
-                            isLoading={areExpensesLoading}
-                            currentMonth={currentMonth}
-                            onMonthChange={handleMonthChange}
-                        />
-                    </div>
-                </div>
-            </div>
-        </div>
+        {groupId ? <DashboardContent groupId={groupId} /> : <WelcomeCard />}
       </main>
     </div>
   );
 }
-
-    
