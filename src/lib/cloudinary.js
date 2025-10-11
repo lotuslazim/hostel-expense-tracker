@@ -1,10 +1,10 @@
 // cloudinary.js
-const CLOUD_NAME = 'your-cloud-name-here'; // From Step 2
-const UPLOAD_PRESET = 'bachelorbite';      // 👈 USE THIS
+const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
 export async function uploadToCloudinary(file) {
-  if (CLOUD_NAME === 'your-cloud-name-here') {
-    console.warn("Cloudinary is not configured. Please add your CLOUD_NAME to /src/lib/cloudinary.js. Skipping image upload.");
+  if (!CLOUD_NAME || !UPLOAD_PRESET) {
+    console.warn("Cloudinary environment variables (NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME, NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET) are not set. Skipping image upload.");
     return null;
   }
 
