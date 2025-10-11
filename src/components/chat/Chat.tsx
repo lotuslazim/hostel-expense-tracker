@@ -37,7 +37,7 @@ function ChatSkeleton() {
                 </div>
                  <div className="flex items-end gap-2">
                     <Skeleton className="h-8 w-8 rounded-full" />
-                    <Skeleton className="h-12 w-2/5 rounded-xl" />
+                    <Skeleton className="h-12 w-2/s rounded-xl" />
                 </div>
                  <div className="flex items-end gap-2 justify-end">
                     <Skeleton className="h-16 w-3/4 rounded-xl" />
@@ -116,6 +116,13 @@ export function Chat({ groupId, currentUser }: ChatProps) {
 
             if (imageFile) {
                 imageUrl = await uploadToCloudinary(imageFile);
+                if (!imageUrl) {
+                    toast({
+                        variant: "destructive",
+                        title: "Image Upload Failed",
+                        description: "Please configure Cloudinary in your project settings."
+                    });
+                }
             }
 
             await addDoc(collection(firestore, `groups/${groupId}/messages`), {
