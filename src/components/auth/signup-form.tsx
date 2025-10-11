@@ -18,8 +18,8 @@ import { AuthCard } from "./auth-card";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
 import { auth, firestore } from "@/firebase/config";
-import { GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, updateProfile, type User, sendEmailVerification } from "firebase/auth";
-import { useState } from "react";
+import { GoogleAuthProvider, signInWithRedirect, getRedirectResult, createUserWithEmailAndPassword, updateProfile, type User, sendEmailVerification } from "firebase/auth";
+import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { doc, getDoc, setDoc } from "firebase/firestore";
@@ -53,6 +53,32 @@ export function SignupForm() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
+
+   useEffect(() => {
+    const handleRedirectResult = async () => {
+        setIsGoogleLoading(true);
+        try {
+            const result = await getRedirectResult(auth);
+            if (result && result.user) {
+                await createUserDocument(result.user);
+                router.push('/dashboard');
+            }
+        } catch (error: any) {
+            console.error("Error handling redirect result:", error);
+             if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
+                toast({
+                    variant: "destructive",
+                    title: "Google Sign-Up Failed",
+                    description: "Could not complete sign-up with Google. Please try again."
+                });
+            }
+        } finally {
+            setIsGoogleLoading(false);
+        }
+    };
+    handleRedirectResult();
+  }, [router, toast]);
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -97,22 +123,15 @@ export function SignupForm() {
     setIsGoogleLoading(true);
     const provider = new GoogleAuthProvider();
     try {
-      const result = await signInWithPopup(auth, provider);
-      await createUserDocument(result.user);
-      router.push('/dashboard');
+       await signInWithRedirect(auth, provider);
     } catch (error: any) {
-       if (error.code !== 'auth/popup-closed-by-user') {
-            console.error("Error during Google sign-in:", error);
-            toast({ 
-              variant: "destructive", 
-              title: "Google Sign-In Failed", 
-              description: error.code === 'auth/popup-blocked' 
-                ? "Pop-up blocked by browser. Please allow pop-ups for this site."
-                : "Could not sign in with Google. Please try again."
-            });
-       }
-    } finally {
-        setIsGoogleLoading(false);
+       console.error("Error during Google sign-in redirect:", error);
+        toast({ 
+          variant: "destructive", 
+          title: "Google Sign-Up Failed", 
+          description: "Could not start sign up with Google. Please try again."
+        });
+       setIsGoogleLoading(false);
     }
   };
 

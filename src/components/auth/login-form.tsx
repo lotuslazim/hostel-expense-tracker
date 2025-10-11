@@ -18,8 +18,8 @@ import { AuthCard } from "./auth-card";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
 import { auth, firestore } from "@/firebase/config";
-import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, signOut, type User } from "firebase/auth";
-import { useState } from "react";
+import { GoogleAuthProvider, signInWithRedirect, getRedirectResult, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, signOut, type User } from "firebase/auth";
+import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { GoogleIcon } from "../icons/google";
@@ -56,6 +56,31 @@ export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
 
+  useEffect(() => {
+    const handleRedirectResult = async () => {
+        setIsGoogleLoading(true);
+        try {
+            const result = await getRedirectResult(auth);
+            if (result && result.user) {
+                await createUserDocument(result.user);
+                router.push('/dashboard');
+            }
+        } catch (error: any) {
+            console.error("Error handling redirect result:", error);
+            if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
+                toast({
+                    variant: "destructive",
+                    title: "Google Sign-In Failed",
+                    description: "Could not complete sign-in with Google. Please try again."
+                });
+            }
+        } finally {
+            setIsGoogleLoading(false);
+        }
+    };
+    handleRedirectResult();
+  }, [router, toast]);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: { email: "", password: "" },
@@ -73,7 +98,6 @@ export function LoginForm() {
         setUserForVerification(userCredential.user);
         setNeedsVerification(true);
         setIsLoading(false);
-        // DO NOT sign out here. User needs to be authenticated to resend verification email.
         return;
       }
       
@@ -99,21 +123,14 @@ export function LoginForm() {
     setIsGoogleLoading(true);
     const provider = new GoogleAuthProvider();
     try {
-      const result = await signInWithPopup(auth, provider);
-      await createUserDocument(result.user);
-      router.push('/dashboard');
+      await signInWithRedirect(auth, provider);
     } catch (error: any) {
-      if (error.code !== 'auth/popup-closed-by-user') {
-          console.error("Error during Google sign-in:", error);
-          toast({ 
-            variant: "destructive", 
-            title: "Google Sign-In Failed", 
-            description: error.code === 'auth/popup-blocked' 
-              ? "Pop-up blocked by browser. Please allow pop-ups for this site."
-              : "Could not sign in with Google. Please try again."
-          });
-      }
-    } finally {
+      console.error("Error during Google sign-in redirect:", error);
+      toast({ 
+        variant: "destructive", 
+        title: "Google Sign-In Failed", 
+        description: "Could not start sign in with Google. Please try again."
+      });
       setIsGoogleLoading(false);
     }
   };
@@ -137,7 +154,6 @@ export function LoginForm() {
           description: "Could not send verification email. Please try again later.",
         });
     } finally {
-        // Now sign out, so user has to log in again with verified email
         await signOut(auth);
         setUserForVerification(null);
         setNeedsVerification(false);
