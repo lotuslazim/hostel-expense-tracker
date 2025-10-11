@@ -23,9 +23,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useUser, useDoc } from "@/firebase";
+import { useUser, useDoc, setDocumentNonBlocking, addDocumentNonBlocking } from "@/firebase";
 import { firestore } from "@/firebase/config";
-import { doc, addDoc, collection, serverTimestamp, Timestamp, writeBatch, query, getDocs, where } from "firebase/firestore";
+import { doc, collection, serverTimestamp, Timestamp, getDocs, where, query } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, ShoppingCart, Camera, Upload, X, Plus, Trash2 } from "lucide-react";
 import { sanitizeFirestoreData } from "@/lib/utils";
@@ -56,7 +56,6 @@ const purchasedItemSchema = z.object({
 export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   const { user: currentUser } = useUser();
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [receiptImageFile, setReceiptImageFile] = useState<File | null>(null);
   const { triggerUpdate } = useInventory();
@@ -244,21 +243,20 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
       toast({ variant: "destructive", title: "Error", description: "You must be in a group to add an expense." });
       return;
     }
-
+    
     if ((values.category === 'Electricity' || values.category === 'Gas') && isUtilityReceiptRequired && !receiptImageFile) {
         toast({ variant: "destructive", title: "Receipt Required", description: "A receipt image is required for utility bills." });
         return;
     }
 
-    setIsSubmitting(true);
-    
+    form.control.register('root', { disabled: true }); // Disable form during submission
+
     try {
         let receiptUrl: string | null = null;
         if (receiptImageFile) {
             receiptUrl = await uploadToCloudinary(receiptImageFile);
         }
         
-        const batch = writeBatch(firestore);
         const expenseRef = doc(collection(firestore, `groups/${groupId}/expenses`));
 
         let finalExpenseItem = values.expenseItem;
@@ -277,14 +275,14 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
             createdAt: serverTimestamp(),
             groupId,
         });
-        batch.set(expenseRef, expenseData);
 
+        // Use non-blocking write for the main expense
+        setDocumentNonBlocking(expenseRef, expenseData, {});
+
+        // Handle purchased items if they exist
         if (values.category === 'Food & Groceries' && values.purchasedItems) {
             for (const item of values.purchasedItems) {
-                const purchaseRef = doc(collection(firestore, `groups/${groupId}/purchases`));
-                
                 const masterItemId = await findMasterItemId(item.name);
-
                 const purchaseData = sanitizeFirestoreData({
                     itemId: masterItemId,
                     itemName: item.name,
@@ -297,12 +295,11 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                     userName: currentUser.displayName || currentUser.email?.split('@')[0],
                     groupId,
                 });
-                batch.set(purchaseRef, purchaseData);
+                // Use non-blocking write for each purchase
+                addDocumentNonBlocking(collection(firestore, `groups/${groupId}/purchases`), purchaseData);
             }
         }
         
-        await batch.commit();
-
         toast({
             title: "Expense Added",
             description: `Your ${values.category.toLowerCase()} expense of ৳${values.amount} has been logged.`,
@@ -317,9 +314,9 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
 
     } catch (error) {
         console.error("Error adding expense:", error);
-        toast({ variant: "destructive", title: "Error", description: "Could not log expense. Please try again." });
+        toast({ variant: "destructive", title: "Error", description: "Could not log expense. Please check permissions and try again." });
     } finally {
-        setIsSubmitting(false);
+        form.control.register('root', { disabled: false }); // Re-enable form
     }
   }
   
@@ -356,7 +353,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                 render={({ field }) => (
                     <FormItem>
                     <FormLabel>Category</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value} disabled={form.formState.isSubmitting}>
                         <FormControl>
                         <SelectTrigger>
                             <SelectValue placeholder="Select an expense category" />
@@ -380,7 +377,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                     <FormItem>
                     <FormLabel>Total Amount (৳)</FormLabel>
                     <FormControl>
-                        <Input type="number" placeholder="0.00" {...field} value={field.value ?? ''} />
+                        <Input type="number" placeholder="0.00" {...field} value={field.value ?? ''} disabled={form.formState.isSubmitting} />
                     </FormControl>
                     <FormMessage />
                     </FormItem>
@@ -396,7 +393,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                         <Input 
                           placeholder={categoryValue === 'Other' ? 'e.g., Kitchen repair' : 'Auto-generated for other categories'} 
                           {...field} 
-                          disabled={categoryValue !== 'Other'}
+                          disabled={categoryValue !== 'Other' || form.formState.isSubmitting}
                           value={field.value ?? ''}
                         />
                       </FormControl>
@@ -427,7 +424,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                               render={({ field }) => (
                                 <FormItem className="col-span-5">
                                   <FormControl>
-                                      <Input placeholder="e.g. Rice" {...field} />
+                                      <Input placeholder="e.g. Rice" {...field} disabled={form.formState.isSubmitting} />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -438,7 +435,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                               name={`purchasedItems.${index}.quantity`}
                               render={({ field }) => (
                                 <FormItem className="col-span-2">
-                                  <FormControl><Input type="number" placeholder="1" {...field}/></FormControl>
+                                  <FormControl><Input type="number" placeholder="1" {...field} disabled={form.formState.isSubmitting}/></FormControl>
                                   <FormMessage/>
                                 </FormItem>
                               )}
@@ -448,7 +445,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                               name={`purchasedItems.${index}.unit`}
                               render={({ field }) => (
                                 <FormItem className="col-span-2">
-                                   <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                   <Select onValueChange={field.onChange} defaultValue={field.value} disabled={form.formState.isSubmitting}>
                                     <FormControl>
                                       <SelectTrigger>
                                         <SelectValue placeholder="Unit" />
@@ -469,13 +466,13 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                               name={`purchasedItems.${index}.cost`}
                               render={({ field }) => (
                                 <FormItem className="col-span-2">
-                                  <FormControl><Input type="number" placeholder="0" {...field}/></FormControl>
+                                  <FormControl><Input type="number" placeholder="0" {...field} disabled={form.formState.isSubmitting}/></FormControl>
                                   <FormMessage/>
                                 </FormItem>
                               )}
                             />
                            <div className="col-span-12 sm:col-span-1 flex items-center justify-end sm:justify-center h-10 -mt-2 sm:mt-0">
-                              <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)} className="h-8 w-8">
+                              <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)} className="h-8 w-8" disabled={form.formState.isSubmitting}>
                                 <Trash2 className="h-4 w-4 text-destructive"/>
                                 <span className="sr-only">Remove Item</span>
                               </Button>
@@ -487,6 +484,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                         variant="outline"
                         size="sm"
                         onClick={() => append({ name: "", quantity: 1, unit: "", cost: 0 })}
+                        disabled={form.formState.isSubmitting}
                       >
                         <Plus className="mr-2 h-4 w-4" /> Add Item
                       </Button>
@@ -499,7 +497,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                        {imagePreview ? (
                         <div className="relative w-24 h-24">
                           <img src={imagePreview} alt="Receipt preview" className="w-full h-full object-cover rounded-md border"/>
-                          <Button variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6 rounded-full" onClick={clearImage}>
+                          <Button variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6 rounded-full" onClick={clearImage} disabled={form.formState.isSubmitting}>
                             <X className="h-4 w-4"/>
                           </Button>
                         </div>
@@ -507,7 +505,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                         <div className="flex gap-2">
                             <Dialog open={isCameraDialogOpen} onOpenChange={setIsCameraDialogOpen}>
                                 <DialogTrigger asChild>
-                                    <Button type="button" variant="outline" className="flex-1" onClick={getCameraPermission}>
+                                    <Button type="button" variant="outline" className="flex-1" onClick={getCameraPermission} disabled={form.formState.isSubmitting}>
                                         <Camera className="mr-2"/> Take Photo
                                     </Button>
                                 </DialogTrigger>
@@ -532,19 +530,19 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                                     </Button>
                                 </DialogContent>
                             </Dialog>
-                            <Button type="button" variant="outline" className="flex-1" onClick={() => fileInputRef.current?.click()}>
+                            <Button type="button" variant="outline" className="flex-1" onClick={() => fileInputRef.current?.click()} disabled={form.formState.isSubmitting}>
                                 <Upload className="mr-2"/> Upload
                             </Button>
                             <FormControl>
-                                <Input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleFileChange}/>
+                                <Input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleFileChange} disabled={form.formState.isSubmitting}/>
                             </FormControl>
                         </div>
                       )}
                       <FormMessage />
                   </FormItem>
                 )}
-                <Button type="submit" disabled={isSubmitting} className="w-full">
-                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <Button type="submit" disabled={form.formState.isSubmitting} className="w-full">
+                    {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Add Expense
                 </Button>
             </form>

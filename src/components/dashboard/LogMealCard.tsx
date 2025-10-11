@@ -19,7 +19,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
 import { useUser, useDoc, addDocumentNonBlocking } from "@/firebase";
 import { firestore } from "@/firebase/config";
-import { doc, addDoc, collection, serverTimestamp, Timestamp } from "firebase/firestore";
+import { doc, collection, serverTimestamp, Timestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Utensils } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
@@ -31,7 +31,6 @@ interface LogMealCardProps {
 export function LogMealCard({ selectedDate }: LogMealCardProps) {
   const { user: currentUser } = useUser();
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [currentUser]);
   const { data: currentUserData } = useDoc(currentUserRef);
@@ -86,32 +85,25 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
         title: "Meal Logged!",
         description: `Your ${values.mealType} has been successfully logged.`,
     });
+    
+    const mealData = {
+      mealType: values.mealType,
+      mealNumber: values.mealCount,
+      description: `${values.mealCount} ${values.mealType}(s) logged. ${values.itemName ? `Item: ${values.itemName}` : ''}`,
+      date: Timestamp.fromDate(selectedDate),
+      userId: currentUser.uid,
+      userName: currentUser.displayName || currentUser.email?.split('@')[0],
+      createdAt: serverTimestamp(),
+      itemName: values.itemName || null,
+      groupId,
+    };
+    
+    // Perform the database operation in the background
+    const mealCollectionRef = collection(firestore, `groups/${groupId}/meals`);
+    addDocumentNonBlocking(mealCollectionRef, mealData);
+    
     form.reset({ mealCount: 1, mealType: undefined, itemName: "" });
 
-    // Perform the database operation in the background
-    try {
-      const mealCollectionRef = collection(firestore, `groups/${groupId}/meals`);
-      await addDoc(mealCollectionRef, {
-        mealType: values.mealType,
-        mealNumber: values.mealCount,
-        description: `${values.mealCount} ${values.mealType}(s) logged. ${values.itemName ? `Item: ${values.itemName}` : ''}`,
-        date: Timestamp.fromDate(selectedDate),
-        userId: currentUser.uid,
-        userName: currentUser.displayName || currentUser.email?.split('@')[0],
-        createdAt: serverTimestamp(),
-        itemName: values.itemName || null,
-        groupId,
-      });
-    } catch (error) {
-      console.error("Error logging meal:", error);
-      // Rollback: Inform user of the failure
-      toast({
-        variant: "destructive",
-        title: "Logging Failed",
-        description: "Could not save your meal. Please try again.",
-      });
-      // Optionally, restore form state here if needed
-    }
   }
   
   if (isGroupDataLoading && groupId) {
@@ -208,8 +200,8 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
                 </FormItem>
               )}
             />
-            <Button type="submit" disabled={isSubmitting || mealTypes.length === 0} className="w-full">
-                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button type="submit" disabled={mealTypes.length === 0 || form.formState.isSubmitting} className="w-full">
+                {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Log Meal
             </Button>
           </form>
