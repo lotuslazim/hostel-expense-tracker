@@ -1,5 +1,5 @@
 // cloudinary.js
-const CLOUD_NAME = 'your-cloud-name-here'; // From Step 2
+const CLOUD_NAME = 'dpi7maxlc'; // From Step 2
 const UPLOAD_PRESET = 'bachelorbite';      // 👈 USE THIS
 
 export async function uploadFile(file) {
