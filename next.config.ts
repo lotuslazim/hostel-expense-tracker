@@ -2,7 +2,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: 'export',
+  experimental: {
+    serverActions: true,
+  },
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },
@@ -18,5 +20,3 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
-
-    
