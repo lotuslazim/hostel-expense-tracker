@@ -112,7 +112,7 @@ export function Chat({ groupId, currentUser }: ChatProps) {
         setIsSending(true);
 
         try {
-            let imageUrl: string | undefined = undefined;
+            let imageUrl: string | null = null;
 
             if (imageFile) {
                 imageUrl = await uploadToCloudinary(imageFile);
@@ -120,7 +120,7 @@ export function Chat({ groupId, currentUser }: ChatProps) {
 
             await addDoc(collection(firestore, `groups/${groupId}/messages`), {
                 text: newMessage.trim(),
-                imageUrl: imageUrl || null,
+                imageUrl: imageUrl,
                 createdAt: serverTimestamp(),
                 userId: currentUser.uid,
                 userName: currentUser.displayName || currentUser.email?.split('@')[0],
@@ -219,5 +219,3 @@ export function Chat({ groupId, currentUser }: ChatProps) {
         </Card>
     );
 }
-
-    

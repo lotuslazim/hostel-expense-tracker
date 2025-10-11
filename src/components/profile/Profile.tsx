@@ -504,5 +504,3 @@ export function Profile() {
     </div>
   );
 }
-
-    

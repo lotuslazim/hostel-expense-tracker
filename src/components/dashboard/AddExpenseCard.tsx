@@ -253,7 +253,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     setIsSubmitting(true);
     
     try {
-        let receiptUrl: string | undefined = undefined;
+        let receiptUrl: string | null = null;
         if (receiptImageFile) {
             receiptUrl = await uploadToCloudinary(receiptImageFile);
         }
@@ -553,5 +553,3 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     </Card>
   );
 }
-
-    
