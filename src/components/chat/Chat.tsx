@@ -115,7 +115,9 @@ export function Chat({ groupId, currentUser }: ChatProps) {
             let imageUrl: string | null = null;
 
             if (imageFile) {
-                imageUrl = await uploadToCloudinary(imageFile);
+                const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+                const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+                imageUrl = await uploadToCloudinary(imageFile, cloudName, uploadPreset);
                 if (!imageUrl) {
                     toast({
                         variant: "destructive",

@@ -254,7 +254,9 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     try {
         let receiptUrl: string | null = null;
         if (receiptImageFile) {
-            receiptUrl = await uploadToCloudinary(receiptImageFile);
+            const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+            const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+            receiptUrl = await uploadToCloudinary(receiptImageFile, cloudName, uploadPreset);
         }
         
         const expenseRef = doc(collection(firestore, `groups/${groupId}/expenses`));

@@ -304,7 +304,9 @@ export function Profile() {
 
     try {
       if (profileImageFile) {
-        photoURL = await uploadToCloudinary(profileImageFile);
+        const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+        const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+        photoURL = await uploadToCloudinary(profileImageFile, cloudName, uploadPreset);
       }
 
       await updateDoc(userRef, {
