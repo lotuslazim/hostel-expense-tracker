@@ -18,7 +18,7 @@ import { AuthCard } from "./auth-card";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
 import { auth, firestore } from "@/firebase/config";
-import { GoogleAuthProvider, signInWithRedirect, createUserWithEmailAndPassword, updateProfile, type User, sendEmailVerification } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, signInWithRedirect, createUserWithEmailAndPassword, updateProfile, type User, sendEmailVerification } from "firebase/auth";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Eye, EyeOff } from "lucide-react";
@@ -96,16 +96,36 @@ export function SignupForm() {
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
     const provider = new GoogleAuthProvider();
+    
     try {
-       await signInWithRedirect(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      await createUserDocument(result.user);
+      
+      toast({
+        title: "Successfully signed up!",
+        description: `Welcome to BachelorBite, ${result.user.displayName || result.user.email}`,
+      });
+      
+      router.push('/dashboard');
+      
     } catch (error: any) {
-       console.error("Error during Google sign-in redirect:", error);
+      console.error("Error during Google sign-up:", error);
+      
+      if (error.code === 'auth/popup-blocked') {
+        toast({
+            title: "Pop-up Blocked",
+            description: "Please allow pop-ups for this site to sign in with Google. Trying redirect method...",
+        });
+        await signInWithRedirect(auth, provider);
+      } else {
         toast({ 
           variant: "destructive", 
           title: "Google Sign-Up Failed", 
-          description: "Could not start sign up with Google. Please try again."
+          description: error.message || "Could not sign up with Google. Please try again."
         });
-       setIsGoogleLoading(false);
+      }
+    } finally {
+      setIsGoogleLoading(false);
     }
   };
 

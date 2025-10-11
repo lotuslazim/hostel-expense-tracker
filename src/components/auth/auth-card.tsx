@@ -1,4 +1,3 @@
-
 import {
   Card,
   CardContent,
@@ -19,6 +18,7 @@ interface AuthCardProps {
   footerLinkHref: string;
 }
 
+// Make sure this is exported as default or named export
 export function AuthCard({
   children,
   title,
@@ -48,3 +48,6 @@ export function AuthCard({
     </Card>
   );
 }
+
+// Make sure there's only one export
+export default AuthCard;

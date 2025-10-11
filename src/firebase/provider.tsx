@@ -77,23 +77,18 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       auth,
       (firebaseUser) => {
         setUserAuthState({ user: firebaseUser, isUserLoading: false, userError: null });
+        // After auth state is resolved, handle any pending redirect
+        handleRedirectResult();
       },
       (error) => {
         console.error("FirebaseProvider: onAuthStateChanged error:", error);
         setUserAuthState({ user: null, isUserLoading: false, userError: error });
+        setIsProcessingRedirect(false);
       }
     );
-    return () => unsubscribe();
-  }, [auth]);
-
-  useEffect(() => {
+    
     // This effect runs once after the initial auth state is determined
     const handleRedirectResult = async () => {
-      // Don't run this logic until the initial user loading is complete
-      if (userAuthState.isUserLoading) {
-        return;
-      }
-      
       try {
         const result = await getRedirectResult(auth);
         if (result && result.user) {
@@ -121,10 +116,10 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
         setIsProcessingRedirect(false);
       }
     };
-    
-    handleRedirectResult();
 
-  }, [userAuthState.isUserLoading, auth, firestore, router, toast]);
+
+    return () => unsubscribe();
+  }, [auth, firestore, router, toast]);
 
   const contextValue = useMemo((): FirebaseContextState => ({
     firebaseApp,
