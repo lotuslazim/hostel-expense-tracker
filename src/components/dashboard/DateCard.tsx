@@ -2,11 +2,18 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar } from "@/components/ui/calendar";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format, addDays, subDays, isToday } from "date-fns";
+import dynamic from 'next/dynamic';
+import { Skeleton } from "../ui/skeleton";
+
+const Calendar = dynamic(() => import('@/components/ui/calendar').then(mod => mod.Calendar), {
+    ssr: false,
+    loading: () => <div className="p-3"><Skeleton className="h-[280px] w-[240px]" /></div>,
+});
+
 
 interface DateCardProps {
     date: Date;
