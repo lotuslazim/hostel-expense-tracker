@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -11,7 +10,6 @@ import { Logo } from "@/components/icons/logo";
 import { useInView } from "react-intersection-observer";
 import { cn } from "@/lib/utils";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { LandingHeader } from "@/components/app/landing-header";
 
 const FeatureCard = ({ icon, title, description, delay }: { icon: React.ReactNode, title: string, description: string, delay: string }) => {
   const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.1 });
@@ -96,7 +94,6 @@ export default function Home() {
   if (!user) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
-        <LandingHeader />
         <main className="flex-grow">
           {/* Hero Section */}
           <section 
