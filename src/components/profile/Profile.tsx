@@ -500,9 +500,11 @@ export function Profile() {
         </Card>
       </div>
       
-      <ReceiptDialog>
+      <Dialog>
         <AccountSettings user={user} userData={userData} groupData={groupData} groupId={groupId} />
-      </ReceiptDialog>
+      </Dialog>
     </div>
   );
 }
+
+    
