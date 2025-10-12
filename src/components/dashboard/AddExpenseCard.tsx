@@ -34,10 +34,11 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Alert, AlertTitle, AlertDescription } from "../ui/alert";
 import { useInventory } from "@/contexts/InventoryContext";
 import { uploadToCloudinary } from "@/lib/cloudinary";
-import imageCompression from "browser-image-compression";
+import type imageCompression from "browser-image-compression";
 
 const compressImage = async (file: File | Blob): Promise<Blob> => {
-    return imageCompression(file as File, { maxSizeMB: 1, maxWidthOrHeight: 1024 });
+    const imageCompressionModule = (await import('browser-image-compression')).default;
+    return imageCompressionModule(file as File, { maxSizeMB: 1, maxWidthOrHeight: 1024 });
 };
 
 interface AddExpenseCardProps {
@@ -254,9 +255,11 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     try {
         let receiptUrl: string | null = null;
         if (receiptImageFile) {
-            const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-            const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
-            receiptUrl = await uploadToCloudinary(receiptImageFile, cloudName, uploadPreset);
+            receiptUrl = await uploadToCloudinary(
+                receiptImageFile, 
+                process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME, 
+                process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
+            );
         }
         
         const expenseRef = doc(collection(firestore, `groups/${groupId}/expenses`));

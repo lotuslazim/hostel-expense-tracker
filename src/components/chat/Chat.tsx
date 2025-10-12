@@ -15,8 +15,8 @@ import type { User } from 'firebase/auth';
 import type { ChatMessage as ChatMessageType } from "@/lib/types";
 import { Loader2, Send, Image as ImageIcon, X, MessageSquare } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
-import imageCompression from "browser-image-compression";
 import { uploadToCloudinary } from "@/lib/cloudinary";
+import type imageCompression from "browser-image-compression";
 
 interface ChatProps {
     groupId: string;
@@ -87,8 +87,9 @@ export function Chat({ groupId, currentUser }: ChatProps) {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
             try {
+                const imageCompression = (await import('browser-image-compression')).default;
                 const compressedFile = await imageCompression(file, { maxSizeMB: 1, maxWidthOrHeight: 1024 });
-                setImageFile(compressedFile);
+                setImageFile(compressedFile as File);
                 setImagePreview(URL.createObjectURL(compressedFile));
             } catch (error) {
                 toast({ variant: "destructive", title: "Error compressing image." });
@@ -115,9 +116,11 @@ export function Chat({ groupId, currentUser }: ChatProps) {
             let imageUrl: string | null = null;
 
             if (imageFile) {
-                const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-                const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
-                imageUrl = await uploadToCloudinary(imageFile, cloudName, uploadPreset);
+                imageUrl = await uploadToCloudinary(
+                    imageFile,
+                    process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+                    process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
+                );
                 if (!imageUrl) {
                     toast({
                         variant: "destructive",
