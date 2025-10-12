@@ -80,19 +80,19 @@ export default function Home() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex flex-col bg-gradient-to-b from-[#eaffea] to-[#f8fff5] dark:from-gray-900 dark:to-gray-950">
+      <div className="min-h-screen flex flex-col bg-background">
         <LandingHeader />
         
-        <main className="flex-grow pt-24">
+        <main className="flex-grow pt-16">
           {/* Hero Section */}
-          <section ref={heroRef} className="text-center py-16 md:py-24">
+          <section ref={heroRef} className="text-center py-16 md:py-24" style={{ backgroundColor: '#253D2C' }}>
             <div className="container p-4 space-y-4 max-w-3xl mx-auto flex flex-col items-center">
-              <div className={cn("transition-all duration-700 ease-out", heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10")}>
-                  <Logo isStacked />
+              <div className={cn("transition-all duration-700 ease-out text-white", heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10")}>
+                  <Logo />
               </div>
               <h1 
                 className={cn(
-                  "text-3xl md:text-4xl font-bold font-headline text-foreground transition-all duration-700 ease-out",
+                  "text-3xl md:text-4xl font-bold font-headline text-white transition-all duration-700 ease-out",
                   heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
                 )}
                 style={{ transitionDelay: '200ms' }}
@@ -101,7 +101,7 @@ export default function Home() {
               </h1>
               <p 
                 className={cn(
-                  "text-lg md:text-xl text-muted-foreground transition-all duration-700 ease-out",
+                  "text-lg md:text-xl text-gray-300 transition-all duration-700 ease-out",
                   heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
                 )}
                 style={{ transitionDelay: '400ms' }}
@@ -173,7 +173,7 @@ export default function Home() {
                      <p className="text-muted-foreground mb-8">
                          It's free to use and takes less than a minute to get started. Your roommates will thank you (probably).
                      </p>
-                     <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground text-lg px-8 py-6 rounded-full transition-transform duration-300 ease-in-out hover:scale-105">
+                     <Button asChild size="lg" className="bg-primary text-primary-foreground text-lg px-8 py-6 rounded-full transition-transform duration-300 ease-in-out hover:scale-105">
                         <Link href="/signup">
                             Sign Up for Free <ArrowRight className="ml-2 h-5 w-5" />
                         </Link>
