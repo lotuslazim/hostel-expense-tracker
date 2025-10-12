@@ -10,9 +10,16 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Menu, MessageCircle, LayoutDashboard, BarChart3, Package } from "lucide-react";
 import { useUser } from "@/firebase";
 import { Skeleton } from "../ui/skeleton";
+import { useState, useEffect } from "react";
 
 export function AppHeader() {
   const { isUserLoading } = useUser();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
 
   const navLinks = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -78,7 +85,7 @@ export function AppHeader() {
         
         {/* Unified Nav Menu */}
         <div className="mr-4">
-          {renderNavMenu()}
+          {isClient && renderNavMenu()}
         </div>
 
         {/* Logo in the middle for desktop */}
