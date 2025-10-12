@@ -49,7 +49,7 @@ export default function Home() {
                 <div className="pt-4 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
                     <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground text-lg px-8 py-6 rounded-full transition-transform duration-300 ease-in-out hover:scale-105">
                         <Link href="/login">
-                            Get Started <ArrowRight className="ml-2 h-5 w-5" />
+                            Your Move. <ArrowRight className="ml-2 h-5 w-5" />
                         </Link>
                     </Button>
                 </div>
