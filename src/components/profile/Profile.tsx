@@ -17,13 +17,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Camera, User, Mail, Home, Users, Wallet, ChevronDown, Loader2, LogOut, Trash2, Copy, Receipt } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { format, startOfMonth } from "date-fns";
+import { format } from 'date-fns/format';
+import { startOfMonth } from 'date-fns/startOfMonth';
 import type { Expense, Member } from "@/lib/types";
+import imageCompression from "browser-image-compression";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent as ReceiptDialogContent, DialogHeader as ReceiptDialogHeader, DialogTitle as ReceiptDialogTitle, DialogTrigger as ReceiptDialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { uploadToCloudinary } from "@/lib/cloudinary";
-import type imageCompression from "browser-image-compression";
+
 
 function ProfileSkeleton() {
   return (
@@ -285,7 +287,6 @@ export function Profile() {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
        try {
-        const imageCompression = (await import('browser-image-compression')).default;
         const compressedFile = await imageCompression(file, { maxSizeMB: 1, maxWidthOrHeight: 1024 });
         setProfileImageFile(compressedFile as File);
         setImagePreview(URL.createObjectURL(compressedFile));
@@ -304,11 +305,9 @@ export function Profile() {
 
     try {
       if (profileImageFile) {
-        photoURL = await uploadToCloudinary(
-            profileImageFile, 
-            process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME, 
-            process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
-        );
+        const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+        const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+        photoURL = await uploadToCloudinary(profileImageFile, cloudName, uploadPreset);
       }
 
       await updateDoc(userRef, {
@@ -508,3 +507,7 @@ export function Profile() {
     </div>
   );
 }
+
+    
+
+    

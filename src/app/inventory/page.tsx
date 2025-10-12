@@ -7,7 +7,10 @@ import { AppHeader } from "@/components/app/header";
 import { useUser, useDoc, useFirebase } from "@/firebase";
 import { doc, collection, query, where, Timestamp, getDocs, orderBy, limit, startAfter, QueryDocumentSnapshot, DocumentData } from "firebase/firestore";
 import type { Purchase } from "@/lib/types";
-import { addMonths, subMonths, startOfMonth, endOfMonth } from "date-fns";
+import { addMonths } from 'date-fns/addMonths';
+import { subMonths } from 'date-fns/subMonths';
+import { startOfMonth } from 'date-fns/startOfMonth';
+import { endOfMonth } from 'date-fns/endOfMonth';
 import { MonthSwitcher } from "@/components/report/month-switcher";
 import { WelcomeCard } from "@/components/app/welcome-card";
 
@@ -149,3 +152,5 @@ export default function InventoryPage() {
     </div>
   );
 }
+
+    

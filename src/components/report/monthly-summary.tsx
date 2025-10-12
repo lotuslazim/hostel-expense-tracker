@@ -9,7 +9,11 @@ import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
 import { doc, collection, query, where, Timestamp } from "firebase/firestore";
 import { useMemo, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { format, startOfMonth, endOfMonth, addMonths, subMonths } from 'date-fns';
+import { format } from 'date-fns/format';
+import { startOfMonth } from 'date-fns/startOfMonth';
+import { endOfMonth } from 'date-fns/endOfMonth';
+import { addMonths } from 'date-fns/addMonths';
+import { subMonths } from 'date-fns/subMonths';
 import type { MealLog, Expense } from "@/lib/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -565,3 +569,5 @@ export function MonthlySummary() {
   );
 
 }
+
+    

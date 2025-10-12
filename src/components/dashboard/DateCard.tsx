@@ -5,7 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { format, addDays, subDays, isToday } from "date-fns";
+import { format } from 'date-fns/format';
+import { addDays } from 'date-fns/addDays';
+import { subDays } from 'date-fns/subDays';
+import { isToday } from 'date-fns/isToday';
 import dynamic from 'next/dynamic';
 import { Skeleton } from "../ui/skeleton";
 
@@ -75,3 +78,5 @@ export function DateCard({ date, setDate }: DateCardProps) {
         </Card>
     );
 }
+
+    

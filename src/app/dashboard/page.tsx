@@ -12,7 +12,10 @@ import { useUser, useDoc, useFirebase, useCollection } from "@/firebase";
 import { doc, collection, query, where, Timestamp, orderBy } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Expense } from "@/lib/types";
-import { addMonths, subMonths, startOfMonth, endOfMonth } from "date-fns";
+import { addMonths } from 'date-fns/addMonths';
+import { subMonths } from 'date-fns/subMonths';
+import { startOfMonth } from 'date-fns/startOfMonth';
+import { endOfMonth } from 'date-fns/endOfMonth';
 import { SendReminderCard } from "@/components/dashboard/SendReminderCard";
 
 function DashboardSkeleton() {
@@ -121,3 +124,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    

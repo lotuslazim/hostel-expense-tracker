@@ -10,7 +10,8 @@ import { PackageOpen, ChevronDown, Loader2 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { format, toDate } from 'date-fns';
+import { format } from 'date-fns/format';
+import { toDate } from 'date-fns/toDate';
 import { Timestamp } from 'firebase/firestore';
 
 
@@ -173,3 +174,5 @@ export function InventoryTable({ purchases, isLoading, onLoadMore, hasMore, isMo
         </Card>
     );
 }
+
+    

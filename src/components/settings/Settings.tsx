@@ -45,7 +45,9 @@ import { Label } from "../ui/label";
 import { Switch } from "../ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { startOfMonth, endOfMonth, format } from "date-fns";
+import { startOfMonth } from 'date-fns/startOfMonth';
+import { endOfMonth } from 'date-fns/endOfMonth';
+import { format } from 'date-fns/format';
 
 
 function SettingsSkeleton() {
@@ -541,3 +543,5 @@ export function Settings() {
     </div>
   );
 }
+
+    

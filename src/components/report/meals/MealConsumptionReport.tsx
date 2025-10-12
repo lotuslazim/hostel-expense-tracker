@@ -4,7 +4,11 @@
 import { useMemo, useState } from "react";
 import { useUser, useDoc, useCollection, useFirebase } from "@/firebase";
 import { doc, collection, query, where, Timestamp } from "firebase/firestore";
-import { format, startOfMonth, endOfMonth, addMonths, subMonths } from 'date-fns';
+import { format } from 'date-fns/format';
+import { startOfMonth } from 'date-fns/startOfMonth';
+import { endOfMonth } from 'date-fns/endOfMonth';
+import { addMonths } from 'date-fns/addMonths';
+import { subMonths } from 'date-fns/subMonths';
 import type { MealLog, Purchase } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -217,3 +221,5 @@ export function MealConsumptionReport() {
         </div>
     );
 }
+
+    

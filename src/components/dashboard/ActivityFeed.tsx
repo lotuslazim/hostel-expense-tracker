@@ -2,7 +2,7 @@
 "use client";
 
 import { useMemo }from "react";
-import { format } from "date-fns";
+import { format } from 'date-fns/format';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ShoppingCart, Receipt } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -112,3 +112,5 @@ export function ActivityFeed({ expenses, isLoading, currentMonth, onMonthChange 
     </Card>
   );
 }
+
+    

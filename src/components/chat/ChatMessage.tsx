@@ -4,7 +4,7 @@
 import { cn } from "@/lib/utils";
 import type { ChatMessage as ChatMessageType } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { format } from "date-fns";
+import { format } from 'date-fns/format';
 import { Timestamp } from "firebase/firestore";
 
 interface ChatMessageProps {
@@ -65,3 +65,6 @@ export function ChatMessage({ message, currentUserId }: ChatMessageProps) {
     );
 }
 
+
+
+    

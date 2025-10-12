@@ -13,4 +13,12 @@ export * from './errors';
 export * from './error-emitter';
 
 // Re-exporting date-fns functions for convenience
-export { startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, differenceInDays } from 'date-fns';
+export { startOfWeek } from 'date-fns/startOfWeek';
+export { endOfWeek } from 'date-fns/endOfWeek';
+export { startOfMonth } from 'date-fns/startOfMonth';
+export { endOfMonth } from 'date-fns/endOfMonth';
+export { startOfYear } from 'date-fns/startOfYear';
+export { endOfYear } from 'date-fns/endOfYear';
+export { differenceInDays } from 'date-fns/differenceInDays';
+
+    
