@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import * as SwitchPrimitives from "@radix-ui/react-switch"
+import { SunIcon, MoonIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils"
 
@@ -21,7 +22,9 @@ const Switch = React.forwardRef<
       className={cn(
         "pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0"
       )}
-    />
+    >
+       {props.checked ? <MoonIcon className="h-3 w-3 text-primary-foreground" /> : <SunIcon className="h-3 w-3 text-foreground" />}
+    </SwitchPrimitives.Thumb>
   </SwitchPrimitives.Root>
 ))
 Switch.displayName = SwitchPrimitives.Root.displayName
