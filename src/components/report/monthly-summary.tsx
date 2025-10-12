@@ -398,7 +398,7 @@ export function MonthlySummary() {
       </Card>
        <Card className="flex flex-col">
             <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Package/> Miscellaneous</CardTitle>
+                <CardTitle className="flex items-center gap-2"><Package/> Other Expenses</CardTitle>
                  <CardDescription>A summary of other expenses.</CardDescription>
             </CardHeader>
             <CardContent className="flex-grow space-y-4">
