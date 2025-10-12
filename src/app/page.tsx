@@ -6,7 +6,6 @@ import { ArrowRight, Utensils, Wallet, MessageSquare } from "lucide-react";
 import { useUser } from "@/firebase";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { LandingHeader } from "@/components/app/landing-header";
 import { Logo } from "@/components/icons/logo";
 import { useInView } from "react-intersection-observer";
 import { cn } from "@/lib/utils";
@@ -83,9 +82,8 @@ export default function Home() {
   if (!user) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
-        <LandingHeader />
         
-        <main className="flex-grow pt-16">
+        <main className="flex-grow">
           {/* Hero Section */}
           <section ref={heroRef} className="text-center py-16 md:py-24" style={{ backgroundColor: '#253D2C' }}>
             <div className="container p-4 space-y-4 max-w-3xl mx-auto flex flex-col items-center">
