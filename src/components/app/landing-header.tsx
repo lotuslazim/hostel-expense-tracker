@@ -41,7 +41,7 @@ export function LandingHeader() {
         <div className="flex flex-1 items-center justify-end space-x-2">
           <nav className="flex items-center gap-4">
              <ThemeSwitcher />
-             <Button asChild variant="ghost" className="hidden md:inline-flex text-white hover:bg-white/10 hover:text-white">
+             <Button asChild variant="ghost" className="hidden md:inline-flex text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground">
                 <Link href="/login">Sign In</Link>
              </Button>
              <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90">
@@ -55,4 +55,3 @@ export function LandingHeader() {
     </header>
   );
 }
-
