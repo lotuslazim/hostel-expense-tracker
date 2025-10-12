@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -53,6 +54,18 @@ const Step = ({ number, title, description, delay }: { number: string, title: st
     )
 }
 
+const FloatingIcon = ({ children, className, animationDelay }: { children: React.ReactNode, className?: string, animationDelay?: string }) => (
+    <div 
+      className={cn(
+          "absolute text-5xl opacity-10 text-white animate-float",
+          className
+      )}
+      style={{ animationDelay }}
+    >
+        {children}
+    </div>
+);
+
 export default function Home() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
@@ -85,37 +98,56 @@ export default function Home() {
         
         <main className="flex-grow">
           {/* Hero Section */}
-          <section ref={heroRef} className="text-center py-16 md:py-24" style={{ backgroundColor: '#253D2C' }}>
-            <div className="container p-4 space-y-4 max-w-3xl mx-auto flex flex-col items-center">
-              <div className={cn("transition-all duration-700 ease-out text-white dark-theme-logo", heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10")}>
-                  <Logo />
-              </div>
-              <h1 
-                className={cn(
-                  "text-3xl md:text-4xl font-bold font-headline text-white transition-all duration-700 ease-out",
-                  heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-                )}
-                style={{ transitionDelay: '200ms' }}
-              >
-                BachelorBite won’t cook for you, but it’ll make your messy life easier.
-              </h1>
-              <p 
-                className={cn(
-                  "text-lg md:text-xl text-gray-300 transition-all duration-700 ease-out",
-                  heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-                )}
-                style={{ transitionDelay: '400ms' }}
-              >
-                Skip the heartbreaks, count the meals.
-              </p>
+          <section 
+            ref={heroRef} 
+            className="relative text-center py-24 md:py-32 overflow-hidden bg-gradient-to-br from-[#253D2C] to-[#435E49]"
+          >
+            <div className="absolute inset-0 bg-black/20"></div>
+
+            {/* Floating Icons */}
+            <FloatingIcon className="top-[10%] left-[5%]">🍛</FloatingIcon>
+            <FloatingIcon className="top-[20%] right-[10%]" animationDelay="2s">🍴</FloatingIcon>
+            <FloatingIcon className="bottom-[15%] left-[20%]" animationDelay="4s">🧾</FloatingIcon>
+            <FloatingIcon className="bottom-[10%] right-[25%]" animationDelay="6s">💵</FloatingIcon>
+
+            <div className="container relative p-4 space-y-4 max-w-3xl mx-auto flex flex-col items-center">
               <div 
                 className={cn(
-                  "pt-4 transition-all duration-700 ease-out",
+                  "relative transition-opacity duration-1000 ease-out mb-4",
+                  heroInView ? "opacity-100" : "opacity-0"
+                )}
+              >
+                  <Logo isMascotAnimated={true} mascotSize="large" />
+              </div>
+              <div className="relative [text-shadow:_0_4px_30px_rgba(0,0,0,0.4)]">
+                <h1 
+                  className={cn(
+                    "text-3xl md:text-4xl font-bold font-headline text-white transition-all duration-700 ease-out",
+                    heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+                  )}
+                  style={{ transitionDelay: '200ms' }}
+                >
+                  BachelorBite won’t cook for you, but it’ll make your messy life easier.
+                </h1>
+                <p 
+                  className={cn(
+                    "text-lg md:text-xl text-gray-300 mt-4 transition-all duration-700 ease-out",
+                    heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+                  )}
+                  style={{ transitionDelay: '400ms' }}
+                >
+                  Skip the heartbreaks, count the meals.
+                </p>
+              </div>
+
+              <div 
+                className={cn(
+                  "pt-6 transition-all duration-700 ease-out",
                   heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
                 )}
                 style={{ transitionDelay: '600ms' }}
               >
-                <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground text-lg px-8 py-6 rounded-full transition-transform duration-300 ease-in-out hover:scale-105">
+                <Button asChild size="lg" className="bg-gradient-to-r from-mint-500 to-green-400 text-slate-800 font-bold text-lg px-8 py-6 rounded-full transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:shadow-mint-500/30 animate-pulse-slow">
                   <Link href="/login">
                     Your Move. <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
@@ -160,7 +192,11 @@ export default function Home() {
                       <Step number="3" title="Settle Up" description="At the end of the month, see a clear breakdown of who owes what. No more awkward math." delay="300ms" />
                   </div>
                   <div className={cn("hidden md:block transition-all duration-700 ease-out", stepsInView ? "opacity-100 scale-100" : "opacity-0 scale-90")} style={{transitionDelay: '400ms'}}>
-                    <img src={howItWorksImage?.imageUrl} alt={howItWorksImage?.description} className="rounded-lg shadow-xl" data-ai-hint={howItWorksImage?.imageHint} />
+                    {howItWorksImage ? (
+                      <img src={howItWorksImage.imageUrl} alt={howItWorksImage.description} className="rounded-lg shadow-xl" data-ai-hint={howItWorksImage.imageHint} />
+                    ) : (
+                      <div className="bg-muted rounded-lg shadow-xl aspect-[6/5]"></div>
+                    )}
                   </div>
               </div>
           </section>
