@@ -8,7 +8,7 @@ export function Logo({ isStacked = false }: { isStacked?: boolean }) {
   return (
     <div
       className={cn(
-        "flex items-center",
+        "flex items-center gap-0",
         isStacked ? "flex-col" : ""
       )}
       aria-label="BachelorBite Home"
