@@ -31,10 +31,28 @@
       "imageHint": "person portrait"
     },
     {
-      "id": "landing-how-it-works",
+      "id": "app-preview",
       "description": "A screenshot of the application dashboard.",
-      "imageUrl": "https://picsum.photos/seed/bachelorbite/600/500",
+      "imageUrl": "https://picsum.photos/seed/bachelorbite-preview/1000/700",
       "imageHint": "app dashboard"
+    },
+    {
+      "id": "highlight-kitchen",
+      "description": "Illustration of a messy but lively kitchen.",
+      "imageUrl": "https://picsum.photos/seed/messykitchen/400/300",
+      "imageHint": "messy kitchen"
+    },
+    {
+      "id": "highlight-bills",
+      "description": "Illustration of bills and money being organized.",
+      "imageUrl": "https://picsum.photos/seed/bills/400/300",
+      "imageHint": "organize bills"
+    },
+    {
+      "id": "highlight-friends",
+      "description": "Illustration of friends happily eating together.",
+      "imageUrl": "https://picsum.photos/seed/friendseating/400/300",
+      "imageHint": "friends eating"
     }
   ]
 }

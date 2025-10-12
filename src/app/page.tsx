@@ -3,7 +3,7 @@
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowRight, Utensils, Wallet, MessageSquare } from "lucide-react";
+import { ArrowRight, Utensils, Wallet, MessageSquare, CheckCircle } from "lucide-react";
 import { useUser } from "@/firebase";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -11,6 +11,8 @@ import { Logo } from "@/components/icons/logo";
 import { useInView } from "react-intersection-observer";
 import { cn } from "@/lib/utils";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
+import Image from "next/image";
+import { Card, CardContent } from "@/components/ui/card";
 
 const FeatureCard = ({ icon, title, description, delay }: { icon: React.ReactNode, title: string, description: string, delay: string }) => {
   const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.1 });
@@ -31,6 +33,31 @@ const FeatureCard = ({ icon, title, description, delay }: { icon: React.ReactNod
     </div>
   );
 };
+
+const HighlightCard = ({ imageId, title, delay }: { imageId: string, title: string, delay: string }) => {
+    const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.1 });
+    const image = PlaceHolderImages.find(p => p.id === imageId);
+    return (
+        <Card
+            ref={ref}
+            className={cn(
+                "overflow-hidden transition-all duration-700 ease-out",
+                inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+            )}
+            style={{ transitionDelay: delay }}
+        >
+            <CardContent className="p-0">
+                {image ? (
+                    <Image src={image.imageUrl} alt={image.description} width={400} height={300} className="w-full h-48 object-cover" data-ai-hint={image.imageHint}/>
+                ) : <div className="w-full h-48 bg-muted"></div>}
+                <div className="p-4">
+                    <h3 className="font-bold text-center">{title}</h3>
+                </div>
+            </CardContent>
+        </Card>
+    );
+};
+
 
 const Step = ({ number, title, description, delay }: { number: string, title: string, description: string, delay: string }) => {
     const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.1 });
@@ -70,11 +97,14 @@ export default function Home() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const { ref: heroRef, inView: heroInView } = useInView({ triggerOnce: true, threshold: 0.1 });
+  const { ref: whyRef, inView: whyInView } = useInView({ triggerOnce: true, threshold: 0.2 });
   const { ref: featuresRef, inView: featuresInView } = useInView({ triggerOnce: true, threshold: 0.1 });
   const { ref: stepsRef, inView: stepsInView } = useInView({ triggerOnce: true, threshold: 0.1 });
+  const { ref: previewRef, inView: previewInView } = useInView({ triggerOnce: true, threshold: 0.2 });
   const { ref: ctaRef, inView: ctaInView } = useInView({ triggerOnce: true, threshold: 0.1 });
 
   const howItWorksImage = PlaceHolderImages.find(p => p.id === "landing-how-it-works");
+  const appPreviewImage = PlaceHolderImages.find(p => p.id === "app-preview");
 
   useEffect(() => {
     if (!isUserLoading && user) {
@@ -159,15 +189,32 @@ export default function Home() {
             </div>
           </section>
 
+          {/* Why BachelorBite Section */}
+          <section ref={whyRef} className="py-16 md:py-24 bg-gradient-to-b from-green-50/50 to-background">
+             <div className="container text-center">
+                 <h2 className="text-3xl font-bold font-headline mb-4">Why BachelorBite?</h2>
+                 <p className="max-w-2xl mx-auto text-muted-foreground text-lg mb-12">
+                     Because hostel and bachelor life is chaotic enough — tracking meals and money shouldn’t be.
+                     BachelorBite is your all-in-one roommate manager. It helps you keep track of who ate, who paid, and who owes.
+                     No spreadsheets, no awkward reminders, just harmony in the kitchen.
+                 </p>
+                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                     <HighlightCard imageId="highlight-kitchen" title="End Kitchen Chaos" delay="100ms" />
+                     <HighlightCard imageId="highlight-bills" title="Simplify Shared Bills" delay="200ms" />
+                     <HighlightCard imageId="highlight-friends" title="Enjoy Roommate Harmony" delay="300ms" />
+                 </div>
+             </div>
+          </section>
+          
           {/* Features Section */}
-          <section ref={featuresRef} className="py-16 md:py-24 bg-background/50 dark:bg-black/20">
+          <section ref={featuresRef} className="py-16 md:py-24">
               <div className="container">
-                   <h2 className="text-3xl font-bold text-center mb-12 font-headline">Everything you need to manage your den.</h2>
+                   <h2 className="text-3xl font-bold text-center mb-12 font-headline">Everything you need to manage your hostel life.</h2>
                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                        <FeatureCard
                            icon={<Utensils size={24} />}
                            title="Daily Meal Logging"
-                           description="Easily log who's eating and when, so you only cook what you need."
+                           description="Easily log who’s eating and when, so you only cook what you need."
                            delay="100ms"
                        />
                        <FeatureCard
@@ -185,38 +232,70 @@ export default function Home() {
                    </div>
               </div>
           </section>
-
+          
           {/* How It Works Section */}
-          <section ref={stepsRef} className="py-16 md:py-24">
-              <div className="container grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-                  <div className="space-y-8">
-                      <Step number="1" title="Create or Join a Group" description="Start a new household or join your roommates with a simple invite code." delay="100ms" />
-                      <Step number="2" title="Log Meals & Expenses" description="Take a few seconds each day to log your meals and any shared expenses you've paid for." delay="200ms" />
-                      <Step number="3" title="Settle Up" description="At the end of the month, see a clear breakdown of who owes what. No more awkward math." delay="300ms" />
-                  </div>
-                  <div className={cn("hidden md:block transition-all duration-700 ease-out", stepsInView ? "opacity-100 scale-100" : "opacity-0 scale-90")} style={{transitionDelay: '400ms'}}>
-                    {howItWorksImage ? (
-                      <img src={howItWorksImage.imageUrl} alt={howItWorksImage.description} className="rounded-lg shadow-xl" data-ai-hint={howItWorksImage.imageHint} />
-                    ) : (
-                      <div className="bg-muted rounded-lg shadow-xl aspect-[6/5]"></div>
-                    )}
-                  </div>
+          <section ref={stepsRef} className="py-16 md:py-24 bg-background/80 dark:bg-black/20">
+            <div className="container">
+                 <h2 className="text-3xl font-bold text-center mb-12 font-headline">How It Works</h2>
+                 <div className="max-w-3xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                     <div className={cn("transition-all duration-700 ease-out", stepsInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10")} style={{transitionDelay: '100ms'}}>
+                        <div className="inline-block p-4 bg-primary/10 text-primary rounded-full mb-4"><span className="text-2xl font-headline">1</span></div>
+                        <h3 className="text-xl font-bold font-headline mb-2">Create or Join a Group</h3>
+                        <p className="text-muted-foreground">Start a new household or join your roommates using a simple invite code.</p>
+                     </div>
+                      <div className={cn("transition-all duration-700 ease-out", stepsInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10")} style={{transitionDelay: '200ms'}}>
+                        <div className="inline-block p-4 bg-primary/10 text-primary rounded-full mb-4"><span className="text-2xl font-headline">2</span></div>
+                        <h3 className="text-xl font-bold font-headline mb-2">Log Meals & Expenses</h3>
+                        <p className="text-muted-foreground">Just a few seconds a day to log meals and shared expenses you’ve paid.</p>
+                     </div>
+                      <div className={cn("transition-all duration-700 ease-out", stepsInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10")} style={{transitionDelay: '300ms'}}>
+                        <div className="inline-block p-4 bg-primary/10 text-primary rounded-full mb-4"><span className="text-2xl font-headline">3</span></div>
+                        <h3 className="text-xl font-bold font-headline mb-2">Settle Up</h3>
+                        <p className="text-muted-foreground">End of the month, get a clean breakdown of who owes what — no more awkward math.</p>
+                     </div>
+                 </div>
+            </div>
+          </section>
+
+          {/* App Preview Section */}
+           <section ref={previewRef} className="py-16 md:py-24">
+              <div className="container max-w-4xl text-center">
+                <div 
+                  className={cn(
+                    "bg-white dark:bg-zinc-800 p-4 rounded-xl shadow-2xl transition-all duration-700 ease-out",
+                     previewInView ? "opacity-100 scale-100" : "opacity-0 scale-90"
+                  )}
+                  style={{transitionDelay: '200ms'}}
+                >
+                  {appPreviewImage ? (
+                    <Image src={appPreviewImage.imageUrl} alt={appPreviewImage.description} width={1000} height={700} className="rounded-lg" data-ai-hint={appPreviewImage.imageHint}/>
+                  ) : (
+                    <div className="bg-muted rounded-lg aspect-video"></div>
+                  )}
+                </div>
+                 <div className="mt-8">
+                     <p className="text-lg font-semibold">A peek inside BachelorBite.</p>
+                     <p className="text-muted-foreground">Simple. Organized. Satisfying.</p>
+                 </div>
               </div>
           </section>
 
            {/* Final CTA */}
-          <section ref={ctaRef} className="py-16 md:py-24 text-center bg-background/50 dark:bg-black/20">
+          <section ref={ctaRef} className="py-16 md:py-24 text-center bg-mint-500/20">
               <div className="container max-w-2xl">
                    <div className={cn("transition-all duration-700 ease-out", ctaInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10")}>
                      <h2 className="text-3xl font-bold font-headline mb-4">Ready to end the chaos?</h2>
                      <p className="text-muted-foreground mb-8">
-                         It's free to use and takes less than a minute to get started. Your roommates will thank you (probably).
+                         It’s free to use and takes less than a minute to get started. Your roommates will thank you (probably).
                      </p>
                      <Button asChild size="lg" className="bg-primary text-primary-foreground text-lg px-8 py-6 rounded-full transition-transform duration-300 ease-in-out hover:scale-105">
                         <Link href="/signup">
                             Sign Up for Free <ArrowRight className="ml-2 h-5 w-5" />
                         </Link>
                     </Button>
+                    <div className="mt-12 text-sm text-muted-foreground">
+                        <p>📩 Contact: lotuslazim@gmail.com</p>
+                    </div>
                    </div>
               </div>
           </section>
