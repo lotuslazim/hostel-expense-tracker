@@ -12,7 +12,7 @@ interface LogoProps {
 }
 
 export function Logo({ 
-  isStacked = false, 
+  isStacked = true, 
   isMascotAnimated = false, 
   mascotSize = 'default',
   className
@@ -43,7 +43,7 @@ export function Logo({
       </div>
       <div
         className={cn(
-          "font-headline text-3xl font-bold tracking-tight",
+          "font-headline text-5xl font-bold tracking-tight",
            "text-primary-foreground group-[.dark-theme-logo]:text-white",
           isStacked ? "text-center" : ""
         )}
