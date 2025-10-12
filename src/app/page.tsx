@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -115,7 +116,7 @@ export default function Home() {
                   heroInView ? "opacity-100" : "opacity-0"
                 )}
               >
-                  <Logo isMascotAnimated={true} mascotSize="large" />
+                  <Logo isMascotAnimated={true} mascotSize="large" isStacked={true} textSize="large" />
               </div>
               <div className="relative [text-shadow:_0_4px_30px_rgba(0,0,0,0.4)]">
                 <h1 

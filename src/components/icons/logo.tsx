@@ -9,18 +9,20 @@ interface LogoProps {
   isMascotAnimated?: boolean;
   mascotSize?: 'default' | 'large';
   className?: string;
+  textSize?: 'default' | 'large';
 }
 
 export function Logo({ 
-  isStacked = true, 
+  isStacked = false, 
   isMascotAnimated = false, 
   mascotSize = 'default',
+  textSize = 'default',
   className
 }: LogoProps) {
   return (
     <div
       className={cn(
-        "flex items-center gap-0 group",
+        "flex items-center gap-2 group",
         isStacked ? "flex-col" : "",
         className
       )}
@@ -28,7 +30,7 @@ export function Logo({
     >
       <div className={cn(
           "relative shrink-0 transition-transform duration-300 group-hover:scale-110",
-          isStacked ? "w-20 h-12 mb-2" : "w-12 h-12",
+          mascotSize === 'default' && (isStacked ? "w-20 h-12 mb-2" : "w-10 h-10"),
           mascotSize === 'large' && 'w-16 h-16 md:w-20 md:h-20',
           isMascotAnimated && 'animate-mascot-idle'
         )}>
@@ -37,15 +39,17 @@ export function Logo({
           alt="BachelorBite Logo" 
           fill
           style={{ objectFit: "contain" }}
-          sizes={mascotSize === 'large' ? "20vw" : "(max-width: 768px) 10vw, 5vw"}
+          sizes={mascotSize === 'large' ? "20vw" : "10vw"}
           priority
         />
       </div>
       <div
         className={cn(
-          "font-headline text-5xl font-bold tracking-tight",
+           "font-headline font-bold tracking-tight",
            "text-primary-foreground group-[.dark-theme-logo]:text-white",
-          isStacked ? "text-center" : ""
+           isStacked ? "text-center" : "",
+           textSize === 'default' && "text-2xl",
+           textSize === 'large' && "text-5xl",
         )}
       >
         <span className="text-white group-[.light-theme-logo]:text-foreground">Bachelor</span>

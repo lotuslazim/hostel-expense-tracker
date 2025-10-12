@@ -60,7 +60,7 @@ export function AppHeader() {
           </SheetHeader>
           <div className="flex flex-col gap-4 py-6">
             <div className="px-4 mb-4">
-              <Logo />
+              <Logo className="light-theme-logo" />
             </div>
             <nav className="flex flex-col gap-2 px-4">
               {navLinks.map((link) => (
@@ -94,12 +94,12 @@ export function AppHeader() {
 
         {/* Logo in the middle for desktop */}
         <div className="hidden md:flex flex-1 items-center justify-center">
-            <Logo />
+            <Logo className="light-theme-logo" />
         </div>
 
         {/* Logo for mobile */}
         <div className="md:hidden flex-1">
-          <Logo />
+          <Logo className="light-theme-logo" />
         </div>
 
         {/* Right side icons */}
