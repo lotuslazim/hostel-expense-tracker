@@ -30,25 +30,25 @@
   }
 
   .dark {
-    --background: 120 10% 8%;
-    --foreground: 120 5% 90%;
-    --card: 120 10% 12%;
-    --card-foreground: 120 5% 90%;
-    --popover: 120 10% 12%;
-    --popover-foreground: 120 5% 90%;
-    --primary: 131 41% 56%;
-    --primary-foreground: 131 41% 10%;
-    --secondary: 120 5% 20%;
-    --secondary-foreground: 120 5% 90%;
-    --muted: 120 5% 20%;
-    --muted-foreground: 120 5% 65%;
-    --accent: 131 41% 46%;
-    --accent-foreground: 120 5% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 5% 90%;
-    --border: 120 5% 20%;
-    --input: 120 5% 22%;
-    --ring: 131 41% 56%;
+    --background: 120 70% 6%; /* A very deep, dark green */
+    --foreground: 120 10% 95%; /* Almost white for high contrast */
+    --card: 120 60% 9%; /* A slightly lighter green for cards */
+    --card-foreground: 120 10% 95%;
+    --popover: 120 60% 9%;
+    --popover-foreground: 120 10% 95%;
+    --primary: 120 70% 30%; /* Your chosen color #0F4D0F, as the primary highlight */
+    --primary-foreground: 120 20% 98%;
+    --secondary: 120 50% 15%;
+    --secondary-foreground: 120 10% 95%;
+    --muted: 120 50% 15%;
+    --muted-foreground: 120 10% 65%;
+    --accent: 120 70% 25%;
+    --accent-foreground: 120 10% 98%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 120 60% 12%;
+    --input: 120 60% 12%;
+    --ring: 120 70% 35%;
   }
 }
 
