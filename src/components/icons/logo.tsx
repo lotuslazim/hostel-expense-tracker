@@ -33,7 +33,7 @@ export function Logo({ isStacked = false }: { isStacked?: boolean }) {
         )}
       >
         <span className="text-foreground">Bachelor</span>
-        <span className="text-primary">Bite</span>
+        <span style={{ color: '#418C4C' }}>Bite</span>
       </div>
     </div>
   );
