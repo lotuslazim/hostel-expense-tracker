@@ -9,6 +9,7 @@ import { FirebaseClientProvider } from "@/firebase/client-provider";
 import { I18nProvider } from "@/i18n/client-provider";
 import { cn } from "@/lib/utils";
 import { ReminderListener } from "@/components/app/ReminderListener";
+import { ProgressBar } from "@/components/app/progress-bar";
 
 const ptSans = PT_Sans({
   subsets: ["latin"],
@@ -45,6 +46,7 @@ export default function RootLayout({
           >
             <InventoryProvider>
               <FirebaseClientProvider>
+                <ProgressBar />
                 {children}
                 <Toaster />
                 <ReminderListener />

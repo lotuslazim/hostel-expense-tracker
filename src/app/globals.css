@@ -7,34 +7,25 @@
 
 @layer base {
   :root {
-    --background: 96 60% 95%; /* E8FFD7 */
-    --foreground: 131 21% 21%; /* Darker version of #3E5F44 for text */
-
-    --card: 96 60% 98%; /* Slightly lighter than background for cards */
+    --background: 96 60% 95%;
+    --foreground: 131 21% 21%;
+    --card: 96 60% 98%;
     --card-foreground: 131 21% 21%;
-
     --popover: 96 60% 98%;
     --popover-foreground: 131 21% 21%;
-
-    --primary: 131 21% 31%; /* #3E5F44 */
-    --primary-foreground: 96 60% 95%; /* #E8FFD7 */
-
-    --secondary: 124 45% 90%; /* Lighter version of #93DA97 */
+    --primary: 131 21% 31%;
+    --primary-foreground: 96 60% 95%;
+    --secondary: 124 45% 90%;
     --secondary-foreground: 131 21% 21%;
-
     --muted: 124 45% 90%;
     --muted-foreground: 131 21% 41%;
-
-    --accent: 134 22% 47%; /* #5E936C */
+    --accent: 134 22% 47%;
     --accent-foreground: 96 60% 98%;
-
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-
-    --border: 124 45% 85%; /* Based on #93DA97 */
+    --border: 124 45% 85%;
     --input: 124 45% 88%;
     --ring: 131 21% 31%;
-
     --radius: 0.5rem;
   }
 
@@ -77,4 +68,30 @@
   body {
     @apply bg-background text-foreground font-body;
   }
+}
+
+/* NProgress styles */
+#nprogress {
+  pointer-events: none;
+}
+#nprogress .bar {
+  background: hsl(var(--primary));
+  position: fixed;
+  z-index: 1031;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+}
+#nprogress .peg {
+  display: block;
+  position: absolute;
+  right: 0px;
+  width: 100px;
+  height: 100%;
+  box-shadow: 0 0 10px hsl(var(--primary)), 0 0 5px hsl(var(--primary));
+  opacity: 1.0;
+  -webkit-transform: rotate(3deg) translate(0px, -4px);
+      -ms-transform: rotate(3deg) translate(0px, -4px);
+          transform: rotate(3deg) translate(0px, -4px);
 }
