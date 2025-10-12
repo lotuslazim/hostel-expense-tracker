@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -11,6 +10,7 @@ import { LandingHeader } from "@/components/app/landing-header";
 import { Logo } from "@/components/icons/logo";
 import { useInView } from "react-intersection-observer";
 import { cn } from "@/lib/utils";
+import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 const FeatureCard = ({ icon, title, description, delay }: { icon: React.ReactNode, title: string, description: string, delay: string }) => {
   const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.1 });
@@ -61,6 +61,8 @@ export default function Home() {
   const { ref: featuresRef, inView: featuresInView } = useInView({ triggerOnce: true, threshold: 0.1 });
   const { ref: stepsRef, inView: stepsInView } = useInView({ triggerOnce: true, threshold: 0.1 });
   const { ref: ctaRef, inView: ctaInView } = useInView({ triggerOnce: true, threshold: 0.1 });
+
+  const howItWorksImage = PlaceHolderImages.find(p => p.id === "landing-how-it-works");
 
   useEffect(() => {
     if (!isUserLoading && user) {
@@ -160,7 +162,7 @@ export default function Home() {
                       <Step number="3" title="Settle Up" description="At the end of the month, see a clear breakdown of who owes what. No more awkward math." delay="300ms" />
                   </div>
                   <div className={cn("hidden md:block transition-all duration-700 ease-out", stepsInView ? "opacity-100 scale-100" : "opacity-0 scale-90")} style={{transitionDelay: '400ms'}}>
-                    <img src="https://picsum.photos/seed/bachelorbite/600/500" alt="App screenshot" className="rounded-lg shadow-xl" data-ai-hint="app dashboard" />
+                    <img src={howItWorksImage?.imageUrl} alt={howItWorksImage?.description} className="rounded-lg shadow-xl" data-ai-hint={howItWorksImage?.imageHint} />
                   </div>
               </div>
           </section>
