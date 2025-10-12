@@ -26,7 +26,7 @@ const playfairDisplay = Playfair_Display({
 
 export const metadata: Metadata = {
   title: "BachelorBite",
-  description: "Simplified meal and expense tracking.",
+  description: "Simplified meal and expense tracking for shared living.",
 };
 
 export default function RootLayout({
