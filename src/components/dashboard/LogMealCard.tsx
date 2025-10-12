@@ -19,10 +19,11 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
 import { useUser, useDoc, addDocumentNonBlocking } from "@/firebase";
 import { firestore } from "@/firebase/config";
-import { doc, collection, serverTimestamp, Timestamp } from "firebase/firestore";
+import { doc, collection, serverTimestamp, Timestamp, addDoc, deleteDoc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Utensils } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
+import { ToastAction } from "../ui/toast";
 
 interface LogMealCardProps {
     selectedDate: Date;
@@ -70,6 +71,12 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
     form.reset({ mealCount: 1, itemName: "" });
   }, [isMealItemNameRequired, mealTypes, form]);
 
+  const handleUndo = (docId: string) => {
+    const docRef = doc(firestore, `groups/${groupId}/meals`, docId);
+    deleteDoc(docRef);
+    toast({ title: "Action Undone", description: "The meal log has been removed." });
+  };
+
   async function onSubmit(values: MealSchemaType) {
     if (!currentUser || !groupId) {
       toast({
@@ -79,12 +86,6 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
       });
       return;
     }
-
-    // Optimistic UI update
-    toast({
-        title: "Meal Logged!",
-        description: `Your ${values.mealType} has been successfully logged.`,
-    });
     
     const mealData = {
       mealType: values.mealType,
@@ -98,9 +99,28 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
       groupId,
     };
     
-    // Perform the database operation in the background
+    // Perform the database operation and get the new doc's ID
     const mealCollectionRef = collection(firestore, `groups/${groupId}/meals`);
-    addDocumentNonBlocking(mealCollectionRef, mealData);
+    try {
+        const docRef = await addDoc(mealCollectionRef, mealData);
+        
+        toast({
+            title: "Meal Logged!",
+            description: `Your ${values.mealType} has been successfully logged.`,
+            action: (
+              <ToastAction altText="Undo" onClick={() => handleUndo(docRef.id)}>
+                Undo
+              </ToastAction>
+            ),
+        });
+
+    } catch(e) {
+         toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Could not log meal. Please try again.",
+        });
+    }
     
     form.reset({ mealCount: 1, mealType: undefined, itemName: "" });
 

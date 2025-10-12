@@ -23,9 +23,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useUser, useDoc, setDocumentNonBlocking, addDocumentNonBlocking } from "@/firebase";
+import { useUser, useDoc } from "@/firebase";
 import { firestore } from "@/firebase/config";
-import { doc, collection, serverTimestamp, Timestamp, getDocs, where, query } from "firebase/firestore";
+import { doc, collection, serverTimestamp, Timestamp, getDocs, where, query, addDoc, deleteDoc, writeBatch } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, ShoppingCart, Camera, Upload, X, Plus, Trash2 } from "lucide-react";
 import { sanitizeFirestoreData } from "@/lib/utils";
@@ -35,6 +35,7 @@ import { Alert, AlertTitle, AlertDescription } from "../ui/alert";
 import { useInventory } from "@/contexts/InventoryContext";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import type imageCompression from "browser-image-compression";
+import { ToastAction } from "../ui/toast";
 
 const compressImage = async (file: File | Blob): Promise<Blob> => {
     const imageCompressionModule = (await import('browser-image-compression')).default;
@@ -239,6 +240,31 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     return undefined;
   };
 
+  const handleUndo = async (expenseId: string, purchaseIds: string[] = []) => {
+    if (!groupId) return;
+    const batch = writeBatch(firestore);
+
+    // Delete the main expense document
+    const expenseRef = doc(firestore, `groups/${groupId}/expenses`, expenseId);
+    batch.delete(expenseRef);
+
+    // Delete associated purchase documents
+    purchaseIds.forEach(purchaseId => {
+        const purchaseRef = doc(firestore, `groups/${groupId}/purchases`, purchaseId);
+        batch.delete(purchaseRef);
+    });
+
+    try {
+        await batch.commit();
+        toast({ title: "Action Undone", description: "The expense and related purchases have been removed." });
+        if (purchaseIds.length > 0) {
+            triggerUpdate();
+        }
+    } catch (error) {
+        toast({ variant: "destructive", title: "Error Undoing", description: "Could not remove the expense." });
+    }
+  };
+
   async function onSubmit(values: z.infer<typeof expenseSchema>) {
     if (!currentUser || !groupId) {
       toast({ variant: "destructive", title: "Error", description: "You must be in a group to add an expense." });
@@ -262,8 +288,6 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
             );
         }
         
-        const expenseRef = doc(collection(firestore, `groups/${groupId}/expenses`));
-
         let finalExpenseItem = values.expenseItem;
         if (values.category === 'Food & Groceries') {
             finalExpenseItem = values.purchasedItems?.map(item => item.name).filter(Boolean).join(', ') || 'Groceries';
@@ -280,10 +304,10 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
             createdAt: serverTimestamp(),
             groupId,
         });
-
-        // Use non-blocking write for the main expense
-        setDocumentNonBlocking(expenseRef, expenseData, {});
-
+        
+        const expenseRef = await addDoc(collection(firestore, `groups/${groupId}/expenses`), expenseData);
+        
+        const purchaseIds: string[] = [];
         // Handle purchased items if they exist
         if (values.category === 'Food & Groceries' && values.purchasedItems) {
             for (const item of values.purchasedItems) {
@@ -300,14 +324,15 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                     userName: currentUser.displayName || currentUser.email?.split('@')[0],
                     groupId,
                 });
-                // Use non-blocking write for each purchase
-                addDocumentNonBlocking(collection(firestore, `groups/${groupId}/purchases`), purchaseData);
+                const purchaseRef = await addDoc(collection(firestore, `groups/${groupId}/purchases`), purchaseData);
+                purchaseIds.push(purchaseRef.id);
             }
         }
         
         toast({
             title: "Expense Added",
             description: `Your ${values.category.toLowerCase()} expense of ৳${values.amount} has been logged.`,
+            action: <ToastAction altText="Undo" onClick={() => handleUndo(expenseRef.id, purchaseIds)}>Undo</ToastAction>
         });
 
         if (values.category === 'Food & Groceries') {
