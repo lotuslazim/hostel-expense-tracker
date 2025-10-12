@@ -43,12 +43,12 @@ export function Logo({
       </div>
       <div
         className={cn(
-          "font-headline text-2xl font-bold tracking-tight",
-           "group-[.dark-theme-logo]:text-white",
+          "font-headline text-3xl font-bold tracking-tight",
+           "text-primary-foreground group-[.dark-theme-logo]:text-white",
           isStacked ? "text-center" : ""
         )}
       >
-        <span className="text-foreground group-[.dark-theme-logo]:text-white">Bachelor</span>
+        <span className="text-white group-[.light-theme-logo]:text-foreground">Bachelor</span>
         <span style={{ color: '#84B067' }}>Bite</span>
       </div>
     </div>
