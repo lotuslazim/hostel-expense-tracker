@@ -40,14 +40,14 @@ export default function Home() {
         <main className="flex-grow flex items-center justify-center text-center">
             <div className="p-4 space-y-4 max-w-3xl mx-auto flex flex-col items-center">
                 <Logo isStacked />
-                <h1 className="text-3xl md:text-4xl font-bold font-headline text-foreground">
+                <h1 className="text-3xl md:text-4xl font-bold font-headline text-foreground animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                     BachelorBite won’t cook for you, but it’ll make your messy life easier.
                 </h1>
-                <p className="text-lg md:text-xl text-muted-foreground">
+                <p className="text-lg md:text-xl text-muted-foreground animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
                     Skip the heartbreaks, count the meals.
                 </p>
-                <div className="pt-4">
-                    <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground text-lg px-8 py-6 rounded-full">
+                <div className="pt-4 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
+                    <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground text-lg px-8 py-6 rounded-full transition-transform duration-300 ease-in-out hover:scale-105">
                         <Link href="/login">
                             Get Started <ArrowRight className="ml-2 h-5 w-5" />
                         </Link>

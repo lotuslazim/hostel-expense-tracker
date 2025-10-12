@@ -1,3 +1,4 @@
+
 "use client";
 
 import { cn } from '@/lib/utils';
@@ -13,7 +14,7 @@ export function Logo({ isStacked = false }: { isStacked?: boolean }) {
       )}
       aria-label="BachelorBite Home"
     >
-      <div className={cn("relative shrink-0", isStacked ? "w-20 h-12" : "w-12 h-12")}>
+      <div className={cn("relative shrink-0 animate-logo-pulse", isStacked ? "w-20 h-12" : "w-12 h-12")}>
         <Image 
           src="/logo.png" 
           alt="BachelorBite Logo" 
