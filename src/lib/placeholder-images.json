@@ -37,22 +37,22 @@
       "imageHint": "app dashboard"
     },
     {
-      "id": "highlight-kitchen",
-      "description": "Illustration of a messy but lively kitchen.",
-      "imageUrl": "https://picsum.photos/seed/messykitchen/400/300",
-      "imageHint": "messy kitchen"
+      "id": "app-dashboard",
+      "description": "An image representing the app's main dashboard view.",
+      "imageUrl": "https://picsum.photos/seed/appdashboard/400/300",
+      "imageHint": "dashboard ui"
     },
     {
-      "id": "highlight-bills",
-      "description": "Illustration of bills and money being organized.",
-      "imageUrl": "https://picsum.photos/seed/bills/400/300",
-      "imageHint": "organize bills"
+      "id": "app-report",
+      "description": "An image representing the app's monthly report feature.",
+      "imageUrl": "https://picsum.photos/seed/appreport/400/300",
+      "imageHint": "report chart"
     },
     {
-      "id": "highlight-friends",
-      "description": "Illustration of friends happily eating together.",
-      "imageUrl": "https://picsum.photos/seed/friendseating/400/300",
-      "imageHint": "friends eating"
+      "id": "app-inventory",
+      "description": "An image representing the app's inventory management feature.",
+      "imageUrl": "https://picsum.photos/seed/appinventory/400/300",
+      "imageHint": "inventory list"
     }
   ]
 }

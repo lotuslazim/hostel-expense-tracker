@@ -190,7 +190,7 @@ export default function Home() {
           </section>
 
           {/* Why BachelorBite Section */}
-          <section ref={whyRef} className="py-16 md:py-24 bg-gradient-to-b from-green-50/50 to-background">
+          <section ref={whyRef} className="py-16 md:py-24 bg-gradient-to-b from-primary/10 to-background">
              <div className="container text-center">
                  <h2 className="text-3xl font-bold font-headline mb-4">Why BachelorBite?</h2>
                  <p className="max-w-2xl mx-auto text-muted-foreground text-lg mb-12">
@@ -199,9 +199,9 @@ export default function Home() {
                      No spreadsheets, no awkward reminders, just harmony in the kitchen.
                  </p>
                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
-                     <HighlightCard imageId="highlight-kitchen" title="End Kitchen Chaos" delay="100ms" />
-                     <HighlightCard imageId="highlight-bills" title="Simplify Shared Bills" delay="200ms" />
-                     <HighlightCard imageId="highlight-friends" title="Enjoy Roommate Harmony" delay="300ms" />
+                     <HighlightCard imageId="app-dashboard" title="Daily Dashboard" delay="100ms" />
+                     <HighlightCard imageId="app-report" title="Monthly Reports" delay="200ms" />
+                     <HighlightCard imageId="app-inventory" title="Inventory Tracking" delay="300ms" />
                  </div>
              </div>
           </section>
@@ -313,5 +313,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
