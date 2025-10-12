@@ -1,3 +1,4 @@
+
 "use client";
 
 import { cn } from '@/lib/utils';
@@ -31,7 +32,7 @@ export function Logo({ isStacked = false }: { isStacked?: boolean }) {
           isStacked ? "text-center" : ""
         )}
       >
-        <span className="text-foreground">Bachelor</span>
+        <span className="text-white">Bachelor</span>
         <span style={{ color: '#84B067' }}>Bite</span>
       </div>
     </div>
