@@ -19,7 +19,7 @@ import { Camera, User, Mail, Home, Users, Wallet, ChevronDown, Loader2, LogOut, 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { format } from 'date-fns/format';
 import { startOfMonth } from 'date-fns/startOfMonth';
-import type { Expense, Member } from "@/lib/types";
+import type { Expense, Member, User as UserType } from "@/lib/types";
 import imageCompression from "browser-image-compression";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent as ReceiptDialogContent, DialogHeader as ReceiptDialogHeader, DialogTitle as ReceiptDialogTitle, DialogTrigger as ReceiptDialogTrigger } from "@/components/ui/dialog";
@@ -126,7 +126,6 @@ function AccountSettings({ user, userData, groupData, groupId }: { user: any, us
       const memberRef = doc(firestore, `groups/${groupId}/members`, user.uid);
 
       batch.update(userRef, { groupId: null, isAdmin: false });
-      // Instead of deleting, set status to inactive
       batch.update(memberRef, { status: 'inactive', leftAt: serverTimestamp() });
 
       try {
@@ -153,7 +152,6 @@ function AccountSettings({ user, userData, groupData, groupId }: { user: any, us
             const userRef = doc(firestore, "users", user.uid);
             await deleteDoc(userRef);
 
-            // This action is sensitive and requires recent sign-in.
             await deleteUser(user);
             
             toast({ title: "Account Deleted", description: "Your account has been permanently deleted." });
@@ -222,6 +220,27 @@ function AccountSettings({ user, userData, groupData, groupId }: { user: any, us
     )
 }
 
+function Roommate({ memberId }: { memberId: string }) {
+    const userRef = useMemo(() => doc(firestore, 'users', memberId), [memberId]);
+    const { data: userData, isLoading } = useDoc<UserType>(userRef);
+
+    if (isLoading) {
+        return <div className="flex items-center gap-3"><Skeleton className="h-8 w-8 rounded-full" /><Skeleton className="h-5 w-28" /></div>;
+    }
+    
+    if (!userData) return null;
+
+    return (
+        <div className="flex items-center gap-3">
+            <Avatar className="h-8 w-8">
+                <AvatarImage src={userData.photoURL} />
+                <AvatarFallback>{userData.displayName?.charAt(0).toUpperCase()}</AvatarFallback>
+            </Avatar>
+            <span>{userData.displayName}</span>
+        </div>
+    );
+}
+
 export function Profile() {
   const { user, isUserLoading } = useUser();
   const { toast } = useToast();
@@ -246,7 +265,6 @@ export function Profile() {
   
   const expensesQuery = useMemo(() => {
     if (!user || !groupId) return null;
-    const lastMonth = startOfMonth(new Date());
     return query(
         collection(firestore, `groups/${groupId}/expenses`), 
         where("userId", "==", user.uid)
@@ -315,13 +333,7 @@ export function Profile() {
         photoURL: photoURL,
       });
 
-      if (groupId && user) {
-        const memberRef = doc(firestore, `groups/${groupId}/members`, user.uid);
-        await updateDoc(memberRef, {
-          displayName: displayName,
-          photoURL: photoURL,
-        });
-      }
+      // No need to update member doc anymore as it doesn't store display info
       
       toast({ title: "Profile Updated", description: "Your changes have been saved." });
       setIsEditing(false);
@@ -424,13 +436,7 @@ export function Profile() {
                       <p className="font-semibold text-muted-foreground mb-2 flex items-center gap-2"><Users/> Roommates</p>
                       <div className="space-y-3">
                         {roommates && roommates.length > 0 ? roommates.map(member => (
-                          <div key={member.id} className="flex items-center gap-3">
-                            <Avatar className="h-8 w-8">
-                              <AvatarImage src={member.photoURL} />
-                              <AvatarFallback>{member.displayName?.charAt(0).toUpperCase()}</AvatarFallback>
-                            </Avatar>
-                            <span>{member.displayName}</span>
-                          </div>
+                          <Roommate key={member.id} memberId={member.id} />
                         )) : (
                           <p className="text-muted-foreground">You have no roommates in this group yet.</p>
                         )}
@@ -507,7 +513,3 @@ export function Profile() {
     </div>
   );
 }
-
-    
-
-    

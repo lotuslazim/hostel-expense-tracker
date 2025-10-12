@@ -16,7 +16,8 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AppHeader } from "@/components/app/header";
-import type { Member } from "@/lib/types";
+import type { Member, User as UserType } from "@/lib/types";
+import { User } from "firebase/auth";
 
 function AdminPageSkeleton() {
   return (
@@ -64,7 +65,7 @@ function AdminPageSkeleton() {
   );
 }
 
-function NewUserAdminPanel({ user }: { user: any }) {
+function NewUserAdminPanel({ user }: { user: User }) {
   const { toast } = useToast();
   const [isCreating, setIsCreating] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
@@ -79,16 +80,14 @@ function NewUserAdminPanel({ user }: { user: any }) {
     if (!user) return;
     setIsCreating(true);
     try {
-      // Create invitation code
       const invitationCode = Math.random().toString(36).substring(2, 8).toUpperCase();
 
-      // Create group document
       const groupRef = await addDoc(collection(firestore, "groups"), {
         groupName: groupName,
         invitationCode: invitationCode,
         adminId: user.uid,
         createdAt: serverTimestamp(),
-        settings: { // Default settings
+        settings: {
             mealTypes: ["Lunch", "Dinner"],
             isMealItemNameRequired: false,
             isExpenseDescriptionRequired: false,
@@ -98,21 +97,15 @@ function NewUserAdminPanel({ user }: { user: any }) {
       
       const groupId = groupRef.id;
 
-      // Update user document with groupId and set as admin
       const userRef = doc(firestore, "users", user.uid);
       const memberRef = doc(firestore, `groups/${groupId}/members`, user.uid);
 
       const batch = writeBatch(firestore);
       batch.update(userRef, { groupId: groupId, isAdmin: true });
       batch.set(memberRef, {
-        id: user.uid,
-        email: user.email,
-        displayName: user.displayName,
-        photoURL: user.photoURL,
         role: "admin",
         status: "active",
         joinedAt: serverTimestamp(),
-        leftAt: null,
       });
 
       await batch.commit();
@@ -154,27 +147,19 @@ function NewUserAdminPanel({ user }: { user: any }) {
 
         const batch = writeBatch(firestore);
         
-        // Update user document
         batch.update(userRef, { groupId: groupId, isAdmin: false });
 
         if (memberDoc.exists()) {
-            // User is rejoining, update their status
             batch.update(memberRef, {
                 status: 'active',
                 leftAt: null,
-                role: 'member' // reset role on rejoin
+                role: 'member'
             });
         } else {
-            // New member
             batch.set(memberRef, {
-                id: user.uid,
-                email: user.email,
-                displayName: user.displayName,
-                photoURL: user.photoURL,
                 role: "member",
                 status: "active",
                 joinedAt: serverTimestamp(),
-                leftAt: null
             });
         }
 
@@ -254,18 +239,61 @@ function NewUserAdminPanel({ user }: { user: any }) {
   );
 }
 
+// A new component to render member rows, fetching user data individually.
+function MemberRow({ member }: { member: Member }) {
+    const userRef = useMemo(() => doc(firestore, 'users', member.id), [member.id]);
+    const { data: userData, isLoading } = useDoc<UserType>(userRef);
+
+    if (isLoading) {
+        return (
+            <TableRow>
+                <TableCell>
+                    <div className="flex items-center gap-3">
+                        <Skeleton className="h-8 w-8 rounded-full" />
+                        <Skeleton className="h-5 w-28" />
+                    </div>
+                </TableCell>
+                <TableCell><Skeleton className="h-5 w-40" /></TableCell>
+                <TableCell><Skeleton className="h-6 w-20" /></TableCell>
+            </TableRow>
+        );
+    }
+    
+    if (!userData) return null; // Or some fallback UI
+
+    return (
+        <TableRow>
+            <TableCell>
+                <div className="flex items-center gap-3">
+                    <Avatar className="h-8 w-8">
+                        <AvatarImage src={userData.photoURL} />
+                        <AvatarFallback>{userData.displayName?.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <span>{userData.displayName}</span>
+                </div>
+            </TableCell>
+            <TableCell>{userData.email}</TableCell>
+            <TableCell>
+                <Badge variant={member.role === 'admin' ? 'default' : 'secondary'}>
+                    {member.role === 'admin' ? 'Admin' : 'Member'}
+                </Badge>
+            </TableCell>
+        </TableRow>
+    );
+}
+
+
 function GroupDetailsPanel({ groupId }: { groupId: string }) {
     const { toast } = useToast();
 
     const groupRef = useMemo(() => doc(firestore, "groups", groupId), [groupId]);
     const { data: groupData, isLoading: isGroupDataLoading } = useDoc(groupRef);
 
-    const membersQuery = useMemo(() => query(collection(firestore, `groups/${groupId}/members`), where('status', '==', 'active')), [groupId]);
-    const { data: activeMembers, isLoading: areMembersLoading } = useCollection<Member>(membersQuery);
-    
-    const pastMembersQuery = useMemo(() => query(collection(firestore, `groups/${groupId}/members`), where('status', '==', 'inactive')), [groupId]);
-    const { data: pastMembers, isLoading: arePastMembersLoading } = useCollection<Member>(pastMembersQuery);
+    const membersQuery = useMemo(() => query(collection(firestore, `groups/${groupId}/members`)), [groupId]);
+    const { data: members, isLoading: areMembersLoading } = useCollection<Member>(membersQuery);
 
+    const activeMembers = useMemo(() => members?.filter(m => m.status === 'active'), [members]);
+    const pastMembers = useMemo(() => members?.filter(m => m.status === 'inactive'), [members]);
 
     const handleCopyInviteCode = () => {
         if (groupData?.invitationCode) {
@@ -274,7 +302,7 @@ function GroupDetailsPanel({ groupId }: { groupId: string }) {
         }
     };
 
-    if (isGroupDataLoading || areMembersLoading || arePastMembersLoading) {
+    if (isGroupDataLoading || areMembersLoading) {
         return <AdminPageSkeleton />;
     }
 
@@ -339,23 +367,7 @@ function GroupDetailsPanel({ groupId }: { groupId: string }) {
                         </TableHeader>
                         <TableBody>
                             {activeMembers?.map(member => (
-                                <TableRow key={member.id}>
-                                    <TableCell>
-                                        <div className="flex items-center gap-3">
-                                            <Avatar className="h-8 w-8">
-                                                <AvatarImage src={member.photoURL} />
-                                                <AvatarFallback>{member.displayName?.charAt(0)}</AvatarFallback>
-                                            </Avatar>
-                                            <span>{member.displayName}</span>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>{member.email}</TableCell>
-                                    <TableCell>
-                                        <Badge variant={member.role === 'admin' ? 'default' : 'secondary'}>
-                                            {member.role === 'admin' ? 'Admin' : 'Member'}
-                                        </Badge>
-                                    </TableCell>
-                                </TableRow>
+                               <MemberRow key={member.id} member={member} />
                             ))}
                         </TableBody>
                     </Table>
@@ -369,23 +381,20 @@ function GroupDetailsPanel({ groupId }: { groupId: string }) {
                         <CardDescription>Members who have previously left the group.</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <div className="space-y-2">
-                            {pastMembers.map(member => (
-                                <div key={member.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                                    <div className="flex items-center gap-3">
-                                        <Avatar className="h-8 w-8">
-                                            <AvatarImage src={member.photoURL} />
-                                            <AvatarFallback>{member.displayName?.charAt(0)}</AvatarFallback>
-                                        </Avatar>
-                                        <div>
-                                            <p className="font-medium">{member.displayName}</p>
-                                            <p className="text-xs text-muted-foreground">{member.email}</p>
-                                        </div>
-                                    </div>
-                                    <Button variant="outline" size="sm">View History</Button>
-                                </div>
-                            ))}
-                        </div>
+                       <Table>
+                           <TableHeader>
+                               <TableRow>
+                                   <TableHead>Name</TableHead>
+                                   <TableHead>Email</TableHead>
+                                   <TableHead>Status</TableHead>
+                               </TableRow>
+                           </TableHeader>
+                           <TableBody>
+                               {pastMembers.map(member => (
+                                   <MemberRow key={member.id} member={member} />
+                               ))}
+                           </TableBody>
+                       </Table>
                     </CardContent>
                 </Card>
             )}

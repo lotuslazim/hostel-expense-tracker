@@ -1,5 +1,4 @@
 
-
 import type { Timestamp } from 'firebase/firestore';
 
 export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
@@ -93,15 +92,19 @@ export interface Item {
   date: Date;
 }
 
-
-export interface Member {
+export interface User {
   id: string;
   email: string;
   displayName: string;
   photoURL?: string;
+  groupId: string | null;
+  isAdmin: boolean;
+}
+
+export interface Member {
+  id: string; // This will be the same as the user's UID
   role: 'admin' | 'member';
   status: 'active' | 'inactive';
   joinedAt: Timestamp;
   leftAt?: Timestamp | null;
 }
-    
