@@ -108,6 +108,10 @@ export default function Home() {
             <FloatingIcon className="top-[20%] right-[10%]" animationDelay="2s">🍴</FloatingIcon>
             <FloatingIcon className="bottom-[15%] left-[20%]" animationDelay="4s">🧾</FloatingIcon>
             <FloatingIcon className="bottom-[10%] right-[25%]" animationDelay="6s">💵</FloatingIcon>
+            <FloatingIcon className="top-[50%] left-[15%]" animationDelay="1s">🍲</FloatingIcon>
+            <FloatingIcon className="top-[60%] right-[20%]" animationDelay="3s">🛍️</FloatingIcon>
+            <FloatingIcon className="bottom-[30%] left-[5%]" animationDelay="5s">🏠</FloatingIcon>
+            <FloatingIcon className="top-[35%] right-[30%]" animationDelay="7s">🧑‍🤝‍🧑</FloatingIcon>
 
             <div className="container relative p-4 space-y-4 max-w-3xl mx-auto flex flex-col items-center">
               <div 
