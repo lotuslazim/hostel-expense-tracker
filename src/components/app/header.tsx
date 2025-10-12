@@ -83,7 +83,7 @@ export function AppHeader() {
   return (
     <header className={cn(
       "sticky top-0 z-50 w-full border-b",
-      "bg-transparent backdrop-blur supports-[backdrop-filter]:bg-transparent"
+      "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
     )}>
       <div className="container flex h-16 items-center">
         

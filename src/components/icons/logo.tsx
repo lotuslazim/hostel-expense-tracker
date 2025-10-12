@@ -32,7 +32,7 @@ export function Logo({ isStacked = false }: { isStacked?: boolean }) {
           isStacked ? "text-center" : ""
         )}
       >
-        <span className="text-white">Bachelor</span>
+        <span className="text-foreground group-[.dark-theme-logo]:text-white">Bachelor</span>
         <span style={{ color: '#84B067' }}>Bite</span>
       </div>
     </div>

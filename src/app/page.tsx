@@ -89,7 +89,7 @@ export default function Home() {
           {/* Hero Section */}
           <section ref={heroRef} className="text-center py-16 md:py-24" style={{ backgroundColor: '#253D2C' }}>
             <div className="container p-4 space-y-4 max-w-3xl mx-auto flex flex-col items-center">
-              <div className={cn("transition-all duration-700 ease-out text-white", heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10")}>
+              <div className={cn("transition-all duration-700 ease-out text-white dark-theme-logo", heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10")}>
                   <Logo />
               </div>
               <h1 
