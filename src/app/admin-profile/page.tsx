@@ -20,6 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 import { startOfMonth } from 'date-fns/startOfMonth';
 import { endOfMonth } from 'date-fns/endOfMonth';
 import { format } from 'date-fns/format';
+import type { Member, User as UserType } from "@/lib/types";
 
 
 function AdminProfilePageSkeleton() {
@@ -95,6 +96,47 @@ function AccessDenied() {
         </div>
     )
 }
+
+function MemberRow({ memberId, role }: { memberId: string, role: string }) {
+    const userRef = useMemo(() => doc(firestore, 'users', memberId), [memberId]);
+    const { data: userData, isLoading } = useDoc<UserType>(userRef);
+
+    if (isLoading) {
+        return (
+             <TableRow>
+                <TableCell>
+                    <div className="flex items-center gap-3">
+                        <Skeleton className="h-8 w-8 rounded-full" />
+                        <Skeleton className="h-5 w-28" />
+                    </div>
+                </TableCell>
+                <TableCell><Skeleton className="h-5 w-40" /></TableCell>
+                <TableCell><Skeleton className="h-6 w-20" /></TableCell>
+            </TableRow>
+        )
+    }
+
+    if (!userData) return null;
+
+    return (
+        <TableRow>
+            <TableCell>
+                <div className="flex items-center gap-3">
+                    <Avatar className="h-8 w-8">
+                        <AvatarImage src={userData.photoURL} />
+                        <AvatarFallback>{userData.displayName?.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <span>{userData.displayName}</span>
+                </div>
+            </TableCell>
+            <TableCell>{userData.email}</TableCell>
+            <TableCell>
+                <Badge variant={role === 'admin' ? 'default' : 'secondary'}>{role}</Badge>
+            </TableCell>
+        </TableRow>
+    );
+}
+
 
 function AdminActionsCard({ groupDocRef, groupData, groupId }: { groupDocRef: any, groupData: any, groupId: string }) {
     const { toast } = useToast();
@@ -309,7 +351,7 @@ export default function AdminProfilePage() {
         return query(collection(firestore, `groups/${groupId}/members`));
     }, [groupId]);
 
-    const { data: members, isLoading: areMembersLoading } = useCollection(membersQuery);
+    const { data: members, isLoading: areMembersLoading } = useCollection<Member>(membersQuery);
 
     const handleCopyInviteCode = () => {
         if (groupData?.invitationCode) {
@@ -339,7 +381,7 @@ export default function AdminProfilePage() {
             ) : (
                 <div className="space-y-8">
                     <div>
-                        <h1 className="text-3xl font-bold font-headline">Admin Profile</h1>
+                        <h1 className="text-3xl font-bold font-headline">Admin Dashboard</h1>
                         <p className="text-muted-foreground">Manage your group, members, and settings.</p>
                     </div>
         
@@ -390,21 +432,7 @@ export default function AdminProfilePage() {
                                     </TableHeader>
                                     <TableBody>
                                         {members?.map(member => (
-                                            <TableRow key={member.id}>
-                                                <TableCell>
-                                                    <div className="flex items-center gap-3">
-                                                        <Avatar className="h-8 w-8">
-                                                            <AvatarImage src={member.photoURL} />
-                                                            <AvatarFallback>{member.displayName?.charAt(0)}</AvatarFallback>
-                                                        </Avatar>
-                                                        <span>{member.displayName}</span>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>{member.email}</TableCell>
-                                                <TableCell>
-                                                    <Badge variant={member.role === 'admin' ? 'default' : 'secondary'}>{member.role}</Badge>
-                                                </TableCell>
-                                            </TableRow>
+                                            <MemberRow key={member.id} memberId={member.id} role={member.role} />
                                         ))}
                                     </TableBody>
                                 </Table>

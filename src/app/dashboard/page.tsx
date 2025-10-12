@@ -7,7 +7,7 @@ import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { DateCard } from "@/components/dashboard/DateCard";
 import { AppHeader } from "@/components/app/header";
 import { useState, useMemo } from "react";
-import { WelcomeCard } from "@/components/app/welcome-card";
+import { Welcome } from "@/components/app/welcome";
 import { useUser, useDoc, useFirebase, useCollection } from "@/firebase";
 import { doc, collection, query, where, Timestamp, orderBy } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -119,10 +119,8 @@ export default function DashboardPage() {
     <div className="flex flex-col min-h-screen">
       <AppHeader />
       <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {groupId ? <DashboardContent groupId={groupId} /> : <WelcomeCard />}
+        {groupId ? <DashboardContent groupId={groupId} /> : <Welcome />}
       </main>
     </div>
   );
 }
-
-    

@@ -36,7 +36,7 @@ export function WelcomeCard() {
                     </div>
                 </div>
                  <div className="text-sm text-muted-foreground mt-4">
-                    You can manage your group from the <Link href="/admin" className="underline hover:text-primary">Admin Panel</Link> at any time.
+                    You can manage your group from the <Link href="/admin" className="underline hover:text-primary">Group Details page</Link> at any time.
                 </div>
             </CardContent>
         </Card>

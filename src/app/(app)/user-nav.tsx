@@ -95,7 +95,7 @@ export function UserNav() {
           {isUserAdmin && (
             <DropdownMenuItem asChild>
               <Link href="/admin-profile">
-                <Shield className="mr-2 h-4 w-4" />Admin Profile
+                <Shield className="mr-2 h-4 w-4" />Admin Dashboard
               </Link>
             </DropdownMenuItem>
           )}
