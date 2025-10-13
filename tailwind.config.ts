@@ -94,6 +94,10 @@ const config = {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-20px)" },
         },
+        "float-slow": {
+            "0%, 100%": { transform: "translateY(0)" },
+            "50%": { transform: "translateY(-10px)" },
+        },
         "mascot-idle": {
           "0%, 100%": { transform: "translateY(0) rotate(0deg) scale(1)" },
           "25%": { transform: "translateY(-5px) rotate(-3deg) scale(1.02)" },
@@ -102,6 +106,14 @@ const config = {
         "pulse-slow": {
           "0%, 100%": { transform: "scale(1)", boxShadow: "0 0 0 0 hsl(var(--primary) / 0.3)" },
           "70%": { transform: "scale(1.05)", boxShadow: "0 0 0 10px hsl(var(--primary) / 0)" },
+        },
+        "lightning-flash": {
+            "0%": { opacity: "0" },
+            "50%": { opacity: "0.3" },
+            "52%": { opacity: "0.1" },
+            "55%": { opacity: "0.5" },
+            "56%": { opacity: "0" },
+            "100%": { opacity: "0" },
         }
       },
       animation: {
@@ -110,8 +122,10 @@ const config = {
         "fade-in-up": "fade-in-up 0.5s ease-out forwards",
         "logo-pulse": "logo-pulse 5s ease-in-out infinite",
         "float": "float 8s ease-in-out infinite",
+        "float-slow": "float-slow 6s ease-in-out infinite",
         "mascot-idle": "mascot-idle 5s ease-in-out infinite",
         "pulse-slow": "pulse-slow 3s ease-in-out infinite",
+        "lightning-flash": "lightning-flash 4s infinite linear"
       },
     },
   },
@@ -119,3 +133,5 @@ const config = {
 } satisfies Config
 
 export default config;
+
+    

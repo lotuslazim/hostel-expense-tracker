@@ -230,6 +230,16 @@ export default function Home() {
              </div>
            </section>
            
+            {/* Stormy Scene Section */}
+            <section className="relative py-24 md:py-32 bg-gray-900 overflow-hidden">
+                <div className="absolute inset-0 bg-black/50 z-0"></div>
+                <div className="absolute inset-0 animate-lightning-flash z-10"></div>
+                <div className="container relative z-20 flex flex-col items-center justify-center text-center">
+                    <Logo isMascotAnimated={true} mascotSize="large" className="animate-float-slow" />
+                    <p className="mt-4 text-white/80 font-semibold text-lg">Even in the storm of shared living, BachelorBite keeps things calm.</p>
+                </div>
+            </section>
+
             {/* App Preview Section */}
             {appPreviewImage && (
                 <section ref={previewRef} className="py-24 md:py-32 bg-gradient-to-b from-[#1E3A28] to-[#162A1C]">
@@ -304,3 +314,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
