@@ -21,6 +21,7 @@ const config = {
     extend: {
       backgroundImage: {
         'grid-white': "linear-gradient(to right, theme('colors.white / 5%') 1px, transparent 1px), linear-gradient(to bottom, theme('colors.white / 5%') 1px, transparent 1px)",
+        'rain': 'linear-gradient(transparent, rgba(255,255,255,0.1) 40%, rgba(255,255,255,0.1) 60%, transparent)',
       },
       fontFamily: {
         body: ["var(--font-poppins)", "sans-serif"],
@@ -114,6 +115,10 @@ const config = {
             "55%": { opacity: "0.5" },
             "56%": { opacity: "0" },
             "100%": { opacity: "0" },
+        },
+        "rain": {
+            "0%": { backgroundPosition: "0% 0%" },
+            "100%": { backgroundPosition: "20% 100%" },
         }
       },
       animation: {
@@ -125,7 +130,8 @@ const config = {
         "float-slow": "float-slow 6s ease-in-out infinite",
         "mascot-idle": "mascot-idle 5s ease-in-out infinite",
         "pulse-slow": "pulse-slow 3s ease-in-out infinite",
-        "lightning-flash": "lightning-flash 4s infinite linear"
+        "lightning-flash": "lightning-flash 4s infinite linear",
+        "rain": "rain 0.6s linear infinite",
       },
     },
   },
@@ -134,4 +140,3 @@ const config = {
 
 export default config;
 
-    
