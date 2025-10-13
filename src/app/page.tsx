@@ -182,7 +182,7 @@ export default function Home() {
                   )}
                   style={{ transitionDelay: '600ms' }}
                 >
-                  We can’t fix your love life, but your meal plan? Done.
+                  Love might ditch you sometimes — I won’t.
                 </p>
               </div>
             </div>
