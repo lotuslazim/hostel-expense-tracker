@@ -228,22 +228,6 @@ export default function Home() {
                  </div>
              </div>
            </section>
-           
-            {/* Stormy Scene Section */}
-            <section className="relative py-24 md:py-32 bg-gray-900 overflow-hidden">
-                <div className="absolute inset-0 animate-lightning-flash bg-black/50 z-0"></div>
-                <div className="rain absolute inset-0 z-20"></div>
-
-                <div className="container relative z-10 flex flex-col items-center justify-center text-center">
-                    <div className="relative">
-                        <svg className="w-48 h-auto -mb-10 text-gray-400 drop-shadow-lg" viewBox="0 0 128 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M106.5 42.1667C118.5 37.1667 122.5 23.5 115.333 13.8333C108.167 4.16667 94.6667 2.16667 85.3333 9.83333C80.3333 4.16667 72 0.166667 63 0.166667C50.1667 0.166667 39.3333 9.16667 36.3333 21.1667C33.3333 19.5 30 18.5 26.5 18.5C16.8333 18.5 9 26.3333 9 36C9 36.3333 9.16667 36.6667 9.16667 37C4.16667 39.3333 0.833333 44.8333 1.83333 50.5C2.83333 56.1667 8 60.1667 13.8333 60.1667H102.5C114.333 60.1667 123.5 50.6667 123.5 39C123.5 31.5 118.167 25.1667 111.5 23.1667" fill="currentColor" stroke="black" strokeOpacity="0.2" strokeWidth="1"/>
-                        </svg>
-                        <Logo isMascotAnimated={true} mascotSize="large" className="animate-float-slow" />
-                    </div>
-                    <p className="mt-4 text-white/80 font-semibold text-lg">Even in the storm of shared living, BachelorBite keeps things calm.</p>
-                </div>
-            </section>
 
             {/* App Preview Section */}
             {appPreviewImage && (
@@ -319,5 +303,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
