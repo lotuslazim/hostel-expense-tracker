@@ -23,7 +23,7 @@ export function Logo({
     <div
       className={cn(
         "flex items-center gap-0 group",
-        isStacked ? "flex-col" : "",
+        isStacked ? "flex-col" : "gap-1.5",
         className
       )}
       aria-label="BachelorBite Home"
@@ -31,7 +31,7 @@ export function Logo({
       <div className={cn(
           "relative shrink-0 transition-transform duration-300 group-hover:scale-110",
           mascotSize === 'default' && (isStacked ? "w-20 h-12 mb-2" : "w-10 h-10"),
-          mascotSize === 'large' && 'w-16 h-16 md:w-20 md:h-20',
+          mascotSize === 'large' && 'w-24 h-24 md:w-28 md:h-28',
           isMascotAnimated && 'animate-mascot-idle'
         )}>
         <Image 
@@ -49,11 +49,11 @@ export function Logo({
            "text-primary-foreground group-[.dark-theme-logo]:text-white",
            isStacked ? "text-center" : "",
            textSize === 'default' && "text-2xl",
-           textSize === 'large' && "text-5xl",
+           textSize === 'large' && "text-5xl md:text-6xl",
         )}
       >
         <span className="text-white group-[.light-theme-logo]:text-foreground">Bachelor</span>
-        <span style={{ color: '#84B067' }}>Bite</span>
+        <span className="text-primary">Bite</span>
       </div>
     </div>
   );

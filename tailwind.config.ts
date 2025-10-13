@@ -19,9 +19,12 @@ const config = {
       },
     },
     extend: {
+      backgroundImage: {
+        'grid-white': "linear-gradient(to right, theme('colors.white / 5%') 1px, transparent 1px), linear-gradient(to bottom, theme('colors.white / 5%') 1px, transparent 1px)",
+      },
       fontFamily: {
-        body: ["var(--font-pt-sans)"],
-        headline: ["var(--font-playfair-display)"],
+        body: ["var(--font-poppins)", "sans-serif"],
+        headline: ["var(--font-playfair-display)", "serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -92,12 +95,13 @@ const config = {
           "50%": { transform: "translateY(-20px)" },
         },
         "mascot-idle": {
-          "0%, 100%": { transform: "translateY(0) scale(1)" },
-          "50%": { transform: "translateY(-5px) scale(1.02)" },
+          "0%, 100%": { transform: "translateY(0) rotate(0deg) scale(1)" },
+          "25%": { transform: "translateY(-5px) rotate(-3deg) scale(1.02)" },
+          "75%": { transform: "translateY(-2px) rotate(2deg) scale(1.01)" },
         },
         "pulse-slow": {
-          "0%, 100%": { transform: "scale(1)", boxShadow: "0 0 0 0 rgba(167, 222, 131, 0.3)" },
-          "70%": { transform: "scale(1.05)", boxShadow: "0 0 0 10px rgba(167, 222, 131, 0)" },
+          "0%, 100%": { transform: "scale(1)", boxShadow: "0 0 0 0 hsl(var(--primary) / 0.3)" },
+          "70%": { transform: "scale(1.05)", boxShadow: "0 0 0 10px hsl(var(--primary) / 0)" },
         }
       },
       animation: {
@@ -106,7 +110,7 @@ const config = {
         "fade-in-up": "fade-in-up 0.5s ease-out forwards",
         "logo-pulse": "logo-pulse 5s ease-in-out infinite",
         "float": "float 8s ease-in-out infinite",
-        "mascot-idle": "mascot-idle 4s ease-in-out infinite",
+        "mascot-idle": "mascot-idle 5s ease-in-out infinite",
         "pulse-slow": "pulse-slow 3s ease-in-out infinite",
       },
     },
