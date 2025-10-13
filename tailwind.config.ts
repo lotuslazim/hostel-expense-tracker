@@ -108,12 +108,15 @@ const config = {
           "70%": { transform: "scale(1.05)", boxShadow: "0 0 0 10px hsl(var(--primary) / 0)" },
         },
         "lightning-flash": {
-            "0%": { opacity: "0" },
-            "50%": { opacity: "1" },
-            "51%": { opacity: "0.2" },
-            "53%": { opacity: "0.6" },
-            "55%": { opacity: "0" },
-            "100%": { opacity: "0" },
+          "0%, 100%": { opacity: "0" },
+          "5%": { opacity: "0" },
+          "6%": { opacity: "1" },
+          "7%": { opacity: "0" },
+          "8%": { opacity: "1" },
+          "9%": { opacity: "0" },
+          "20%": { opacity: "0" },
+          "21%": { opacity: "1" },
+          "22%": { opacity: "0" },
         },
         "rain": {
             "0%": { backgroundPosition: "0% 0%" },
@@ -138,3 +141,5 @@ const config = {
 } satisfies Config
 
 export default config;
+
+    
