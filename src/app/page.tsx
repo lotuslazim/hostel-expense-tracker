@@ -154,12 +154,12 @@ export default function Home() {
                 </h1>
                 <p
                   className={cn(
-                    "text-lg md:text-xl text-muted-foreground mt-4 transition-all duration-700 ease-out",
+                    "text-2xl mt-4 transition-all duration-700 ease-out",
                     heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
                   )}
                   style={{ transitionDelay: '400ms' }}
                 >
-                  We can’t fix your love life, but your meal plan? Done.
+                  😉
                 </p>
               </div>
 
@@ -175,6 +175,15 @@ export default function Home() {
                     Your Move. <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
+                 <p
+                  className={cn(
+                    "text-lg md:text-xl text-muted-foreground mt-4 transition-all duration-700 ease-out",
+                    heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+                  )}
+                  style={{ transitionDelay: '600ms' }}
+                >
+                  We can’t fix your love life, but your meal plan? Done.
+                </p>
               </div>
             </div>
           </section>
