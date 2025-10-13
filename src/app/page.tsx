@@ -126,7 +126,7 @@ export default function Home() {
             <div className="container relative p-4 space-y-4 max-w-3xl mx-auto flex flex-col items-center">
                <p
                 className={cn(
-                  "text-lg text-white/80 mb-2 transition-all duration-700 ease-out",
+                  "text-lg text-white/80 mb-4 transition-all duration-700 ease-out",
                   heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
                 )}
                 style={{ transitionDelay: '200ms' }}
@@ -320,4 +320,3 @@ export default function Home() {
     </div>
   );
 }
-
