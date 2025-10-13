@@ -76,28 +76,6 @@ const config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
-        "fade-in-up": {
-          "0%": {
-            opacity: "0",
-            transform: "translateY(20px)",
-          },
-          "100%": {
-            opacity: "1",
-            transform: "translateY(0)",
-          },
-        },
-        "logo-pulse": {
-          "0%, 100%": { transform: "scale(1)" },
-          "50%": { transform: "scale(1.03)" },
-        },
-        "float": {
-          "0%, 100%": { transform: "translateY(0)" },
-          "50%": { transform: "translateY(-20px)" },
-        },
-        "float-slow": {
-            "0%, 100%": { transform: "translateY(0)" },
-            "50%": { transform: "translateY(-10px)" },
-        },
         "mascot-idle": {
           "0%, 100%": { transform: "translateY(0) rotate(0deg) scale(1)" },
           "25%": { transform: "translateY(-5px) rotate(-3deg) scale(1.02)" },
@@ -126,10 +104,6 @@ const config = {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "fade-in-up": "fade-in-up 0.5s ease-out forwards",
-        "logo-pulse": "logo-pulse 5s ease-in-out infinite",
-        "float": "float 8s ease-in-out infinite",
-        "float-slow": "float-slow 6s ease-in-out infinite",
         "mascot-idle": "mascot-idle 5s ease-in-out infinite",
         "pulse-slow": "pulse-slow 3s ease-in-out infinite",
         "lightning-flash": "lightning-flash 4s infinite linear",
@@ -142,4 +116,3 @@ const config = {
 
 export default config;
 
-    
