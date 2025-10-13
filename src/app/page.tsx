@@ -53,11 +53,11 @@ const FeatureCard = ({ icon, title, description, imageSrc }: { icon: React.React
 const StepCard = ({ number, title, description, delay }: { number: string, title: string, description: string, delay: string }) => {
   const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.2 });
   return (
-     <div
+    <div
       ref={ref}
       className={cn(
-        "flex items-start gap-4 transition-all duration-700 ease-out",
-        inView ? "opacity-100 translate-x-0" : "opacity-0 translate-x-10"
+        "flex flex-col items-center text-center gap-4 transition-all duration-700 ease-out",
+        inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
       )}
       style={{ transitionDelay: delay }}
     >
@@ -69,8 +69,8 @@ const StepCard = ({ number, title, description, delay }: { number: string, title
         <p className="text-muted-foreground mt-1">{description}</p>
       </div>
     </div>
-  )
-}
+  );
+};
 
 
 export default function Home() {
@@ -220,10 +220,9 @@ export default function Home() {
 
            {/* How It Works Section */}
            <section ref={howRef} className="py-24 md:py-32 bg-[#142317]">
-             <div className="container max-w-3xl mx-auto text-center">
+             <div className="container max-w-4xl mx-auto text-center">
                  <h2 className="text-3xl md:text-4xl font-bold font-headline text-white mb-12">How It Works</h2>
-                 <div className="space-y-12 relative">
-                    <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-primary/20 -translate-x-1/2 hidden md:block"></div>
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
                     <StepCard number="1" title="Create or Join a Group" description="Start a new household or join your roommates using a simple invite code." delay="100ms" />
                     <StepCard number="2" title="Log Meals & Expenses" description="Just a few seconds a day to log meals and shared expenses you’ve paid." delay="200ms" />
                     <StepCard number="3" title="Settle Up" description="End of the month, get a clean breakdown of who owes what — no more awkward math." delay="300ms" />
@@ -305,6 +304,3 @@ export default function Home() {
     </div>
   );
 }
-
-
-    
