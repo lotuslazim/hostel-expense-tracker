@@ -65,6 +65,15 @@ export default function Home() {
             <FloatingIcon className="top-[50%] left-[15%]" animationDelay="1s">🏠</FloatingIcon>
 
             <div className="container relative p-4 space-y-6 max-w-4xl mx-auto flex flex-col items-center">
+              <p
+                className={cn(
+                  "text-lg text-muted-foreground transition-all duration-700 ease-out",
+                  heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+                )}
+                style={{ transitionDelay: '200ms' }}
+              >
+                The smart roommate manager for bachelors, hostels, and shared flats.
+              </p>
               <div
                 className={cn(
                   "relative transition-all duration-700 ease-out mb-4",
@@ -75,15 +84,6 @@ export default function Home() {
                   <Logo isMascotAnimated={true} mascotSize="large" isStacked={true} textSize="large" />
               </div>
               <div className="relative [text-shadow:_0_4px_30px_rgba(0,0,0,0.5)]">
-                 <p
-                  className={cn(
-                    "text-lg text-muted-foreground transition-all duration-700 ease-out",
-                     heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-                  )}
-                  style={{ transitionDelay: '200ms' }}
-                 >
-                   The smart roommate manager for bachelors, hostels, and shared flats.
-                 </p>
                 <h1
                   className={cn(
                     "text-4xl md:text-5xl font-bold font-headline text-white mt-2 transition-all duration-700 ease-out",
