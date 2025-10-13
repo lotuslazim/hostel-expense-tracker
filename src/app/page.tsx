@@ -135,7 +135,7 @@ export default function Home() {
               </div>
               <p
                 className={cn(
-                  "text-lg text-white/80 transition-all duration-700 ease-out",
+                  "text-base text-white/80 transition-all duration-700 ease-out",
                   heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
                 )}
                 style={{ transitionDelay: '200ms' }}
@@ -303,6 +303,3 @@ export default function Home() {
     </div>
   );
 }
-
-
-    
