@@ -84,20 +84,11 @@ const config = {
           "0%, 100%": { transform: "scale(1)", boxShadow: "0 0 0 0 hsl(var(--primary) / 0.3)" },
           "70%": { transform: "scale(1.05)", boxShadow: "0 0 0 10px hsl(var(--primary) / 0)" },
         },
-        "lightning-flash": {
-          "0%, 100%": { opacity: "0" },
-          "5%": { opacity: "0" },
-          "6%": { opacity: "1" },
-          "7%": { opacity: "0" },
-          "8%": { opacity: "1" },
-          "9%": { opacity: "0" },
-          "20%": { opacity: "0" },
-          "21%": { opacity: "1" },
-          "22%": { opacity: "0" },
-        },
-        "rain": {
-            "0%": { backgroundPosition: "0% 0%" },
-            "100%": { backgroundPosition: "20% 100%" },
+        "mascot-idle": {
+          "0%, 100%": { transform: "translateY(0) rotate(0deg) scale(1)" },
+          "25%": { transform: "translateY(-2px) rotate(-1deg) scale(1.01)" },
+          "50%": { transform: "translateY(0) rotate(0deg) scale(1)" },
+          "75%": { transform: "translateY(-2px) rotate(1deg) scale(1.01)" }
         }
       },
       animation: {
@@ -105,8 +96,7 @@ const config = {
         "accordion-up": "accordion-up 0.2s ease-out",
         "float": "float 6s ease-in-out infinite",
         "pulse-slow": "pulse-slow 3s ease-in-out infinite",
-        "lightning-flash": "lightning-flash 4s infinite linear",
-        "rain": "rain 0.6s linear infinite",
+        "mascot-idle": "mascot-idle 5s ease-in-out infinite",
       },
     },
   },
