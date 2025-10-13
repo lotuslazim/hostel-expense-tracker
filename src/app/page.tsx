@@ -111,6 +111,14 @@ export default function Home() {
           >
              <div className="absolute inset-0 bg-grid-white/[0.05]"></div>
 
+             {/* Floating Icons */}
+            <FloatingIcon className="top-[10%] left-[5%]" animationDelay="0s"><Utensils /></FloatingIcon>
+            <FloatingIcon className="top-[20%] right-[10%]" animationDelay="1s"><IndianRupee /></FloatingIcon>
+            <FloatingIcon className="bottom-[25%] left-[15%]" animationDelay="2s"><CheckCircle /></FloatingIcon>
+            <FloatingIcon className="bottom-[10%] right-[20%]" animationDelay="3s"><MessageSquare /></FloatingIcon>
+            <FloatingIcon className="top-[50%] left-[25%]" animationDelay="4s"><Utensils /></FloatingIcon>
+            <FloatingIcon className="top-[60%] right-[30%]" animationDelay="5s"><IndianRupee /></FloatingIcon>
+
             <div className="container relative p-4 space-y-4 max-w-3xl mx-auto flex flex-col items-center">
               <div
                 className={cn(
@@ -119,7 +127,7 @@ export default function Home() {
                 )}
                 style={{ transitionDelay: '100ms'}}
               >
-                  <Logo isMascotAnimated={true} mascotSize="large" isStacked={true} textSize="large" />
+                  <Logo isMascotAnimated={false} mascotSize="large" isStacked={true} textSize="large" />
               </div>
               <p
                 className={cn(
@@ -292,3 +300,4 @@ export default function Home() {
   );
 }
 
+    

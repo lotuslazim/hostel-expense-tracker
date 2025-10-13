@@ -76,10 +76,9 @@ const config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
-        "mascot-idle": {
-          "0%, 100%": { transform: "translateY(0) rotate(0deg) scale(1)" },
-          "25%": { transform: "translateY(-5px) rotate(-3deg) scale(1.02)" },
-          "75%": { transform: "translateY(-2px) rotate(2deg) scale(1.01)" },
+        "float": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-20px)" },
         },
         "pulse-slow": {
           "0%, 100%": { transform: "scale(1)", boxShadow: "0 0 0 0 hsl(var(--primary) / 0.3)" },
@@ -104,7 +103,7 @@ const config = {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "mascot-idle": "mascot-idle 5s ease-in-out infinite",
+        "float": "float 6s ease-in-out infinite",
         "pulse-slow": "pulse-slow 3s ease-in-out infinite",
         "lightning-flash": "lightning-flash 4s infinite linear",
         "rain": "rain 0.6s linear infinite",
@@ -116,3 +115,4 @@ const config = {
 
 export default config;
 
+    
