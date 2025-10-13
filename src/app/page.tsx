@@ -18,7 +18,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 const FloatingIcon = ({ children, className, animationDelay }: { children: React.ReactNode, className?: string, animationDelay?: string }) => (
   <div
     className={cn(
-        "absolute text-5xl text-white/10 blur-sm animate-float",
+        "absolute text-5xl text-white/20 blur-sm animate-float",
         className
     )}
     style={{ animationDelay }}
@@ -112,14 +112,17 @@ export default function Home() {
              <div className="absolute inset-0 bg-grid-white/[0.05]"></div>
 
             {/* Floating Icons */}
-            <FloatingIcon className="top-[10%] left-[5%]">🍛</FloatingIcon>
-            <FloatingIcon className="top-[20%] right-[10%]" animationDelay="2s">🍴</FloatingIcon>
-            <FloatingIcon className="bottom-[15%] left-[20%]" animationDelay="4s">📝</FloatingIcon>
-            <FloatingIcon className="bottom-[10%] right-[25%]" animationDelay="6s">💰</FloatingIcon>
-            <FloatingIcon className="top-[50%] left-[15%]" animationDelay="1s">🏠</FloatingIcon>
-            <FloatingIcon className="top-[70%] left-[10%] text-6xl" animationDelay="3s">🥣</FloatingIcon>
-            <FloatingIcon className="top-[80%] right-[15%]" animationDelay="5s">🛍️</FloatingIcon>
-            <FloatingIcon className="top-[35%] left-[30%]" animationDelay="7s">🤝</FloatingIcon>
+            <FloatingIcon className="top-[10%] left-[5%] text-6xl">🍛</FloatingIcon>
+            <FloatingIcon className="top-[15%] right-[10%]" animationDelay="2s">🍴</FloatingIcon>
+            <FloatingIcon className="top-[30%] left-[15%]" animationDelay="1.5s">📝</FloatingIcon>
+            <FloatingIcon className="top-[35%] right-[20%]" animationDelay="3.5s">💰</FloatingIcon>
+            <FloatingIcon className="top-[50%] left-[10%]" animationDelay="1s">🏠</FloatingIcon>
+            <FloatingIcon className="top-[60%] right-[15%] text-6xl" animationDelay="4s">🥣</FloatingIcon>
+            <FloatingIcon className="bottom-[10%] left-[5%]" animationDelay="5s">🛍️</FloatingIcon>
+            <FloatingIcon className="bottom-[15%] right-[5%] text-6xl" animationDelay="2.5s">🪙</FloatingIcon>
+            <FloatingIcon className="bottom-[30%] left-[25%]" animationDelay="6s">💵</FloatingIcon>
+            <FloatingIcon className="bottom-[40%] right-[25%]" animationDelay="0.5s">💸</FloatingIcon>
+
 
             <div className="container relative p-4 space-y-4 max-w-3xl mx-auto flex flex-col items-center">
                <p
