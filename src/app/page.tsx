@@ -18,7 +18,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 const FloatingIcon = ({ children, className, animationDelay }: { children: React.ReactNode, className?: string, animationDelay?: string }) => (
   <div
     className={cn(
-        "absolute text-5xl text-white/20 blur-sm animate-float",
+        "absolute text-5xl text-white/20 animate-float",
         className
     )}
     style={{ animationDelay }}
@@ -112,12 +112,12 @@ export default function Home() {
              <div className="absolute inset-0 bg-grid-white/[0.05]"></div>
 
              {/* Floating Icons */}
-            <FloatingIcon className="top-[10%] left-[5%]" animationDelay="0s"><Utensils /></FloatingIcon>
-            <FloatingIcon className="top-[20%] right-[10%]" animationDelay="1s"><IndianRupee /></FloatingIcon>
-            <FloatingIcon className="bottom-[25%] left-[15%]" animationDelay="2s"><CheckCircle /></FloatingIcon>
-            <FloatingIcon className="bottom-[10%] right-[20%]" animationDelay="3s"><MessageSquare /></FloatingIcon>
-            <FloatingIcon className="top-[50%] left-[25%]" animationDelay="4s"><Utensils /></FloatingIcon>
-            <FloatingIcon className="top-[60%] right-[30%]" animationDelay="5s"><IndianRupee /></FloatingIcon>
+            <FloatingIcon className="top-[10%] left-[5%]" animationDelay="0s">🍛</FloatingIcon>
+            <FloatingIcon className="top-[20%] right-[10%]" animationDelay="1s">💰</FloatingIcon>
+            <FloatingIcon className="bottom-[25%] left-[15%]" animationDelay="2s">📝</FloatingIcon>
+            <FloatingIcon className="bottom-[10%] right-[20%]" animationDelay="3s">🍴</FloatingIcon>
+            <FloatingIcon className="top-[50%] left-[25%]" animationDelay="4s">🍛</FloatingIcon>
+            <FloatingIcon className="top-[60%] right-[30%]" animationDelay="5s">💰</FloatingIcon>
 
             <div className="container relative p-4 space-y-4 max-w-3xl mx-auto flex flex-col items-center">
               <div
@@ -299,5 +299,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
