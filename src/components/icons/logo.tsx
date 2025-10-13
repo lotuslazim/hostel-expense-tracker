@@ -22,7 +22,7 @@ export function Logo({
   return (
     <div
       className={cn(
-        "flex items-center gap-2 group",
+        "flex items-center gap-0 group",
         isStacked ? "flex-col" : "",
         className
       )}
