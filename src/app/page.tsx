@@ -150,7 +150,7 @@ export default function Home() {
                   )}
                   style={{ transitionDelay: '300ms' }}
                 >
-                  Here to make your messy life easier — because someone has to. 😌
+                  Here to make your bachelor life easier — because someone has to. 😌
                 </h1>
               </div>
 
@@ -303,3 +303,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
