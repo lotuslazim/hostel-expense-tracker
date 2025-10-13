@@ -150,7 +150,7 @@ export default function Home() {
                   )}
                   style={{ transitionDelay: '300ms' }}
                 >
-                  BachelorBite won’t cook for you, but it’ll make your messy life easier.
+                  Here to make your messy life easier — because someone has to. 😌
                 </h1>
                 <p
                   className={cn(
