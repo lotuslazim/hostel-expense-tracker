@@ -152,15 +152,6 @@ export default function Home() {
                 >
                   Here to make your messy life easier — because someone has to. 😌
                 </h1>
-                <p
-                  className={cn(
-                    "text-2xl mt-4 transition-all duration-700 ease-out",
-                    heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-                  )}
-                  style={{ transitionDelay: '400ms' }}
-                >
-                  😉
-                </p>
               </div>
 
               <div
