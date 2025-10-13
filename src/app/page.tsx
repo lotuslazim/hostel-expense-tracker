@@ -126,7 +126,7 @@ export default function Home() {
             <div className="container relative p-4 space-y-4 max-w-3xl mx-auto flex flex-col items-center">
                <p
                 className={cn(
-                  "text-lg text-white/80 mb-4 transition-all duration-700 ease-out",
+                  "text-lg text-white/80 transition-all duration-700 ease-out",
                   heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
                 )}
                 style={{ transitionDelay: '200ms' }}
@@ -232,8 +232,14 @@ export default function Home() {
             {/* Stormy Scene Section */}
             <section className="relative py-24 md:py-32 bg-gray-900 overflow-hidden">
                 <div className="absolute inset-0 bg-black/50 z-0"></div>
-                <div className="absolute inset-0 animate-lightning-flash z-10"></div>
-                 <div className="absolute inset-0 animate-rain z-20"></div>
+                <div className="absolute inset-0 animate-lightning-flash z-10 opacity-30"></div>
+                <div 
+                    className="absolute inset-0 z-20 animate-rain"
+                    style={{
+                        backgroundSize: '300px 300px',
+                        backgroundImage: 'linear-gradient(0deg, transparent 50%, rgba(255, 255, 255, 0.1) 50%)',
+                    }}
+                ></div>
 
                 <div className="container relative z-20 flex flex-col items-center justify-center text-center">
                     <div className="relative">

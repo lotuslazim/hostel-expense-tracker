@@ -21,7 +21,6 @@ const config = {
     extend: {
       backgroundImage: {
         'grid-white': "linear-gradient(to right, theme('colors.white / 5%') 1px, transparent 1px), linear-gradient(to bottom, theme('colors.white / 5%') 1px, transparent 1px)",
-        'rain': 'linear-gradient(transparent, rgba(255,255,255,0.1) 40%, rgba(255,255,255,0.1) 60%, transparent)',
       },
       fontFamily: {
         body: ["var(--font-poppins)", "sans-serif"],
@@ -110,10 +109,10 @@ const config = {
         },
         "lightning-flash": {
             "0%": { opacity: "0" },
-            "50%": { opacity: "0.3" },
-            "52%": { opacity: "0.1" },
-            "55%": { opacity: "0.5" },
-            "56%": { opacity: "0" },
+            "50%": { opacity: "1" },
+            "51%": { opacity: "0.2" },
+            "53%": { opacity: "0.6" },
+            "55%": { opacity: "0" },
             "100%": { opacity: "0" },
         },
         "rain": {
@@ -139,4 +138,3 @@ const config = {
 } satisfies Config
 
 export default config;
-
