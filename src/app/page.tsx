@@ -64,10 +64,10 @@ export default function Home() {
             <FloatingIcon className="bottom-[10%] right-[25%]" animationDelay="6s">💰</FloatingIcon>
             <FloatingIcon className="top-[50%] left-[15%]" animationDelay="1s">🏠</FloatingIcon>
 
-            <div className="container relative p-4 space-y-6 max-w-4xl mx-auto flex flex-col items-center">
-              <p
+            <div className="container relative p-4 space-y-4 max-w-3xl mx-auto flex flex-col items-center">
+               <p
                 className={cn(
-                  "text-lg text-muted-foreground transition-all duration-700 ease-out",
+                  "text-lg text-primary mb-2 transition-all duration-700 ease-out",
                   heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
                 )}
                 style={{ transitionDelay: '200ms' }}
@@ -76,7 +76,7 @@ export default function Home() {
               </p>
               <div
                 className={cn(
-                  "relative transition-all duration-700 ease-out mb-4",
+                  "relative transition-all duration-700 ease-out",
                   heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
                 )}
                 style={{ transitionDelay: '100ms'}}
