@@ -41,7 +41,7 @@ export function DateCard({ date, setDate }: DateCardProps) {
     const isNextButtonDisabled = isToday(date) || isDateInFuture;
 
     return (
-        <Card className={cn("bg-[#C8E6C9] dark:bg-green-900/20")}>
+        <Card>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base"><CalendarDays /> Selected Date</CardTitle>
             </CardHeader>
