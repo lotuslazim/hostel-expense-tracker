@@ -81,8 +81,8 @@ const config = {
           "50%": { transform: "translateY(-20px)" },
         },
         "pulse-slow": {
-          "0%, 100%": { transform: "scale(1)", boxShadow: "0 0 0 0 hsl(var(--primary) / 0.3)" },
-          "70%": { transform: "scale(1.05)", boxShadow: "0 0 0 10px hsl(var(--primary) / 0)" },
+          "0%, 100%": { transform: "scale(1)", boxShadow: "0 0 0 0 rgba(124, 203, 120, 0.3)" },
+          "70%": { transform: "scale(1.05)", boxShadow: "0 0 0 10px rgba(124, 203, 120, 0)" },
         },
         "mascot-idle": {
           "0%, 100%": { transform: "translateY(0) rotate(0deg) scale(1)" },
@@ -104,5 +104,3 @@ const config = {
 } satisfies Config
 
 export default config;
-
-    
