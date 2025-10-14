@@ -112,17 +112,17 @@ export default function Home() {
              <div className="absolute inset-0 bg-grid-white/[0.05]"></div>
 
              {/* Floating Icons */}
-            <FloatingIcon className="top-[10%] left-[5%]" animationDelay="0s">🍛</FloatingIcon>
-            <FloatingIcon className="top-[20%] right-[10%]" animationDelay="1s">💰</FloatingIcon>
-            <FloatingIcon className="bottom-[25%] left-[15%]" animationDelay="2s">📝</FloatingIcon>
-            <FloatingIcon className="bottom-[10%] right-[20%]" animationDelay="3s">🍴</FloatingIcon>
-            <FloatingIcon className="top-[50%] left-[25%]" animationDelay="4s">🍛</FloatingIcon>
-            <FloatingIcon className="top-[60%] right-[30%]" animationDelay="5s">💰</FloatingIcon>
+            <FloatingIcon className="top-[10%] left-[5%] opacity-10" animationDelay="0s">🍛</FloatingIcon>
+            <FloatingIcon className="top-[20%] right-[10%] opacity-10" animationDelay="1s">💰</FloatingIcon>
+            <FloatingIcon className="bottom-[25%] left-[15%] opacity-10" animationDelay="2s">📝</FloatingIcon>
+            <FloatingIcon className="bottom-[10%] right-[20%] opacity-10" animationDelay="3s">🍴</FloatingIcon>
+            <FloatingIcon className="top-[50%] left-[25%] opacity-10" animationDelay="4s">🍛</FloatingIcon>
+            <FloatingIcon className="top-[60%] right-[30%] opacity-10" animationDelay="5s">💰</FloatingIcon>
 
             <div className="container relative p-4 space-y-4 max-w-3xl mx-auto flex flex-col items-center">
               <div
                 className={cn(
-                  "relative transition-all duration-700 ease-out",
+                  "relative transition-all duration-700 ease-out [filter:drop-shadow(0_4px_8px_rgba(0,0,0,0.5))]",
                   heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
                 )}
                 style={{ transitionDelay: '100ms'}}
@@ -299,6 +299,5 @@ export default function Home() {
     </div>
   );
 }
-
 
     
