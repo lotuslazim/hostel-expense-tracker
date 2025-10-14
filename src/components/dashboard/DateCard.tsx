@@ -11,6 +11,7 @@ import { subDays } from 'date-fns/subDays';
 import { isToday } from 'date-fns/isToday';
 import dynamic from 'next/dynamic';
 import { Skeleton } from "../ui/skeleton";
+import { cn } from "@/lib/utils";
 
 const Calendar = dynamic(() => import('@/components/ui/calendar').then(mod => mod.Calendar), {
     ssr: false,
@@ -40,7 +41,7 @@ export function DateCard({ date, setDate }: DateCardProps) {
     const isNextButtonDisabled = isToday(date) || isDateInFuture;
 
     return (
-        <Card>
+        <Card className={cn("bg-[#C8E6C9] dark:bg-green-900/20")}>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base"><CalendarDays /> Selected Date</CardTitle>
             </CardHeader>
