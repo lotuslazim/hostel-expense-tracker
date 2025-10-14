@@ -141,7 +141,7 @@ export default function Home() {
               <div className="relative [text-shadow:_0_4px_30px_rgba(0,0,0,0.5)]">
                 <h1
                   className={cn(
-                    "text-4xl md:text-5xl font-bold font-headline text-white mt-2 transition-all duration-700 ease-out",
+                    "text-3xl md:text-4xl font-bold font-headline text-white mt-4 transition-all duration-700 ease-out",
                     heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
                   )}
                   style={{ transitionDelay: '300ms' }}
@@ -299,3 +299,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
