@@ -9,7 +9,7 @@
   :root {
     --background: 210 40% 98%;
     --foreground: 222.2 84% 4.9%;
-    --card: 122 47% 85%; /* #C8E6C9 */
+    --card: 210 40% 100%; /* Lighter card background */
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
