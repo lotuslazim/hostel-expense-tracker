@@ -127,7 +127,7 @@ export default function Home() {
                 )}
                 style={{ transitionDelay: '100ms'}}
               >
-                  <Logo isMascotAnimated={false} mascotSize="large" isStacked={true} textSize="large" />
+                  <Logo isMascotAnimated={true} mascotSize="large" isStacked={true} textSize="large" />
               </div>
               <p
                 className={cn(
@@ -299,5 +299,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
