@@ -251,14 +251,14 @@ export default function Home() {
             <section ref={ctaRef} className="py-24 md:py-32 bg-mint-500 text-center">
                 <div className="container max-w-2xl mx-auto">
                     <h3 className={cn(
-                        "text-3xl md:text-4xl font-bold font-headline text-slate-800 transition-all duration-700 ease-out",
+                        "text-3xl md:text-4xl font-bold font-headline text-slate-900 transition-all duration-700 ease-out",
                         ctaInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
                         )}
                     >
-                        Ready to end the chaos?
+                        Ready to end the chaos? 🍳
                     </h3>
                     <p className={cn(
-                        "text-lg text-slate-600 mt-4 transition-all duration-700 ease-out",
+                        "text-lg text-slate-700 mt-4 mb-8 transition-all duration-700 ease-out",
                         ctaInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
                         )} style={{ transitionDelay: '200ms' }}
                     >
@@ -271,16 +271,17 @@ export default function Home() {
                         )}
                         style={{ transitionDelay: '400ms' }}
                     >
-                        <Button asChild size="lg" className="bg-slate-900 text-white font-bold text-lg px-8 py-6 rounded-full transition-all duration-300 ease-in-out hover:scale-105 hover:bg-slate-800 hover:shadow-lg">
+                        <Button asChild size="lg" className="bg-slate-900 text-white font-bold text-lg px-8 py-6 rounded-full transition-all duration-300 ease-in-out hover:scale-105 hover:bg-slate-800 hover:shadow-lg hover:shadow-slate-900/40">
                         <Link href="/signup">
                             Sign Up for Free <ArrowRight className="ml-2 h-5 w-5" />
                         </Link>
                         </Button>
                     </div>
                      <div className="mt-16 text-slate-600">
-                        <p className="font-semibold text-xl">Skip the heartbreaks, count the meals. ❤️🍛</p>
-                        <p className="mt-4 text-sm">
-                            📩 Contact: <a href="mailto:lotuslazim@gmail.com" className="underline hover:text-slate-800">lotuslazim@gmail.com</a>
+                        <p className="font-semibold text-lg text-slate-700">Skip the heartbreaks, count the meals. ❤️🍛</p>
+                         <hr className="w-1/2 mx-auto my-6 opacity-20 border-slate-700" />
+                        <p className="text-sm">
+                            📧 Contact: <a href="mailto:lotuslazim@gmail.com" className="underline hover:text-slate-900">lotuslazim@gmail.com</a>
                         </p>
                     </div>
                 </div>
@@ -300,4 +301,3 @@ export default function Home() {
   );
 }
 
-    
