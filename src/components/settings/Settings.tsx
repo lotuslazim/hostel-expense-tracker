@@ -192,7 +192,7 @@ function AdminControls({ groupData, members, groupId }: { groupData: any, member
 
 
   return (
-    <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+    <div className="grid grid-cols-1 gap-8 md:grid-cols-3 items-start">
         <div className="md:col-span-1">
           <h2 className="text-xl font-bold flex items-center gap-2"><Shield /> {t('settings.admin_controls.title')}</h2>
           <p className="text-muted-foreground">{t('settings.admin_controls.admin_responsibility.description')}</p>
@@ -353,7 +353,7 @@ function AccountSettings({ user, userData, groupData, groupId }: { user: any, us
     };
 
     return (
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-3 items-start">
           <div className="md:col-span-1">
             <h2 className="text-xl font-bold flex items-center gap-2"><User />{t('settings.account_settings.title')}</h2>
             <p className="text-muted-foreground">Manage your group and account actions.</p>
@@ -440,7 +440,7 @@ function AppSettings() {
     const { t, lang, setLang } = useI18n();
 
     return (
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-3 items-start">
           <div className="md:col-span-1">
             <h2 className="text-xl font-bold flex items-center gap-2"><SettingsIcon /> {t('settings.app_settings.title')}</h2>
             <p className="text-muted-foreground">Customize the application's look and feel.</p>
@@ -543,5 +543,3 @@ export function Settings() {
     </div>
   );
 }
-
-    
