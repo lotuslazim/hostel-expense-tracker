@@ -86,10 +86,9 @@ export function SignupForm() {
         description: "You've successfully signed up with Google.",
       });
       
-      // The redirect is now handled by the onAuthStateChanged listener
-      // and the effect on the home page.
+      router.push('/dashboard');
 
-    } catch (error: any) {
+    } catch (error: any) => {
       if (error.code === 'auth/popup-closed-by-user') {
         setIsGoogleLoading(false);
         return;
