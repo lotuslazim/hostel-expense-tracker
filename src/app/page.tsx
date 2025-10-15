@@ -133,12 +133,12 @@ export default function Home() {
             <div className="absolute inset-0 bg-grid-white/[0.05]"></div>
 
             {/* Floating Icons */}
-          <FloatingIcon className="top-[10%] left-[5%] text-white/10" animationDelay="0s">🍛</FloatingIcon>
-          <FloatingIcon className="top-[20%] right-[10%] text-white/10" animationDelay="1s">💰</FloatingIcon>
-          <FloatingIcon className="bottom-[25%] left-[15%] text-white/10" animationDelay="2s">📝</FloatingIcon>
-          <FloatingIcon className="bottom-[10%] right-[20%] text-white/10" animationDelay="3s">🍴</FloatingIcon>
-          <FloatingIcon className="top-[50%] left-[25%] text-white/10" animationDelay="4s">🍛</FloatingIcon>
-          <FloatingIcon className="top-[60%] right-[30%] text-white/10" animationDelay="5s">💰</FloatingIcon>
+          <FloatingIcon className="top-[10%] left-[5%] text-white/30" animationDelay="0s">🍛</FloatingIcon>
+          <FloatingIcon className="top-[20%] right-[10%] text-white/30" animationDelay="1s">💰</FloatingIcon>
+          <FloatingIcon className="bottom-[25%] left-[15%] text-white/30" animationDelay="2s">📝</FloatingIcon>
+          <FloatingIcon className="bottom-[10%] right-[20%] text-white/30" animationDelay="3s">🍴</FloatingIcon>
+          <FloatingIcon className="top-[50%] left-[25%] text-white/30" animationDelay="4s">🍛</FloatingIcon>
+          <FloatingIcon className="top-[60%] right-[30%] text-white/30" animationDelay="5s">💰</FloatingIcon>
 
           <div className="container relative p-4 space-y-4 max-w-3xl mx-auto flex flex-col items-center">
             <div
