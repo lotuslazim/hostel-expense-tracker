@@ -311,8 +311,10 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
         const purchaseIds: string[] = [];
         // Handle purchased items if they exist
         if (values.category === 'Food & Groceries' && values.purchasedItems) {
+            const batch = writeBatch(firestore);
             for (const item of values.purchasedItems) {
                 const masterItemId = await findMasterItemId(item.name);
+                const purchaseRef = doc(collection(firestore, `groups/${groupId}/purchases`)); // Auto-generate ID
                 const purchaseData = sanitizeFirestoreData({
                     itemId: masterItemId,
                     itemName: item.name,
@@ -325,9 +327,10 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                     userName: currentUser.displayName || currentUser.email?.split('@')[0],
                     groupId,
                 });
-                const purchaseRef = await addDoc(collection(firestore, `groups/${groupId}/purchases`), purchaseData);
+                batch.set(purchaseRef, purchaseData);
                 purchaseIds.push(purchaseRef.id);
             }
+            await batch.commit();
         }
         
         toast({
