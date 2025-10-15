@@ -94,8 +94,9 @@ export default function Home() {
 
   if (isUserLoading || user) { // Keep showing loading screen until not loading AND user is null
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-[#0f2027] via-[#203a43] to-[#2c5364] text-white p-4">
-        <div className="text-center space-y-6">
+      <div className="relative min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-[#0f2027] via-[#203a43] to-[#2c5364] text-white p-4 overflow-hidden">
+        <div className="absolute inset-0 bg-grid-white/[0.05]"></div>
+        <div className="relative text-center space-y-6">
             <p className="text-2xl md:text-3xl font-medium animate-fade-in-scale [animation-delay:200ms]">
                 Take a breath. 🌿
             </p>
@@ -108,6 +109,9 @@ export default function Home() {
                 <span className="h-2.5 w-2.5 rounded-full bg-white/80 animate-loading-dot [animation-delay:0.2s]"></span>
                 <span className="h-2.5 w-2.5 rounded-full bg-white/80 animate-loading-dot [animation-delay:0.4s]"></span>
             </div>
+        </div>
+        <div className="absolute bottom-4 right-4 animate-fade-in-scale [animation-delay:1000ms]">
+          <Logo isMascotAnimated={true} mascotSize='default' className='opacity-50' />
         </div>
       </div>
     );
@@ -304,5 +308,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
