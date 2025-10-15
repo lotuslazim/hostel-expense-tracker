@@ -18,7 +18,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 const FloatingIcon = ({ children, className, animationDelay }: { children: React.ReactNode, className?: string, animationDelay?: string }) => (
   <div
     className={cn(
-        "absolute text-5xl text-white/20 animate-float",
+        "absolute text-5xl text-foreground/5 dark:text-white/10 animate-float",
         className
     )}
     style={{ animationDelay }}
@@ -94,26 +94,18 @@ export default function Home() {
 
   if (isUserLoading || user) { // Keep showing loading screen until not loading AND user is null
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#142317] gap-6 text-white overflow-hidden">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-6 text-foreground overflow-hidden">
         {/* Floating Icons */}
-        <FloatingIcon className="top-[15%] left-[10%] opacity-5" animationDelay="0s">🍛</FloatingIcon>
-        <FloatingIcon className="top-[30%] right-[15%] opacity-5" animationDelay="1s">💰</FloatingIcon>
-        <FloatingIcon className="bottom-[35%] left-[20%] opacity-5" animationDelay="2s">📝</FloatingIcon>
-        <FloatingIcon className="bottom-[15%] right-[25%] opacity-5" animationDelay="3s">🍴</FloatingIcon>
+        <FloatingIcon className="top-[15%] left-[10%]" animationDelay="0s">🍛</FloatingIcon>
+        <FloatingIcon className="top-[30%] right-[15%]" animationDelay="1s">💰</FloatingIcon>
+        <FloatingIcon className="bottom-[35%] left-[20%]" animationDelay="2s">📝</FloatingIcon>
+        <FloatingIcon className="bottom-[15%] right-[25%]" animationDelay="3s">🍴</FloatingIcon>
         
-        <div className="relative w-28 h-28 animate-mascot-idle">
-            <Image 
-                src="/logo.png" 
-                alt="BachelorBite Logo" 
-                fill
-                className="object-contain"
-                sizes="20vw"
-                priority
-            />
-        </div>
-        <div className="text-center space-y-2">
-            <p className="text-lg font-medium text-white/80">Organizing your bachelor life...</p>
-            <div className="flex items-center justify-center gap-1.5">
+        <div className="text-center space-y-4 z-10">
+            <p className="text-lg font-medium text-muted-foreground">Hi, how you doing?</p>
+            <p className="text-2xl md:text-3xl font-bold">I know you're doing your best.</p>
+            <div className="text-8xl animate-bounce-slow">👍</div>
+            <div className="flex items-center justify-center gap-1.5 pt-4">
                 <span className="h-2 w-2 rounded-full bg-primary animate-loading-dot [animation-delay:0.0s]"></span>
                 <span className="h-2 w-2 rounded-full bg-primary animate-loading-dot [animation-delay:0.1s]"></span>
                 <span className="h-2 w-2 rounded-full bg-primary animate-loading-dot [animation-delay:0.2s]"></span>
@@ -314,5 +306,3 @@ export default function Home() {
     </div>
   );
 }
-
-    

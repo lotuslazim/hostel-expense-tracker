@@ -94,6 +94,10 @@ const config = {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-4px)" },
         },
+        "bounce-slow": {
+          "0%, 100%": { transform: "translateY(-5%)", animationTimingFunction: "cubic-bezier(0.8, 0, 1, 1)" },
+          "50%": { transform: "translateY(0)", animationTimingFunction: "cubic-bezier(0, 0, 0.2, 1)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -102,6 +106,7 @@ const config = {
         "pulse-slow": "pulse-slow 3s ease-in-out infinite",
         "mascot-idle": "mascot-idle 5s ease-in-out infinite",
         "loading-dot": "loading-dot 1.2s cubic-bezier(0, 0.5, 0.5, 1) infinite",
+        "bounce-slow": "bounce-slow 1s infinite",
       },
     },
   },
@@ -109,5 +114,3 @@ const config = {
 } satisfies Config
 
 export default config;
-
-    
