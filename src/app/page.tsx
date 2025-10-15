@@ -3,7 +3,7 @@
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowRight, Utensils, IndianRupee, MessageSquare, CheckCircle } from "lucide-react";
+import { ArrowRight, Utensils, IndianRupee, Scale, CheckCircle } from "lucide-react";
 import { useUser } from "@/firebase";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -216,19 +216,19 @@ export default function Home() {
                     icon={<Utensils />} 
                     title="Daily Meal Logging"
                     description="Easily log who’s eating and when — so you only cook what you need."
-                    imageSrc={PlaceHolderImages.find(p => p.id === 'app-dashboard')?.imageUrl || ''}
+                    imageSrc={'/dashboard.jpg'}
                   />
                   <FeatureCard 
                     icon={<IndianRupee />} 
                     title="Expense Tracking"
                     description="Split bills for groceries, gas, and utilities. Upload receipts to keep things official."
-                    imageSrc={PlaceHolderImages.find(p => p.id === 'app-report')?.imageUrl || ''}
+                    imageSrc={'/addexpense.jpg'}
                   />
                   <FeatureCard 
-                    icon={<MessageSquare />} 
-                    title="Group Chat"
-                    description="Coordinate plans, share shopping lists, or just send memes. It all happens here."
-                    imageSrc={PlaceHolderImages.find(p => p.id === 'app-inventory')?.imageUrl || ''}
+                    icon={<Scale />} 
+                    title="Final Settlement"
+                    description="Get a clear breakdown of who owes what at the end of the month. No more math headaches."
+                    imageSrc={'/finalsettlement.jpg'}
                   />
                 </div>
             </div>
@@ -310,5 +310,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
