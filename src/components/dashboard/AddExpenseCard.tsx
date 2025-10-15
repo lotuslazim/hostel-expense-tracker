@@ -303,6 +303,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
             date: Timestamp.fromDate(selectedDate),
             createdAt: serverTimestamp(),
             groupId,
+            purchasedItems: values.category === 'Food & Groceries' ? values.purchasedItems : [],
         });
         
         const expenseRef = await addDoc(collection(firestore, `groups/${groupId}/expenses`), expenseData);

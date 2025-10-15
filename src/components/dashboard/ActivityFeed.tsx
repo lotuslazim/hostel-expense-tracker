@@ -8,7 +8,7 @@ import { ShoppingCart, Receipt } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import type { Expense } from "@/lib/types";
+import type { Expense, PurchasedItem } from "@/lib/types";
 import { MonthSwitcher } from "../report/month-switcher";
 import { Skeleton } from "../ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
@@ -23,14 +23,13 @@ interface ActivityFeedProps {
 
 const ExpenseItemsDisplay = ({ item }: { item: Expense }) => {
     const isFood = item.category === 'Food & Groceries';
-    const items = item.expenseItem?.split(',').map(s => s.trim());
-    const hasMultipleItems = isFood && items && items.length > 1;
+    const hasMultipleItems = isFood && item.purchasedItems && item.purchasedItems.length > 1;
 
     if (!hasMultipleItems) {
         return <>{item.expenseItem || "N/A"}</>;
     }
 
-    const truncatedItems = items.slice(0, 2).join(', ');
+    const truncatedItems = item.purchasedItems?.slice(0, 2).map(i => i.name).join(', ');
 
     return (
         <>
@@ -44,11 +43,24 @@ const ExpenseItemsDisplay = ({ item }: { item: Expense }) => {
                         <DialogTitle>All Items for Expense on {format((item.date as any).toDate(), "MMM d")}</DialogTitle>
                     </DialogHeader>
                     <div className="py-4">
-                        <ul className="list-disc list-inside space-y-2">
-                           {items.map((itemName, index) => (
-                               <li key={index}>{itemName}</li>
-                           ))}
-                        </ul>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Item</TableHead>
+                                    <TableHead>Quantity</TableHead>
+                                    <TableHead className="text-right">Cost</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                               {item.purchasedItems?.map((purchasedItem, index) => (
+                                   <TableRow key={index}>
+                                       <TableCell>{purchasedItem.name}</TableCell>
+                                       <TableCell>{purchasedItem.quantity} {purchasedItem.unit}</TableCell>
+                                       <TableCell className="text-right">৳{purchasedItem.cost.toFixed(2)}</TableCell>
+                                   </TableRow>
+                               ))}
+                            </TableBody>
+                        </Table>
                     </div>
                 </DialogContent>
             </Dialog>

@@ -17,6 +17,14 @@ export interface MealLog {
 
 export type ExpenseCategory = 'Food & Groceries' | 'Electricity' | 'Gas' | 'Other';
 
+export interface PurchasedItem {
+    name: string;
+    quantity: number;
+    unit: string;
+    cost: number;
+    itemId?: string;
+}
+
 export interface Expense {
   id: string;
   description?: string; // Kept for backward compatibility
@@ -29,6 +37,7 @@ export interface Expense {
   userId: string;
   groupId: string;
   userName?: string;
+  purchasedItems?: PurchasedItem[];
 }
 
 export interface ChatMessage {
@@ -74,14 +83,6 @@ export interface Purchase {
     userName: string;
     groupId: string;
 }
-
-export interface PurchasedItem {
-    name: string;
-    quantity: number;
-    unit: string;
-    cost: number;
-}
-
     
 export interface Item {
   id: string;
