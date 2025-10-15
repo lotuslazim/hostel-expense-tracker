@@ -18,7 +18,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 const FloatingIcon = ({ children, className, animationDelay }: { children: React.ReactNode, className?: string, animationDelay?: string }) => (
   <div
     className={cn(
-        "absolute text-5xl text-foreground/5 dark:text-white/10 animate-float",
+        "absolute text-5xl animate-float",
         className
     )}
     style={{ animationDelay }}
@@ -97,12 +97,12 @@ export default function Home() {
       <div className="relative min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-[#0f2027] via-[#203a43] to-[#2c5364] text-white p-4 overflow-hidden">
         <div className="absolute inset-0 bg-grid-white/[0.05]"></div>
          {/* Floating Icons */}
-          <FloatingIcon className="top-[10%] left-[5%] opacity-30" animationDelay="0s">🍛</FloatingIcon>
-          <FloatingIcon className="top-[20%] right-[10%] opacity-30" animationDelay="1s">💰</FloatingIcon>
-          <FloatingIcon className="bottom-[25%] left-[15%] opacity-30" animationDelay="2s">📝</FloatingIcon>
-          <FloatingIcon className="bottom-[10%] right-[20%] opacity-30" animationDelay="3s">🍴</FloatingIcon>
-          <FloatingIcon className="top-[50%] left-[25%] opacity-30" animationDelay="4s">🍛</FloatingIcon>
-          <FloatingIcon className="top-[60%] right-[30%] opacity-30" animationDelay="5s">💰</FloatingIcon>
+          <FloatingIcon className="top-[10%] left-[5%] text-white/30" animationDelay="0s">🍛</FloatingIcon>
+          <FloatingIcon className="top-[20%] right-[10%] text-white/30" animationDelay="1s">💰</FloatingIcon>
+          <FloatingIcon className="bottom-[25%] left-[15%] text-white/30" animationDelay="2s">📝</FloatingIcon>
+          <FloatingIcon className="bottom-[10%] right-[20%] text-white/30" animationDelay="3s">🍴</FloatingIcon>
+          <FloatingIcon className="top-[50%] left-[25%] text-white/30" animationDelay="4s">🍛</FloatingIcon>
+          <FloatingIcon className="top-[60%] right-[30%] text-white/30" animationDelay="5s">💰</FloatingIcon>
 
         <div className="relative text-center space-y-6 z-10">
             <p className="text-2xl md:text-3xl font-medium animate-fade-in-scale [animation-delay:200ms]">
@@ -134,12 +134,12 @@ export default function Home() {
             <div className="absolute inset-0 bg-grid-white/[0.05]"></div>
 
             {/* Floating Icons */}
-          <FloatingIcon className="top-[10%] left-[5%] opacity-10" animationDelay="0s">🍛</FloatingIcon>
-          <FloatingIcon className="top-[20%] right-[10%] opacity-10" animationDelay="1s">💰</FloatingIcon>
-          <FloatingIcon className="bottom-[25%] left-[15%] opacity-10" animationDelay="2s">📝</FloatingIcon>
-          <FloatingIcon className="bottom-[10%] right-[20%] opacity-10" animationDelay="3s">🍴</FloatingIcon>
-          <FloatingIcon className="top-[50%] left-[25%] opacity-10" animationDelay="4s">🍛</FloatingIcon>
-          <FloatingIcon className="top-[60%] right-[30%] opacity-10" animationDelay="5s">💰</FloatingIcon>
+          <FloatingIcon className="top-[10%] left-[5%] text-white/10" animationDelay="0s">🍛</FloatingIcon>
+          <FloatingIcon className="top-[20%] right-[10%] text-white/10" animationDelay="1s">💰</FloatingIcon>
+          <FloatingIcon className="bottom-[25%] left-[15%] text-white/10" animationDelay="2s">📝</FloatingIcon>
+          <FloatingIcon className="bottom-[10%] right-[20%] text-white/10" animationDelay="3s">🍴</FloatingIcon>
+          <FloatingIcon className="top-[50%] left-[25%] text-white/10" animationDelay="4s">🍛</FloatingIcon>
+          <FloatingIcon className="top-[60%] right-[30%] text-white/10" animationDelay="5s">💰</FloatingIcon>
 
           <div className="container relative p-4 space-y-4 max-w-3xl mx-auto flex flex-col items-center">
             <div
@@ -313,5 +313,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
