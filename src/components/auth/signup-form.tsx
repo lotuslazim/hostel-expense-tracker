@@ -17,12 +17,11 @@ import { Input } from "@/components/ui/input";
 import { AuthCard } from "./auth-card";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
-import { auth, firestore } from "@/firebase/config";
-import { GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, updateProfile, type User, sendEmailVerification } from "firebase/auth";
+import { auth } from "@/firebase/config";
+import { GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, updateProfile, sendEmailVerification } from "firebase/auth";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Eye, EyeOff } from "lucide-react";
-import { doc, getDoc, setDoc } from "firebase/firestore";
 import { GoogleIcon } from "../icons/google";
 
 const formSchema = z.object({
@@ -50,7 +49,6 @@ export function SignupForm() {
       const user = userCredential.user;
       
       await updateProfile(user, { displayName: values.name });
-      // No need to call createUserDocument here, it's handled by the provider
 
       await sendEmailVerification(user);
       
@@ -87,8 +85,9 @@ export function SignupForm() {
         title: "Account Created!",
         description: "You've successfully signed up with Google.",
       });
-
-      router.push('/dashboard');
+      
+      // The redirect is now handled by the onAuthStateChanged listener
+      // and the effect on the home page.
 
     } catch (error: any) {
       if (error.code === 'auth/popup-closed-by-user') {

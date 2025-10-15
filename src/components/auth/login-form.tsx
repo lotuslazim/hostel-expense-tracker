@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { AuthCard } from "./auth-card";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
-import { auth, firestore } from "@/firebase/config";
+import { auth } from "@/firebase/config";
 import { 
   GoogleAuthProvider, 
   signInWithPopup,
@@ -32,7 +32,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { GoogleIcon } from "../icons/google";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
-import { doc, getDoc, setDoc } from "firebase/firestore";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email." }),
@@ -91,16 +90,13 @@ export function LoginForm() {
     
     try {
       await signInWithPopup(auth, provider);
-      
       toast({
         title: "Success!",
         description: "Signed in with Google successfully.",
       });
-      
-      router.push('/dashboard');
-      
+      // The redirect is now handled by the onAuthStateChanged listener
+      // and the effect on the home page.
     } catch (error: any) {
-      // Don't show an error toast if the user closes the popup
       if (error.code === 'auth/popup-closed-by-user') {
         setIsGoogleLoading(false);
         return;
