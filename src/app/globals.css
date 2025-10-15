@@ -6,33 +6,33 @@
 
 @layer base {
   :root {
-    --background: 140 10% 98%; /* --color-bg: #F7F9F8 */
-    --foreground: 0 0% 12%; /* --color-text-primary: #1E1E1E */
+    --background: 140 25% 98%; /* #F8FBF9 */
+    --foreground: 0 0% 11%; /* #1C1C1C */
     
-    --card: 140 30% 97%; /* #F5FAF7 - Soft light green */
-    --card-foreground: 0 0% 12%; /* --color-text-primary: #1E1E1E */
+    --card: 147 31% 95%; /* #EAF7EF */
+    --card-foreground: 0 0% 11%;
     
-    --popover: 0 0% 100%; /* --color-surface: #FFFFFF */
-    --popover-foreground: 0 0% 12%; /* --color-text-primary: #1E1E1E */
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 11%;
     
-    --primary: 139 42% 42%; /* #4CA555 */
+    --primary: 142 47% 42%; /* #3BA55D */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 45 100% 71%; /* --color-secondary: #FFD66B */
+    --secondary: 45 100% 71%;
     --secondary-foreground: 0 0% 12%;
     
-    --muted: 120 4% 93%; /* --color-surface-alt: #EDEFEF */
-    --muted-foreground: 0 0% 36%; /* --color-text-secondary: #5C5C5C */
+    --muted: 120 4% 93%;
+    --muted-foreground: 0 0% 37%; /* #5E5E5E */
     
-    --accent: 139 42% 95%; /* Light Green for hover */
-    --accent-foreground: 139 42% 32%;
+    --accent: 145 44% 94%; /* #DDF1E4 */
+    --accent-foreground: 142 47% 32%;
 
-    --destructive: 0 79% 64%; /* --color-error: #E75D5D */
+    --destructive: 0 79% 64%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 150 5% 91%; /* --color-border: #E1E4E3 */
-    --input: 120 4% 93%; /* --color-surface-alt: #EDEFEF */
-    --ring: 139 42% 42%; /* #4CA555 */
+    --border: 150 5% 91%;
+    --input: 120 4% 93%;
+    --ring: 142 47% 42%;
 
     --radius: 0.5rem;
   }
