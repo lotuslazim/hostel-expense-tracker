@@ -23,7 +23,7 @@ export function Logo({
     <div
       className={cn(
         "flex items-center gap-0 group",
-        isStacked ? "flex-col" : "gap-1.5",
+        isStacked ? "flex-col" : "",
         className
       )}
       aria-label="BachelorBite Home"
