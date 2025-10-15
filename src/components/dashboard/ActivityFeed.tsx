@@ -73,7 +73,10 @@ export function ActivityFeed({ expenses, isLoading, currentMonth, onMonthChange 
                                 <TableCell className="hidden sm:table-cell">{format((item.date as any).toDate(), "MMM d")}</TableCell>
                                 <TableCell>
                                     <div className="font-medium">{item.userName}</div>
-                                    <div className="text-muted-foreground">{item.expenseItem || "N/A"}</div>
+                                    <div className="text-sm text-muted-foreground">
+                                      <span className="font-medium text-foreground/80">Item: </span>
+                                      {item.expenseItem || "N/A"}
+                                    </div>
                                      <div className="md:hidden pt-1">
                                         <Badge variant="secondary">{item.category}</Badge>
                                     </div>
