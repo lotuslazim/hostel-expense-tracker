@@ -34,6 +34,22 @@ export interface UserHookResult extends UserAuthState {}
 // React Context
 export const FirebaseContext = createContext<FirebaseContextState | undefined>(undefined);
 
+const createUserDocument = async (firestore: Firestore, user: User) => {
+    const userDocRef = doc(firestore, "users", user.uid);
+    const userDoc = await getDoc(userDocRef);
+
+    if (!userDoc.exists()) {
+      await setDoc(userDocRef, {
+        id: user.uid,
+        email: user.email,
+        displayName: user.displayName || user.email?.split('@')[0],
+        photoURL: user.photoURL,
+        groupId: null,
+        isAdmin: false,
+      });
+    }
+};
+
 /**
  * FirebaseProvider manages and provides user authentication state.
  */
@@ -51,7 +67,10 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   
   // This effect listens for all authentication state changes (login, logout).
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        await createUserDocument(firestore, user);
+      }
       setUserAuthState({ user, isUserLoading: false, userError: null });
     }, (error) => {
       console.error("FirebaseProvider: onAuthStateChanged error:", error);
@@ -59,7 +78,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     });
 
     return () => unsubscribe();
-  }, [auth]);
+  }, [auth, firestore]);
 
 
   const contextValue = useMemo((): FirebaseContextState => ({
@@ -107,5 +126,3 @@ export const useUser = (): UserHookResult => {
     userError: context.userError,
   };
 };
-
-    

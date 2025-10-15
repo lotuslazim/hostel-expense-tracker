@@ -39,22 +39,6 @@ const formSchema = z.object({
   password: z.string().min(1, { message: "Password is required." }),
 });
 
-const createUserDocument = async (user: User, name?: string) => {
-    const userDocRef = doc(firestore, "users", user.uid);
-    const userDoc = await getDoc(userDocRef);
-
-    if (!userDoc.exists()) {
-      await setDoc(userDocRef, {
-        id: user.uid,
-        email: user.email,
-        displayName: name || user.displayName || user.email?.split('@')[0],
-        photoURL: user.photoURL,
-        groupId: null,
-        isAdmin: false,
-      });
-    }
-};
-
 export function LoginForm() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -84,7 +68,6 @@ export function LoginForm() {
         return;
       }
       
-      await createUserDocument(userCredential.user);
       router.push('/dashboard');
 
     } catch (error: any) {
@@ -107,9 +90,7 @@ export function LoginForm() {
     const provider = new GoogleAuthProvider();
     
     try {
-      const result = await signInWithPopup(auth, provider);
-      
-      await createUserDocument(result.user);
+      await signInWithPopup(auth, provider);
       
       toast({
         title: "Success!",
@@ -293,5 +274,3 @@ export function LoginForm() {
     </AuthCard>
   );
 }
-
-    

@@ -31,22 +31,6 @@ const formSchema = z.object({
   password: z.string().min(8, { message: "Password must be at least 8 characters." }),
 });
 
-const createUserDocument = async (user: User, name?: string) => {
-    const userDocRef = doc(firestore, "users", user.uid);
-    const userDoc = await getDoc(userDocRef);
-
-    if (!userDoc.exists()) {
-        await setDoc(userDocRef, {
-            id: user.uid,
-            email: user.email,
-            displayName: name || user.displayName || user.email?.split('@')[0],
-            photoURL: user.photoURL,
-            groupId: null,
-            isAdmin: false,
-        });
-    }
-};
-
 export function SignupForm() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -66,7 +50,7 @@ export function SignupForm() {
       const user = userCredential.user;
       
       await updateProfile(user, { displayName: values.name });
-      await createUserDocument(user, values.name);
+      // No need to call createUserDocument here, it's handled by the provider
 
       await sendEmailVerification(user);
       
@@ -97,8 +81,7 @@ export function SignupForm() {
     setIsGoogleLoading(true);
     const provider = new GoogleAuthProvider();
     try {
-      const result = await signInWithPopup(auth, provider);
-      await createUserDocument(result.user);
+      await signInWithPopup(auth, provider);
       
       toast({
         title: "Account Created!",
@@ -217,5 +200,3 @@ export function SignupForm() {
     </AuthCard>
   );
 }
-
-    
