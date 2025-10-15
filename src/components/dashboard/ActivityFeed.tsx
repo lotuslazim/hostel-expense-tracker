@@ -21,6 +21,41 @@ interface ActivityFeedProps {
   onMonthChange: (direction: "next" | "prev") => void;
 }
 
+const ExpenseItemsDisplay = ({ item }: { item: Expense }) => {
+    const isFood = item.category === 'Food & Groceries';
+    const items = item.expenseItem?.split(',').map(s => s.trim());
+    const hasMultipleItems = isFood && items && items.length > 1;
+
+    if (!hasMultipleItems) {
+        return <>{item.expenseItem || "N/A"}</>;
+    }
+
+    const truncatedItems = items.slice(0, 2).join(', ');
+
+    return (
+        <>
+            {truncatedItems}...
+            <Dialog>
+                <DialogTrigger asChild>
+                    <Button variant="link" size="sm" className="h-auto p-0 pl-2">View All</Button>
+                </DialogTrigger>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>All Items for Expense on {format((item.date as any).toDate(), "MMM d")}</DialogTitle>
+                    </DialogHeader>
+                    <div className="py-4">
+                        <ul className="list-disc list-inside space-y-2">
+                           {items.map((itemName, index) => (
+                               <li key={index}>{itemName}</li>
+                           ))}
+                        </ul>
+                    </div>
+                </DialogContent>
+            </Dialog>
+        </>
+    );
+};
+
 export function ActivityFeed({ expenses, isLoading, currentMonth, onMonthChange }: ActivityFeedProps) {
 
   const sortedExpenses = useMemo(() => {
@@ -75,7 +110,7 @@ export function ActivityFeed({ expenses, isLoading, currentMonth, onMonthChange 
                                     <div className="font-medium">{item.userName}</div>
                                     <div className="text-sm text-muted-foreground">
                                       <span className="font-medium text-foreground/80">Item: </span>
-                                      {item.expenseItem || "N/A"}
+                                      <ExpenseItemsDisplay item={item} />
                                     </div>
                                      <div className="md:hidden pt-1">
                                         <Badge variant="secondary">{item.category}</Badge>
