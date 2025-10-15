@@ -86,11 +86,12 @@ export function SignupForm() {
         description: "You've successfully signed up with Google.",
       });
       
-      router.push('/dashboard');
+      // The redirect is now handled by the onAuthStateChanged listener
+      // in the FirebaseProvider, which prevents race conditions.
 
     } catch (error: any) => {
       if (error.code === 'auth/popup-closed-by-user') {
-        setIsGoogleLoading(false);
+        // User intentionally closed the popup, do nothing.
         return;
       }
       

@@ -6,6 +6,7 @@ import { FirebaseApp } from 'firebase/app';
 import { Firestore, doc, getDoc, setDoc } from 'firebase/firestore';
 import { Auth, User, onAuthStateChanged } from 'firebase/auth';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
+import { usePathname, useRouter } from 'next/navigation';
 
 interface FirebaseProviderProps {
   children: ReactNode;
@@ -59,6 +60,8 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   firestore,
   auth,
 }) => {
+  const router = useRouter();
+  const pathname = usePathname();
   const [userAuthState, setUserAuthState] = useState<UserAuthState>({
     user: null,
     isUserLoading: true, // Start loading until first auth event
@@ -79,6 +82,21 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
 
     return () => unsubscribe();
   }, [auth, firestore]);
+
+  // This effect handles redirection after authentication state is confirmed.
+  useEffect(() => {
+    const publicPaths = ['/login', '/signup', '/'];
+    // Wait until auth state is determined
+    if (!userAuthState.isUserLoading) {
+      if (userAuthState.user && publicPaths.includes(pathname)) {
+        // If user is logged in and on a public page, redirect to dashboard.
+        router.push('/dashboard');
+      } else if (!userAuthState.user && !publicPaths.includes(pathname)) {
+        // If user is not logged in and on a protected page, redirect to login.
+        router.push('/login');
+      }
+    }
+  }, [userAuthState.user, userAuthState.isUserLoading, pathname, router]);
 
 
   const contextValue = useMemo((): FirebaseContextState => ({
