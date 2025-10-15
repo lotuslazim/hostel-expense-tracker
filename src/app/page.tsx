@@ -94,21 +94,19 @@ export default function Home() {
 
   if (isUserLoading || user) { // Keep showing loading screen until not loading AND user is null
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-6 text-foreground overflow-hidden">
-        {/* Floating Icons */}
-        <FloatingIcon className="top-[15%] left-[10%]" animationDelay="0s">🍛</FloatingIcon>
-        <FloatingIcon className="top-[30%] right-[15%]" animationDelay="1s">💰</FloatingIcon>
-        <FloatingIcon className="bottom-[35%] left-[20%]" animationDelay="2s">📝</FloatingIcon>
-        <FloatingIcon className="bottom-[15%] right-[25%]" animationDelay="3s">🍴</FloatingIcon>
-        
-        <div className="text-center space-y-4 z-10">
-            <p className="text-lg font-medium text-muted-foreground">Hi, how you doing?</p>
-            <p className="text-2xl md:text-3xl font-bold">I know you're doing your best.</p>
-            <div className="text-8xl animate-bounce-slow">👍</div>
-            <div className="flex items-center justify-center gap-1.5 pt-4">
-                <span className="h-2 w-2 rounded-full bg-primary animate-loading-dot [animation-delay:0.0s]"></span>
-                <span className="h-2 w-2 rounded-full bg-primary animate-loading-dot [animation-delay:0.1s]"></span>
-                <span className="h-2 w-2 rounded-full bg-primary animate-loading-dot [animation-delay:0.2s]"></span>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-[#0f2027] via-[#203a43] to-[#2c5364] text-white p-4">
+        <div className="text-center space-y-6">
+            <p className="text-2xl md:text-3xl font-medium animate-fade-in-scale [animation-delay:200ms]">
+                Take a breath. 🌿
+            </p>
+             <p className="text-xl md:text-2xl font-light text-white/80 animate-fade-in-scale [animation-delay:400ms]">
+                You’re right where you need to be.
+            </p>
+            <div className="text-8xl animate-bounce-once [animation-delay:600ms]">👍</div>
+            <div className="flex items-center justify-center gap-1.5 pt-4 animate-fade-in-scale [animation-delay:800ms]">
+                <span className="h-2.5 w-2.5 rounded-full bg-white/80 animate-loading-dot [animation-delay:0.0s]"></span>
+                <span className="h-2.5 w-2.5 rounded-full bg-white/80 animate-loading-dot [animation-delay:0.2s]"></span>
+                <span className="h-2.5 w-2.5 rounded-full bg-white/80 animate-loading-dot [animation-delay:0.4s]"></span>
             </div>
         </div>
       </div>
@@ -306,3 +304,5 @@ export default function Home() {
     </div>
   );
 }
+
+    

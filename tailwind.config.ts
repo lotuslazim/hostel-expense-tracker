@@ -91,12 +91,16 @@ const config = {
           "75%": { transform: "translateY(-2px) rotate(1deg) scale(1.01)" }
         },
         "loading-dot": {
-          "0%, 100%": { transform: "translateY(0)" },
-          "50%": { transform: "translateY(-4px)" },
+          "0%, 100%": { transform: "translateY(0)", opacity: "0.5" },
+          "50%": { transform: "translateY(-6px)", opacity: "1" },
         },
-        "bounce-slow": {
-          "0%, 100%": { transform: "translateY(-5%)", animationTimingFunction: "cubic-bezier(0.8, 0, 1, 1)" },
-          "50%": { transform: "translateY(0)", animationTimingFunction: "cubic-bezier(0, 0, 0.2, 1)" },
+        "fade-in-scale": {
+          "0%": { opacity: "0", transform: "scale(0.95)" },
+          "100%": { opacity: "1", transform: "scale(1)" },
+        },
+        "bounce-once": {
+            "0%, 100%": { transform: "translateY(0)" },
+            "50%": { transform: "translateY(-15px)" },
         },
       },
       animation: {
@@ -105,8 +109,9 @@ const config = {
         "float": "float 6s ease-in-out infinite",
         "pulse-slow": "pulse-slow 3s ease-in-out infinite",
         "mascot-idle": "mascot-idle 5s ease-in-out infinite",
-        "loading-dot": "loading-dot 1.2s cubic-bezier(0, 0.5, 0.5, 1) infinite",
-        "bounce-slow": "bounce-slow 1s infinite",
+        "loading-dot": "loading-dot 1.4s cubic-bezier(0.45, 0, 0.55, 1) infinite",
+        "fade-in-scale": "fade-in-scale 0.8s ease-out forwards",
+        "bounce-once": "bounce-once 1s ease-in-out forwards",
       },
     },
   },
@@ -114,3 +119,5 @@ const config = {
 } satisfies Config
 
 export default config;
+
+    
