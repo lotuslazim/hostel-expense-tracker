@@ -38,7 +38,7 @@ export function Logo({
           src="/logo.png" 
           alt="BachelorBite Logo" 
           fill
-          style={{ objectFit: "contain" }}
+          className="object-contain"
           sizes={mascotSize === 'large' ? "20vw" : "10vw"}
           priority
         />

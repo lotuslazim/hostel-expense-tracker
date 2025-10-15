@@ -39,7 +39,7 @@ const FeatureCard = ({ icon, title, description, imageSrc }: { icon: React.React
     >
       <CardHeader className="items-center">
          <div className="relative h-40 w-full mb-4 rounded-lg overflow-hidden">
-          <Image src={imageSrc} alt={title} layout="fill" objectFit="cover" className="transition-transform duration-300 group-hover:scale-105" />
+          <Image src={imageSrc} alt={title} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
         </div>
         <CardTitle className="flex items-center gap-2 text-xl font-bold text-white">{icon}{title}</CardTitle>
       </CardHeader>
@@ -235,7 +235,7 @@ export default function Home() {
                             previewInView ? "opacity-100 scale-100" : "opacity-0 scale-90"
                             )}
                         >
-                            <Image src={appPreviewImage.imageUrl} alt={appPreviewImage.description} layout="fill" objectFit="cover" />
+                            <Image src={appPreviewImage.imageUrl} alt={appPreviewImage.description} fill className="object-cover" />
                         </div>
                         <p className={cn(
                             "mt-6 text-muted-foreground italic transition-all duration-500 ease-out",
@@ -300,4 +300,3 @@ export default function Home() {
     </div>
   );
 }
-
