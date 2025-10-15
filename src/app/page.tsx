@@ -96,7 +96,8 @@ export default function Home() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center space-y-4">
-          <p className="text-xl text-muted-foreground">Loading...</p>
+          <Logo isMascotAnimated={true} isStacked={true} mascotSize="large" textSize="large" />
+          <p className="text-xl text-muted-foreground animate-pulse-subtle">Loading...</p>
         </div>
       </div>
     );
@@ -293,3 +294,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
