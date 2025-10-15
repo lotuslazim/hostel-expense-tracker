@@ -4,10 +4,8 @@
 import React, { createContext, useContext, ReactNode, useMemo, useState, useEffect } from 'react';
 import { FirebaseApp } from 'firebase/app';
 import { Firestore, doc, getDoc, setDoc } from 'firebase/firestore';
-import { Auth, User, onAuthStateChanged, getRedirectResult } from 'firebase/auth';
+import { Auth, User, onAuthStateChanged } from 'firebase/auth';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
-import { useRouter } from 'next/navigation';
-import { useToast } from '@/hooks/use-toast';
 
 interface FirebaseProviderProps {
   children: ReactNode;
@@ -36,25 +34,8 @@ export interface UserHookResult extends UserAuthState {}
 // React Context
 export const FirebaseContext = createContext<FirebaseContextState | undefined>(undefined);
 
-const createUserDocument = async (firestore: Firestore, user: User, name?: string) => {
-    const userDocRef = doc(firestore, "users", user.uid);
-    const userDoc = await getDoc(userDocRef);
-
-    if (!userDoc.exists()) {
-      await setDoc(userDocRef, {
-        id: user.uid,
-        email: user.email,
-        displayName: name || user.displayName || user.email?.split('@')[0],
-        photoURL: user.photoURL,
-        groupId: null,
-        isAdmin: false,
-      });
-    }
-};
-
 /**
- * FirebaseProvider manages and provides user authentication state,
- * including processing Google Sign-In redirect results.
+ * FirebaseProvider manages and provides user authentication state.
  */
 export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   children,
@@ -62,43 +43,12 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   firestore,
   auth,
 }) => {
-  const router = useRouter();
-  const { toast } = useToast();
   const [userAuthState, setUserAuthState] = useState<UserAuthState>({
     user: null,
     isUserLoading: true, // Start loading until first auth event
     userError: null,
   });
-
-  // This effect handles the result of a Google Sign-In redirect.
-  // It runs only once when the component mounts.
-  useEffect(() => {
-    const handleRedirectResult = async () => {
-      try {
-        const result = await getRedirectResult(auth);
-        if (result?.user) {
-          // User has successfully signed in via redirect.
-          await createUserDocument(firestore, result.user);
-          toast({
-            title: "Successfully signed in!",
-            description: `Welcome, ${result.user.displayName || result.user.email}`,
-          });
-          router.push('/dashboard');
-        }
-      } catch (error: any) {
-        // Handle specific errors, like `auth/account-exists-with-different-credential`
-        console.error("FirebaseProvider: Google redirect error:", error);
-        toast({
-          variant: "destructive",
-          title: "Sign-In Error",
-          description: error.message || "An error occurred during sign-in.",
-        });
-      }
-    };
-    
-    handleRedirectResult();
-  }, [auth, firestore, router, toast]);
-
+  
   // This effect listens for all authentication state changes (login, logout).
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -157,3 +107,5 @@ export const useUser = (): UserHookResult => {
     userError: context.userError,
   };
 };
+
+    

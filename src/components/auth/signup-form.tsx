@@ -18,7 +18,7 @@ import { AuthCard } from "./auth-card";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
 import { auth, firestore } from "@/firebase/config";
-import { GoogleAuthProvider, signInWithRedirect, createUserWithEmailAndPassword, updateProfile, type User, sendEmailVerification } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, updateProfile, type User, sendEmailVerification } from "firebase/auth";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Eye, EyeOff } from "lucide-react";
@@ -97,17 +97,29 @@ export function SignupForm() {
     setIsGoogleLoading(true);
     const provider = new GoogleAuthProvider();
     try {
-      await signInWithRedirect(auth, provider);
-      // The user is redirected, so this part of the code won't execute until they return.
-      // The redirect result is handled in FirebaseProvider.
+      const result = await signInWithPopup(auth, provider);
+      await createUserDocument(result.user);
+      
+      toast({
+        title: "Account Created!",
+        description: "You've successfully signed up with Google.",
+      });
+
+      router.push('/dashboard');
+
     } catch (error: any) {
-      console.error("Error during Google sign-up redirect:", error);
+      if (error.code === 'auth/popup-closed-by-user') {
+        setIsGoogleLoading(false);
+        return;
+      }
+      
       toast({ 
         variant: "destructive", 
         title: "Google Sign-Up Failed", 
-        description: error.message || "Could not start sign up with Google. Please try again."
+        description: error.message || "Could not complete sign up with Google. Please try again."
       });
-      setIsGoogleLoading(false);
+    } finally {
+        setIsGoogleLoading(false);
     }
   };
 
@@ -205,3 +217,5 @@ export function SignupForm() {
     </AuthCard>
   );
 }
+
+    

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -106,11 +107,8 @@ export function LoginForm() {
     const provider = new GoogleAuthProvider();
     
     try {
-      console.log("Starting Google sign-in...");
       const result = await signInWithPopup(auth, provider);
-      console.log("Google sign-in success:", result.user.email);
       
-      // Create user document
       await createUserDocument(result.user);
       
       toast({
@@ -121,24 +119,15 @@ export function LoginForm() {
       router.push('/dashboard');
       
     } catch (error: any) {
-      console.error("Google sign-in error:", error);
-      console.error("Error code:", error.code);
-      console.error("Error message:", error.message);
-      
-      let errorMessage = "Could not sign in with Google. Please try again.";
-      
-      if (error.code === 'auth/popup-blocked') {
-        errorMessage = "Popup was blocked. Please allow popups for this site.";
-      } else if (error.code === 'auth/popup-closed-by-user') {
-        errorMessage = "Sign-in cancelled.";
-        setIsGoogleLoading(false);
-        return; // Don't show error toast for user cancellation
-      } else if (error.code === 'auth/unauthorized-domain') {
-        errorMessage = "This domain is not authorized. Please contact support.";
-      } else if (error.code === 'auth/cancelled-popup-request') {
-        // Multiple popup requests, ignore
+      // Don't show an error toast if the user closes the popup
+      if (error.code === 'auth/popup-closed-by-user') {
         setIsGoogleLoading(false);
         return;
+      }
+      
+      let errorMessage = "Could not sign in with Google. Please try again.";
+      if (error.code === 'auth/popup-blocked') {
+        errorMessage = "Popup was blocked. Please allow popups for this site.";
       }
       
       toast({ 
@@ -304,3 +293,5 @@ export function LoginForm() {
     </AuthCard>
   );
 }
+
+    
