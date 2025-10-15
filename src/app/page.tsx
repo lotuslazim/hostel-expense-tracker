@@ -39,7 +39,7 @@ const FeatureCard = ({ icon, title, description, imageSrc }: { icon: React.React
     >
       <CardHeader className="items-center">
          <div className="relative h-40 w-full mb-4 rounded-lg overflow-hidden">
-          <Image src={imageSrc} alt={title} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
+          <Image src={imageSrc} alt={title} fill className="object-contain transition-transform duration-300 group-hover:scale-105" />
         </div>
         <CardTitle className="flex items-center gap-2 text-xl font-bold text-white">{icon}{title}</CardTitle>
       </CardHeader>
@@ -310,3 +310,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
