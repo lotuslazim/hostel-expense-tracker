@@ -84,10 +84,6 @@ const config = {
           "0%, 100%": { transform: "scale(1)", boxShadow: "0 0 0 0 rgba(124, 203, 120, 0.3)" },
           "70%": { transform: "scale(1.05)", boxShadow: "0 0 0 10px rgba(124, 203, 120, 0)" },
         },
-        "pulse-subtle": {
-          "0%, 100%": { opacity: "1" },
-          "50%": { opacity: "0.6" },
-        },
         "mascot-idle": {
           "0%, 100%": { transform: "translateY(0) rotate(0deg) scale(1)" },
           "25%": { transform: "translateY(-2px) rotate(-1deg) scale(1.01)" },
@@ -104,7 +100,6 @@ const config = {
         "accordion-up": "accordion-up 0.2s ease-out",
         "float": "float 6s ease-in-out infinite",
         "pulse-slow": "pulse-slow 3s ease-in-out infinite",
-        "pulse-subtle": "pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
         "mascot-idle": "mascot-idle 5s ease-in-out infinite",
         "loading-dot": "loading-dot 1.2s cubic-bezier(0, 0.5, 0.5, 1) infinite",
       },

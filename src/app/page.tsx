@@ -85,7 +85,7 @@ export default function Home() {
   const appPreviewImage = PlaceHolderImages.find(p => p.id === 'app-preview');
 
   useEffect(() => {
-    // Only redirect when loading is complete and user is authenticated.
+    // Wait until loading is complete before trying to redirect.
     if (!isUserLoading && user) {
       router.replace('/dashboard');
     }
