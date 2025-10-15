@@ -82,7 +82,6 @@ export default function Home() {
   const { ref: previewRef, inView: previewInView } = useInView({ triggerOnce: true, threshold: 0.2 });
   const { ref: ctaRef, inView: ctaInView } = useInView({ triggerOnce: true, threshold: 0.2 });
   
-  const appPreviewImage = PlaceHolderImages.find(p => p.id === 'app-preview');
 
   useEffect(() => {
     // Wait until loading is complete before trying to redirect.
@@ -248,26 +247,24 @@ export default function Home() {
           </section>
 
           {/* App Preview Section */}
-          {appPreviewImage && (
-              <section ref={previewRef} className="py-24 md:py-32 bg-gradient-to-b from-[#1E3A28] to-[#162A1C]">
-                  <div className="container max-w-4xl mx-auto text-center">
-                        <div
-                          className={cn(
-                          "relative w-full max-w-3xl mx-auto aspect-video rounded-xl shadow-2xl shadow-black/50 overflow-hidden transform transition-all duration-700 ease-out",
-                          previewInView ? "opacity-100 scale-100" : "opacity-0 scale-90"
-                          )}
-                      >
-                          <Image src={appPreviewImage.imageUrl} alt={appPreviewImage.description} fill className="object-cover" />
-                      </div>
-                      <p className={cn(
-                          "mt-6 text-muted-foreground italic transition-all duration-500 ease-out",
-                          previewInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
-                      )} style={{ transitionDelay: '200ms'}}>
-                          A peek inside BachelorBite. Simple. Organized. Satisfying.
-                      </p>
+          <section ref={previewRef} className="py-24 md:py-32 bg-gradient-to-b from-[#1E3A28] to-[#162A1C]">
+              <div className="container max-w-4xl mx-auto text-center">
+                    <div
+                      className={cn(
+                      "relative w-full max-w-3xl mx-auto aspect-video rounded-xl shadow-2xl shadow-black/50 overflow-hidden transform transition-all duration-700 ease-out",
+                      previewInView ? "opacity-100 scale-100" : "opacity-0 scale-90"
+                      )}
+                  >
+                      <Image src="/app-screenshot.jpg" alt="App Screenshot" fill className="object-cover" />
                   </div>
-              </section>
-          )}
+                  <p className={cn(
+                      "mt-6 text-muted-foreground italic transition-all duration-500 ease-out",
+                      previewInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+                  )} style={{ transitionDelay: '200ms'}}>
+                      A peek inside BachelorBite. Simple. Organized. Satisfying.
+                  </p>
+              </div>
+          </section>
 
           {/* Final CTA Section */}
           <section ref={ctaRef} className="py-24 md:py-32 bg-mint-500 text-center">
@@ -313,3 +310,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
