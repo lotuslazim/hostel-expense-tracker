@@ -530,13 +530,14 @@ export function Settings() {
         <h1 className="text-3xl font-bold font-headline">{t('settings.title')}</h1>
         <p className="text-muted-foreground">{t('settings.description')}</p>
       </div>
-      <Separator />
+      
       <AppSettings />
-      <Separator />
+      
       {user && <AccountSettings user={user} userData={userData} groupData={groupData} groupId={groupId}/>}
+      
       {isUserAdmin && groupData && members && (
         <>
-            <Separator />
+            
             <AdminControls groupData={groupData} members={members} groupId={groupId!} />
         </>
       )}
