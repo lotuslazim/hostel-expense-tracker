@@ -4,7 +4,7 @@
 import { useMemo }from "react";
 import { format } from 'date-fns/format';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { ShoppingCart, Receipt } from "lucide-react";
+import { ShoppingCart, Receipt, List } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -21,29 +21,25 @@ interface ActivityFeedProps {
   onMonthChange: (direction: "next" | "prev") => void;
 }
 
-const ExpenseItemsDisplay = ({ item }: { item: Expense }) => {
+const ExpenseDetailsDialog = ({ item }: { item: Expense }) => {
     const isFood = item.category === 'Food & Groceries';
-    const hasMultipleItems = isFood && item.purchasedItems && item.purchasedItems.length > 1;
-
-    if (!hasMultipleItems) {
-        return <>{item.expenseItem || "N/A"}</>;
-    }
-
-    const truncatedItems = item.purchasedItems?.slice(0, 2).map(i => i.name).join(', ');
+    const hasPurchasedItems = isFood && item.purchasedItems && item.purchasedItems.length > 0;
 
     return (
-        <>
-            {truncatedItems}...
-            <Dialog>
-                <DialogTrigger asChild>
-                    <Button variant="link" size="sm" className="h-auto p-0 pl-2">View All</Button>
-                </DialogTrigger>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>All Items for Expense on {format((item.date as any).toDate(), "MMM d")}</DialogTitle>
-                    </DialogHeader>
-                    <div className="py-4">
-                        <Table>
+        <Dialog>
+            <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="h-8">Details</Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Expense Details</DialogTitle>
+                    <CardDescription>
+                        Logged by {item.userName} on {format((item.date as any).toDate(), "MMM d, yyyy")}
+                    </CardDescription>
+                </DialogHeader>
+                <div className="py-4">
+                    {hasPurchasedItems ? (
+                         <Table>
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>Item</TableHead>
@@ -61,10 +57,33 @@ const ExpenseItemsDisplay = ({ item }: { item: Expense }) => {
                                ))}
                             </TableBody>
                         </Table>
-                    </div>
-                </DialogContent>
-            </Dialog>
-        </>
+                    ) : (
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-center">
+                                <span className="text-muted-foreground">Item</span>
+                                <span className="font-medium">{item.expenseItem}</span>
+                            </div>
+                             <div className="flex justify-between items-center">
+                                <span className="text-muted-foreground">Category</span>
+                                <Badge variant="secondary">{item.category}</Badge>
+                            </div>
+                             <div className="flex justify-between items-center">
+                                <span className="text-muted-foreground">Amount</span>
+                                <span className="font-bold text-lg">৳{item.amount.toFixed(2)}</span>
+                            </div>
+                            {item.receiptPhotoUrl && (
+                                <div className="flex justify-between items-center">
+                                    <span className="text-muted-foreground">Receipt</span>
+                                    <a href={item.receiptPhotoUrl} target="_blank" rel="noopener noreferrer">
+                                        <Button variant="link">View Receipt</Button>
+                                    </a>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </DialogContent>
+        </Dialog>
     );
 };
 
@@ -110,8 +129,8 @@ export function ActivityFeed({ expenses, isLoading, currentMonth, onMonthChange 
                             <TableHead className="w-[60px] hidden sm:table-cell">Date</TableHead>
                             <TableHead>Member & Item</TableHead>
                             <TableHead className="hidden md:table-cell">Category</TableHead>
+                            <TableHead>Details</TableHead>
                             <TableHead className="text-right">Amount</TableHead>
-                            <TableHead className="text-center w-[50px]">Receipt</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -122,35 +141,17 @@ export function ActivityFeed({ expenses, isLoading, currentMonth, onMonthChange 
                                     <div className="font-medium">{item.userName}</div>
                                     <div className="text-sm text-muted-foreground">
                                       <span className="font-medium text-foreground/80">Item: </span>
-                                      <ExpenseItemsDisplay item={item} />
+                                      {item.expenseItem}
                                     </div>
                                      <div className="md:hidden pt-1">
                                         <Badge variant="secondary">{item.category}</Badge>
                                     </div>
                                 </TableCell>
                                 <TableCell className="hidden md:table-cell"><Badge variant="secondary">{item.category}</Badge></TableCell>
-                                <TableCell className="text-right font-semibold">৳{item.amount.toFixed(2)}</TableCell>
-                                <TableCell className="text-center">
-                                    {item.receiptPhotoUrl ? (
-                                        <Dialog>
-                                            <DialogTrigger asChild>
-                                                <Button variant="ghost" size="icon">
-                                                    <Receipt className="h-4 w-4" />
-                                                </Button>
-                                            </DialogTrigger>
-                                            <DialogContent className="max-w-3xl">
-                                                <DialogHeader>
-                                                    <DialogTitle>Receipt for {item.expenseItem}</DialogTitle>
-                                                </DialogHeader>
-                                                <div className="py-4">
-                                                    <img src={item.receiptPhotoUrl} alt="Receipt" className="w-full h-auto rounded-md" />
-                                                </div>
-                                            </DialogContent>
-                                        </Dialog>
-                                    ) : (
-                                        <span className="text-muted-foreground text-xs">-</span>
-                                    )}
+                                <TableCell>
+                                    <ExpenseDetailsDialog item={item} />
                                 </TableCell>
+                                <TableCell className="text-right font-semibold">৳{item.amount.toFixed(2)}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
