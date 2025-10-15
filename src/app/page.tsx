@@ -94,7 +94,13 @@ export default function Home() {
 
   if (isUserLoading || user) { // Keep showing loading screen until not loading AND user is null
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#142317] gap-6 text-white overflow-hidden">
+        {/* Floating Icons */}
+        <FloatingIcon className="top-[15%] left-[10%] opacity-5" animationDelay="0s">🍛</FloatingIcon>
+        <FloatingIcon className="top-[30%] right-[15%] opacity-5" animationDelay="1s">💰</FloatingIcon>
+        <FloatingIcon className="bottom-[35%] left-[20%] opacity-5" animationDelay="2s">📝</FloatingIcon>
+        <FloatingIcon className="bottom-[15%] right-[25%] opacity-5" animationDelay="3s">🍴</FloatingIcon>
+        
         <div className="relative w-28 h-28 animate-mascot-idle">
             <Image 
                 src="/logo.png" 
@@ -105,10 +111,13 @@ export default function Home() {
                 priority
             />
         </div>
-        <div className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-primary animate-loading-dot [animation-delay:0.0s]"></span>
-            <span className="h-2 w-2 rounded-full bg-primary animate-loading-dot [animation-delay:0.1s]"></span>
-            <span className="h-2 w-2 rounded-full bg-primary animate-loading-dot [animation-delay:0.2s]"></span>
+        <div className="text-center space-y-2">
+            <p className="text-lg font-medium text-white/80">Organizing your bachelor life...</p>
+            <div className="flex items-center justify-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-primary animate-loading-dot [animation-delay:0.0s]"></span>
+                <span className="h-2 w-2 rounded-full bg-primary animate-loading-dot [animation-delay:0.1s]"></span>
+                <span className="h-2 w-2 rounded-full bg-primary animate-loading-dot [animation-delay:0.2s]"></span>
+            </div>
         </div>
       </div>
     );
@@ -305,3 +314,5 @@ export default function Home() {
     </div>
   );
 }
+
+    

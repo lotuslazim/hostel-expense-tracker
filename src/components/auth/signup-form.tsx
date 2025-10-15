@@ -89,7 +89,7 @@ export function SignupForm() {
       // The redirect is now handled by the onAuthStateChanged listener
       // in the FirebaseProvider, which prevents race conditions.
 
-    } catch (error: any) => {
+    } catch (error: any) {
       if (error.code === 'auth/popup-closed-by-user') {
         // User intentionally closed the popup, do nothing.
         return;
