@@ -6,10 +6,10 @@
 
 @layer base {
   :root {
-    --background: 48 100% 99%; /* #FFFDF8 */
+    --background: 150 25% 98%; /* #F8FBF9 */
     --foreground: 0 0% 11%; /* #1C1C1C */
     
-    --card: 45 100% 95%; /* #FFF8E7 */
+    --card: 150 25% 95%; /* #EAF7EF */
     --card-foreground: 0 0% 11%;
     
     --popover: 0 0% 100%;
@@ -24,7 +24,7 @@
     --muted: 120 4% 93%;
     --muted-foreground: 0 0% 37%; /* #5E5E5E */
     
-    --accent: 44 100% 92%; /* #FFF3D9 */
+    --accent: 150 25% 94%; /* #DDF1E4 */
     --accent-foreground: 142 47% 32%;
 
     --destructive: 0 79% 64%;
