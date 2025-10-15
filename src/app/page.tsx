@@ -94,10 +94,21 @@ export default function Home() {
 
   if (isUserLoading || user) { // Keep showing loading screen until not loading AND user is null
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center space-y-4">
-          <Logo isMascotAnimated={true} isStacked={true} mascotSize="large" textSize="large" />
-          <p className="text-xl text-muted-foreground animate-pulse-subtle">Loading...</p>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4">
+        <div className="relative w-28 h-28 animate-mascot-idle">
+            <Image 
+                src="/logo.png" 
+                alt="BachelorBite Logo" 
+                fill
+                className="object-contain"
+                sizes="20vw"
+                priority
+            />
+        </div>
+        <div className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-primary animate-loading-dot [animation-delay:0.0s]"></span>
+            <span className="h-2 w-2 rounded-full bg-primary animate-loading-dot [animation-delay:0.1s]"></span>
+            <span className="h-2 w-2 rounded-full bg-primary animate-loading-dot [animation-delay:0.2s]"></span>
         </div>
       </div>
     );
@@ -294,5 +305,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
