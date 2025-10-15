@@ -7,15 +7,19 @@ import { UserNav } from "@/app/(app)/user-nav";
 import { NavLink } from "./nav-link";
 import { Button } from "../ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, MessageCircle, LayoutDashboard, BarChart3, Package } from "lucide-react";
+import { Menu, MessageCircle, LayoutDashboard, BarChart3, Package, LogOut } from "lucide-react";
 import { useUser } from "@/firebase";
 import { Skeleton } from "../ui/skeleton";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { signOut } from "firebase/auth";
+import { auth } from "@/firebase/config";
+import { useRouter } from "next/navigation";
 
 export function AppHeader() {
   const { isUserLoading } = useUser();
   const [isClient, setIsClient] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     setIsClient(true);
@@ -27,6 +31,15 @@ export function AppHeader() {
     { href: "/report", label: "Monthly Report", icon: BarChart3 },
     { href: "/inventory", label: "Inventory", icon: Package },
   ];
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push("/");
+    } catch (error) {
+      console.error("Error signing out: ", error);
+    }
+  };
 
   const renderUserSection = () => {
     if (isUserLoading) {
@@ -58,22 +71,34 @@ export function AppHeader() {
            <SheetHeader>
             <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
           </SheetHeader>
-          <div className="flex flex-col gap-4 py-6">
-            <div className="px-4 mb-4">
-              <Logo className="light-theme-logo" />
+          <div className="flex flex-col h-full">
+            <div className="flex flex-col gap-4 py-6">
+                <div className="px-4 mb-4">
+                <Logo className="light-theme-logo" />
+                </div>
+                <nav className="flex flex-col gap-2 px-4">
+                {navLinks.map((link) => (
+                    <Link
+                    key={link.href}
+                    href={link.href}
+                    className="flex items-center gap-3 rounded-lg px-3 py-3 text-muted-foreground transition-all hover:text-primary text-base font-medium"
+                    >
+                    <link.icon className="h-5 w-5" />
+                    {link.label}
+                    </Link>
+                ))}
+                </nav>
             </div>
-            <nav className="flex flex-col gap-2 px-4">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="flex items-center gap-3 rounded-lg px-3 py-3 text-muted-foreground transition-all hover:text-primary text-base font-medium"
+            <div className="mt-auto p-4 border-t border-border">
+                 <Button
+                    variant="ghost"
+                    onClick={handleLogout}
+                    className="w-full justify-start flex items-center gap-3 rounded-lg px-3 py-3 text-muted-foreground transition-all hover:text-primary text-base font-medium"
                 >
-                  <link.icon className="h-5 w-5" />
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
+                    <LogOut className="h-5 w-5" />
+                    Log Out
+                </Button>
+            </div>
           </div>
         </SheetContent>
       </Sheet>
