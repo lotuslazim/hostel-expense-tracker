@@ -60,21 +60,25 @@ export function ActivityFeed({ expenses, isLoading, currentMonth, onMonthChange 
                  <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Date</TableHead>
-                            <TableHead>Member</TableHead>
-                            <TableHead>Expense Item</TableHead>
-                            <TableHead>Category</TableHead>
+                            <TableHead className="w-[60px] hidden sm:table-cell">Date</TableHead>
+                            <TableHead>Member & Item</TableHead>
+                            <TableHead className="hidden md:table-cell">Category</TableHead>
                             <TableHead className="text-right">Amount</TableHead>
-                            <TableHead className="text-center">Receipt</TableHead>
+                            <TableHead className="text-center w-[50px]">Receipt</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {sortedExpenses.map((item) => (
                             <TableRow key={`expense-${item.id}`}>
-                                <TableCell>{format((item.date as any).toDate(), "MMM d")}</TableCell>
-                                <TableCell>{item.userName}</TableCell>
-                                <TableCell>{item.expenseItem || "N/A"}</TableCell>
-                                <TableCell><Badge variant="secondary">{item.category}</Badge></TableCell>
+                                <TableCell className="hidden sm:table-cell">{format((item.date as any).toDate(), "MMM d")}</TableCell>
+                                <TableCell>
+                                    <div className="font-medium">{item.userName}</div>
+                                    <div className="text-muted-foreground">{item.expenseItem || "N/A"}</div>
+                                     <div className="md:hidden pt-1">
+                                        <Badge variant="secondary">{item.category}</Badge>
+                                    </div>
+                                </TableCell>
+                                <TableCell className="hidden md:table-cell"><Badge variant="secondary">{item.category}</Badge></TableCell>
                                 <TableCell className="text-right font-semibold">৳{item.amount.toFixed(2)}</TableCell>
                                 <TableCell className="text-center">
                                     {item.receiptPhotoUrl ? (
@@ -112,5 +116,3 @@ export function ActivityFeed({ expenses, isLoading, currentMonth, onMonthChange 
     </Card>
   );
 }
-
-    
