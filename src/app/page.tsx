@@ -132,7 +132,9 @@ export default function Home() {
              <p className="text-xl md:text-2xl font-light text-white/80 animate-fade-in-scale [animation-delay:400ms]">
                 You’re right where you need to be.
             </p>
-            <div className="text-8xl animate-bounce-once [animation-delay:600ms]">👍</div>
+            <div className="animate-fade-in-scale [animation-delay:600ms]">
+                <Logo isMascotAnimated={true} mascotSize="large" isStacked={true} textSize="large" />
+            </div>
             <div className="flex items-center justify-center gap-1.5 pt-4 animate-fade-in-scale [animation-delay:800ms]">
                 <span className="h-2.5 w-2.5 rounded-full bg-white/80 animate-loading-dot [animation-delay:0.0s]"></span>
                 <span className="h-2.5 w-2.5 rounded-full bg-white/80 animate-loading-dot [animation-delay:0.2s]"></span>
@@ -333,4 +335,3 @@ export default function Home() {
   );
 }
 
-    
