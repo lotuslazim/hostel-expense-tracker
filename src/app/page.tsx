@@ -33,17 +33,17 @@ const FeatureCard = ({ icon, title, description, imageSrc }: { icon: React.React
     <Card 
       ref={ref}
       className={cn(
-        "bg-white/5 border-white/10 text-center p-6 transform transition-all duration-500",
+        "bg-white/5 border-white/10 text-center p-6 transform transition-all duration-500 flex flex-col",
         inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
       )}
     >
       <CardHeader className="items-center">
-         <div className="relative h-40 w-full mb-4 rounded-lg overflow-hidden">
+         <div className="relative w-full mb-4 rounded-lg overflow-hidden aspect-video">
           <Image src={imageSrc} alt={title} fill className="object-contain transition-transform duration-300 group-hover:scale-105" />
         </div>
         <CardTitle className="flex items-center gap-2 text-xl font-bold text-white">{icon}{title}</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-grow">
         <p className="text-muted-foreground">{description}</p>
       </CardContent>
     </Card>
@@ -252,10 +252,10 @@ export default function Home() {
                     <div
                       className={cn(
                       "relative w-full max-w-3xl mx-auto aspect-video rounded-xl shadow-2xl shadow-black/50 overflow-hidden transform transition-all duration-700 ease-out",
-                      previewInView ? "opacity-100 scale-100" : "opacity-0 scale-90"
+                      previewInView ? "opacity-100 scale-120" : "opacity-0 scale-100"
                       )}
                   >
-                      <Image src="/app-screenshot.jpg" alt="App Screenshot" fill className="object-cover" />
+                      <Image src="/abcd.jpg" alt="App Screenshot" fill className="object-cover" />
                   </div>
                   <p className={cn(
                       "mt-6 text-muted-foreground italic transition-all duration-500 ease-out",
