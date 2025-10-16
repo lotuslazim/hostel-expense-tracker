@@ -30,6 +30,7 @@ export function AppHeader() {
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/report", label: "Monthly Report", icon: BarChart3 },
     { href: "/inventory", label: "Inventory", icon: Package },
+    { href: "/chat", label: "Chat", icon: MessageCircle },
   ];
 
   const handleLogout = async () => {
