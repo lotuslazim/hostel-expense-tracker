@@ -27,7 +27,7 @@ import { useUser, useDoc } from "@/firebase";
 import { firestore } from "@/firebase/config";
 import { doc, collection, serverTimestamp, Timestamp, getDocs, where, query, addDoc, deleteDoc, writeBatch } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ShoppingCart, Camera, Upload, X, Plus, Trash2, CameraRotate } from "lucide-react";
+import { Loader2, ShoppingCart, Camera, Upload, X, Plus, Trash2, RefreshCw } from "lucide-react";
 import { sanitizeFirestoreData } from "@/lib/utils";
 import { Skeleton } from "../ui/skeleton";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
@@ -580,7 +580,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                                                 className="absolute bottom-2 right-2 rounded-full"
                                                 disabled={isCapturing}
                                              >
-                                                <CameraRotate className="h-5 w-5" />
+                                                <RefreshCw className="h-5 w-5" />
                                                 <span className="sr-only">Rotate Camera</span>
                                             </Button>
                                         )}
@@ -612,5 +612,3 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     </Card>
   );
 }
-
-    
