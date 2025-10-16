@@ -4,6 +4,8 @@ import { Poppins, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { ClientProviders } from "./client-providers";
+import { Suspense } from "react";
+import { ProgressBar } from "@/components/app/progress-bar";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -33,6 +35,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn("font-body", poppins.variable, playfairDisplay.variable)} suppressHydrationWarning>
+        <Suspense fallback={null}>
+          <ProgressBar />
+        </Suspense>
         <ClientProviders>{children}</ClientProviders>
       </body>
     </html>

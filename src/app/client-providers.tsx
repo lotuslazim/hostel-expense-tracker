@@ -1,14 +1,12 @@
 
 "use client";
 
-import { Suspense } from "react";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { InventoryProvider } from "@/contexts/InventoryContext";
 import { FirebaseClientProvider } from "@/firebase/client-provider";
 import { I18nProvider } from "@/i18n/client-provider";
 import { ReminderListener } from "@/components/app/ReminderListener";
-import { ProgressBar } from "@/components/app/progress-bar";
 
 export function ClientProviders({ children }: { children: React.ReactNode }) {
   return (
@@ -21,9 +19,6 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
       >
         <InventoryProvider>
           <FirebaseClientProvider>
-            <Suspense fallback={null}>
-              <ProgressBar />
-            </Suspense>
             {children}
             <Toaster />
             <ReminderListener />
