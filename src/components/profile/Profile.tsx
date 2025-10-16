@@ -261,6 +261,7 @@ const Roommate = React.memo(function Roommate({ memberId }: { memberId: string }
 export function Profile() {
   const { user, isUserLoading } = useUser();
   const { toast } = useToast();
+  const router = useRouter();
 
   const userRef = useMemo(() => (user ? doc(firestore, "users", user.uid) : null), [user]);
   const { data: userData, isLoading: isUserDataLoading } = useDoc(userRef);
