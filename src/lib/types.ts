@@ -58,6 +58,7 @@ export interface Reminder {
     senderName: string;
     messageText: string;
     createdAt: Timestamp;
+    read?: string[];
 }
 
 export interface FoodItem {

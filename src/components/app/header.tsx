@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { signOut } from "firebase/auth";
 import { auth } from "@/firebase/config";
 import { useRouter } from "next/navigation";
+import { NotificationBell } from "./notification-bell";
 
 export function AppHeader() {
   const { isUserLoading } = useUser();
@@ -48,6 +49,7 @@ export function AppHeader() {
     }
     return (
       <>
+        <NotificationBell />
         <Button variant="ghost" size="icon" asChild>
           <Link href="/chat">
             <MessageCircle />
