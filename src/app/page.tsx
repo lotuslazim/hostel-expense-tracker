@@ -3,7 +3,7 @@
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowRight, Utensils, Scale, CheckCircle } from "lucide-react";
+import { ArrowRight, Utensils, Scale } from "lucide-react";
 import { useUser } from "@/firebase";
 import { useRouter } from "next/navigation";
 import React, { useEffect, Suspense, lazy } from "react";
@@ -15,11 +15,11 @@ import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const Dialog = lazy(() => import('@/components/ui/dialog').then(mod => mod.Dialog));
-const DialogContent = lazy(() => import('@/components/ui/dialog').then(mod => mod.DialogContent));
-const DialogTrigger = lazy(() => import('@/components/ui/dialog').then(mod => mod.DialogTrigger));
-const DialogHeader = lazy(() => import('@/components/ui/dialog').then(mod => mod.DialogHeader));
-const DialogTitle = lazy(() => import('@/components/ui/dialog').then(mod => mod.DialogTitle));
+const Dialog = lazy(() => import('@/components/ui/dialog').then(module => ({ default: module.Dialog })));
+const DialogContent = lazy(() => import('@/components/ui/dialog').then(module => ({ default: module.DialogContent })));
+const DialogTrigger = lazy(() => import('@/components/ui/dialog').then(module => ({ default: module.DialogTrigger })));
+const DialogHeader = lazy(() => import('@/components/ui/dialog').then(module => ({ default: module.DialogHeader })));
+const DialogTitle = lazy(() => import('@/components/ui/dialog').then(module => ({ default: module.DialogTitle })));
 
 
 const FloatingIcon = ({ children, className, animationDelay }: { children: React.ReactNode, className?: string, animationDelay?: string }) => (
@@ -343,3 +343,5 @@ export default function Home() {
     </div>
   );
 }
+
+    

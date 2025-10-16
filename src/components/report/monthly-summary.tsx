@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { Flame, Zap, Utensils, Scale, Users, FileText, ArrowRight, ChevronDown, AlertTriangle, Package, Receipt } from "lucide-react";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
 import { doc, collection, query, where, Timestamp } from "firebase/firestore";
-import { useMemo, useState } from "react";
+import { useMemo, useState, lazy, Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from 'date-fns/format';
 import { startOfMonth } from 'date-fns/startOfMonth';
@@ -21,7 +21,12 @@ import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MonthSwitcher } from "./month-switcher";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
+
+const Dialog = lazy(() => import('../ui/dialog').then(module => ({ default: module.Dialog })));
+const DialogContent = lazy(() => import('../ui/dialog').then(module => ({ default: module.DialogContent })));
+const DialogHeader = lazy(() => import('../ui/dialog').then(module => ({ default: module.DialogHeader })));
+const DialogTitle = lazy(() => import('../ui/dialog').then(module => ({ default: module.DialogTitle })));
+const DialogTrigger = lazy(() => import('../ui/dialog').then(module => ({ default: module.DialogTrigger })));
 
 
 // Type definitions for processed data
@@ -155,21 +160,23 @@ function CollapsibleUtilityItem({
                     <TableCell className="text-right">৳{(expense.amount || 0).toFixed(2)}</TableCell>
                     <TableCell className="text-center">
                       {expense.receiptPhotoUrl ? (
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-7 w-7">
-                                <Receipt className="h-4 w-4" />
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-3xl">
-                            <DialogHeader>
-                                <DialogTitle>Receipt for {expense.expenseItem}</DialogTitle>
-                            </DialogHeader>
-                            <div className="py-4">
-                                <img src={expense.receiptPhotoUrl} alt="Receipt" className="w-full h-auto rounded-md" />
-                            </div>
-                          </DialogContent>
-                        </Dialog>
+                        <Suspense fallback={<Skeleton className="h-7 w-7" />}>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-7 w-7">
+                                  <Receipt className="h-4 w-4" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-3xl">
+                              <DialogHeader>
+                                  <DialogTitle>Receipt for {expense.expenseItem}</DialogTitle>
+                              </DialogHeader>
+                              <div className="py-4">
+                                  <img src={expense.receiptPhotoUrl} alt="Receipt" className="w-full h-auto rounded-md" />
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        </Suspense>
                       ) : <span className="text-xs">-</span>}
                     </TableCell>
                   </TableRow>
@@ -434,21 +441,23 @@ export function MonthlySummary() {
                                             <TableCell className="text-right">৳{expense.amount.toFixed(2)}</TableCell>
                                             <TableCell className="text-center">
                                                 {expense.receiptPhotoUrl ? (
-                                                  <Dialog>
-                                                      <DialogTrigger asChild>
-                                                          <Button variant="ghost" size="icon" className="h-7 w-7">
-                                                              <Receipt className="h-4 w-4" />
-                                                          </Button>
-                                                      </DialogTrigger>
-                                                      <DialogContent className="max-w-3xl">
-                                                          <DialogHeader>
-                                                              <DialogTitle>Receipt for {expense.expenseItem}</DialogTitle>
-                                                          </DialogHeader>
-                                                          <div className="py-4">
-                                                              <img src={expense.receiptPhotoUrl} alt="Receipt" className="w-full h-auto rounded-md" />
-                                                          </div>
-                                                      </DialogContent>
-                                                  </Dialog>
+                                                  <Suspense fallback={<Skeleton className="h-7 w-7"/>}>
+                                                    <Dialog>
+                                                        <DialogTrigger asChild>
+                                                            <Button variant="ghost" size="icon" className="h-7 w-7">
+                                                                <Receipt className="h-4 w-4" />
+                                                            </Button>
+                                                        </DialogTrigger>
+                                                        <DialogContent className="max-w-3xl">
+                                                            <DialogHeader>
+                                                                <DialogTitle>Receipt for {expense.expenseItem}</DialogTitle>
+                                                            </DialogHeader>
+                                                            <div className="py-4">
+                                                                <img src={expense.receiptPhotoUrl} alt="Receipt" className="w-full h-auto rounded-md" />
+                                                            </div>
+                                                        </DialogContent>
+                                                    </Dialog>
+                                                  </Suspense>
                                                 ) : <span className="text-xs">-</span>}
                                             </TableCell>
                                         </TableRow>
@@ -569,3 +578,5 @@ export function MonthlySummary() {
   );
 
 }
+
+    

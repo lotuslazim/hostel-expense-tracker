@@ -21,21 +21,21 @@ import type { Expense, Member, User as UserType } from "@/lib/types";
 import imageCompression from "browser-image-compression";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 
-const AlertDialog = lazy(() => import('@/components/ui/alert-dialog').then(mod => ({ default: mod.AlertDialog })));
-const AlertDialogAction = lazy(() => import('@/components/ui/alert-dialog').then(mod => ({ default: mod.AlertDialogAction })));
-const AlertDialogCancel = lazy(() => import('@/components/ui/alert-dialog').then(mod => ({ default: mod.AlertDialogCancel })));
-const AlertDialogContent = lazy(() => import('@/components/ui/alert-dialog').then(mod => ({ default: mod.AlertDialogContent })));
-const AlertDialogDescription = lazy(() => import('@/components/ui/alert-dialog').then(mod => ({ default: mod.AlertDialogDescription })));
-const AlertDialogFooter = lazy(() => import('@/components/ui/alert-dialog').then(mod => ({ default: mod.AlertDialogFooter })));
-const AlertDialogHeader = lazy(() => import('@/components/ui/alert-dialog').then(mod => ({ default: mod.AlertDialogHeader })));
-const AlertDialogTitle = lazy(() => import('@/components/ui/alert-dialog').then(mod => ({ default: mod.AlertDialogTitle })));
-const AlertDialogTrigger = lazy(() => import('@/components/ui/alert-dialog').then(mod => ({ default: mod.AlertDialogTrigger })));
+const AlertDialog = lazy(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialog })));
+const AlertDialogAction = lazy(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialogAction })));
+const AlertDialogCancel = lazy(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialogCancel })));
+const AlertDialogContent = lazy(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialogContent })));
+const AlertDialogDescription = lazy(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialogDescription })));
+const AlertDialogFooter = lazy(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialogFooter })));
+const AlertDialogHeader = lazy(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialogHeader })));
+const AlertDialogTitle = lazy(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialogTitle })));
+const AlertDialogTrigger = lazy(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialogTrigger })));
 
-const Dialog = lazy(() => import('@/components/ui/dialog').then(mod => ({ default: mod.Dialog })));
-const ReceiptDialogContent = lazy(() => import('@/components/ui/dialog').then(mod => ({ default: mod.DialogContent })));
-const ReceiptDialogHeader = lazy(() => import('@/components/ui/dialog').then(mod => ({ default: mod.DialogHeader })));
-const ReceiptDialogTitle = lazy(() => import('@/components/ui/dialog').then(mod => ({ default: mod.DialogTitle })));
-const ReceiptDialogTrigger = lazy(() => import('@/components/ui/dialog').then(mod => ({ default: mod.DialogTrigger })));
+const Dialog = lazy(() => import('@/components/ui/dialog').then(module => ({ default: module.Dialog })));
+const ReceiptDialogContent = lazy(() => import('@/components/ui/dialog').then(module => ({ default: module.DialogContent })));
+const ReceiptDialogHeader = lazy(() => import('@/components/ui/dialog').then(module => ({ default: module.DialogHeader })));
+const ReceiptDialogTitle = lazy(() => import('@/components/ui/dialog').then(module => ({ default: module.DialogTitle })));
+const ReceiptDialogTrigger = lazy(() => import('@/components/ui/dialog').then(module => ({ default: module.DialogTrigger })));
 
 import { Label } from "@/components/ui/label";
 import { signOut, sendPasswordResetEmail, deleteUser } from "firebase/auth";
@@ -236,7 +236,7 @@ function AccountSettings({ user, userData, groupData, groupId }: { user: any, us
     )
 }
 
-const Roommate = memo(function Roommate({ memberId }: { memberId: string }) {
+const Roommate = React.memo(function Roommate({ memberId }: { memberId: string }) {
     const userRef = useMemo(() => doc(firestore, 'users', memberId), [memberId]);
     const { data: userData, isLoading } = useDoc<UserType>(userRef);
 
@@ -534,3 +534,5 @@ export function Profile() {
     </div>
   );
 }
+
+    
