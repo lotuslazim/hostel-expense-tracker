@@ -71,8 +71,8 @@ export function AppHeader() {
     return (
       <Sheet>
         <SheetTrigger asChild>
-          <Button variant="ghost" size="icon">
-            <Menu className="h-7 w-7" />
+          <Button variant="ghost" size="icon" className="h-8 w-8 md:h-9 md:w-9">
+            <Menu className="h-6 w-6" />
             <span className="sr-only">Open navigation menu</span>
           </Button>
         </SheetTrigger>
@@ -126,16 +126,16 @@ export function AppHeader() {
     )}>
       <div className="container flex h-16 items-center">
         
-        <div className="flex flex-1 items-center justify-start">
+        <div className="flex-1 flex items-center justify-start">
           {isClient && renderNavMenu()}
         </div>
 
-        <div className="flex flex-1 items-center justify-center">
+        <div className="flex-1 flex items-center justify-center">
             <Logo className="light-theme-logo" />
         </div>
 
-        <div className="flex flex-1 items-center justify-end space-x-2">
-           <div className="flex items-center space-x-1">
+        <div className="flex-1 flex items-center justify-end space-x-1 md:space-x-2">
+           <div className="hidden md:flex items-center space-x-1">
             {renderUserSection()}
            </div>
         </div>
