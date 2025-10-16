@@ -164,5 +164,3 @@ export function ActivityFeed({ expenses, isLoading, currentMonth, onMonthChange 
     </Card>
   );
 }
-
-    
