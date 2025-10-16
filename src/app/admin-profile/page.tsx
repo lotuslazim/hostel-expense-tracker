@@ -482,9 +482,3 @@ export default function AdminProfilePage() {
 }
 
     
-
-    
-
-    
-
-    
