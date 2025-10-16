@@ -6,14 +6,20 @@ import Link from "next/link";
 import { ArrowRight, Utensils, Scale, CheckCircle } from "lucide-react";
 import { useUser } from "@/firebase";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import React, { useEffect, Suspense, lazy } from "react";
 import { Logo } from "@/components/icons/logo";
 import { useInView } from "react-intersection-observer";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Skeleton } from "@/components/ui/skeleton";
+
+const Dialog = lazy(() => import('@/components/ui/dialog').then(mod => mod.Dialog));
+const DialogContent = lazy(() => import('@/components/ui/dialog').then(mod => mod.DialogContent));
+const DialogTrigger = lazy(() => import('@/components/ui/dialog').then(mod => mod.DialogTrigger));
+const DialogHeader = lazy(() => import('@/components/ui/dialog').then(mod => mod.DialogHeader));
+const DialogTitle = lazy(() => import('@/components/ui/dialog').then(mod => mod.DialogTitle));
 
 
 const FloatingIcon = ({ children, className, animationDelay }: { children: React.ReactNode, className?: string, animationDelay?: string }) => (
@@ -39,30 +45,33 @@ const FeatureCard = ({ icon, title, description, imageSrc }: { icon: React.React
       )}
     >
       <CardHeader className="items-center">
-        <Dialog>
-          <DialogTrigger asChild>
-            <div className="relative w-full mb-4 rounded-lg overflow-hidden aspect-video cursor-zoom-in group">
-              <Image 
-                src={imageSrc} 
-                alt={title} 
-                fill 
-                className="object-contain transition-transform duration-300 group-hover:scale-105"
-              />
-            </div>
-          </DialogTrigger>
-          <DialogContent className="max-w-6xl p-0">
-             <DialogHeader className="p-4">
-                <DialogTitle className="sr-only">{title} - Fullscreen View</DialogTitle>
-             </DialogHeader>
-             <Image 
-                src={imageSrc} 
-                alt={title} 
-                width={1920}
-                height={1080}
-                className="rounded-b-lg object-contain w-full h-auto"
-              />
-          </DialogContent>
-        </Dialog>
+        <Suspense fallback={<Skeleton className="w-full aspect-video rounded-lg" />}>
+          <Dialog>
+            <DialogTrigger asChild>
+              <div className="relative w-full mb-4 rounded-lg overflow-hidden aspect-video cursor-zoom-in group">
+                <Image 
+                  src={imageSrc} 
+                  alt={title} 
+                  fill 
+                  className="object-contain transition-transform duration-300 group-hover:scale-105"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                />
+              </div>
+            </DialogTrigger>
+            <DialogContent className="max-w-6xl p-0">
+               <DialogHeader className="p-4">
+                  <DialogTitle className="sr-only">{title} - Fullscreen View</DialogTitle>
+               </DialogHeader>
+               <Image 
+                  src={imageSrc} 
+                  alt={title} 
+                  width={1920}
+                  height={1080}
+                  className="rounded-b-lg object-contain w-full h-auto"
+                />
+            </DialogContent>
+          </Dialog>
+        </Suspense>
         <CardTitle className="flex items-center gap-2 text-xl font-bold text-white">{icon}{title}</CardTitle>
       </CardHeader>
       <CardContent className="flex-grow">
@@ -279,7 +288,7 @@ export default function Home() {
                       previewInView ? "opacity-100 scale-120" : "opacity-0 scale-100"
                       )}
                   >
-                      <Image src="/a1.jpg" alt="App Screenshot" fill className="object-cover" />
+                      <Image src="/a1.jpg" alt="App Screenshot" fill className="object-cover" priority />
                   </div>
                   <p className={cn(
                       "mt-6 text-muted-foreground italic transition-all duration-500 ease-out",

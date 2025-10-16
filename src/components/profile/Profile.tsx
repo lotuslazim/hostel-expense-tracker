@@ -1,11 +1,10 @@
 
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, lazy, Suspense } from "react";
 import { useUser } from "@/firebase";
 import { auth, firestore } from "@/firebase/config";
 import { doc, updateDoc, collection, query, where, Timestamp, orderBy, writeBatch, getDocs, deleteDoc, serverTimestamp } from "firebase/firestore";
-import { signOut, sendPasswordResetEmail, deleteUser } from "firebase/auth";
 import { useDoc, useCollection } from "@/firebase";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -18,13 +17,28 @@ import { useToast } from "@/hooks/use-toast";
 import { Camera, User, Mail, Home, Users, Wallet, ChevronDown, Loader2, LogOut, Trash2, Copy, Receipt } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { format } from 'date-fns/format';
-import { startOfMonth } from 'date-fns/startOfMonth';
 import type { Expense, Member, User as UserType } from "@/lib/types";
 import imageCompression from "browser-image-compression";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Dialog, DialogContent as ReceiptDialogContent, DialogHeader as ReceiptDialogHeader, DialogTitle as ReceiptDialogTitle, DialogTrigger as ReceiptDialogTrigger } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import { uploadToCloudinary } from "@/lib/cloudinary";
+
+const AlertDialog = lazy(() => import('@/components/ui/alert-dialog').then(mod => ({ default: mod.AlertDialog })));
+const AlertDialogAction = lazy(() => import('@/components/ui/alert-dialog').then(mod => ({ default: mod.AlertDialogAction })));
+const AlertDialogCancel = lazy(() => import('@/components/ui/alert-dialog').then(mod => ({ default: mod.AlertDialogCancel })));
+const AlertDialogContent = lazy(() => import('@/components/ui/alert-dialog').then(mod => ({ default: mod.AlertDialogContent })));
+const AlertDialogDescription = lazy(() => import('@/components/ui/alert-dialog').then(mod => ({ default: mod.AlertDialogDescription })));
+const AlertDialogFooter = lazy(() => import('@/components/ui/alert-dialog').then(mod => ({ default: mod.AlertDialogFooter })));
+const AlertDialogHeader = lazy(() => import('@/components/ui/alert-dialog').then(mod => ({ default: mod.AlertDialogHeader })));
+const AlertDialogTitle = lazy(() => import('@/components/ui/alert-dialog').then(mod => ({ default: mod.AlertDialogTitle })));
+const AlertDialogTrigger = lazy(() => import('@/components/ui/alert-dialog').then(mod => ({ default: mod.AlertDialogTrigger })));
+
+const Dialog = lazy(() => import('@/components/ui/dialog').then(mod => ({ default: mod.Dialog })));
+const ReceiptDialogContent = lazy(() => import('@/components/ui/dialog').then(mod => ({ default: mod.DialogContent })));
+const ReceiptDialogHeader = lazy(() => import('@/components/ui/dialog').then(mod => ({ default: mod.DialogHeader })));
+const ReceiptDialogTitle = lazy(() => import('@/components/ui/dialog').then(mod => ({ default: mod.DialogTitle })));
+const ReceiptDialogTrigger = lazy(() => import('@/components/ui/dialog').then(mod => ({ default: mod.DialogTrigger })));
+
+import { Label } from "@/components/ui/label";
+import { signOut, sendPasswordResetEmail, deleteUser } from "firebase/auth";
 
 
 function ProfileSkeleton() {
@@ -162,6 +176,7 @@ function AccountSettings({ user, userData, groupData, groupId }: { user: any, us
     };
 
     return (
+      <Suspense fallback={<Skeleton className="h-96 w-full" />}>
         <Card>
             <CardHeader>
                 <CardTitle>Account Actions</CardTitle>
@@ -217,10 +232,11 @@ function AccountSettings({ user, userData, groupData, groupId }: { user: any, us
                 </div>
             </CardContent>
         </Card>
+      </Suspense>
     )
 }
 
-function Roommate({ memberId }: { memberId: string }) {
+const Roommate = memo(function Roommate({ memberId }: { memberId: string }) {
     const userRef = useMemo(() => doc(firestore, 'users', memberId), [memberId]);
     const { data: userData, isLoading } = useDoc<UserType>(userRef);
 
@@ -239,7 +255,8 @@ function Roommate({ memberId }: { memberId: string }) {
             <span>{userData.displayName}</span>
         </div>
     );
-}
+});
+
 
 export function Profile() {
   const { user, isUserLoading } = useUser();
@@ -478,22 +495,26 @@ export function Profile() {
                                         </div>
                                         <div className="flex items-center gap-2">
                                             {item.receiptPhotoUrl && (
-                                                <ReceiptDialogTrigger asChild>
-                                                    <Button variant="ghost" size="icon" className="h-7 w-7">
-                                                        <Receipt className="h-4 w-4" />
-                                                    </Button>
-                                                </ReceiptDialogTrigger>
+                                                <Suspense fallback={<Skeleton className="h-7 w-7"/>}>
+                                                    <ReceiptDialogTrigger asChild>
+                                                        <Button variant="ghost" size="icon" className="h-7 w-7">
+                                                            <Receipt className="h-4 w-4" />
+                                                        </Button>
+                                                    </ReceiptDialogTrigger>
+                                                </Suspense>
                                             )}
                                             <p className="font-medium w-20 text-right">৳{item.amount.toFixed(2)}</p>
                                         </div>
-                                         <ReceiptDialogContent>
-                                            <ReceiptDialogHeader>
-                                                <ReceiptDialogTitle>Receipt for {item.expenseItem}</ReceiptDialogTitle>
-                                            </ReceiptDialogHeader>
-                                            <div className="py-4">
-                                                <img src={item.receiptPhotoUrl} alt="Receipt" className="w-full h-auto rounded-md" />
-                                            </div>
-                                        </ReceiptDialogContent>
+                                         <Suspense>
+                                             <ReceiptDialogContent>
+                                                <ReceiptDialogHeader>
+                                                    <ReceiptDialogTitle>Receipt for {item.expenseItem}</ReceiptDialogTitle>
+                                                </ReceiptDialogHeader>
+                                                <div className="py-4">
+                                                    <img src={item.receiptPhotoUrl} alt="Receipt" className="w-full h-auto rounded-md" />
+                                                </div>
+                                            </ReceiptDialogContent>
+                                         </Suspense>
                                     </div>
                                 ))}
                             </div>
@@ -513,5 +534,3 @@ export function Profile() {
     </div>
   );
 }
-
-    

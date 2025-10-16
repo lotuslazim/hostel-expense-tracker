@@ -4,7 +4,7 @@
 import { useUser, useDoc, useCollection } from "@/firebase";
 import { firestore } from "@/firebase/config";
 import { doc, collection, query, addDoc, serverTimestamp, updateDoc, where, getDocs, writeBatch, getDoc, setDoc } from "firebase/firestore";
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -240,7 +240,7 @@ function NewUserAdminPanel({ user }: { user: User }) {
 }
 
 // A new component to render member rows, fetching user data individually.
-function MemberRow({ member }: { member: Member }) {
+const MemberRow = React.memo(function MemberRow({ member }: { member: Member }) {
     const userRef = useMemo(() => doc(firestore, 'users', member.id), [member.id]);
     const { data: userData, isLoading } = useDoc<UserType>(userRef);
 
@@ -280,7 +280,7 @@ function MemberRow({ member }: { member: Member }) {
             </TableCell>
         </TableRow>
     );
-}
+});
 
 
 function GroupDetailsPanel({ groupId }: { groupId: string }) {
@@ -434,5 +434,3 @@ export default function AdminPage() {
         </div>
     )
 }
-
-    

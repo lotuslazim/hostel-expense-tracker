@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,7 +14,7 @@ import { cn } from "@/lib/utils";
 
 const Calendar = dynamic(() => import('@/components/ui/calendar').then(mod => mod.Calendar), {
     ssr: false,
-    loading: () => <div className="p-3"><Skeleton className="h-[280px] w-[240px]" /></div>,
+    loading: () => <div className="p-3"><Skeleton className="h-[280px] w-full" /></div>,
 });
 
 
@@ -79,5 +78,3 @@ export function DateCard({ date, setDate }: DateCardProps) {
         </Card>
     );
 }
-
-    
