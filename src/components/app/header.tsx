@@ -135,7 +135,7 @@ export function AppHeader() {
         </div>
 
         <div className="flex-1 flex items-center justify-end space-x-1 md:space-x-2">
-           <div className="hidden md:flex items-center space-x-1">
+           <div className="flex items-center space-x-1">
             {renderUserSection()}
            </div>
         </div>
