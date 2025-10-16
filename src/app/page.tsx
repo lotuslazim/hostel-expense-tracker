@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 
 const FloatingIcon = ({ children, className, animationDelay }: { children: React.ReactNode, className?: string, animationDelay?: string }) => (
@@ -51,6 +51,9 @@ const FeatureCard = ({ icon, title, description, imageSrc }: { icon: React.React
             </div>
           </DialogTrigger>
           <DialogContent className="max-w-4xl p-2 bg-transparent border-0">
+             <DialogHeader>
+                <DialogTitle className="sr-only">{title} - Fullscreen View</DialogTitle>
+             </DialogHeader>
              <Image 
                 src={imageSrc} 
                 alt={title} 
@@ -329,3 +332,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
