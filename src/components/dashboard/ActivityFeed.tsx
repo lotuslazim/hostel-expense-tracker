@@ -45,7 +45,7 @@ const ExpenseDetailsDialog = ({ item }: { item: Expense }) => {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="h-8 mt-2">Details</Button>
+                <Button variant="outline" size="sm" className="h-7 px-2 text-xs">Details</Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
@@ -151,21 +151,23 @@ export function ActivityFeed({ expenses, isLoading, currentMonth, onMonthChange 
                     </TableHeader>
                     <TableBody>
                         {sortedExpenses.map((item) => (
-                            <TableRow key={`expense-${item.id}`}>
-                                <TableCell className="hidden sm:table-cell">{format((item.date as any).toDate(), "MMM d")}</TableCell>
+                            <TableRow key={`expense-${item.id}`} className="align-top">
+                                <TableCell className="hidden sm:table-cell pt-5">{format((item.date as any).toDate(), "MMM d")}</TableCell>
                                 <TableCell>
                                     <div className="font-medium">{item.userName}</div>
-                                    <div className="text-sm text-muted-foreground">
+                                    <div className="text-sm text-muted-foreground flex items-center gap-2">
                                       <span className="font-medium text-foreground/80">Item: </span>
-                                      {item.expenseItem}
+                                      <span>{item.expenseItem}</span>
                                     </div>
-                                    <div className="md:hidden pt-1">
+                                    <div className="md:hidden pt-2">
                                         <CategoryBadge category={item.category} />
                                     </div>
-                                    <ExpenseDetailsDialog item={item} />
+                                    <div className="pt-2">
+                                      <ExpenseDetailsDialog item={item} />
+                                    </div>
                                 </TableCell>
-                                <TableCell className="hidden md:table-cell"><CategoryBadge category={item.category} /></TableCell>
-                                <TableCell className="text-right font-semibold">৳{item.amount.toFixed(2)}</TableCell>
+                                <TableCell className="hidden md:table-cell pt-5"><CategoryBadge category={item.category} /></TableCell>
+                                <TableCell className="text-right font-semibold pt-5">৳{item.amount.toFixed(2)}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
