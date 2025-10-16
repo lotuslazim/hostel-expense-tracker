@@ -127,12 +127,14 @@ export function AppHeader() {
     )}>
       <div className="container flex h-16 items-center">
         
-        <div className="md:hidden">
+        <div className="flex items-center justify-start md:hidden">
           {isClient && renderNavMenu()}
         </div>
 
-        <div className="flex-1 flex items-center justify-start md:justify-center">
-            <Logo className="light-theme-logo" />
+        <div className="flex flex-1 items-center justify-center md:justify-start">
+            <div className="md:absolute md:left-1/2 md:-translate-x-1/2">
+                <Logo className="light-theme-logo" />
+            </div>
         </div>
 
         <div className="flex items-center justify-end space-x-2">
