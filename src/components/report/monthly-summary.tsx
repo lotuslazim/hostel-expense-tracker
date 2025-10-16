@@ -67,7 +67,7 @@ const formatDateSafe = (date: Date | Timestamp | undefined): string => {
 const formatShortDateSafe = (date: Date | Timestamp | undefined): string => {
   if (!date) return "N/A";
   const jsDate = date instanceof Date ? date : (date as Timestamp)?.toDate?.();
-  return jsDate ? format(jsDate, 'MMM d') : "N/A";
+  return jsDate ? format(jsDate, 'MMM d') : "N'A";
 };
 
 // Empty State Component
@@ -569,5 +569,3 @@ export function MonthlySummary() {
   );
 
 }
-
-    
