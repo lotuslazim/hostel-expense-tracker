@@ -1,3 +1,6 @@
+
+"use client";
+
 import { Settings } from "@/components/settings/Settings";
 import { AppHeader } from "@/components/app/header";
 
@@ -11,3 +14,5 @@ export default function SettingsPage() {
     </div>
   );
 }
+
+    

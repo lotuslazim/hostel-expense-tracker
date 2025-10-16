@@ -26,3 +26,5 @@ function SummarySkeleton() {
 export default function ReportPage() {
     return <MonthlySummary />;
 }
+
+    
