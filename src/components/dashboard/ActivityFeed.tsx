@@ -28,7 +28,7 @@ const ExpenseDetailsDialog = ({ item }: { item: Expense }) => {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="h-8 mt-2">Details</Button>
+                <Button variant="outline" size="sm" className="h-8">Details</Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
@@ -167,3 +167,5 @@ export function ActivityFeed({ expenses, isLoading, currentMonth, onMonthChange 
     </Card>
   );
 }
+
+    
