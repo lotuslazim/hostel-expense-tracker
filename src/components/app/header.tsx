@@ -63,15 +63,6 @@ export function AppHeader() {
     return (
       <>
         <NotificationBell />
-        <Button variant="ghost" size="icon" asChild className="relative">
-          <Link href="/chat">
-            <MessageCircle />
-            {unreadCount > 0 && (
-              <Badge variant="destructive" className="absolute top-0 right-0 h-5 w-5 justify-center p-0">{unreadCount}</Badge>
-            )}
-            <span className="sr-only">Open Chat</span>
-          </Link>
-        </Button>
         <UserNav />
       </>
     );
@@ -82,7 +73,7 @@ export function AppHeader() {
       <Sheet>
         <SheetTrigger asChild>
           <Button variant="ghost" size="icon">
-            <Menu className="h-5 w-5" />
+            <Menu className="h-6 w-6" />
             <span className="sr-only">Open navigation menu</span>
           </Button>
         </SheetTrigger>
@@ -136,24 +127,16 @@ export function AppHeader() {
     )}>
       <div className="container flex h-16 items-center">
         
-        {/* Unified Nav Menu */}
-        <div className="mr-4">
+        <div className="md:hidden">
           {isClient && renderNavMenu()}
         </div>
 
-        {/* Logo in the middle for desktop */}
-        <div className="hidden md:flex flex-1 items-center justify-center">
+        <div className="flex-1 flex items-center justify-start md:justify-center">
             <Logo className="light-theme-logo" />
         </div>
 
-        {/* Logo for mobile */}
-        <div className="md:hidden flex-1">
-          <Logo className="light-theme-logo" />
-        </div>
-
-        {/* Right side icons */}
         <div className="flex items-center justify-end space-x-2">
-           <div className="flex items-center space-x-2">
+           <div className="flex items-center space-x-1">
             {renderUserSection()}
            </div>
         </div>
