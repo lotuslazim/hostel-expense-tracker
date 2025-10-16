@@ -99,8 +99,8 @@ export function ActivityFeed({ expenses, isLoading, currentMonth, onMonthChange 
   return (
     <Card className="h-full">
       <CardHeader>
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex-1">
                 <CardTitle>Monthly Expense Feed</CardTitle>
                 <CardDescription>
                   Showing all expenses for {format(currentMonth, "MMMM yyyy")}.
