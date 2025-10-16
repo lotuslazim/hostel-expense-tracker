@@ -180,8 +180,8 @@ function NewUserAdminPanel({ user }: { user: User }) {
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
       <div className="text-center mb-8">
         <Group className="h-12 w-12 mx-auto text-primary mb-4" />
-        <h1 className="text-3xl font-bold font-headline">Get Started with Your Group</h1>
-        <p className="text-muted-foreground mt-2 max-w-md">
+        <h1 className="text-2xl md:text-3xl font-bold font-headline">Get Started with Your Group</h1>
+        <p className="text-sm md:text-base text-muted-foreground mt-2 max-w-md">
           A group allows you and your roommates to track meals and manage shared expenses together.
         </p>
       </div>
@@ -318,8 +318,8 @@ function GroupDetailsPanel({ groupId }: { groupId: string }) {
     return (
         <div className="space-y-8">
             <div>
-                <h1 className="text-3xl font-bold font-headline tracking-tight">Group Details</h1>
-                <p className="text-muted-foreground">Information about your current group.</p>
+                <h1 className="text-2xl md:text-3xl font-bold font-headline tracking-tight">Group Details</h1>
+                <p className="text-sm md:text-base text-muted-foreground">Information about your current group.</p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -434,3 +434,5 @@ export default function AdminPage() {
         </div>
     )
 }
+
+    

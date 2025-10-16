@@ -362,8 +362,8 @@ export function Profile() {
   return (
     <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight font-headline">My Profile</h1>
-        <p className="text-muted-foreground">View and edit your personal and group information.</p>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight font-headline">My Profile</h1>
+        <p className="text-sm md:text-base text-muted-foreground">View and edit your personal and group information.</p>
       </div>
 
       <Card>
@@ -488,7 +488,7 @@ export function Profile() {
                                         </div>
                                          <ReceiptDialogContent>
                                             <ReceiptDialogHeader>
-                                                <ReceiptDialogTitle>Receipt for {item.expenseItem}</DialogTitle>
+                                                <ReceiptDialogTitle>Receipt for {item.expenseItem}</ReceiptDialogTitle>
                                             </ReceiptDialogHeader>
                                             <div className="py-4">
                                                 <img src={item.receiptPhotoUrl} alt="Receipt" className="w-full h-auto rounded-md" />

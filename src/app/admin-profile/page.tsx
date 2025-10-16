@@ -381,8 +381,8 @@ export default function AdminProfilePage() {
             ) : (
                 <div className="space-y-8">
                     <div>
-                        <h1 className="text-3xl font-bold font-headline">Admin Dashboard</h1>
-                        <p className="text-muted-foreground">Manage your group, members, and settings.</p>
+                        <h1 className="text-2xl md:text-3xl font-bold font-headline">Admin Dashboard</h1>
+                        <p className="text-sm md:text-base text-muted-foreground">Manage your group, members, and settings.</p>
                     </div>
         
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -447,6 +447,8 @@ export default function AdminProfilePage() {
         </div>
       );
 }
+
+    
 
     
 

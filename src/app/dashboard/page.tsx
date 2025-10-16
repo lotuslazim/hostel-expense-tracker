@@ -68,8 +68,8 @@ function DashboardContent({ groupId }: { groupId: string }) {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight font-headline">Dashboard</h1>
-        <p className="text-muted-foreground">Log your meals and expenses for the day.</p>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight font-headline">Dashboard</h1>
+        <p className="text-sm md:text-base text-muted-foreground">Log your meals and expenses for the day.</p>
       </div>
       <div className="space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -124,3 +124,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    
