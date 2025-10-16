@@ -8,19 +8,32 @@ import { NavLink } from "./nav-link";
 import { Button } from "../ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, MessageCircle, LayoutDashboard, BarChart3, Package, LogOut } from "lucide-react";
-import { useUser } from "@/firebase";
+import { useUser, useDoc } from "@/firebase";
 import { Skeleton } from "../ui/skeleton";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { signOut } from "firebase/auth";
-import { auth } from "@/firebase/config";
+import { auth, firestore } from "@/firebase/config";
 import { useRouter } from "next/navigation";
 import { NotificationBell } from "./notification-bell";
+import { doc } from "firebase/firestore";
+import { useUnreadMessages } from "@/hooks/useUnreadMessages";
+import { Badge } from "../ui/badge";
 
 export function AppHeader() {
-  const { isUserLoading } = useUser();
+  const { user, isUserLoading } = useUser();
   const [isClient, setIsClient] = useState(false);
   const router = useRouter();
+
+  const userDocRef = useMemo(() => {
+    if (!user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [user]);
+  const { data: userData } = useDoc(userDocRef);
+  const groupId = userData?.groupId;
+
+  const { unreadCount } = useUnreadMessages(groupId, user?.uid);
+
 
   useEffect(() => {
     setIsClient(true);
@@ -31,7 +44,7 @@ export function AppHeader() {
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/report", label: "Monthly Report", icon: BarChart3 },
     { href: "/inventory", label: "Inventory", icon: Package },
-    { href: "/chat", label: "Chat", icon: MessageCircle },
+    { href: "/chat", label: "Chat", icon: MessageCircle, notificationCount: unreadCount },
   ];
 
   const handleLogout = async () => {
@@ -50,9 +63,12 @@ export function AppHeader() {
     return (
       <>
         <NotificationBell />
-        <Button variant="ghost" size="icon" asChild>
+        <Button variant="ghost" size="icon" asChild className="relative">
           <Link href="/chat">
             <MessageCircle />
+            {unreadCount > 0 && (
+              <Badge variant="destructive" className="absolute top-0 right-0 h-5 w-5 justify-center p-0">{unreadCount}</Badge>
+            )}
             <span className="sr-only">Open Chat</span>
           </Link>
         </Button>
@@ -84,10 +100,15 @@ export function AppHeader() {
                     <Link
                     key={link.href}
                     href={link.href}
-                    className="flex items-center gap-3 rounded-lg px-3 py-3 text-muted-foreground transition-all hover:text-primary text-base font-medium"
+                    className="flex items-center justify-between rounded-lg px-3 py-3 text-muted-foreground transition-all hover:text-primary text-base font-medium"
                     >
-                    <link.icon className="h-5 w-5" />
-                    {link.label}
+                    <div className="flex items-center gap-3">
+                      <link.icon className="h-5 w-5" />
+                      {link.label}
+                    </div>
+                    {link.notificationCount && link.notificationCount > 0 && (
+                      <Badge variant="destructive">{link.notificationCount}</Badge>
+                    )}
                     </Link>
                 ))}
                 </nav>

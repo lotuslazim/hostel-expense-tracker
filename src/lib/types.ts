@@ -49,6 +49,7 @@ export interface ChatMessage {
   userName: string;
   userPhotoURL?: string;
   groupId: string;
+  readBy?: string[];
 }
 
 export interface Reminder {

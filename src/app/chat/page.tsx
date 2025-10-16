@@ -4,10 +4,11 @@
 import { Chat } from "@/components/chat/Chat";
 import { AppHeader } from "@/components/app/header";
 import { useUser, useDoc, useFirebase } from "@/firebase";
-import { useMemo } from "react";
-import { doc } from "firebase/firestore";
+import { useMemo, useEffect } from "react";
+import { doc, collection, writeBatch, getDocs, query, where, arrayUnion, serverTimestamp } from "firebase/firestore";
 import { WelcomeCard } from "@/components/app/welcome-card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 
 function ChatPageSkeleton() {
     return (
@@ -53,6 +54,20 @@ export default function ChatPage() {
 
     const isLoading = isUserLoading || isCurrentUserDataLoading;
     const groupId = currentUserData?.groupId;
+    const userId = currentUser?.uid;
+
+    const { unreadMessages } = useUnreadMessages(groupId, userId);
+
+    useEffect(() => {
+        if (unreadMessages.length > 0 && groupId && userId) {
+            const batch = writeBatch(firestore);
+            unreadMessages.forEach(msg => {
+                const msgRef = doc(firestore, `groups/${groupId}/messages`, msg.id);
+                batch.update(msgRef, { readBy: arrayUnion(userId) });
+            });
+            batch.commit().catch(console.error);
+        }
+    }, [unreadMessages, groupId, userId, firestore]);
 
     return (
     <div className="flex flex-col h-screen">

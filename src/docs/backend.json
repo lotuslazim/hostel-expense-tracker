@@ -101,7 +101,8 @@
         "userPhotoURL": { "type": "string", "format": "uri" },
         "text": { "type": "string" },
         "imageUrl": { "type": "string", "format": "uri" },
-        "createdAt": { "type": "string", "format": "date-time" }
+        "createdAt": { "type": "string", "format": "date-time" },
+        "readBy": { "type": "array", "items": { "type": "string" }, "description": "List of user IDs who have read the message." }
       },
       "required": ["id", "groupId", "userId", "userName", "createdAt"]
     },
@@ -227,9 +228,10 @@
           "entityName": "ChatMessage", "schema": { "$ref": "#/entities/ChatMessage" },
           "rules": {
             "list, get": "request.auth.token.email_verified == true && get(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)).data.status == 'active'",
-            "create": "request.auth.token.email_verified == true && get(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)).data.status == 'active' && request.resource.data.userId == request.auth.uid"
+            "create": "request.auth.token.email_verified == true && get(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)).data.status == 'active' && request.resource.data.userId == request.auth.uid",
+            "update": "request.auth.token.email_verified == true && request.auth.uid == resource.data.readBy[resource.data.readBy.size() - 1]"
           },
-          "description": "Stores chat messages. Accessible only by active members of the group. Users can only create their own messages. Email verification required."
+          "description": "Stores chat messages. Readable by active group members. Users can only create their own messages. Users can update a message only to add themselves to the `readBy` array."
         }
       },
        {
