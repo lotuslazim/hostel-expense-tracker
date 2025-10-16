@@ -30,7 +30,7 @@ export function Logo({
     >
       <div className={cn(
           "relative shrink-0 transition-transform duration-300 group-hover:scale-110",
-          mascotSize === 'default' && (isStacked ? "w-20 h-12 mb-2" : "w-10 h-10"),
+          mascotSize === 'default' && (isStacked ? "w-20 h-12 mb-2" : "w-9 h-9 md:w-10 md:h-10"),
           mascotSize === 'large' && 'w-24 h-24 md:w-28 md:h-28',
           isMascotAnimated && 'animate-mascot-idle'
         )}>
@@ -47,7 +47,7 @@ export function Logo({
         className={cn(
            "font-headline font-bold tracking-tight",
            isStacked ? "text-center" : "",
-           textSize === 'default' && "text-2xl",
+           textSize === 'default' && "text-xl md:text-2xl",
            textSize === 'large' && "text-5xl md:text-6xl",
         )}
       >
