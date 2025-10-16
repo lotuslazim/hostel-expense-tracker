@@ -97,7 +97,7 @@ const StepCard = ({ number, title, description, delay }: { number: string, title
       </div>
       <div>
         <h4 className="font-bold text-xl text-white">{title}</h4>
-        <p className="text-muted-foreground mt-1">{description}</p>
+        <p className="text-white/80 mt-1">{description}</p>
       </div>
     </div>
   );
