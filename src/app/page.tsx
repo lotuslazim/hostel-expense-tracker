@@ -66,7 +66,7 @@ const FeatureCard = ({ icon, title, description, imageSrc }: { icon: React.React
         <CardTitle className="flex items-center gap-2 text-xl font-bold text-white">{icon}{title}</CardTitle>
       </CardHeader>
       <CardContent className="flex-grow">
-        <p className="text-muted-foreground">{description}</p>
+        <p className="text-white/80">{description}</p>
       </CardContent>
     </Card>
   )
