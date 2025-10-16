@@ -133,7 +133,7 @@ export default function Home() {
                 You’re right where you need to be.
             </p>
             <div className="animate-fade-in-scale [animation-delay:600ms]">
-                <Logo isMascotAnimated={true} mascotSize="large" isStacked={true} textSize="large" />
+                <Logo isMascotAnimated={true} mascotSize="large" isStacked={true} textSize="large" textColor="text-white" />
             </div>
             <div className="flex items-center justify-center gap-1.5 pt-4 animate-fade-in-scale [animation-delay:800ms]">
                 <span className="h-2.5 w-2.5 rounded-full bg-white/80 animate-loading-dot [animation-delay:0.0s]"></span>
@@ -172,7 +172,7 @@ export default function Home() {
               )}
               style={{ transitionDelay: '100ms'}}
             >
-                <Logo isMascotAnimated={true} mascotSize="large" isStacked={true} textSize="large" />
+                <Logo isMascotAnimated={true} mascotSize="large" isStacked={true} textSize="large" textColor="text-white" />
             </div>
             <p
               className={cn(
@@ -334,4 +334,3 @@ export default function Home() {
     </div>
   );
 }
-

@@ -10,6 +10,7 @@ interface LogoProps {
   mascotSize?: 'default' | 'large';
   className?: string;
   textSize?: 'default' | 'large';
+  textColor?: string;
 }
 
 export function Logo({ 
@@ -17,6 +18,7 @@ export function Logo({
   isMascotAnimated = false, 
   mascotSize = 'default',
   textSize = 'default',
+  textColor = 'text-foreground dark:text-white',
   className
 }: LogoProps) {
   return (
@@ -51,7 +53,7 @@ export function Logo({
            textSize === 'large' && "text-5xl md:text-6xl",
         )}
       >
-        <span className="text-foreground dark:text-white">Bachelor</span>
+        <span className={cn(textColor)}>Bachelor</span>
         <span className="text-primary">Bite</span>
       </div>
     </div>
