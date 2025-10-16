@@ -72,7 +72,7 @@ export function AppHeader() {
       <Sheet>
         <SheetTrigger asChild>
           <Button variant="ghost" size="icon">
-            <Menu className="h-6 w-6" />
+            <Menu className="h-7 w-7" />
             <span className="sr-only">Open navigation menu</span>
           </Button>
         </SheetTrigger>
