@@ -1,3 +1,4 @@
+
 import type { Metadata } from "next";
 import { Playfair_Display, Poppins } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
@@ -9,6 +10,7 @@ import { I18nProvider } from "@/i18n/client-provider";
 import { cn } from "@/lib/utils";
 import { ReminderListener } from "@/components/app/ReminderListener";
 import { ProgressBar } from "@/components/app/progress-bar";
+import { Suspense } from "react";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -47,7 +49,9 @@ export default function RootLayout({
           >
             <InventoryProvider>
               <FirebaseClientProvider>
-                <ProgressBar />
+                <Suspense fallback={null}>
+                  <ProgressBar />
+                </Suspense>
                 {children}
                 <Toaster />
                 <ReminderListener />
