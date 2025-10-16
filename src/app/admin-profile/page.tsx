@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { FileDown, Users, Shield, Copy, Settings, Package, Plus, Trash2, Loader2 } from "lucide-react";
+import { FileDown, Users, Shield, Copy, Settings, Package, Plus, Trash2, Loader2, Info } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,8 @@ import { startOfMonth } from 'date-fns/startOfMonth';
 import { endOfMonth } from 'date-fns/endOfMonth';
 import { format } from 'date-fns/format';
 import type { Member, User as UserType } from "@/lib/types";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 
 function AdminProfilePageSkeleton() {
@@ -143,6 +145,24 @@ function AdminActionsCard({ groupDocRef, groupData, groupId }: { groupDocRef: an
     const [newMealType, setNewMealType] = useState("");
     const [isUpdating, setIsUpdating] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
+
+    const [isMealItemNameRequired, setIsMealItemNameRequired] = useState(groupData?.settings?.isMealItemNameRequired ?? false);
+
+    const handleMealItemNameRequiredToggle = async (checked: boolean) => {
+        if (!groupDocRef) return;
+        setIsUpdating(true);
+        try {
+            await updateDoc(groupDocRef, {
+                "settings.isMealItemNameRequired": checked
+            });
+            setIsMealItemNameRequired(checked);
+            toast({ title: "Setting Updated", description: `Meal item name is now ${checked ? 'required' : 'optional'}.` });
+        } catch (error) {
+            toast({ variant: "destructive", title: "Error updating setting." });
+        } finally {
+            setIsUpdating(false);
+        }
+    };
     
     const handleAddMealType = async () => {
         if (!newMealType.trim() || !groupDocRef) return;
@@ -313,6 +333,19 @@ function AdminActionsCard({ groupDocRef, groupData, groupId }: { groupDocRef: an
                         </div>
                     </DialogContent>
                 </Dialog>
+
+                <div className="flex items-center justify-between p-3 rounded-lg border">
+                    <Label htmlFor="meal-item-required" className="flex flex-col gap-1">
+                        <span>Require Meal Item Name</span>
+                        <span className="text-xs font-normal text-muted-foreground">Makes the 'Item Name' field mandatory when logging a meal.</span>
+                    </Label>
+                    <Switch
+                        id="meal-item-required"
+                        checked={isMealItemNameRequired}
+                        onCheckedChange={handleMealItemNameRequiredToggle}
+                        disabled={isUpdating}
+                    />
+                </div>
 
                 <Button variant="outline" className="w-full justify-start gap-2" disabled>
                     <Package className="h-4 w-4"/> Edit Purchased Items

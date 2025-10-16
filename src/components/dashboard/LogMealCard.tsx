@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
-import { useUser, useDoc, addDocumentNonBlocking } from "@/firebase";
+import { useUser, useDoc } from "@/firebase";
 import { firestore } from "@/firebase/config";
 import { doc, collection, serverTimestamp, Timestamp, addDoc, deleteDoc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
@@ -72,6 +72,7 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
   }, [isMealItemNameRequired, mealTypes, form]);
 
   const handleUndo = (docId: string) => {
+    if (!groupId) return;
     const docRef = doc(firestore, `groups/${groupId}/meals`, docId);
     deleteDoc(docRef);
     toast({ title: "Action Undone", description: "The meal log has been removed." });
