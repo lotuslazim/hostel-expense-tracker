@@ -218,7 +218,7 @@ export default function Home() {
               </Button>
                 <p
                 className={cn(
-                  "text-lg md:text-xl text-muted-foreground mt-4 transition-all duration-700 ease-out",
+                  "text-lg md:text-xl text-white/80 mt-4 transition-all duration-700 ease-out",
                   heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
                 )}
                 style={{ transitionDelay: '600ms' }}
@@ -343,5 +343,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
