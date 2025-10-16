@@ -44,7 +44,7 @@ export function ChatMessage({ message, currentUserId }: ChatMessageProps) {
                             <img 
                                 src={message.imageUrl} 
                                 alt="Chat attachment" 
-                                className="rounded-lg max-w-full h-auto cursor-pointer border-2 border-background"
+                                className="rounded-lg max-w-full h-auto cursor-pointer"
                                 style={{ maxHeight: '300px' }}
                             />
                          </a>
