@@ -1,13 +1,13 @@
-
 "use client";
 
 import { useEffect } from 'react';
-import { usePathname, useSearchParams } from 'next/navigation';
 import NProgress from 'nprogress';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 export function ProgressBar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   useEffect(() => {
     NProgress.configure({ showSpinner: false });
@@ -15,15 +15,31 @@ export function ProgressBar() {
     const handleStart = () => NProgress.start();
     const handleStop = () => NProgress.done();
 
-    // We can't use next/router events since they were removed in app router
-    // so we'll just listen for path changes.
-    handleStop(); // Stop progress on initial load
+    // The initial router object from `useRouter` might not be the patched one.
+    // We patch the methods on the `window.history` object, which `next/navigation` uses under the hood.
+    const originalPushState = window.history.pushState;
+    const originalReplaceState = window.history.replaceState;
 
-    return () => {
-      handleStop(); // Ensure progress stops on component unmount
+    window.history.pushState = function (...args) {
+      handleStart();
+      originalPushState.apply(window.history, args);
     };
-  }, [pathname, searchParams]);
 
-  // The component doesn't render anything itself
-  return null;
+    window.history.replaceState = function (...args) {
+      handleStart();
+      originalReplaceState.apply(window.history, args);
+    };
+
+    // When the component mounts, and on subsequent path changes, we stop the progress bar.
+    // This handles the initial load and back/forward browser button navigation.
+    handleStop();
+
+    // Cleanup function to restore original methods
+    return () => {
+      window.history.pushState = originalPushState;
+      window.history.replaceState = originalReplaceState;
+    };
+  }, [pathname, searchParams]); // Re-run effect when path changes to call handleStop()
+
+  return null; // This component does not render anything.
 }
