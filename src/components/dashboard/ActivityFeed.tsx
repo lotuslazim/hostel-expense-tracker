@@ -31,7 +31,7 @@ const categoryIcons: Record<ExpenseCategory, React.ReactNode> = {
 
 const CategoryBadge = ({ category }: { category: ExpenseCategory }) => {
     return (
-        <Badge variant="outline" className="flex items-center gap-1.5 bg-secondary/10 text-secondary-foreground/80 px-2">
+        <Badge variant="secondary" className="flex items-center gap-1.5">
             {categoryIcons[category]}
             <span>{category}</span>
         </Badge>
