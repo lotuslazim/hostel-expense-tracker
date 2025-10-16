@@ -37,7 +37,10 @@ export function ReminderListener() {
             if (isInitialLoadRef.current) {
                 if (snapshot.docs.length > 0) {
                     const lastDoc = snapshot.docs[snapshot.docs.length - 1];
-                    lastReminderTimestampRef.current = (lastDoc.data().createdAt as Timestamp).toDate();
+                    const lastDocData = lastDoc.data();
+                    if (lastDocData.createdAt) {
+                        lastReminderTimestampRef.current = (lastDocData.createdAt as Timestamp).toDate();
+                    }
                 } else {
                     lastReminderTimestampRef.current = new Date();
                 }
@@ -48,6 +51,10 @@ export function ReminderListener() {
             changes.forEach((change) => {
                 if (change.type === 'added') {
                     const reminder = change.doc.data() as Reminder;
+                    // Fix: Check if createdAt exists before using it
+                    if (!reminder.createdAt) {
+                        return; // Ignore documents that don't have a server timestamp yet
+                    }
                     const reminderDate = (reminder.createdAt as Timestamp).toDate();
 
                     if (reminder.senderId === currentUser.uid) {
