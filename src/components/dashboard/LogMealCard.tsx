@@ -44,7 +44,7 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
   const isMealItemNameRequired = useMemo(() => groupData?.settings?.isMealItemNameRequired ?? false, [groupData]);
 
   const mealSchema = useMemo(() => {
-    const safeMealTypes = mealTypes.length > 0 ? mealTypes.map(t => t.toLowerCase()) : ["dummy"];
+    const safeMealTypes = mealTypes.length > 0 ? mealTypes.map((t: string) => t.toLowerCase()) : ["dummy"];
     
     return z.object({
         mealType: z.enum(safeMealTypes as [string, ...string[]], {
