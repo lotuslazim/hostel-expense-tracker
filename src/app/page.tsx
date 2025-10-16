@@ -50,8 +50,8 @@ const FeatureCard = ({ icon, title, description, imageSrc }: { icon: React.React
               />
             </div>
           </DialogTrigger>
-          <DialogContent className="max-w-4xl p-2 bg-transparent border-0">
-             <DialogHeader>
+          <DialogContent className="max-w-6xl p-0">
+             <DialogHeader className="p-4">
                 <DialogTitle className="sr-only">{title} - Fullscreen View</DialogTitle>
              </DialogHeader>
              <Image 
@@ -59,7 +59,7 @@ const FeatureCard = ({ icon, title, description, imageSrc }: { icon: React.React
                 alt={title} 
                 width={1920}
                 height={1080}
-                className="rounded-lg object-contain"
+                className="rounded-b-lg object-contain w-full h-auto"
               />
           </DialogContent>
         </Dialog>
