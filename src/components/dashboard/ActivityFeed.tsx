@@ -130,6 +130,7 @@ export function ActivityFeed({ expenses, isLoading, currentMonth, onMonthChange 
                             <TableHead>Member & Item</TableHead>
                             <TableHead className="hidden md:table-cell">Category</TableHead>
                             <TableHead className="text-right">Amount</TableHead>
+                            <TableHead className="w-[100px] text-center">Details</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -145,10 +146,12 @@ export function ActivityFeed({ expenses, isLoading, currentMonth, onMonthChange 
                                     <div className="md:hidden pt-1">
                                         <Badge variant="secondary">{item.category}</Badge>
                                     </div>
-                                    <ExpenseDetailsDialog item={item} />
                                 </TableCell>
                                 <TableCell className="hidden md:table-cell"><Badge variant="secondary">{item.category}</Badge></TableCell>
                                 <TableCell className="text-right font-semibold">৳{item.amount.toFixed(2)}</TableCell>
+                                <TableCell className="text-center">
+                                    <ExpenseDetailsDialog item={item} />
+                                </TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
