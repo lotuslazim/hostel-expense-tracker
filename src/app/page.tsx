@@ -238,7 +238,7 @@ export default function Home() {
                     icon={<Utensils />} 
                     title="Daily Meal Logging"
                     description="Easily log who’s eating and when — so you only cook what you need."
-                    imageSrc={'/dashboard.jpg'}
+                    imageSrc={'/dashboadjpg.jpg'}
                   />
                   <FeatureCard 
                     icon={<div className="h-6 w-6 flex items-center justify-center text-3xl font-bold">৳</div>} 
@@ -250,7 +250,7 @@ export default function Home() {
                     icon={<Scale />} 
                     title="Final Settlement"
                     description="Get a clear breakdown of who owes what at the end of the month. No more math headaches."
-                    imageSrc={'/finalsettlement.jpg'}
+                    imageSrc={'/finalsatelment.jpg'}
                   />
                 </div>
             </div>
@@ -277,7 +277,7 @@ export default function Home() {
                       previewInView ? "opacity-100 scale-120" : "opacity-0 scale-100"
                       )}
                   >
-                      <Image src="/app-screenshot.jpg" alt="App Screenshot" fill className="object-cover" />
+                      <Image src="/a1.jpg" alt="App Screenshot" fill className="object-cover" />
                   </div>
                   <p className={cn(
                       "mt-6 text-muted-foreground italic transition-all duration-500 ease-out",

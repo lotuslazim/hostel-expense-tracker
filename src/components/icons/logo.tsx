@@ -46,13 +46,12 @@ export function Logo({
       <div
         className={cn(
            "font-headline font-bold tracking-tight",
-           "text-primary-foreground group-[.dark-theme-logo]:text-white",
            isStacked ? "text-center" : "",
            textSize === 'default' && "text-2xl",
            textSize === 'large' && "text-5xl md:text-6xl",
         )}
       >
-        <span className="text-white group-[.light-theme-logo]:text-foreground">Bachelor</span>
+        <span className="text-foreground dark:text-white">Bachelor</span>
         <span className="text-primary">Bite</span>
       </div>
     </div>
