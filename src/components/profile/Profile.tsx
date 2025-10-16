@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useMemo, useEffect, lazy, Suspense } from "react";
@@ -535,5 +534,3 @@ export function Profile() {
     </div>
   );
 }
-
-    
