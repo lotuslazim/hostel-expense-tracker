@@ -488,7 +488,7 @@ export function Profile() {
                                         </div>
                                          <ReceiptDialogContent>
                                             <ReceiptDialogHeader>
-                                                <ReceiptDialogTitle>Receipt for {item.expenseItem}</ReceiptDialogTitle>
+                                                <ReceiptDialogTitle>Receipt for {item.expenseItem}</DialogTitle>
                                             </ReceiptDialogHeader>
                                             <div className="py-4">
                                                 <img src={item.receiptPhotoUrl} alt="Receipt" className="w-full h-auto rounded-md" />
@@ -513,3 +513,5 @@ export function Profile() {
     </div>
   );
 }
+
+    
