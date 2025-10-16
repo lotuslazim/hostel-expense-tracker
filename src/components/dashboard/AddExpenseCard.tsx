@@ -27,7 +27,7 @@ import { useUser, useDoc } from "@/firebase";
 import { firestore } from "@/firebase/config";
 import { doc, collection, serverTimestamp, Timestamp, getDocs, where, query, addDoc, deleteDoc, writeBatch } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ShoppingCart, Camera, Upload, X, Plus, Trash2 } from "lucide-react";
+import { Loader2, ShoppingCart, Camera, Upload, X, Plus, Trash2, CameraRotate } from "lucide-react";
 import { sanitizeFirestoreData } from "@/lib/utils";
 import { Skeleton } from "../ui/skeleton";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
@@ -72,6 +72,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   const [isCapturing, setIsCapturing] = useState(false);
   const [showInventoryFields, setShowInventoryFields] = useState(false);
   const [showReceipt, setShowReceipt] = useState(false);
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
 
 
   const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [currentUser]);
@@ -145,14 +146,20 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
 
   }, [categoryValue, form]);
 
-  
-  useEffect(() => {
-    if (!isCameraDialogOpen && streamRef.current) {
+  const stopCameraStream = () => {
+    if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
         streamRef.current = null;
         if (videoRef.current) {
             videoRef.current.srcObject = null;
         }
+    }
+  };
+
+  
+  useEffect(() => {
+    if (!isCameraDialogOpen) {
+       stopCameraStream();
     }
   }, [isCameraDialogOpen]);
 
@@ -178,9 +185,9 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   }
 
   const getCameraPermission = async () => {
-      if (hasCameraPermission === false) return; // Don't re-request if denied
+      stopCameraStream();
       try {
-          const stream = await navigator.mediaDevices.getUserMedia({video: true});
+          const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode } });
           streamRef.current = stream;
           if (videoRef.current) {
               videoRef.current.srcObject = stream;
@@ -192,6 +199,17 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
       }
   };
   
+  const handleRotateCamera = () => {
+    setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
+  };
+
+  useEffect(() => {
+    if (isCameraDialogOpen && hasCameraPermission) {
+        getCameraPermission();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [facingMode, isCameraDialogOpen, hasCameraPermission]);
+
  const handleCapture = async () => {
     if (!videoRef.current || !canvasRef.current || isCapturing) return;
     setIsCapturing(true);
@@ -223,10 +241,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
         setIsCameraDialogOpen(false);
     } finally {
         setIsCapturing(false);
-        if (streamRef.current) {
-            streamRef.current.getTracks().forEach(track => track.stop());
-            streamRef.current = null;
-        }
+        stopCameraStream();
     }
 };
 
@@ -548,7 +563,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                                         <DialogTitle>Take a Photo</DialogTitle>
                                         <DialogDescription>Center the receipt in the frame and click capture.</DialogDescription>
                                     </DialogHeader>
-                                    <div className="py-4">
+                                    <div className="py-4 relative">
                                         <video ref={videoRef} className="w-full aspect-video rounded-md bg-muted" autoPlay playsInline muted />
                                         <canvas ref={canvasRef} className="hidden" />
                                         {hasCameraPermission === false && (
@@ -556,6 +571,18 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                                                 <AlertTitle>Camera Access Denied</AlertTitle>
                                                 <AlertDescription>Please enable camera permissions in your browser settings.</AlertDescription>
                                             </Alert>
+                                        )}
+                                        {hasCameraPermission && (
+                                             <Button 
+                                                variant="outline" 
+                                                size="icon" 
+                                                onClick={handleRotateCamera} 
+                                                className="absolute bottom-2 right-2 rounded-full"
+                                                disabled={isCapturing}
+                                             >
+                                                <CameraRotate className="h-5 w-5" />
+                                                <span className="sr-only">Rotate Camera</span>
+                                            </Button>
                                         )}
                                     </div>
                                     <Button onClick={handleCapture} disabled={!hasCameraPermission || isCapturing}>
