@@ -3,7 +3,7 @@
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowRight, Utensils, IndianRupee, Scale, CheckCircle } from "lucide-react";
+import { ArrowRight, Utensils, DollarSign, Scale, CheckCircle } from "lucide-react";
 import { useUser } from "@/firebase";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -19,7 +19,7 @@ import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle } from 
 const FloatingIcon = ({ children, className, animationDelay }: { children: React.ReactNode, className?: string, animationDelay?: string }) => (
   <div
     className={cn(
-        "absolute text-5xl animate-float",
+        "absolute text-5xl animate-float text-white/30",
         className
     )}
     style={{ animationDelay }}
@@ -118,12 +118,12 @@ export default function Home() {
       <div className="relative min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-[#0f2027] via-[#203a43] to-[#2c5364] text-white p-4 overflow-hidden">
         <div className="absolute inset-0 bg-grid-white/[0.05]"></div>
          {/* Floating Icons */}
-          <FloatingIcon className="top-[10%] left-[5%] text-white/30" animationDelay="0s">🍛</FloatingIcon>
-          <FloatingIcon className="top-[20%] right-[10%] text-white/30" animationDelay="1s">💰</FloatingIcon>
-          <FloatingIcon className="bottom-[25%] left-[15%] text-white/30" animationDelay="2s">📝</FloatingIcon>
-          <FloatingIcon className="bottom-[10%] right-[20%] text-white/30" animationDelay="3s">🍴</FloatingIcon>
-          <FloatingIcon className="top-[50%] left-[25%] text-white/30" animationDelay="4s">🍛</FloatingIcon>
-          <FloatingIcon className="top-[60%] right-[30%] text-white/30" animationDelay="5s">💰</FloatingIcon>
+          <FloatingIcon className="top-[10%] left-[5%]" animationDelay="0s">🍛</FloatingIcon>
+          <FloatingIcon className="top-[20%] right-[10%]" animationDelay="1s">💰</FloatingIcon>
+          <FloatingIcon className="bottom-[25%] left-[15%]" animationDelay="2s">📝</FloatingIcon>
+          <FloatingIcon className="bottom-[10%] right-[20%]" animationDelay="3s">🍴</FloatingIcon>
+          <FloatingIcon className="top-[50%] left-[25%]" animationDelay="4s">🍛</FloatingIcon>
+          <FloatingIcon className="top-[60%] right-[30%]" animationDelay="5s">💰</FloatingIcon>
 
         <div className="relative text-center space-y-6 z-10">
             <p className="text-2xl md:text-3xl font-medium animate-fade-in-scale [animation-delay:200ms]">
@@ -155,12 +155,12 @@ export default function Home() {
             <div className="absolute inset-0 bg-grid-white/[0.05]"></div>
 
             {/* Floating Icons */}
-          <FloatingIcon className="top-[10%] left-[5%] text-white/30" animationDelay="0s">🍛</FloatingIcon>
-          <FloatingIcon className="top-[20%] right-[10%] text-white/30" animationDelay="1s">💰</FloatingIcon>
-          <FloatingIcon className="bottom-[25%] left-[15%] text-white/30" animationDelay="2s">📝</FloatingIcon>
-          <FloatingIcon className="bottom-[10%] right-[20%] text-white/30" animationDelay="3s">🍴</FloatingIcon>
-          <FloatingIcon className="top-[50%] left-[25%] text-white/30" animationDelay="4s">🍛</FloatingIcon>
-          <FloatingIcon className="top-[60%] right-[30%] text-white/30" animationDelay="5s">💰</FloatingIcon>
+          <FloatingIcon className="top-[10%] left-[5%]" animationDelay="0s">🍛</FloatingIcon>
+          <FloatingIcon className="top-[20%] right-[10%]" animationDelay="1s">💰</FloatingIcon>
+          <FloatingIcon className="bottom-[25%] left-[15%]" animationDelay="2s">📝</FloatingIcon>
+          <FloatingIcon className="bottom-[10%] right-[20%]" animationDelay="3s">🍴</FloatingIcon>
+          <FloatingIcon className="top-[50%] left-[25%]" animationDelay="4s">🍛</FloatingIcon>
+          <FloatingIcon className="top-[60%] right-[30%]" animationDelay="5s">💰</FloatingIcon>
 
           <div className="container relative p-4 space-y-4 max-w-3xl mx-auto flex flex-col items-center">
             <div
@@ -241,7 +241,7 @@ export default function Home() {
                     imageSrc={'/dashboard.jpg'}
                   />
                   <FeatureCard 
-                    icon={<IndianRupee />} 
+                    icon={<DollarSign />} 
                     title="Expense Tracking"
                     description="Split bills for groceries, gas, and utilities. Upload receipts to keep things official."
                     imageSrc={'/addexpense.jpg'}
@@ -277,7 +277,7 @@ export default function Home() {
                       previewInView ? "opacity-100 scale-120" : "opacity-0 scale-100"
                       )}
                   >
-                      <Image src="/abcd.jpg" alt="App Screenshot" fill className="object-cover" />
+                      <Image src="/app-screenshot.jpg" alt="App Screenshot" fill className="object-cover" />
                   </div>
                   <p className={cn(
                       "mt-6 text-muted-foreground italic transition-all duration-500 ease-out",
