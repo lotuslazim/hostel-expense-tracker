@@ -31,7 +31,7 @@ const categoryIcons: Record<ExpenseCategory, React.ReactNode> = {
 
 const CategoryBadge = ({ category }: { category: ExpenseCategory }) => {
     return (
-        <Badge variant="secondary" className="flex items-center gap-1.5">
+        <Badge variant="secondary" className="inline-flex items-center gap-1.5 py-1">
             {categoryIcons[category]}
             <span>{category}</span>
         </Badge>
@@ -152,22 +152,20 @@ export function ActivityFeed({ expenses, isLoading, currentMonth, onMonthChange 
                     <TableBody>
                         {sortedExpenses.map((item) => (
                             <TableRow key={`expense-${item.id}`} className="align-top">
-                                <TableCell className="hidden sm:table-cell pt-5">{format((item.date as any).toDate(), "MMM d")}</TableCell>
-                                <TableCell>
+                                <TableCell className="hidden sm:table-cell pt-3">{format((item.date as any).toDate(), "MMM d")}</TableCell>
+                                <TableCell className="pt-3">
                                     <div className="font-medium">{item.userName}</div>
                                     <div className="text-sm text-muted-foreground flex items-center gap-2">
                                       <span className="font-medium text-foreground/80">Item: </span>
                                       <span>{item.expenseItem}</span>
+                                       <ExpenseDetailsDialog item={item} />
                                     </div>
                                     <div className="md:hidden pt-2">
                                         <CategoryBadge category={item.category} />
                                     </div>
-                                    <div className="pt-2">
-                                      <ExpenseDetailsDialog item={item} />
-                                    </div>
                                 </TableCell>
-                                <TableCell className="hidden md:table-cell pt-5"><CategoryBadge category={item.category} /></TableCell>
-                                <TableCell className="text-right font-semibold pt-5">৳{item.amount.toFixed(2)}</TableCell>
+                                <TableCell className="hidden md:table-cell pt-3"><CategoryBadge category={item.category} /></TableCell>
+                                <TableCell className="text-right font-semibold pt-3">৳{item.amount.toFixed(2)}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
