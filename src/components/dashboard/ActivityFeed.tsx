@@ -4,21 +4,38 @@
 import { useMemo }from "react";
 import { format } from 'date-fns/format';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { ShoppingCart, Receipt, List } from "lucide-react";
+import { ShoppingCart, Receipt, List, Zap, Flame } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import type { Expense, PurchasedItem } from "@/lib/types";
+import type { Expense, PurchasedItem, ExpenseCategory } from "@/lib/types";
 import { MonthSwitcher } from "../report/month-switcher";
 import { Skeleton } from "../ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { Button } from "../ui/button";
+import { cn } from "@/lib/utils";
 
 interface ActivityFeedProps {
   expenses: Expense[];
   isLoading: boolean;
   currentMonth: Date;
   onMonthChange: (direction: "next" | "prev") => void;
+}
+
+const categoryIcons: Record<ExpenseCategory, React.ReactNode> = {
+    "Food & Groceries": <ShoppingCart className="h-3 w-3" />,
+    "Electricity": <Zap className="h-3 w-3" />,
+    "Gas": <Flame className="h-3 w-3" />,
+    "Other": <List className="h-3 w-3" />,
+};
+
+const CategoryBadge = ({ category }: { category: ExpenseCategory }) => {
+    return (
+        <Badge variant="secondary" className="flex items-center gap-1.5">
+            {categoryIcons[category]}
+            <span>{category}</span>
+        </Badge>
+    )
 }
 
 const ExpenseDetailsDialog = ({ item }: { item: Expense }) => {
@@ -65,7 +82,7 @@ const ExpenseDetailsDialog = ({ item }: { item: Expense }) => {
                             </div>
                              <div className="flex justify-between items-center">
                                 <span className="text-muted-foreground">Category</span>
-                                <Badge variant="secondary">{item.category}</Badge>
+                                <CategoryBadge category={item.category} />
                             </div>
                              <div className="flex justify-between items-center">
                                 <span className="text-muted-foreground">Amount</span>
@@ -99,7 +116,7 @@ export function ActivityFeed({ expenses, isLoading, currentMonth, onMonthChange 
   return (
     <Card className="h-full">
       <CardHeader>
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex-1">
                 <CardTitle>Monthly Expense Feed</CardTitle>
                 <CardDescription>
@@ -143,11 +160,11 @@ export function ActivityFeed({ expenses, isLoading, currentMonth, onMonthChange 
                                       {item.expenseItem}
                                     </div>
                                     <div className="md:hidden pt-1">
-                                        <Badge variant="secondary">{item.category}</Badge>
+                                        <CategoryBadge category={item.category} />
                                     </div>
                                     <ExpenseDetailsDialog item={item} />
                                 </TableCell>
-                                <TableCell className="hidden md:table-cell"><Badge variant="secondary">{item.category}</Badge></TableCell>
+                                <TableCell className="hidden md:table-cell"><CategoryBadge category={item.category} /></TableCell>
                                 <TableCell className="text-right font-semibold">৳{item.amount.toFixed(2)}</TableCell>
                             </TableRow>
                         ))}
