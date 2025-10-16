@@ -3,7 +3,7 @@
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowRight, Utensils, DollarSign, Scale, CheckCircle } from "lucide-react";
+import { ArrowRight, Utensils, Scale, CheckCircle } from "lucide-react";
 import { useUser } from "@/firebase";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -241,7 +241,7 @@ export default function Home() {
                     imageSrc={'/dashboard.jpg'}
                   />
                   <FeatureCard 
-                    icon={<DollarSign />} 
+                    icon={<div className="h-6 w-6 flex items-center justify-center text-3xl font-bold">৳</div>} 
                     title="Expense Tracking"
                     description="Split bills for groceries, gas, and utilities. Upload receipts to keep things official."
                     imageSrc={'/addexpense.jpg'}
