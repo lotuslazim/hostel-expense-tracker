@@ -196,6 +196,11 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
       } catch (error) {
           console.error('Error accessing camera:', error);
           setHasCameraPermission(false);
+          toast({
+            variant: 'destructive',
+            title: 'Camera Access Denied',
+            description: 'Please enable camera permissions in your browser settings to use this app.',
+          });
       }
   };
   
@@ -204,11 +209,11 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   };
 
   useEffect(() => {
-    if (isCameraDialogOpen && hasCameraPermission) {
+    if (isCameraDialogOpen && hasCameraPermission !== false) {
         getCameraPermission();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [facingMode, isCameraDialogOpen, hasCameraPermission]);
+  }, [facingMode, isCameraDialogOpen]);
 
  const handleCapture = async () => {
     if (!videoRef.current || !canvasRef.current || isCapturing) return;
@@ -291,7 +296,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
         return;
     }
 
-    // form.control.register('root', { disabled: true }); // Disable form during submission
+    // form.control.register('root', { disabled: true }); // This line causes errors and is not needed
 
     try {
         let receiptUrl: string | null = null;
@@ -365,7 +370,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
         console.error("Error adding expense:", error);
         toast({ variant: "destructive", title: "Error", description: "Could not log expense. Please check permissions and try again." });
     } finally {
-        // form.control.register('root', { disabled: false }); // Re-enable form
+        // form.control.register('root', { disabled: false }); // This line causes errors and is not needed
     }
   }
   

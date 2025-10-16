@@ -1,4 +1,3 @@
-
 "use client";
 
 import { ReportTabs } from "@/components/report/ReportTabs";
@@ -22,5 +21,3 @@ export default function ReportLayout({
     </div>
   );
 }
-
-    

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { AddExpenseCard } from "@/components/dashboard/AddExpenseCard";
@@ -124,5 +123,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-    

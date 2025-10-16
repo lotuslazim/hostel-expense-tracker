@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useUser, useDoc, useCollection } from "@/firebase";
@@ -434,5 +433,3 @@ export default function AdminPage() {
         </div>
     )
 }
-
-    

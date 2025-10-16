@@ -1,4 +1,3 @@
-
 "use client";
 
 import dynamic from 'next/dynamic';
@@ -26,5 +25,3 @@ function SummarySkeleton() {
 export default function ReportPage() {
     return <MonthlySummary />;
 }
-
-    

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useMemo, useState, useCallback, useEffect } from "react";
@@ -152,5 +151,3 @@ export default function InventoryPage() {
     </div>
   );
 }
-
-    

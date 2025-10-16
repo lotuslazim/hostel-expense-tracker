@@ -1,4 +1,3 @@
-
 "use client";
 
 import { MealConsumptionReport } from "@/components/report/meals/MealConsumptionReport";
@@ -6,5 +5,3 @@ import { MealConsumptionReport } from "@/components/report/meals/MealConsumption
 export default function MealReportPage() {
     return <MealConsumptionReport />;
 }
-
-    
