@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 
 const FloatingIcon = ({ children, className, animationDelay }: { children: React.ReactNode, className?: string, animationDelay?: string }) => (
@@ -30,7 +31,7 @@ const FloatingIcon = ({ children, className, animationDelay }: { children: React
 const FeatureCard = ({ icon, title, description, imageSrc }: { icon: React.ReactNode, title: string, description: string, imageSrc: string }) => {
   const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.2 });
   return (
-    <Card 
+    <Card
       ref={ref}
       className={cn(
         "bg-white/5 border-white/10 text-center p-6 transform transition-all duration-500 flex flex-col",
@@ -38,9 +39,27 @@ const FeatureCard = ({ icon, title, description, imageSrc }: { icon: React.React
       )}
     >
       <CardHeader className="items-center">
-         <div className="relative w-full mb-4 rounded-lg overflow-hidden aspect-video">
-          <Image src={imageSrc} alt={title} fill className="object-contain transition-transform duration-300 group-hover:scale-105" />
-        </div>
+        <Dialog>
+          <DialogTrigger asChild>
+            <div className="relative w-full mb-4 rounded-lg overflow-hidden aspect-video cursor-zoom-in group">
+              <Image 
+                src={imageSrc} 
+                alt={title} 
+                fill 
+                className="object-contain transition-transform duration-300 group-hover:scale-105"
+              />
+            </div>
+          </DialogTrigger>
+          <DialogContent className="max-w-4xl p-2 bg-transparent border-0">
+             <Image 
+                src={imageSrc} 
+                alt={title} 
+                width={1920}
+                height={1080}
+                className="rounded-lg object-contain"
+              />
+          </DialogContent>
+        </Dialog>
         <CardTitle className="flex items-center gap-2 text-xl font-bold text-white">{icon}{title}</CardTitle>
       </CardHeader>
       <CardContent className="flex-grow">
@@ -310,5 +329,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
