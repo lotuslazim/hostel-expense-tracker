@@ -127,15 +127,28 @@ export function AppHeader() {
     )}>
       <div className="container flex h-16 items-center">
         
-        <div className="flex-1 flex items-center justify-start md:hidden">
+        <div className="flex flex-1 items-center justify-start md:hidden">
           {isClient && renderNavMenu()}
         </div>
 
-        <div className="flex-1 flex items-center justify-center md:justify-center">
+        <div className="flex flex-1 items-center justify-center md:justify-start">
             <Logo className="light-theme-logo" />
         </div>
 
-        <div className="flex-1 flex items-center justify-end space-x-2">
+        <div className="flex flex-1 items-center justify-end space-x-2">
+           <div className="hidden md:flex items-center space-x-1">
+             {navLinks.map((link) => (
+               <Button asChild variant="link" key={link.href}>
+                  <Link href={link.href} className="relative text-muted-foreground hover:text-foreground">
+                    <link.icon className="h-5 w-5" />
+                     {link.notificationCount && link.notificationCount > 0 && (
+                      <Badge variant="destructive" className="absolute -top-1 -right-2 h-4 w-4 justify-center p-0">{link.notificationCount}</Badge>
+                    )}
+                    <span className="sr-only">Open {link.label}</span>
+                  </Link>
+               </Button>
+             ))}
+           </div>
            <div className="flex items-center space-x-1">
             {renderUserSection()}
            </div>
