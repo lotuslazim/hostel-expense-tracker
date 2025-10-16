@@ -291,7 +291,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
         return;
     }
 
-    form.control.register('root', { disabled: true }); // Disable form during submission
+    // form.control.register('root', { disabled: true }); // Disable form during submission
 
     try {
         let receiptUrl: string | null = null;
@@ -365,7 +365,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
         console.error("Error adding expense:", error);
         toast({ variant: "destructive", title: "Error", description: "Could not log expense. Please check permissions and try again." });
     } finally {
-        form.control.register('root', { disabled: false }); // Re-enable form
+        // form.control.register('root', { disabled: false }); // Re-enable form
     }
   }
   

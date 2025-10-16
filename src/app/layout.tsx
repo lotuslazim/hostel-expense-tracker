@@ -1,16 +1,9 @@
 
 import type { Metadata } from "next";
-import { Playfair_Display, Poppins } from "next/font/google";
-import { Toaster } from "@/components/ui/toaster";
-import { ThemeProvider } from "@/components/theme-provider";
-import { InventoryProvider } from "@/contexts/InventoryContext";
+import { Poppins, Playfair_Display } from "next/font/google";
 import "./globals.css";
-import { FirebaseClientProvider } from "@/firebase/client-provider";
-import { I18nProvider } from "@/i18n/client-provider";
 import { cn } from "@/lib/utils";
-import { ReminderListener } from "@/components/app/ReminderListener";
-import { ProgressBar } from "@/components/app/progress-bar";
-import { Suspense } from "react";
+import { ClientProviders } from "./client-providers";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -40,25 +33,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn("font-body", poppins.variable, playfairDisplay.variable)} suppressHydrationWarning>
-        <I18nProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <InventoryProvider>
-              <FirebaseClientProvider>
-                <Suspense fallback={null}>
-                  <ProgressBar />
-                </Suspense>
-                {children}
-                <Toaster />
-                <ReminderListener />
-              </FirebaseClientProvider>
-            </InventoryProvider>
-          </ThemeProvider>
-        </I18nProvider>
+        <ClientProviders>{children}</ClientProviders>
       </body>
     </html>
   );
