@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { createContext, useContext, ReactNode, useMemo, useState, useEffect } from 'react';
@@ -68,6 +67,10 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     userError: null,
   });
   
+  // Define public routes
+  const publicRoutes = ['/login', '/signup', '/'];
+  const isPublicRoute = publicRoutes.includes(pathname);
+
   // This effect listens for all authentication state changes (login, logout).
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -85,19 +88,17 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
 
   // This effect handles redirection after authentication state is confirmed.
   useEffect(() => {
-    const publicPaths = ['/login', '/signup', '/'];
     // Wait until auth state is determined
     if (!userAuthState.isUserLoading) {
-      if (userAuthState.user && publicPaths.includes(pathname)) {
+      if (userAuthState.user && isPublicRoute) {
         // If user is logged in and on a public page, redirect to dashboard.
         router.push('/dashboard');
-      } else if (!userAuthState.user && !publicPaths.includes(pathname)) {
+      } else if (!userAuthState.user && !isPublicRoute) {
         // If user is not logged in and on a protected page, redirect to login.
         router.push('/login');
       }
     }
-  }, [userAuthState.user, userAuthState.isUserLoading, pathname, router]);
-
+  }, [userAuthState.user, userAuthState.isUserLoading, isPublicRoute, router, pathname]);
 
   const contextValue = useMemo((): FirebaseContextState => ({
     firebaseApp,
@@ -113,7 +114,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     </FirebaseContext.Provider>
   );
 };
-
 
 /**
  * Hook to access the full Firebase context, including services and user state.
