@@ -325,7 +325,7 @@ export default function Home() {
                       style={{ transitionDelay: '400ms' }}
                   >
                       <Button asChild size="lg" className="bg-slate-900 text-white font-bold text-lg px-8 py-6 rounded-full transition-all duration-300 ease-in-out hover:scale-105 hover:bg-slate-800 hover:shadow-lg hover:shadow-slate-900/40">
-                      <Link href="/signup">
+                      <Link href="/login">
                           Sign Up for Free <ArrowRight className="ml-2 h-5 w-5" />
                       </Link>
                       </Button>
