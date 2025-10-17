@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useMemo, useState } from "react";
@@ -20,6 +19,23 @@ import { MonthSwitcher } from "../month-switcher";
 import { Table, TableBody, TableCell, TableHeader, TableRow, TableHead } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+
+// Add these interfaces at the top of your file
+interface DailyMeal {
+  date: string;
+  meals: MealLog[];
+}
+
+interface MemberActivity {
+  id: string;
+  displayName: string;
+  email?: string;
+  photoURL?: string;
+  totalMealCount: number;
+  totalFoodExpenses: number;
+  dailyMeals: DailyMeal[];
+  monthlyPurchases: Purchase[];
+}
 
 function ReportSkeleton() {
     return (
@@ -122,7 +138,7 @@ export function MealConsumptionReport() {
             </div>
 
             <div className="grid grid-cols-1 gap-4">
-                {activitiesByMember.map(member => (
+                {activitiesByMember.map((member: MemberActivity) => (
                      <Card key={member.id}>
                         <Collapsible>
                              <div className="flex flex-col md:flex-row items-start md:items-center justify-between p-4">
@@ -155,7 +171,7 @@ export function MealConsumptionReport() {
                                     <div>
                                         <h3 className="text-lg font-semibold flex items-center gap-2 mb-2"><Utensils /> Daily Meal Log</h3>
                                         {member.dailyMeals.length > 0 ? (
-                                            member.dailyMeals.map(day => (
+                                            member.dailyMeals.map((day: DailyMeal) => (
                                                 <div key={day.date} className="mt-2 p-3 border rounded-lg bg-muted/50">
                                                     <h4 className="font-semibold mb-2">{format(new Date(day.date), "MMMM d, yyyy")}</h4>
                                                     <div className="space-y-1 text-sm">

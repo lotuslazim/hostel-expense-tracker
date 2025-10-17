@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: 'export',
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },
@@ -27,9 +26,11 @@ const nextConfig: NextConfig = {
         hostname: "lh3.googleusercontent.com",
       },
       {
-        protocol: "https",
+        protocol: "https,"
         hostname: "res.cloudinary.com",
       },
     ],
   }
 };
+
+export default nextConfig;
