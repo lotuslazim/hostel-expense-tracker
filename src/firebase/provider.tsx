@@ -98,7 +98,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
         router.push('/login');
       }
     }
-  }, [userAuthState.user, userAuthState.isUserLoading, isPublicRoute, router, pathname]);
+  }, [userAuthState.user, userAuthState.isUserLoading, isPublicRoute, router]);
 
   const contextValue = useMemo((): FirebaseContextState => ({
     firebaseApp,

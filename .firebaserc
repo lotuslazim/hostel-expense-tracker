@@ -3,13 +3,12 @@
     "default": "bachelor-bite"
   },
   "targets": {
-    "studio-1103431681-ca557": {
+    "bachelor-bite": {
       "hosting": {
-        "bachelorbite": [
-          "bachelor-bite"
+        "bachelor-bite-app": [
+          "bachelor-bite-app"
         ]
       }
     }
-  },
-  "etags": {}
+  }
 }
