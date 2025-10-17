@@ -1,6 +1,5 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -22,11 +21,11 @@ const nextConfig: NextConfig = {
         hostname: "lh3.googleusercontent.com",
       },
       {
-        protocol: "https", 
+        protocol: "https,"
         hostname: "res.cloudinary.com",
       },
     ],
   }
 };
 
-export default nextConfig;
+module.exports = nextConfig;
