@@ -14,6 +14,7 @@ import { Skeleton } from "../ui/skeleton";
 import dynamic from "next/dynamic";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
+import { Timestamp } from "firebase/firestore";
 
 const ExpenseDetailsDialog = dynamic(() => import("./ExpenseDetailsDialog").then(mod => mod.ExpenseDetailsDialog), { ssr: false });
 
@@ -47,7 +48,11 @@ export function ActivityFeed({ expenses, isLoading, currentMonth, onMonthChange 
   const sortedExpenses = useMemo(() => {
     if (!expenses) return [];
     // The query now handles sorting, but we can ensure it here as a fallback
-    return expenses.sort((a, b) => (b.date as any).toDate() - (a.date as any).toDate());
+    return expenses.sort((a, b) => {
+        const dateA = a.date as Timestamp;
+        const dateB = b.date as Timestamp;
+        return dateB.toMillis() - dateA.toMillis();
+    });
   }, [expenses]);
 
 
@@ -90,7 +95,7 @@ export function ActivityFeed({ expenses, isLoading, currentMonth, onMonthChange 
                     <TableBody>
                         {sortedExpenses.map((item) => (
                             <TableRow key={`expense-${item.id}`} className="align-top">
-                                <TableCell className="hidden sm:table-cell pt-3">{format((item.date as any).toDate(), "MMM d")}</TableCell>
+                                <TableCell className="hidden sm:table-cell pt-3">{format((item.date as Timestamp).toDate(), "MMM d")}</TableCell>
                                 <TableCell className="pt-3">
                                     <div className="font-medium">{item.userName}</div>
                                     <div className="text-sm text-muted-foreground flex items-center gap-2">
