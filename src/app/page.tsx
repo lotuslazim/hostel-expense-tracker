@@ -113,6 +113,7 @@ export default function Home() {
   const { ref: previewRef, inView: previewInView } = useInView({ triggerOnce: true, threshold: 0.2 });
   const { ref: ctaRef, inView: ctaInView } = useInView({ triggerOnce: true, threshold: 0.2 });
   
+  const appPreviewImage = PlaceHolderImages.find(p => p.id === 'app-preview');
 
   useEffect(() => {
     // Wait until loading is complete before trying to redirect.
@@ -288,7 +289,7 @@ export default function Home() {
                       previewInView ? "opacity-100 scale-120" : "opacity-0 scale-100"
                       )}
                   >
-                      <Image src="/a1.jpg" alt="App Screenshot" fill className="object-cover" priority />
+                      {appPreviewImage && <Image src={appPreviewImage.imageUrl} alt={appPreviewImage.description} fill className="object-cover" priority />}
                   </div>
                   <p className={cn(
                       "mt-6 text-muted-foreground italic transition-all duration-500 ease-out",
@@ -343,5 +344,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
