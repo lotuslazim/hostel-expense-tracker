@@ -167,11 +167,11 @@
         "definition": {
           "entityName": "User", "schema": { "$ref": "#/entities/User" },
           "rules": { 
-              "read": "request.auth.uid == userId || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true",
-              "write": "request.auth.uid == userId || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true",
+              "read": "request.auth != null",
+              "write": "request.auth.uid == userId",
               "list": "get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true"
           },
-          "description": "Stores user profile information. Admins can list all users. Users can only read/write their own document unless they are an admin."
+          "description": "Stores user profile information. Any authenticated user can read public profile data. Users can only write to their own document. Admins can list all users."
         }
       },
       {
@@ -258,6 +258,8 @@
         }
       }
     ],
-    "reasoning": "This structure is updated to enforce an 'active' status check for all group-related data access. Instead of checking for simple existence with exists(), the rules now use get().data.status == 'active'. This closes a security hole where inactive members could still access group data. It also solves the data inconsistency problem by ensuring that the security rules and application logic are aligned. This is a more secure and robust pattern for managing group membership."
+    "reasoning": "This structure is updated to enforce an 'active' status check for all group-related data access. Instead of checking for simple existence with exists(), the rules now use get().data.status == 'active'. This closes a security hole where inactive members could still access group data. It also solves the data inconsistency problem by ensuring that the security rules and application logic are aligned. This is a more secure and robust pattern for managing group membership. The user read rule was changed to allow any authenticated user to read user profiles to support fetching user data for reports."
   }
 }
+
+    
