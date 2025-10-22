@@ -84,7 +84,7 @@ export function NotificationBell() {
     return (
         <DropdownMenu onOpenChange={handleOpen}>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative">
+                <Button variant="ghost" size="icon" className="relative" aria-label="Open notifications">
                     <Bell />
                     {hasUnread && <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-destructive" />}
                     <span className="sr-only">Open notifications</span>
