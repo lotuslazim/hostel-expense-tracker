@@ -31,6 +31,9 @@ export function ReportTabs() {
         <ReportNavLink href="/report/meals">
             Meals
         </ReportNavLink>
+        <ReportNavLink href="/report/expenses">
+            Expenses
+        </ReportNavLink>
       </div>
     </div>
   );
