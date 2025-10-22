@@ -64,11 +64,16 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
     defaultValues: {
       mealCount: 1,
       itemName: "",
+      mealType: undefined,
     },
   });
 
   useEffect(() => {
-    form.reset({ mealCount: 1, itemName: "" });
+    form.reset({
+      mealCount: 1,
+      itemName: "",
+      mealType: undefined
+    });
   }, [isMealItemNameRequired, mealTypes, form]);
 
   const handleUndo = (docId: string) => {
