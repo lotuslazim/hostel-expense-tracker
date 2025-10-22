@@ -124,7 +124,7 @@ export function Welcome() {
                 <Card className="shadow-lg hover:shadow-xl transition-shadow">
                     <CardHeader className="text-center">
                         <PlusCircle className="h-10 w-10 mx-auto text-primary mb-2" />
-                        <CardTitle>Create a New Group</CardTitle>
+                        <h2 className="text-2xl font-semibold leading-none tracking-tight">Create a New Group</h2>
                         <CardDescription>Start a new group and invite your roommates to join.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -144,7 +144,7 @@ export function Welcome() {
                 <Card className="shadow-lg hover:shadow-xl transition-shadow">
                     <CardHeader className="text-center">
                         <LogIn className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
-                        <CardTitle>Join an Existing Group</CardTitle>
+                        <h2 className="text-2xl font-semibold leading-none tracking-tight">Join an Existing Group</h2>
                         <CardDescription>Use an invite code from a roommate to join their group.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
