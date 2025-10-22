@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useMemo, useEffect, lazy, Suspense } from "react";
@@ -19,22 +20,24 @@ import { format } from 'date-fns/format';
 import type { Expense, Member, User as UserType } from "@/lib/types";
 import imageCompression from "browser-image-compression";
 import { uploadToCloudinary } from "@/lib/cloudinary";
+import dynamic from 'next/dynamic';
 
-const AlertDialog = lazy(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialog })));
-const AlertDialogAction = lazy(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialogAction })));
-const AlertDialogCancel = lazy(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialogCancel })));
-const AlertDialogContent = lazy(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialogContent })));
-const AlertDialogDescription = lazy(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialogDescription })));
-const AlertDialogFooter = lazy(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialogFooter })));
-const AlertDialogHeader = lazy(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialogHeader })));
-const AlertDialogTitle = lazy(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialogTitle })));
-const AlertDialogTrigger = lazy(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialogTrigger })));
+const AlertDialog = dynamic(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialog })), { ssr: false });
+const AlertDialogAction = dynamic(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialogAction })), { ssr: false });
+const AlertDialogCancel = dynamic(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialogCancel })), { ssr: false });
+const AlertDialogContent = dynamic(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialogContent })), { ssr: false });
+const AlertDialogDescription = dynamic(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialogDescription })), { ssr: false });
+const AlertDialogFooter = dynamic(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialogFooter })), { ssr: false });
+const AlertDialogHeader = dynamic(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialogHeader })), { ssr: false });
+const AlertDialogTitle = dynamic(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialogTitle })), { ssr: false });
+const AlertDialogTrigger = dynamic(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialogTrigger })), { ssr: false });
 
-const Dialog = lazy(() => import('@/components/ui/dialog').then(module => ({ default: module.Dialog })));
-const ReceiptDialogContent = lazy(() => import('@/components/ui/dialog').then(module => ({ default: module.DialogContent })));
-const ReceiptDialogHeader = lazy(() => import('@/components/ui/dialog').then(module => ({ default: module.DialogHeader })));
-const ReceiptDialogTitle = lazy(() => import('@/components/ui/dialog').then(module => ({ default: module.DialogTitle })));
-const ReceiptDialogTrigger = lazy(() => import('@/components/ui/dialog').then(module => ({ default: module.DialogTrigger })));
+const Dialog = dynamic(() => import('@/components/ui/dialog').then(module => ({ default: module.Dialog })), { ssr: false });
+const ReceiptDialogContent = dynamic(() => import('@/components/ui/dialog').then(module => ({ default: module.DialogContent })), { ssr: false });
+const ReceiptDialogHeader = dynamic(() => import('@/components/ui/dialog').then(module => ({ default: module.DialogHeader })), { ssr: false });
+const ReceiptDialogTitle = dynamic(() => import('@/components/ui/dialog').then(module => ({ default: module.DialogTitle })), { ssr: false });
+const ReceiptDialogTrigger = dynamic(() => import('@/components/ui/dialog').then(module => ({ default: module.DialogTrigger })), { ssr: false });
+
 
 import { Label } from "@/components/ui/label";
 import { signOut, sendPasswordResetEmail, deleteUser } from "firebase/auth";
@@ -496,25 +499,25 @@ export function Profile() {
                                         <div className="flex items-center gap-2">
                                             {item.receiptPhotoUrl && (
                                                 <Suspense fallback={<Skeleton className="h-7 w-7"/>}>
-                                                    <ReceiptDialogTrigger asChild>
-                                                        <Button variant="ghost" size="icon" className="h-7 w-7">
-                                                            <Receipt className="h-4 w-4" />
-                                                        </Button>
-                                                    </ReceiptDialogTrigger>
+                                                    <Dialog>
+                                                        <ReceiptDialogTrigger asChild>
+                                                            <Button variant="ghost" size="icon" className="h-7 w-7">
+                                                                <Receipt className="h-4 w-4" />
+                                                            </Button>
+                                                        </ReceiptDialogTrigger>
+                                                        <ReceiptDialogContent>
+                                                            <ReceiptDialogHeader>
+                                                                <ReceiptDialogTitle>Receipt for {item.expenseItem}</ReceiptDialogTitle>
+                                                            </ReceiptDialogHeader>
+                                                            <div className="py-4">
+                                                                <img src={item.receiptPhotoUrl} alt="Receipt" className="w-full h-auto rounded-md" />
+                                                            </div>
+                                                        </ReceiptDialogContent>
+                                                    </Dialog>
                                                 </Suspense>
                                             )}
                                             <p className="font-medium w-20 text-right">৳{item.amount.toFixed(2)}</p>
                                         </div>
-                                         <Suspense>
-                                             <ReceiptDialogContent>
-                                                <ReceiptDialogHeader>
-                                                    <ReceiptDialogTitle>Receipt for {item.expenseItem}</ReceiptDialogTitle>
-                                                </ReceiptDialogHeader>
-                                                <div className="py-4">
-                                                    <img src={item.receiptPhotoUrl} alt="Receipt" className="w-full h-auto rounded-md" />
-                                                </div>
-                                            </ReceiptDialogContent>
-                                         </Suspense>
                                     </div>
                                 ))}
                             </div>
@@ -528,9 +531,9 @@ export function Profile() {
         </Card>
       </div>
       
-      <Dialog>
         <AccountSettings user={user} userData={userData} groupData={groupData} groupId={groupId} />
-      </Dialog>
     </div>
   );
 }
+
+    

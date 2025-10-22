@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -20,12 +21,14 @@ import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MonthSwitcher } from "./month-switcher";
+import dynamic from 'next/dynamic';
 
-const Dialog = lazy(() => import('../ui/dialog').then(module => ({ default: module.Dialog })));
-const DialogContent = lazy(() => import('../ui/dialog').then(module => ({ default: module.DialogContent })));
-const DialogHeader = lazy(() => import('../ui/dialog').then(module => ({ default: module.DialogHeader })));
-const DialogTitle = lazy(() => import('../ui/dialog').then(module => ({ default: module.DialogTitle })));
-const DialogTrigger = lazy(() => import('../ui/dialog').then(module => ({ default: module.DialogTrigger })));
+const Dialog = dynamic(() => import('../ui/dialog').then(module => ({ default: module.Dialog })), { ssr: false });
+const DialogContent = dynamic(() => import('../ui/dialog').then(module => ({ default: module.DialogContent })), { ssr: false });
+const DialogHeader = dynamic(() => import('../ui/dialog').then(module => ({ default: module.DialogHeader })), { ssr: false });
+const DialogTitle = dynamic(() => import('../ui/dialog').then(module => ({ default: module.DialogTitle })), { ssr: false });
+const DialogTrigger = dynamic(() => import('../ui/dialog').then(module => ({ default: module.DialogTrigger })), { ssr: false });
+
 
 // Type definitions for processed data
 interface ProcessedMember {
@@ -601,3 +604,5 @@ export function MonthlySummary() {
     </div>
   );
 }
+
+    

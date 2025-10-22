@@ -16,7 +16,10 @@ import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
 import { Timestamp } from "firebase/firestore";
 
-const ExpenseDetailsDialog = dynamic(() => import("./ExpenseDetailsDialog").then(mod => mod.ExpenseDetailsDialog), { ssr: false });
+const ExpenseDetailsDialog = dynamic(() => import("./ExpenseDetailsDialog").then(mod => mod.ExpenseDetailsDialog), { 
+    ssr: false,
+    loading: () => <Skeleton className="h-7 w-16" /> 
+});
 
 interface ActivityFeedProps {
   expenses: Expense[];
@@ -124,3 +127,5 @@ export function ActivityFeed({ expenses, isLoading, currentMonth, onMonthChange 
     </Card>
   );
 }
+
+    
