@@ -476,7 +476,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                               control={form.control}
                               name={`purchasedItems.${index}.name`}
                               render={({ field }) => (
-                                <FormItem className="col-span-5">
+                                <FormItem className="col-span-12 sm:col-span-5">
                                   <FormControl>
                                       <Input placeholder="e.g. Rice" {...field} disabled={form.formState.isSubmitting} />
                                   </FormControl>
@@ -488,7 +488,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                               control={form.control}
                               name={`purchasedItems.${index}.quantity`}
                               render={({ field }) => (
-                                <FormItem className="col-span-2">
+                                <FormItem className="col-span-4 sm:col-span-2">
                                   <FormControl><Input type="number" placeholder="1" {...field} disabled={form.formState.isSubmitting}/></FormControl>
                                   <FormMessage/>
                                 </FormItem>
@@ -498,7 +498,7 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                               control={form.control}
                               name={`purchasedItems.${index}.unit`}
                               render={({ field }) => (
-                                <FormItem className="col-span-2">
+                                <FormItem className="col-span-4 sm:col-span-2">
                                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={form.formState.isSubmitting}>
                                     <FormControl>
                                       <SelectTrigger>
@@ -519,13 +519,13 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
                               control={form.control}
                               name={`purchasedItems.${index}.cost`}
                               render={({ field }) => (
-                                <FormItem className="col-span-2">
+                                <FormItem className="col-span-4 sm:col-span-2">
                                   <FormControl><Input type="number" placeholder="0" {...field} disabled={form.formState.isSubmitting}/></FormControl>
                                   <FormMessage/>
                                 </FormItem>
                               )}
                             />
-                           <div className="col-span-12 sm:col-span-1 flex items-center justify-end sm:justify-center h-10 -mt-2 sm:mt-0">
+                           <div className="col-span-12 flex items-center justify-end sm:justify-center sm:col-span-1 h-10 -mt-2 sm:mt-0">
                               <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)} className="h-8 w-8" disabled={form.formState.isSubmitting}>
                                 <Trash2 className="h-4 w-4 text-destructive"/>
                                 <span className="sr-only">Remove Item</span>

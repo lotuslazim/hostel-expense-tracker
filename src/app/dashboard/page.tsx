@@ -25,14 +25,14 @@ function DashboardSkeleton() {
           <Skeleton className="h-9 w-48" />
           <Skeleton className="h-4 w-72 mt-2" />
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-1 space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+        <div className="lg:col-span-2 space-y-6">
           <Skeleton className="h-32 w-full rounded-lg" />
           <Skeleton className="h-80 w-full rounded-lg" />
           <Skeleton className="h-[28rem] w-full rounded-lg" />
           <Skeleton className="h-48 w-full rounded-lg" />
         </div>
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-3">
            <Skeleton className="h-[calc(100vh-10rem)] w-full rounded-lg" />
         </div>
       </div>
@@ -72,14 +72,14 @@ function DashboardContent({ groupId }: { groupId: string }) {
         <p className="text-sm md:text-base text-muted-foreground">Log your meals and expenses for the day.</p>
       </div>
       <div className="space-y-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-1 space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+          <div className="lg:col-span-2 space-y-6">
             <DateCard date={selectedDate} setDate={setSelectedDate} />
             <LogMealCard selectedDate={selectedDate} />
             <AddExpenseCard selectedDate={selectedDate} />
             <SendReminderCard />
           </div>
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-3">
             <ActivityFeed 
               expenses={expenses || []} 
               isLoading={areExpensesLoading}
