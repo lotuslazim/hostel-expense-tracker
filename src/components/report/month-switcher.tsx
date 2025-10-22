@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -28,9 +27,9 @@ export function MonthSwitcher({
         <ChevronLeft className="h-4 w-4" />
       </Button>
       <div
-        className="flex h-10 w-[240px] items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+        className="flex h-10 w-[180px] sm:w-[240px] items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
       >
-        <span>{format(currentDate, "MMMM yyyy")}</span>
+        <span className="text-sm sm:text-base">{format(currentDate, "MMMM yyyy")}</span>
       </div>
       <Button
         variant="outline"
@@ -43,5 +42,3 @@ export function MonthSwitcher({
     </div>
   );
 }
-
-    

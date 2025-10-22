@@ -27,7 +27,6 @@ const DialogHeader = lazy(() => import('../ui/dialog').then(module => ({ default
 const DialogTitle = lazy(() => import('../ui/dialog').then(module => ({ default: module.DialogTitle })));
 const DialogTrigger = lazy(() => import('../ui/dialog').then(module => ({ default: module.DialogTrigger })));
 
-
 // Type definitions for processed data
 interface ProcessedMember {
   id: string;
@@ -61,7 +60,6 @@ const sortByDateDesc = (a: { date: Date | Timestamp }, b: { date: Date | Timesta
   return (dateB || 0) - (dateA || 0);
 };
 
-
 const formatDateSafe = (date: Date | Timestamp | undefined): string => {
   if (!date) return "N/A";
   const jsDate = date instanceof Date ? date : (date as Timestamp)?.toDate?.();
@@ -71,7 +69,7 @@ const formatDateSafe = (date: Date | Timestamp | undefined): string => {
 const formatShortDateSafe = (date: Date | Timestamp | undefined): string => {
   if (!date) return "N/A";
   const jsDate = date instanceof Date ? date : (date as Timestamp)?.toDate?.();
-  return jsDate ? format(jsDate, 'MMM d') : "N'A";
+  return jsDate ? format(jsDate, 'MMM d') : "N/A";
 };
 
 // Empty State Component
@@ -108,7 +106,6 @@ function DataError() {
     </Alert>
   );
 }
-
 
 // Custom collapsible utility component
 function CollapsibleUtilityItem({ 
@@ -196,7 +193,6 @@ export function MonthlySummary() {
   const { user: currentUser, isUserLoading: isCurrentUserLoading } = useUser();
   const [currentMonth, setCurrentMonth] = useState(startOfMonth(new Date()));
 
-
   const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
   const { data: currentUserData, isLoading: isCurrentUserDataLoading, error: currentUserDataError } = useDoc(currentUserRef);
 
@@ -209,6 +205,7 @@ export function MonthlySummary() {
     };
   }, [currentMonth]);
 
+  // Existing queries
   const membersQuery = useMemo(() =>
     (groupId ? collection(firestore, `groups/${groupId}/members`) : null),
     [firestore, groupId]
@@ -231,22 +228,42 @@ export function MonthlySummary() {
     ) : null),
     [firestore, groupId, monthDateRange]
   );
-  
+
+  // NEW: Query to fetch ALL users
+  const usersQuery = useMemo(() =>
+    collection(firestore, "users"),
+    [firestore]
+  );
+
+  // Existing data fetches
   const { data: membersData, isLoading: areMembersLoading, error: membersError } = useCollection(membersQuery);
   const { data: mealsData, isLoading: areMealsLoading, error: mealsError } = useCollection<MealLog>(mealsQuery);
   const { data: expensesData, isLoading: areExpensesLoading, error: expensesError } = useCollection<Expense>(expensesQuery);
-
-  const isAnyLoading = isCurrentUserLoading || isCurrentUserDataLoading || (!!groupId && (areMembersLoading || areMealsLoading || areExpensesLoading));
-  const hasAnyErrors = currentUserDataError || membersError || mealsError || expensesError;
   
+  // NEW: Fetch all users data
+  const { data: usersData, isLoading: areUsersLoading, error: usersError } = useCollection(usersQuery);
+
+  const isAnyLoading = isCurrentUserLoading || isCurrentUserDataLoading || (!!groupId && (areMembersLoading || areMealsLoading || areExpensesLoading || areUsersLoading));
+  const hasAnyErrors = currentUserDataError || membersError || mealsError || expensesError || usersError;
+
   const handleMonthChange = (direction: "next" | "prev") => {
     setCurrentMonth(prev => direction === 'next' ? addMonths(prev, 1) : subMonths(prev, 1));
   }
 
   const processedData = useMemo((): ProcessedData | null => {
-    if (!membersData || !mealsData || !expensesData) {
+    if (!membersData || !mealsData || !expensesData || !usersData) {
       return null;
     }
+
+    // STEP 1: Create User Map (lookup object)
+    const userMap = usersData.reduce((acc, userDoc) => {
+      acc[userDoc.id] = {
+        displayName: userDoc.displayName,
+        photoURL: userDoc.photoURL,
+        email: userDoc.email
+      };
+      return acc;
+    }, {} as Record<string, { displayName?: string; photoURL?: string; email?: string }>);
 
     const mealsByUser = mealsData.reduce((acc, meal) => {
       acc[meal.userId] = [...(acc[meal.userId] || []), meal];
@@ -258,7 +275,11 @@ export function MonthlySummary() {
       return acc;
     }, {} as Record<string, Expense[]>);
 
+    // STEP 2: Process members with user data lookup
     const processedMembers = membersData.map(member => {
+      // STEP 3: Look up user details from the user map
+      const userDetails = userMap[member.id];
+      
       const memberMeals = (mealsByUser[member.id] || []).sort(sortByDateDesc);
       const memberExpenses = (expensesByUser[member.id] || []);
 
@@ -282,8 +303,9 @@ export function MonthlySummary() {
 
       return {
         id: member.id,
-        name: member.displayName || member.email?.split('@')[0] || 'Unknown User',
-        photoURL: member.photoURL,
+        // STEP 4: Use user data from the map instead of member data
+        name: userDetails?.displayName || userDetails?.email?.split('@')[0] || 'Unnamed Member',
+        photoURL: userDetails?.photoURL,
         meals: totalMeals,
         memberMeals,
         foodExpenses,
@@ -314,7 +336,7 @@ export function MonthlySummary() {
       totalUtilityExpenses: totalUtilityExpenses || 0,
       otherExpensesList
     };
-  }, [membersData, mealsData, expensesData]);
+  }, [membersData, mealsData, expensesData, usersData]);
 
   if (isAnyLoading) {
     return <SummarySkeleton />;
@@ -432,10 +454,12 @@ export function MonthlySummary() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {otherExpensesList.map(expense => (
+                                    {otherExpensesList.map(expense => {
+                                      const userDetails = processedMembers.find(m => m.id === expense.userId);
+                                      return (
                                         <TableRow key={expense.id}>
                                             <TableCell>{formatShortDateSafe(expense.date)}</TableCell>
-                                            <TableCell>{expense.userName}</TableCell>
+                                            <TableCell>{userDetails?.name || 'Unknown Member'}</TableCell>
                                             <TableCell>{expense.expenseItem}</TableCell>
                                             <TableCell className="text-right">৳{expense.amount.toFixed(2)}</TableCell>
                                             <TableCell className="text-center">
@@ -460,7 +484,8 @@ export function MonthlySummary() {
                                                 ) : <span className="text-xs">-</span>}
                                             </TableCell>
                                         </TableRow>
-                                    ))}
+                                      );
+                                    })}
                                 </TableBody>
                            </Table>
                         ) : (
@@ -575,5 +600,4 @@ export function MonthlySummary() {
       </Card>
     </div>
   );
-
 }
