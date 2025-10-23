@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo, useRef, useEffect } from "react";
@@ -16,7 +15,6 @@ import type { ChatMessage as ChatMessageType } from "@/lib/types";
 import { Loader2, Send, Image as ImageIcon, X, MessageSquare } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
 import { uploadToCloudinary } from "@/lib/cloudinary";
-import type imageCompression from "browser-image-compression";
 
 interface ChatProps {
     groupId: string;
@@ -156,11 +154,11 @@ export function Chat({ groupId, currentUser }: ChatProps) {
     };
 
     return (
-        <Card className="h-[calc(100vh-12rem)] flex flex-col shadow-lg">
-            <CardHeader className="border-b">
+        <div className="flex flex-col h-full w-full max-w-4xl mx-auto">
+            <CardHeader className="border-b bg-background z-10">
                 <CardTitle>Group Chat</CardTitle>
             </CardHeader>
-            <CardContent className="flex-grow p-0 overflow-hidden">
+            <div className="flex-grow overflow-hidden">
                 <ScrollArea className="h-full" viewportRef={scrollAreaViewportRef}>
                      <div className="p-4 sm:p-6 space-y-6">
                         {isLoading ? (
@@ -180,7 +178,7 @@ export function Chat({ groupId, currentUser }: ChatProps) {
                         )}
                     </div>
                 </ScrollArea>
-            </CardContent>
+            </div>
             <CardFooter className="p-2 sm:p-4 border-t bg-muted/50">
                 <div className="flex flex-col w-full gap-2">
                     {imagePreview && (
@@ -228,6 +226,6 @@ export function Chat({ groupId, currentUser }: ChatProps) {
                     </div>
                 </div>
             </CardFooter>
-        </Card>
+        </div>
     );
 }

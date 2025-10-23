@@ -4,18 +4,14 @@ import { Chat } from "@/components/chat/Chat";
 import { AppHeader } from "@/components/app/header";
 import { useUser, useDoc, useFirebase } from "@/firebase";
 import { useMemo, useEffect } from "react";
-import { doc, collection, writeBatch, getDocs, query, where, arrayUnion, serverTimestamp } from "firebase/firestore";
+import { doc, collection, writeBatch, arrayUnion } from "firebase/firestore";
 import { WelcomeCard } from "@/components/app/welcome-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 
 function ChatPageSkeleton() {
     return (
-        <div className="flex flex-col h-[calc(100vh-12rem)]">
-            {/* Header Skeleton */}
-            <div className="p-4 border-b">
-                <Skeleton className="h-6 w-1/4" />
-            </div>
+        <div className="flex flex-col flex-grow h-[calc(100vh-4rem)]">
             {/* Message List Skeleton */}
             <div className="flex-grow p-4 space-y-4">
                 <div className="flex items-end gap-2">
@@ -71,9 +67,13 @@ export default function ChatPage() {
     return (
     <div className="flex flex-col h-screen">
       <AppHeader />
-      <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8 overflow-hidden">
+      <main className="flex flex-col flex-grow bg-background overflow-hidden">
         {isLoading ? <ChatPageSkeleton /> : 
-         !groupId ? <WelcomeCard /> :
+         !groupId ? (
+            <div className="container mx-auto py-8">
+                <WelcomeCard />
+            </div>
+         ) :
          <Chat groupId={groupId} currentUser={currentUser} />}
       </main>
     </div>
