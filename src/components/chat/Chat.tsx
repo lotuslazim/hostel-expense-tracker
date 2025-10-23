@@ -263,27 +263,25 @@ export function Chat({ groupId, currentUser }: ChatProps) {
                     </DialogContent>
                 </Dialog>
             </CardHeader>
-            <div className={cn("flex-grow relative", chatBg)}>
-                 <ScrollArea className="absolute inset-0" viewportRef={scrollAreaViewportRef}>
-                     <div className="p-4 sm:p-6 space-y-6">
-                        {isLoading ? (
-                           <ChatSkeleton />
-                        ) : messages && messages.length > 0 ? (
-                            messages.map(msg => (
-                                <ChatMessage key={msg.id} message={msg} currentUserId={currentUser?.uid ?? ''} />
-                            ))
-                        ) : (
-                            <div className="flex items-center justify-center h-full text-muted-foreground">
-                                <div className="text-center">
-                                    <MessageSquare className="h-12 w-12 mx-auto text-muted" />
-                                    <p className="mt-4">No messages yet.</p>
-                                    <p className="text-sm">Start the conversation!</p>
-                                </div>
-                            </div>
-                        )}
+            <ScrollArea className={cn("flex-grow", chatBg)} viewportRef={scrollAreaViewportRef}>
+                <div className="p-4 sm:p-6 space-y-6">
+                {isLoading ? (
+                    <ChatSkeleton />
+                ) : messages && messages.length > 0 ? (
+                    messages.map(msg => (
+                        <ChatMessage key={msg.id} message={msg} currentUserId={currentUser?.uid ?? ''} />
+                    ))
+                ) : (
+                    <div className="flex items-center justify-center h-full text-muted-foreground">
+                        <div className="text-center">
+                            <MessageSquare className="h-12 w-12 mx-auto text-muted" />
+                            <p className="mt-4">No messages yet.</p>
+                            <p className="text-sm">Start the conversation!</p>
+                        </div>
                     </div>
-                </ScrollArea>
-            </div>
+                )}
+                </div>
+            </ScrollArea>
             <CardFooter className="p-2 sm:p-4 border-t bg-muted/50">
                 <div className="flex flex-col w-full gap-2">
                     {imagePreview && (
@@ -333,4 +331,5 @@ export function Chat({ groupId, currentUser }: ChatProps) {
             </CardFooter>
         </div>
     );
-}
+
+    
