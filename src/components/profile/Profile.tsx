@@ -184,18 +184,18 @@ function AccountSettings({ user, userData, groupData, groupId }: { user: any, us
                 <CardTitle>Account Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-                 <div className="flex items-center justify-between">
+                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                     <Label>Password Reset</Label>
-                    <Button variant="outline" onClick={handlePasswordReset}>
+                    <Button variant="outline" onClick={handlePasswordReset} className="w-full sm:w-auto">
                         Send Reset Link
                     </Button>
                 </div>
                  <Separator />
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                     <Label className="text-destructive">Leave Group</Label>
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button variant="destructive" disabled={!groupId}><LogOut className="mr-2 h-4 w-4"/> Leave</Button>
+                            <Button variant="destructive" disabled={!groupId} className="w-full sm:w-auto"><LogOut className="mr-2 h-4 w-4"/> Leave</Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
@@ -212,11 +212,11 @@ function AccountSettings({ user, userData, groupData, groupId }: { user: any, us
                     </AlertDialog>
                 </div>
                 <Separator />
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                      <Label className="text-destructive">Delete Account</Label>
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button variant="destructive" className="text-white"><Trash2 className="mr-2 h-4 w-4"/> Delete Account</Button>
+                            <Button variant="destructive" className="w-full sm:w-auto text-white"><Trash2 className="mr-2 h-4 w-4"/> Delete Account</Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
