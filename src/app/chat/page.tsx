@@ -4,7 +4,7 @@ import { Chat } from "@/components/chat/Chat";
 import { AppHeader } from "@/components/app/header";
 import { useUser, useDoc, useFirebase } from "@/firebase";
 import { useMemo, useEffect } from "react";
-import { doc, collection, writeBatch, arrayUnion } from "firebase/firestore";
+import { doc, writeBatch, arrayUnion } from "firebase/firestore";
 import { WelcomeCard } from "@/components/app/welcome-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
@@ -54,11 +54,13 @@ export default function ChatPage() {
     const { unreadMessages } = useUnreadMessages(groupId, userId);
 
     useEffect(() => {
-        if (unreadMessages.length > 0 && groupId && userId) {
+        if (unreadMessages.length > 0 && groupId && userId && firestore) {
             const batch = writeBatch(firestore);
             unreadMessages.forEach(msg => {
-                const msgRef = doc(firestore, `groups/${groupId}/messages`, msg.id);
-                batch.update(msgRef, { readBy: arrayUnion(userId) });
+                if (msg.id) { // Ensure message has an ID
+                    const msgRef = doc(firestore, `groups/${groupId}/messages`, msg.id);
+                    batch.update(msgRef, { readBy: arrayUnion(userId) });
+                }
             });
             batch.commit().catch(console.error);
         }

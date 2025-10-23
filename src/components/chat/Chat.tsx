@@ -1,8 +1,9 @@
+
 "use client";
 
 import { useState, useMemo, useRef, useEffect } from "react";
-import { useCollection } from "@/firebase";
-import { collection, query, orderBy, addDoc, serverTimestamp } from "firebase/firestore";
+import { useCollection, useDoc } from "@/firebase";
+import { collection, query, orderBy, addDoc, serverTimestamp, doc } from "firebase/firestore";
 import { firestore } from "@/firebase/config";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,6 +63,9 @@ export function Chat({ groupId, currentUser }: ChatProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const scrollAreaViewportRef = useRef<HTMLDivElement>(null);
 
+    const groupRef = useMemo(() => doc(firestore, "groups", groupId), [groupId]);
+    const { data: groupData, isLoading: isGroupDataLoading } = useDoc(groupRef);
+
     const messagesQuery = useMemo(() => {
         return query(
             collection(firestore, `groups/${groupId}/messages`),
@@ -69,7 +73,7 @@ export function Chat({ groupId, currentUser }: ChatProps) {
         );
     }, [groupId]);
 
-    const { data: messages, isLoading } = useCollection<ChatMessageType>(messagesQuery);
+    const { data: messages, isLoading: areMessagesLoading } = useCollection<ChatMessageType>(messagesQuery);
     
     useEffect(() => {
       if (scrollAreaViewportRef.current) {
@@ -153,10 +157,14 @@ export function Chat({ groupId, currentUser }: ChatProps) {
         }
     };
 
+    const isLoading = areMessagesLoading || isGroupDataLoading;
+
     return (
-        <div className="flex flex-col h-full w-full max-w-4xl mx-auto">
+        <div className="flex flex-col h-full w-full max-w-4xl mx-auto bg-card">
             <CardHeader className="border-b bg-background z-10">
-                <CardTitle>Group Chat</CardTitle>
+                <CardTitle>
+                    {isGroupDataLoading ? <Skeleton className="h-7 w-48" /> : groupData?.groupName || "Group Chat"}
+                </CardTitle>
             </CardHeader>
             <div className="flex-grow overflow-hidden">
                 <ScrollArea className="h-full" viewportRef={scrollAreaViewportRef}>
