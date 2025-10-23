@@ -13,9 +13,27 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import type { User } from 'firebase/auth';
 import type { ChatMessage as ChatMessageType } from "@/lib/types";
-import { Loader2, Send, Image as ImageIcon, X, MessageSquare } from "lucide-react";
+import { Loader2, Send, Image as ImageIcon, X, MessageSquare, MoreVertical, Brush, Grid } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
 import { uploadToCloudinary } from "@/lib/cloudinary";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+  DropdownMenuPortal,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 
 interface ChatProps {
     groupId: string;
@@ -54,6 +72,14 @@ function ChatSkeleton() {
     )
 }
 
+const backgroundOptions = [
+    { name: 'Default', class: 'bg-background' },
+    { name: 'Subtle Dots', class: 'bg-background bg-dot-pattern' },
+    { name: 'Lines', class: 'bg-background bg-line-pattern' },
+    { name: 'Grid', class: 'bg-background bg-grid-pattern' },
+];
+
+
 export function Chat({ groupId, currentUser }: ChatProps) {
     const { toast } = useToast();
     const [newMessage, setNewMessage] = useState("");
@@ -62,6 +88,8 @@ export function Chat({ groupId, currentUser }: ChatProps) {
     const [isSending, setIsSending] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const scrollAreaViewportRef = useRef<HTMLDivElement>(null);
+    const [chatBg, setChatBg] = useState('bg-background');
+
 
     const groupRef = useMemo(() => doc(firestore, "groups", groupId), [groupId]);
     const { data: groupData, isLoading: isGroupDataLoading } = useDoc(groupRef);
@@ -74,6 +102,22 @@ export function Chat({ groupId, currentUser }: ChatProps) {
     }, [groupId]);
 
     const { data: messages, isLoading: areMessagesLoading } = useCollection<ChatMessageType>(messagesQuery);
+    
+    const mediaMessages = useMemo(() => {
+        return messages?.filter(msg => msg.imageUrl) ?? [];
+    }, [messages]);
+    
+    useEffect(() => {
+        const savedBg = localStorage.getItem(`chatBg_${groupId}`);
+        if (savedBg) {
+            setChatBg(savedBg);
+        }
+    }, [groupId]);
+
+    const handleSetChatBg = (bgClass: string) => {
+        setChatBg(bgClass);
+        localStorage.setItem(`chatBg_${groupId}`, bgClass);
+    }
     
     useEffect(() => {
       if (scrollAreaViewportRef.current) {
@@ -161,13 +205,65 @@ export function Chat({ groupId, currentUser }: ChatProps) {
 
     return (
         <div className="flex flex-col h-full w-full max-w-4xl mx-auto bg-card">
-            <CardHeader className="border-b bg-background z-10">
+            <CardHeader className="border-b bg-background z-10 flex flex-row items-center justify-between">
                 <CardTitle>
                     {isGroupDataLoading ? <Skeleton className="h-7 w-48" /> : groupData?.groupName || "Group Chat"}
                 </CardTitle>
+                 <Dialog>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                                <MoreVertical className="h-5 w-5" />
+                                <span className="sr-only">Chat options</span>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuSub>
+                                <DropdownMenuSubTrigger>
+                                    <Brush className="mr-2 h-4 w-4" />
+                                    <span>Change Background</span>
+                                </DropdownMenuSubTrigger>
+                                <DropdownMenuPortal>
+                                    <DropdownMenuSubContent>
+                                        {backgroundOptions.map(bg => (
+                                            <DropdownMenuItem key={bg.name} onClick={() => handleSetChatBg(bg.class)}>
+                                                {bg.name}
+                                            </DropdownMenuItem>
+                                        ))}
+                                    </DropdownMenuSubContent>
+                                </DropdownMenuPortal>
+                            </DropdownMenuSub>
+
+                             <DialogTrigger asChild>
+                                <DropdownMenuItem>
+                                    <Grid className="mr-2 h-4 w-4" />
+                                    <span>View All Media</span>
+                                </DropdownMenuItem>
+                            </DialogTrigger>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+
+                     <DialogContent className="max-w-4xl h-[90vh]">
+                        <DialogHeader>
+                            <DialogTitle>All Media</DialogTitle>
+                        </DialogHeader>
+                        <ScrollArea className="h-full">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4">
+                                {mediaMessages.map(msg => (
+                                    <a key={msg.id} href={msg.imageUrl} target="_blank" rel="noopener noreferrer">
+                                        <img src={msg.imageUrl} alt="Chat Media" className="aspect-square w-full rounded-md object-cover transition-transform hover:scale-105" />
+                                    </a>
+                                ))}
+                                {mediaMessages.length === 0 && (
+                                    <p className="col-span-full text-center text-muted-foreground">No media has been shared yet.</p>
+                                )}
+                            </div>
+                        </ScrollArea>
+                    </DialogContent>
+                </Dialog>
             </CardHeader>
-            <div className="flex-grow overflow-hidden">
-                <ScrollArea className="h-full" viewportRef={scrollAreaViewportRef}>
+            <div className={cn("flex-grow overflow-hidden relative", chatBg)}>
+                 <ScrollArea className="absolute inset-0" viewportRef={scrollAreaViewportRef}>
                      <div className="p-4 sm:p-6 space-y-6">
                         {isLoading ? (
                            <ChatSkeleton />
@@ -237,3 +333,5 @@ export function Chat({ groupId, currentUser }: ChatProps) {
         </div>
     );
 }
+
+    
