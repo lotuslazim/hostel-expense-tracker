@@ -18,6 +18,8 @@ export function ChatMessage({ message, currentUserId }: ChatMessageProps) {
     const messageDate = message.createdAt instanceof Timestamp 
         ? message.createdAt.toDate() 
         : new Date(); // Fallback for optimistic updates
+
+    const hasOnlyImage = message.imageUrl && !message.text;
     
     return (
         <div className={cn("flex items-end gap-2 group", isCurrentUser && "justify-end")}>
@@ -31,16 +33,17 @@ export function ChatMessage({ message, currentUserId }: ChatMessageProps) {
             <div className={cn("flex flex-col gap-1", isCurrentUser ? "items-end" : "items-start")}>
                 <div
                     className={cn(
-                        "max-w-xs md:max-w-md p-3 rounded-xl flex flex-col",
+                        "max-w-xs md:max-w-md rounded-xl flex flex-col",
+                         hasOnlyImage ? "p-0 bg-transparent" : "p-3",
                         isCurrentUser
                             ? "bg-primary text-primary-foreground rounded-br-none"
                             : "bg-muted rounded-bl-none"
                     )}
                 >
-                    {!isCurrentUser && <p className="text-xs font-bold mb-1 text-primary">{message.userName}</p>}
+                    {!isCurrentUser && !hasOnlyImage && <p className="text-xs font-bold mb-1 text-primary">{message.userName}</p>}
                     
                     {message.imageUrl && (
-                         <a href={message.imageUrl} target="_blank" rel="noopener noreferrer" className="mb-2">
+                         <a href={message.imageUrl} target="_blank" rel="noopener noreferrer" className={cn(message.text && "mb-2")}>
                             <img 
                                 src={message.imageUrl} 
                                 alt="Chat attachment" 
