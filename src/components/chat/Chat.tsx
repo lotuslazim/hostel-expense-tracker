@@ -263,7 +263,7 @@ export function Chat({ groupId, currentUser }: ChatProps) {
                     </DialogContent>
                 </Dialog>
             </CardHeader>
-            <div className={cn("flex-grow overflow-hidden relative", chatBg)}>
+            <div className={cn("flex-grow relative", chatBg)}>
                  <ScrollArea className="absolute inset-0" viewportRef={scrollAreaViewportRef}>
                      <div className="p-4 sm:p-6 space-y-6">
                         {isLoading ? (
