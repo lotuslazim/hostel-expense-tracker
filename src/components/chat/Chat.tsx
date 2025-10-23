@@ -74,9 +74,10 @@ function ChatSkeleton() {
 
 const backgroundOptions = [
     { name: 'Default', class: 'bg-background' },
-    { name: 'Subtle Dots', class: 'bg-background bg-dot-pattern' },
-    { name: 'Lines', class: 'bg-background bg-line-pattern' },
-    { name: 'Grid', class: 'bg-background bg-grid-pattern' },
+    { name: 'Subtle Grid', class: 'bg-grid-pattern' },
+    { name: 'Colorful', class: 'bg-wallpaper-1' },
+    { name: 'Landscape', class: 'bg-wallpaper-2' },
+    { name: 'Abstract', class: 'bg-wallpaper-3' },
 ];
 
 
@@ -204,7 +205,7 @@ export function Chat({ groupId, currentUser }: ChatProps) {
     const isLoading = areMessagesLoading || isGroupDataLoading;
 
     return (
-        <div className="flex flex-col h-full w-full max-w-4xl mx-auto bg-card">
+        <div className="flex flex-col h-full w-full bg-card">
             <CardHeader className="border-b bg-background z-10 flex flex-row items-center justify-between">
                 <CardTitle>
                     {isGroupDataLoading ? <Skeleton className="h-7 w-48" /> : groupData?.groupName || "Group Chat"}
@@ -333,5 +334,3 @@ export function Chat({ groupId, currentUser }: ChatProps) {
         </div>
     );
 }
-
-    
