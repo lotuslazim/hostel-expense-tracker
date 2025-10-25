@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useMemo } from 'react';
@@ -97,8 +96,8 @@ export function MealLogChecker({ userId, groupId }: MealLogCheckerProps) {
                         const loggedCount = mealStatus[mealType] || 0;
                         const isLogged = loggedCount > 0;
                         return (
-                            <div key={mealType} className="flex items-center justify-between p-2 rounded-md bg-muted/50">
-                                <div className="flex items-center gap-2">
+                            <div key={mealType} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                                <div className="flex items-center gap-3">
                                      {isLogged ? (
                                         <CheckCircle2 className="h-5 w-5 text-green-500" />
                                     ) : (
@@ -106,10 +105,12 @@ export function MealLogChecker({ userId, groupId }: MealLogCheckerProps) {
                                     )}
                                     <span className="font-semibold capitalize">{mealType}</span>
                                 </div>
-                                {isLogged && (
+                                {isLogged ? (
                                      <span className="text-sm text-muted-foreground">
                                         Logged items: <span className="font-bold text-primary">{loggedCount}</span>
                                     </span>
+                                ) : (
+                                    <span className="text-sm text-muted-foreground">Not logged</span>
                                 )}
                             </div>
                         );
