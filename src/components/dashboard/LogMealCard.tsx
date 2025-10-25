@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
@@ -68,12 +67,14 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
 
   const mealSummary = useMemo(() => {
     const summary = mealTypes.reduce((acc: any, type: string) => {
+        // Initialize summary with lowercase keys
         acc[type.toLowerCase()] = 0;
         return acc;
     }, {});
     
     if (loggedMeals) {
         loggedMeals.forEach(meal => {
+            // Firestore data mealType should be lowercase. If not, convert it.
             const mealTypeLower = meal.mealType.toLowerCase();
             if (summary[mealTypeLower] !== undefined) {
                 summary[mealTypeLower] += meal.mealNumber;
@@ -86,6 +87,7 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
 
 
   const mealSchema = useMemo(() => {
+    // Zod schema now expects lowercase meal types
     const safeMealTypes = mealTypes.length > 0 ? mealTypes.map((t: string) => t.toLowerCase()) : ["dummy"];
     
     return z.object({
@@ -116,7 +118,7 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
       itemName: "",
       mealType: undefined
     });
-  }, [isMealItemNameRequired, mealTypes, form]);
+  }, [isMealItemNameRequired, mealTypes, form, selectedDate]);
 
   const handleUndo = (docId: string) => {
     if (!groupId) return;
@@ -136,7 +138,7 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
     }
     
     const mealData = {
-      mealType: values.mealType,
+      mealType: values.mealType, // This will now be lowercase
       mealNumber: values.mealCount,
       description: `${values.mealCount} ${values.mealType}(s) logged. ${values.itemName ? `Item: ${values.itemName}` : ''}`,
       date: Timestamp.fromDate(selectedDate),
@@ -217,7 +219,8 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
             <div className="p-4 bg-muted/50 rounded-lg space-y-2">
                 {areMealsLoading ? <Skeleton className="h-12 w-full" /> : 
                 mealTypes.map((type: string) => {
-                    const loggedCount = mealSummary[type.toLowerCase()];
+                    const typeLower = type.toLowerCase();
+                    const loggedCount = mealSummary[typeLower];
                     const isLogged = loggedCount > 0;
                     return (
                         <div key={type} className="flex items-center justify-between text-sm">
@@ -253,6 +256,7 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
                       {mealTypes.length > 0 ? mealTypes.map((type: string) => (
                           <FormItem key={type} className="flex items-center space-x-2 space-y-0">
                             <FormControl>
+                              {/* The value should be lowercase to match the schema and summary */}
                               <RadioGroupItem value={type.toLowerCase()} />
                             </FormControl>
                             <FormLabel className="font-normal capitalize">{type}</FormLabel>
@@ -300,5 +304,3 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
     </Card>
   );
 }
-
-    
