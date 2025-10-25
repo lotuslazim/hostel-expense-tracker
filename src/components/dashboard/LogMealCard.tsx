@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo, useEffect, lazy, Suspense } from "react";
@@ -69,7 +68,7 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
     );
   }, [currentUser, groupId, selectedDate]);
 
-  const { data: loggedMeals, isLoading: areMealsLoading } = useCollection<MealLog>(todaysMealsQuery);
+  const { data: loggedMeals, isLoading: areMealsLoading } = useCollection<MealLog>(todaysMealsQuery, [selectedDate]);
 
 
   const mealSchema = useMemo(() => {
@@ -322,5 +321,3 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
     </Card>
   );
 }
-
-    

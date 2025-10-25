@@ -10,7 +10,6 @@ import {
   CollectionReference,
 } from 'firebase/firestore';
 
-/** Utility type to add an 'id' field to a given type T. */
 export type WithId<T> = T & { id: string };
 
 export interface UseCollectionResult<T> {
@@ -21,13 +20,13 @@ export interface UseCollectionResult<T> {
 
 export function useCollection<T = any>(
   targetRefOrQuery: CollectionReference<DocumentData> | Query<DocumentData> | null | undefined,
+  deps: any[] = []
 ): UseCollectionResult<T> {
   const [data, setData] = useState<WithId<T>[] | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<FirestoreError | Error | null>(null);
 
-  // Memoize the query to prevent re-renders from creating new query objects
-  const memoizedQuery = useMemo(() => targetRefOrQuery, [targetRefOrQuery]);
+  const memoizedQuery = useMemo(() => targetRefOrQuery, [targetRefOrQuery, ...deps]);
 
   useEffect(() => {
     if (!memoizedQuery) {
@@ -58,10 +57,8 @@ export function useCollection<T = any>(
       }
     );
 
-    // This cleanup function will run when the component unmounts
-    // or when the memoizedQuery changes, preventing memory leaks.
     return () => unsubscribe();
-  }, [memoizedQuery]); // The effect now correctly depends on the memoized query object
+  }, [memoizedQuery]);
 
   return { data, isLoading, error };
 }
