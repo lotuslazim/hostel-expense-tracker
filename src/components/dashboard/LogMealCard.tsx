@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
@@ -51,40 +52,37 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
     const end = new Date(selectedDate);
     end.setHours(23, 59, 59, 999);
     
-    // --- DEBUG LOGGING: Date Range ---
-    console.log("Meal Checker Query Range:", { 
-        start, 
-        end,
-        startTS: Timestamp.fromDate(start),
-        endTS: Timestamp.fromDate(end)
-    });
-    
     return { start: Timestamp.fromDate(start), end: Timestamp.fromDate(end) };
   }, [selectedDate]);
 
   const mealsQuery = useMemo(() => {
     if (!currentUser || !groupId) return null;
+    
+    console.log("Query Parameters:", {
+        userId: currentUser.uid,
+        groupId,
+        start: dayQueryRange.start.toDate(),
+        end: dayQueryRange.end.toDate(),
+    });
 
-    // --- DEBUG LOGGING: Query Parameters ---
-    console.log("Meal Checker Query Params:", { userId: currentUser.uid, groupId });
-
-    return query(
+    const q = query(
       collection(firestore, `groups/${groupId}/meals`),
       where('userId', '==', currentUser.uid),
       where('date', '>=', dayQueryRange.start),
-      where('date', '<=', dayQueryRange.end)
+      where('date', '<=', dayQuery-range.end)
     );
+    console.log("Constructed Query Object:", q);
+    return q;
+
   }, [currentUser, groupId, dayQueryRange]);
 
   const { data: loggedMeals, isLoading: areMealsLoading } = useCollection(mealsQuery);
-
-  // --- DEBUG LOGGING: Firestore Results ---
+  
   useEffect(() => {
     if(!areMealsLoading) {
-      console.log("Firestore Raw Meal Data for Selected Day:", loggedMeals);
+      console.log("Raw meal data from Firestore:", loggedMeals);
     }
   }, [loggedMeals, areMealsLoading]);
-
 
   const mealSummary = useMemo(() => {
     const summary = mealTypes.reduce((acc: any, type: string) => {
@@ -100,8 +98,6 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
             }
         });
     }
-     // --- DEBUG LOGGING: Processed Summary ---
-    console.log("Processed Meal Summary:", summary);
     return summary;
   }, [loggedMeals, mealTypes]);
   // --- End Meal Checker Logic ---
@@ -158,19 +154,16 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
     }
     
     const mealData = {
-      mealType: values.mealType, // Already lowercase from the form
+      mealType: values.mealType,
       mealNumber: values.mealCount,
       description: `${values.mealCount} ${values.mealType}(s) logged. ${values.itemName ? `Item: ${values.itemName}` : ''}`,
-      date: Timestamp.fromDate(selectedDate), // **FIX**: Standardize to Timestamp on write
+      date: Timestamp.fromDate(selectedDate),
       createdAt: serverTimestamp(),
       userId: currentUser.uid,
       userName: currentUser.displayName || currentUser.email?.split('@')[0],
       itemName: values.itemName || null,
       groupId,
     };
-
-    // --- DEBUG LOGGING: Data to be Saved ---
-    console.log("Saving Meal Data:", mealData);
     
     const mealCollectionRef = collection(firestore, `groups/${groupId}/meals`);
     try {
@@ -280,7 +273,6 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
                       {mealTypes.length > 0 ? mealTypes.map((type: string) => (
                           <FormItem key={type} className="flex items-center space-x-2 space-y-0">
                             <FormControl>
-                              {/* **FIX**: Value is now lowercase for normalization */}
                               <RadioGroupItem value={type.toLowerCase()} />
                             </FormControl>
                             <FormLabel className="font-normal capitalize">{type}</FormLabel>
