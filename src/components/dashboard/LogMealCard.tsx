@@ -20,11 +20,12 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
 import { useUser, useDoc, useCollection } from "@/firebase";
 import { firestore } from "@/firebase/config";
-import { doc, collection, serverTimestamp, Timestamp, addDoc, deleteDoc } from "firebase/firestore";
+import { doc, collection, serverTimestamp, Timestamp, addDoc, deleteDoc, query, where } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Utensils } from "lucide-react";
+import { Loader2, Utensils, CheckCircle } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
 import { ToastAction } from "../ui/toast";
+import { Separator } from "../ui/separator";
 
 interface LogMealCardProps {
     selectedDate: Date;
@@ -43,6 +44,45 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
 
   const mealTypes = useMemo(() => groupData?.settings?.mealTypes ?? ["Lunch", "Dinner"], [groupData]);
   const isMealItemNameRequired = useMemo(() => groupData?.settings?.isMealItemNameRequired ?? false, [groupData]);
+
+  // --- Meal Checker Logic ---
+  const dayQueryRange = useMemo(() => {
+    const start = new Date(selectedDate);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(selectedDate);
+    end.setHours(23, 59, 59, 999);
+    return { start: Timestamp.fromDate(start), end: Timestamp.fromDate(end) };
+  }, [selectedDate]);
+
+  const mealsQuery = useMemo(() => {
+    if (!currentUser || !groupId) return null;
+    return query(
+      collection(firestore, `groups/${groupId}/meals`),
+      where('userId', '==', currentUser.uid),
+      where('date', '>=', dayQueryRange.start),
+      where('date', '<=', dayQueryRange.end)
+    );
+  }, [currentUser, groupId, dayQueryRange]);
+
+  const { data: loggedMeals, isLoading: areMealsLoading } = useCollection(mealsQuery);
+
+  const mealSummary = useMemo(() => {
+    const summary = mealTypes.reduce((acc: any, type: string) => {
+        acc[type.toLowerCase()] = 0;
+        return acc;
+    }, {});
+    
+    if (loggedMeals) {
+        loggedMeals.forEach(meal => {
+            if (summary[meal.mealType] !== undefined) {
+                summary[meal.mealType] += meal.mealNumber;
+            }
+        });
+    }
+    return summary;
+  }, [loggedMeals, mealTypes]);
+  // --- End Meal Checker Logic ---
+
 
   const mealSchema = useMemo(() => {
     const safeMealTypes = mealTypes.length > 0 ? mealTypes.map((t: string) => t.toLowerCase()) : ["dummy"];
@@ -98,8 +138,8 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
       mealType: values.mealType,
       mealNumber: values.mealCount,
       description: `${values.mealCount} ${values.mealType}(s) logged. ${values.itemName ? `Item: ${values.itemName}` : ''}`,
-      date: new Date(), // Use client-side date for immediate UI update
-      createdAt: serverTimestamp(), // Use server timestamp for backend ordering
+      date: Timestamp.fromDate(selectedDate),
+      createdAt: serverTimestamp(),
       userId: currentUser.uid,
       userName: currentUser.displayName || currentUser.email?.split('@')[0],
       itemName: values.itemName || null,
@@ -171,6 +211,30 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        <div className="space-y-4 mb-6">
+            <h4 className="text-sm font-medium text-muted-foreground">Logged Meals for this Day</h4>
+            <div className="p-4 bg-muted/50 rounded-lg space-y-2">
+                {areMealsLoading ? <Skeleton className="h-12 w-full" /> : 
+                mealTypes.map((type: string) => {
+                    const loggedCount = mealSummary[type.toLowerCase()];
+                    const isLogged = loggedCount > 0;
+                    return (
+                        <div key={type} className="flex items-center justify-between text-sm">
+                            <span className="font-medium capitalize">{type}</span>
+                            {isLogged ? (
+                                <div className="flex items-center gap-2 text-green-600 font-semibold">
+                                    <CheckCircle className="h-4 w-4"/>
+                                    <span>Logged ({loggedCount})</span>
+                                </div>
+                            ) : (
+                                <span className="text-muted-foreground">Not logged</span>
+                            )}
+                        </div>
+                    )
+                })}
+            </div>
+        </div>
+        <Separator className="mb-6"/>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
