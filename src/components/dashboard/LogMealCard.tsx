@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, lazy, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -17,13 +17,25 @@ import {
 } from "@/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
-import { useUser, useDoc } from "@/firebase";
+import { useUser, useDoc, useCollection } from "@/firebase";
 import { firestore } from "@/firebase/config";
-import { doc, collection, serverTimestamp, Timestamp, addDoc, deleteDoc } from "firebase/firestore";
+import { doc, collection, serverTimestamp, Timestamp, addDoc, deleteDoc, query, where, orderBy } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Utensils } from "lucide-react";
+import { Loader2, Utensils, Trash2 } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
 import { ToastAction } from "../ui/toast";
+import { startOfDay, endOfDay } from "date-fns";
+import type { MealLog } from "@/lib/types";
+
+const AlertDialog = lazy(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialog })));
+const AlertDialogAction = lazy(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialogAction })));
+const AlertDialogCancel = lazy(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialogCancel })));
+const AlertDialogContent = lazy(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialogContent })));
+const AlertDialogDescription = lazy(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialogDescription })));
+const AlertDialogFooter = lazy(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialogFooter })));
+const AlertDialogHeader = lazy(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialogHeader })));
+const AlertDialogTitle = lazy(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialogTitle })));
+const AlertDialogTrigger = lazy(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialogTrigger })));
 
 interface LogMealCardProps {
     selectedDate: Date;
@@ -42,6 +54,23 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
 
   const mealTypes = useMemo(() => groupData?.settings?.mealTypes ?? ["Lunch", "Dinner"], [groupData]);
   const isMealItemNameRequired = useMemo(() => groupData?.settings?.isMealItemNameRequired ?? false, [groupData]);
+
+  // Query for meals logged today by the current user
+  const todaysMealsQuery = useMemo(() => {
+    if (!currentUser || !groupId) return null;
+    const start = Timestamp.fromDate(startOfDay(selectedDate));
+    const end = Timestamp.fromDate(endOfDay(selectedDate));
+    return query(
+      collection(firestore, `groups/${groupId}/meals`),
+      where("userId", "==", currentUser.uid),
+      where("date", ">=", start),
+      where("date", "<=", end),
+      orderBy("date", "desc")
+    );
+  }, [currentUser, groupId, selectedDate]);
+
+  const { data: loggedMeals, isLoading: areMealsLoading } = useCollection<MealLog>(todaysMealsQuery);
+
 
   const mealSchema = useMemo(() => {
     const safeMealTypes = mealTypes.length > 0 ? mealTypes.map((t: string) => t.toLowerCase()) : ["dummy"];
@@ -82,6 +111,17 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
     deleteDoc(docRef);
     toast({ title: "Action Undone", description: "The meal log has been removed." });
   };
+
+  const handleDelete = async (docId: string) => {
+    if (!groupId) return;
+    const docRef = doc(firestore, `groups/${groupId}/meals`, docId);
+    try {
+      await deleteDoc(docRef);
+      toast({ title: "Meal Log Removed" });
+    } catch(e) {
+      toast({ variant: "destructive", title: "Error", description: "Could not remove meal log." });
+    }
+  }
 
   async function onSubmit(values: MealSchemaType) {
     if (!currentUser || !groupId) {
@@ -232,7 +272,55 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
             </Button>
           </form>
         </Form>
+
+         <div className="mt-6 pt-6 border-t">
+            <h4 className="font-medium text-center mb-4">Logged for this day</h4>
+            {areMealsLoading ? (
+                <div className="space-y-2">
+                    <Skeleton className="h-8 w-full" />
+                    <Skeleton className="h-8 w-full" />
+                </div>
+            ) : loggedMeals && loggedMeals.length > 0 ? (
+                <div className="space-y-2">
+                    {loggedMeals.map(meal => (
+                        <div key={meal.id} className="flex items-center justify-between p-2 rounded-md bg-muted/50">
+                           <div>
+                            <p className="font-medium capitalize">
+                                {meal.mealType} (x{meal.mealNumber})
+                            </p>
+                            {meal.itemName && <p className="text-xs text-muted-foreground">{meal.itemName}</p>}
+                           </div>
+                           <Suspense fallback={<Skeleton className="h-8 w-8" />}>
+                           <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="icon" className="text-destructive h-8 w-8">
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        This action will permanently delete this meal log.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleDelete(meal.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                           </AlertDialog>
+                           </Suspense>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <p className="text-sm text-muted-foreground text-center">No meals logged for this date yet.</p>
+            )}
+        </div>
       </CardContent>
     </Card>
   );
 }
+
+    
