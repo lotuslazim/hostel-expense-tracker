@@ -68,7 +68,7 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
     );
   }, [currentUser, groupId, selectedDate]);
 
-  const { data: loggedMeals, isLoading: areMealsLoading } = useCollection<MealLog>(todaysMealsQuery, [selectedDate]);
+  const { data: loggedMeals, isLoading: areMealsLoading } = useCollection<MealLog>(todaysMealsQuery);
 
 
   const mealSchema = useMemo(() => {
