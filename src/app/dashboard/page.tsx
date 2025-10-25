@@ -1,4 +1,3 @@
-
 "use client";
 
 import { AddExpenseCard } from "@/components/dashboard/AddExpenseCard";
@@ -17,7 +16,6 @@ import { subMonths } from 'date-fns/subMonths';
 import { startOfMonth } from 'date-fns/startOfMonth';
 import { endOfMonth } from 'date-fns/endOfMonth';
 import { SendReminderCard } from "@/components/dashboard/SendReminderCard";
-import { MealLogChecker } from "@/components/dashboard/MealLogChecker";
 
 function DashboardSkeleton() {
   return (
