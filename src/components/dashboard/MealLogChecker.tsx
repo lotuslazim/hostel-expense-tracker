@@ -8,20 +8,22 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
 import { CheckCircle2, Circle, ListChecks } from 'lucide-react';
-import { startOfDay, endOfDay } from 'date-fns';
+import { startOfDay, endOfDay, isToday } from 'date-fns';
+import { format } from 'date-fns/format';
 
 interface MealLogCheckerProps {
     userId: string;
     groupId: string;
     mealTypes: string[];
     isLoading: boolean;
+    selectedDate: Date;
 }
 
 function MealCheckerSkeleton() {
     return (
         <Card>
             <CardHeader>
-                <CardTitle className="flex items-center gap-2"><ListChecks /> Today's Meal Log Checker</CardTitle>
+                <CardTitle className="flex items-center gap-2"><ListChecks /> Meal Log Status</CardTitle>
                 <CardDescription>Checking your meal status...</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -36,11 +38,12 @@ function MealCheckerSkeleton() {
     );
 }
 
-export function MealLogChecker({ userId, groupId, mealTypes, isLoading: isMealTypesLoading }: MealLogCheckerProps) {
+export function MealLogChecker({ userId, groupId, mealTypes, isLoading: isMealTypesLoading, selectedDate }: MealLogCheckerProps) {
     const [summary, setSummary] = useState<Record<string, number>>({});
     const [isMealDataLoading, setIsMealDataLoading] = useState(true);
 
     const mealTypesToCheck = useMemo(() => mealTypes.map(t => t.toLowerCase()), [mealTypes]);
+    const dateKey = selectedDate.toISOString().split('T')[0];
 
     useEffect(() => {
         if (!userId || !groupId) {
@@ -49,14 +52,14 @@ export function MealLogChecker({ userId, groupId, mealTypes, isLoading: isMealTy
         };
 
         setIsMealDataLoading(true);
-        const todayStart = startOfDay(new Date());
-        const todayEnd = endOfDay(new Date());
+        const dayStart = startOfDay(selectedDate);
+        const dayEnd = endOfDay(selectedDate);
 
         const q = query(
             collection(firestore, `groups/${groupId}/meals`),
             where('userId', '==', userId),
-            where('date', '>=', Timestamp.fromDate(todayStart)),
-            where('date', '<=', Timestamp.fromDate(todayEnd))
+            where('date', '>=', Timestamp.fromDate(dayStart)),
+            where('date', '<=', Timestamp.fromDate(dayEnd))
         );
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -78,7 +81,7 @@ export function MealLogChecker({ userId, groupId, mealTypes, isLoading: isMealTy
         });
 
         return () => unsubscribe();
-    }, [userId, groupId, mealTypesToCheck]);
+    }, [userId, groupId, mealTypesToCheck, dateKey]); // Use dateKey for stable dependency
 
     const isLoading = isMealTypesLoading || isMealDataLoading;
 
@@ -88,16 +91,18 @@ export function MealLogChecker({ userId, groupId, mealTypes, isLoading: isMealTy
     
     const loggedMealTypesCount = mealTypesToCheck.filter(type => (summary[type] || 0) > 0).length;
     const progress = mealTypesToCheck.length > 0 ? (loggedMealTypesCount / mealTypesToCheck.length) * 100 : 0;
-    const totalMealsLoggedToday = Object.values(summary).reduce((sum, count) => sum + count, 0);
+    const totalMealsLogged = Object.values(summary).reduce((sum, count) => sum + count, 0);
+
+    const titleText = isToday(selectedDate) ? "Today's Meal Log Status" : `Status for ${format(selectedDate, 'MMM d')}`;
 
     return (
         <Card>
             <CardHeader>
-                <CardTitle className="flex items-center gap-2"><ListChecks /> Today's Meal Log Checker</CardTitle>
+                <CardTitle className="flex items-center gap-2"><ListChecks /> {titleText}</CardTitle>
                 <CardDescription>
-                    {totalMealsLoggedToday > 0 
-                        ? `You’ve logged ${totalMealsLoggedToday} meals today.`
-                        : "You haven't logged any meals today."
+                    {totalMealsLogged > 0 
+                        ? `You’ve logged ${totalMealsLogged} meals for this day.`
+                        : "You haven't logged any meals for this day."
                     }
                 </CardDescription>
             </CardHeader>

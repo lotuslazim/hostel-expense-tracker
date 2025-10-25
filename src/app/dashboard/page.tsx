@@ -83,7 +83,7 @@ function DashboardContent({ groupId, userId }: { groupId: string, userId: string
             <DateCard date={selectedDate} setDate={setSelectedDate} />
             <LogMealCard selectedDate={selectedDate} />
             <AddExpenseCard selectedDate={selectedDate} />
-            <MealLogChecker userId={userId} groupId={groupId} mealTypes={mealTypes} isLoading={isGroupLoading} />
+            <MealLogChecker userId={userId} groupId={groupId} mealTypes={mealTypes} isLoading={isGroupLoading} selectedDate={selectedDate} />
             <SendReminderCard />
           </div>
           <div className="lg:col-span-3">
