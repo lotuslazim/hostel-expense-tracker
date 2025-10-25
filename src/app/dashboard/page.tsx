@@ -17,7 +17,6 @@ import { subMonths } from 'date-fns/subMonths';
 import { startOfMonth } from 'date-fns/startOfMonth';
 import { endOfMonth } from 'date-fns/endOfMonth';
 import { SendReminderCard } from "@/components/dashboard/SendReminderCard";
-import { MealHistory } from "@/components/report/meals/MealHistory";
 
 function DashboardSkeleton() {
   return (
@@ -78,7 +77,6 @@ function DashboardContent({ groupId, userId }: { groupId: string, userId: string
             <DateCard date={selectedDate} setDate={setSelectedDate} />
             <LogMealCard selectedDate={selectedDate} />
             <AddExpenseCard selectedDate={selectedDate} />
-            <MealHistory groupId={groupId} userId={userId} />
             <SendReminderCard />
           </div>
           <div className="lg:col-span-3">
