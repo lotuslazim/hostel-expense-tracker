@@ -202,11 +202,11 @@
         "definition": {
           "entityName": "MealLog", "schema": { "$ref": "#/entities/MealLog" },
           "rules": { 
-            "list, get": "request.auth.token.email_verified == true && get(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)).data.status == 'active'",
+            "list, get": "request.auth.token.email_verified == true && get(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)).data.status == 'active' && resource.data.userId == request.auth.uid",
             "create": "request.auth.token.email_verified == true && get(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)).data.status == 'active' && request.resource.data.userId == request.auth.uid",
             "update, delete": "request.auth.token.email_verified == true && get(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)).data.status == 'active' && resource.data.userId == request.auth.uid"
           },
-          "description": "Stores meal logs. Accessible only by active members of the group. Users can only create/edit their own meals. Email verification required."
+          "description": "Stores meal logs. **FIX**: Users can only list and get their own meals, not all meals in the group. Create/update/delete operations are also restricted to the meal's owner."
         }
       },
       {
@@ -258,7 +258,7 @@
         }
       }
     ],
-    "reasoning": "This structure is updated to enforce an 'active' status check for all group-related data access. Instead of checking for simple existence with exists(), the rules now use get().data.status == 'active'. This closes a security hole where inactive members could still access group data. It also solves the data inconsistency problem by ensuring that the security rules and application logic are aligned. This is a more secure and robust pattern for managing group membership. The user read rule was changed to allow any authenticated user to read user profiles to support fetching user data for reports."
+    "reasoning": "This structure is updated to enforce an 'active' status check for all group-related data access. Instead of checking for simple existence with exists(), the rules now use get().data.status == 'active'. This closes a security hole where inactive members could still access group data. It also solves the data inconsistency problem by ensuring that the security rules and application logic are aligned. This is a more secure and robust pattern for managing group membership. The user read rule was changed to allow any authenticated user to read user profiles to support fetching user data for reports. The meal log read rule was restricted so users can only see their own meals, improving privacy."
   }
 }
 

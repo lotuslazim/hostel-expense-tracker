@@ -50,11 +50,24 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
     start.setHours(0, 0, 0, 0);
     const end = new Date(selectedDate);
     end.setHours(23, 59, 59, 999);
+    
+    // --- DEBUG LOGGING: Date Range ---
+    console.log("Meal Checker Query Range:", { 
+        start, 
+        end,
+        startTS: Timestamp.fromDate(start),
+        endTS: Timestamp.fromDate(end)
+    });
+    
     return { start: Timestamp.fromDate(start), end: Timestamp.fromDate(end) };
   }, [selectedDate]);
 
   const mealsQuery = useMemo(() => {
     if (!currentUser || !groupId) return null;
+
+    // --- DEBUG LOGGING: Query Parameters ---
+    console.log("Meal Checker Query Params:", { userId: currentUser.uid, groupId });
+
     return query(
       collection(firestore, `groups/${groupId}/meals`),
       where('userId', '==', currentUser.uid),
@@ -65,29 +78,36 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
 
   const { data: loggedMeals, isLoading: areMealsLoading } = useCollection(mealsQuery);
 
+  // --- DEBUG LOGGING: Firestore Results ---
+  useEffect(() => {
+    if(!areMealsLoading) {
+      console.log("Firestore Raw Meal Data for Selected Day:", loggedMeals);
+    }
+  }, [loggedMeals, areMealsLoading]);
+
+
   const mealSummary = useMemo(() => {
     const summary = mealTypes.reduce((acc: any, type: string) => {
-        // Initialize summary with lowercase keys
         acc[type.toLowerCase()] = 0;
         return acc;
     }, {});
     
     if (loggedMeals) {
         loggedMeals.forEach(meal => {
-            // Firestore data mealType should be lowercase. If not, convert it.
             const mealTypeLower = meal.mealType.toLowerCase();
             if (summary[mealTypeLower] !== undefined) {
                 summary[mealTypeLower] += meal.mealNumber;
             }
         });
     }
+     // --- DEBUG LOGGING: Processed Summary ---
+    console.log("Processed Meal Summary:", summary);
     return summary;
   }, [loggedMeals, mealTypes]);
   // --- End Meal Checker Logic ---
 
 
   const mealSchema = useMemo(() => {
-    // Zod schema now expects lowercase meal types
     const safeMealTypes = mealTypes.length > 0 ? mealTypes.map((t: string) => t.toLowerCase()) : ["dummy"];
     
     return z.object({
@@ -138,16 +158,19 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
     }
     
     const mealData = {
-      mealType: values.mealType, // This will now be lowercase
+      mealType: values.mealType, // Already lowercase from the form
       mealNumber: values.mealCount,
       description: `${values.mealCount} ${values.mealType}(s) logged. ${values.itemName ? `Item: ${values.itemName}` : ''}`,
-      date: Timestamp.fromDate(selectedDate),
+      date: Timestamp.fromDate(selectedDate), // **FIX**: Standardize to Timestamp on write
       createdAt: serverTimestamp(),
       userId: currentUser.uid,
       userName: currentUser.displayName || currentUser.email?.split('@')[0],
       itemName: values.itemName || null,
       groupId,
     };
+
+    // --- DEBUG LOGGING: Data to be Saved ---
+    console.log("Saving Meal Data:", mealData);
     
     const mealCollectionRef = collection(firestore, `groups/${groupId}/meals`);
     try {
@@ -169,6 +192,7 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
             title: "Error",
             description: "Could not log meal. Please try again.",
         });
+        console.error("Meal logging error:", e);
     }
     
     form.reset({ mealCount: 1, mealType: undefined, itemName: "" });
@@ -256,7 +280,7 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
                       {mealTypes.length > 0 ? mealTypes.map((type: string) => (
                           <FormItem key={type} className="flex items-center space-x-2 space-y-0">
                             <FormControl>
-                              {/* The value should be lowercase to match the schema and summary */}
+                              {/* **FIX**: Value is now lowercase for normalization */}
                               <RadioGroupItem value={type.toLowerCase()} />
                             </FormControl>
                             <FormLabel className="font-normal capitalize">{type}</FormLabel>
@@ -304,3 +328,4 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
     </Card>
   );
 }
+    
