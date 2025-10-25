@@ -74,8 +74,9 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
     
     if (loggedMeals) {
         loggedMeals.forEach(meal => {
-            if (summary[meal.mealType] !== undefined) {
-                summary[meal.mealType] += meal.mealNumber;
+            const mealTypeLower = meal.mealType.toLowerCase();
+            if (summary[mealTypeLower] !== undefined) {
+                summary[mealTypeLower] += meal.mealNumber;
             }
         });
     }
@@ -299,3 +300,5 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
     </Card>
   );
 }
+
+    
