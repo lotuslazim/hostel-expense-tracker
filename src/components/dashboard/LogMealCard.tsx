@@ -42,7 +42,7 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
   const groupRef = useMemo(() => (groupId) ? doc(firestore, "groups", groupId) : null, [groupId]);
   const { data: groupData, isLoading: isGroupDataLoading } = useDoc(groupRef);
 
-  const mealTypes = useMemo(() => groupData?.settings?.mealTypes ?? ["Lunch", "Dinner"], [groupData]);
+  const mealTypes = useMemo(() => groupData?.settings?.mealTypes ?? ["Breakfast", "Lunch", "Dinner"], [groupData]);
   const isMealItemNameRequired = useMemo(() => groupData?.settings?.isMealItemNameRequired ?? false, [groupData]);
 
   // --- Meal Checker Logic ---
@@ -69,7 +69,7 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
       collection(firestore, `groups/${groupId}/meals`),
       where('userId', '==', currentUser.uid),
       where('date', '>=', dayQueryRange.start),
-      where('date', '<=', dayQuery-range.end)
+      where('date', '<=', dayQueryRange.end)
     );
     console.log("Constructed Query Object:", q);
     return q;
