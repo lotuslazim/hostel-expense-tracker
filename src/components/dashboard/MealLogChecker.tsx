@@ -15,7 +15,7 @@ interface MealLogCheckerProps {
     groupId: string;
 }
 
-const MEAL_TYPES_TO_CHECK = ["breakfast", "lunch", "dinner"];
+const MEAL_TYPES_TO_CHECK = ["lunch", "dinner"];
 
 function MealCheckerSkeleton() {
     return (
@@ -38,7 +38,7 @@ function MealCheckerSkeleton() {
 }
 
 export function MealLogChecker({ userId, groupId }: MealLogCheckerProps) {
-    const [summary, setSummary] = useState<Record<string, number>>({ breakfast: 0, lunch: 0, dinner: 0 });
+    const [summary, setSummary] = useState<Record<string, number>>({ lunch: 0, dinner: 0 });
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -59,7 +59,7 @@ export function MealLogChecker({ userId, groupId }: MealLogCheckerProps) {
         );
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
-            const mealCounts: Record<string, number> = { breakfast: 0, lunch: 0, dinner: 0 };
+            const mealCounts: Record<string, number> = { lunch: 0, dinner: 0 };
             snapshot.forEach(doc => {
                 const meal = doc.data();
                 const mealType = meal.mealType.toLowerCase();
