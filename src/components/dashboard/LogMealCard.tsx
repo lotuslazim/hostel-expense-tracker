@@ -1,10 +1,11 @@
 
 "use client";
 
-import { useState, useMemo, useEffect, lazy, Suspense } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { format } from 'date-fns/format';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
@@ -128,7 +129,6 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
     }
     
     form.reset({ mealCount: 1, mealType: undefined, itemName: "" });
-
   }
   
   if (isGroupDataLoading && groupId) {
@@ -235,3 +235,5 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
     </Card>
   );
 }
+
+    
