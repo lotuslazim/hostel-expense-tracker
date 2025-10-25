@@ -73,7 +73,7 @@ export function MealLogChecker({ userId, groupId }: MealLogCheckerProps) {
         return <MealCheckerSkeleton />;
     }
     
-    const loggedMealTypesCount = Object.keys(mealStatus).filter(type => MEAL_TYPES_TO_CHECK.includes(type)).length;
+    const loggedMealTypesCount = MEAL_TYPES_TO_CHECK.filter(type => mealStatus[type] > 0).length;
     const progress = (loggedMealTypesCount / MEAL_TYPES_TO_CHECK.length) * 100;
     const totalMealsLoggedToday = Object.values(mealStatus).reduce((sum, count) => sum + count, 0);
 
