@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -19,14 +20,13 @@ export interface UseCollectionResult<T> {
 }
 
 export function useCollection<T = any>(
-  targetRefOrQuery: CollectionReference<DocumentData> | Query<DocumentData> | null | undefined,
-  deps: any[] = []
+  targetRefOrQuery: CollectionReference<DocumentData> | Query<DocumentData> | null | undefined
 ): UseCollectionResult<T> {
   const [data, setData] = useState<WithId<T>[] | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<FirestoreError | Error | null>(null);
 
-  const memoizedQuery = useMemo(() => targetRefOrQuery, [targetRefOrQuery, ...deps]);
+  const memoizedQuery = useMemo(() => targetRefOrQuery, [targetRefOrQuery]);
 
   useEffect(() => {
     if (!memoizedQuery) {

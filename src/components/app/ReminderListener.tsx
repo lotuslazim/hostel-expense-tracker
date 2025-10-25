@@ -4,7 +4,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useUser, useDoc } from '@/firebase';
 import { firestore } from '@/firebase/config';
-import { collection, query, onSnapshot, Timestamp, orderBy } from 'firebase/firestore';
+import { collection, query, onSnapshot, Timestamp, orderBy, where } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import type { Reminder } from '@/lib/types';
 import { doc } from 'firebase/firestore';
@@ -13,7 +13,6 @@ export function ReminderListener() {
     const { user: currentUser } = useUser();
     const { toast } = useToast();
     const lastReminderTimestampRef = useRef<Date | null>(null);
-    const isInitialLoadRef = useRef(true);
 
     const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [currentUser]);
     const { data: currentUserData } = useDoc(currentUserRef);
@@ -23,52 +22,27 @@ export function ReminderListener() {
     useEffect(() => {
         if (!groupId || !currentUser) return;
 
-        isInitialLoadRef.current = true;
-        lastReminderTimestampRef.current = null;
-
+        // Fetch reminders created after the component mounts to avoid showing old toasts.
         const remindersQuery = query(
             collection(firestore, `groups/${groupId}/reminders`),
+            where('createdAt', '>', Timestamp.now()),
             orderBy('createdAt', 'asc')
         );
 
         const unsubscribe = onSnapshot(remindersQuery, (snapshot) => {
-            const changes = snapshot.docChanges();
-
-            if (isInitialLoadRef.current) {
-                if (snapshot.docs.length > 0) {
-                    const lastDoc = snapshot.docs[snapshot.docs.length - 1];
-                    const lastDocData = lastDoc.data();
-                    if (lastDocData.createdAt) {
-                        lastReminderTimestampRef.current = (lastDocData.createdAt as Timestamp).toDate();
-                    }
-                } else {
-                    lastReminderTimestampRef.current = new Date();
-                }
-                isInitialLoadRef.current = false;
-                return; 
-            }
-            
-            changes.forEach((change) => {
+            snapshot.docChanges().forEach((change) => {
                 if (change.type === 'added') {
                     const reminder = change.doc.data() as Reminder;
-                    // Fix: Check if createdAt exists before using it
-                    if (!reminder.createdAt) {
-                        return; // Ignore documents that don't have a server timestamp yet
-                    }
-                    const reminderDate = (reminder.createdAt as Timestamp).toDate();
-
+                    
                     if (reminder.senderId === currentUser.uid) {
-                        return;
+                        return; // Don't toast for your own reminders
                     }
 
-                    if (lastReminderTimestampRef.current && reminderDate > lastReminderTimestampRef.current) {
-                        toast({
-                            title: `Reminder from ${reminder.senderName}`,
-                            description: reminder.messageText,
-                            duration: 10000,
-                        });
-                        lastReminderTimestampRef.current = reminderDate;
-                    }
+                    toast({
+                        title: `Reminder from ${reminder.senderName}`,
+                        description: reminder.messageText,
+                        duration: 10000,
+                    });
                 }
             });
 
@@ -76,10 +50,7 @@ export function ReminderListener() {
             console.error("Error in ReminderListener snapshot:", error);
         });
 
-        return () => {
-            unsubscribe();
-            isInitialLoadRef.current = true;
-        };
+        return () => unsubscribe();
     }, [groupId, currentUser, toast]);
 
     return null;

@@ -68,7 +68,7 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
       where("date", "<=", end),
       orderBy("date", "desc")
     );
-  }, [currentUser, groupId, selectedDate.getTime()]);
+  }, [currentUser, groupId, selectedDate]);
 
   const { data: loggedMeals, isLoading: areMealsLoading } = useCollection<MealLog>(todaysMealsQuery);
 
