@@ -20,7 +20,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
 import { useUser, useDoc, useCollection } from "@/firebase";
 import { firestore } from "@/firebase/config";
-import { doc, collection, serverTimestamp, Timestamp, addDoc, deleteDoc, query, where } from "firebase/firestore";
+import { doc, collection, serverTimestamp, Timestamp, addDoc, deleteDoc, query, where, orderBy } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Utensils, CheckCircle } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
@@ -62,8 +62,10 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
       collection(firestore, `groups/${groupId}/meals`),
       where('userId', '==', currentUser.uid),
       where('date', '>=', dayQueryRange.start),
-      where('date', '<=', dayQueryRange.end)
+      where('date', '<=', dayQueryRange.end),
+      orderBy('date', 'asc')
     );
+    console.log("Query object:", q);
     console.log("Query re-running for date:", selectedDate, "with params:", {
         userId: currentUser.uid,
         groupId,
@@ -319,6 +321,4 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
     </Card>
   );
 }
-    
-
     
