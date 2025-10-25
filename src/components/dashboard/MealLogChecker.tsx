@@ -13,9 +13,9 @@ import { startOfDay, endOfDay } from 'date-fns';
 interface MealLogCheckerProps {
     userId: string;
     groupId: string;
+    mealTypes: string[];
+    isLoading: boolean;
 }
-
-const MEAL_TYPES_TO_CHECK = ["lunch", "dinner"];
 
 function MealCheckerSkeleton() {
     return (
@@ -30,24 +30,25 @@ function MealCheckerSkeleton() {
                 <div className="space-y-3 pt-2">
                     <Skeleton className="h-6 w-full" />
                     <Skeleton className="h-6 w-full" />
-                    <Skeleton className="h-6 w-full" />
                 </div>
             </CardContent>
         </Card>
     );
 }
 
-export function MealLogChecker({ userId, groupId }: MealLogCheckerProps) {
-    const [summary, setSummary] = useState<Record<string, number>>({ lunch: 0, dinner: 0 });
-    const [isLoading, setIsLoading] = useState(true);
+export function MealLogChecker({ userId, groupId, mealTypes, isLoading: isMealTypesLoading }: MealLogCheckerProps) {
+    const [summary, setSummary] = useState<Record<string, number>>({});
+    const [isMealDataLoading, setIsMealDataLoading] = useState(true);
+
+    const mealTypesToCheck = useMemo(() => mealTypes.map(t => t.toLowerCase()), [mealTypes]);
 
     useEffect(() => {
         if (!userId || !groupId) {
-            setIsLoading(false);
+            setIsMealDataLoading(false);
             return;
         };
 
-        setIsLoading(true);
+        setIsMealDataLoading(true);
         const todayStart = startOfDay(new Date());
         const todayEnd = endOfDay(new Date());
 
@@ -59,30 +60,34 @@ export function MealLogChecker({ userId, groupId }: MealLogCheckerProps) {
         );
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
-            const mealCounts: Record<string, number> = { lunch: 0, dinner: 0 };
-            snapshot.forEach(doc => {
-                const meal = doc.data();
-                const mealType = meal.mealType.toLowerCase();
-                if (mealCounts.hasOwnProperty(mealType)) {
-                    mealCounts[mealType] += meal.mealNumber;
+            const initialCounts = mealTypesToCheck.reduce((acc, type) => ({ ...acc, [type]: 0 }), {});
+            const mealCounts: Record<string, number> = snapshot.docs.reduce((acc, doc) => {
+                 const meal = doc.data();
+                 const mealType = meal.mealType.toLowerCase();
+                if (acc.hasOwnProperty(mealType)) {
+                    acc[mealType] += meal.mealNumber;
                 }
-            });
+                return acc;
+            }, initialCounts);
+            
             setSummary(mealCounts);
-            setIsLoading(false);
+            setIsMealDataLoading(false);
         }, (error) => {
             console.error("Error fetching meal logs:", error);
-            setIsLoading(false);
+            setIsMealDataLoading(false);
         });
 
         return () => unsubscribe();
-    }, [userId, groupId]);
+    }, [userId, groupId, mealTypesToCheck]);
+
+    const isLoading = isMealTypesLoading || isMealDataLoading;
 
     if (isLoading) {
         return <MealCheckerSkeleton />;
     }
     
-    const loggedMealTypesCount = MEAL_TYPES_TO_CHECK.filter(type => summary[type] > 0).length;
-    const progress = (loggedMealTypesCount / MEAL_TYPES_TO_CHECK.length) * 100;
+    const loggedMealTypesCount = mealTypesToCheck.filter(type => (summary[type] || 0) > 0).length;
+    const progress = mealTypesToCheck.length > 0 ? (loggedMealTypesCount / mealTypesToCheck.length) * 100 : 0;
     const totalMealsLoggedToday = Object.values(summary).reduce((sum, count) => sum + count, 0);
 
     return (
@@ -99,7 +104,7 @@ export function MealLogChecker({ userId, groupId }: MealLogCheckerProps) {
             <CardContent className="space-y-4">
                 <Progress value={progress} className="h-2" />
                 <div className="space-y-3">
-                    {MEAL_TYPES_TO_CHECK.map(mealType => {
+                    {mealTypesToCheck.length > 0 ? mealTypesToCheck.map(mealType => {
                         const loggedCount = summary[mealType] || 0;
                         const isLogged = loggedCount > 0;
                         return (
@@ -121,7 +126,9 @@ export function MealLogChecker({ userId, groupId }: MealLogCheckerProps) {
                                 )}
                             </div>
                         );
-                    })}
+                    }) : (
+                        <p className="text-sm text-center text-muted-foreground py-4">No meal types configured for this group.</p>
+                    )}
                 </div>
             </CardContent>
         </Card>

@@ -46,6 +46,9 @@ function DashboardContent({ groupId, userId }: { groupId: string, userId: string
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [currentMonth, setCurrentMonth] = useState(startOfMonth(new Date()));
 
+  const groupRef = useMemo(() => doc(firestore, "groups", groupId), [groupId, firestore]);
+  const { data: groupData, isLoading: isGroupLoading } = useDoc(groupRef);
+
   const monthDateRange = useMemo(() => ({
     start: startOfMonth(currentMonth),
     end: endOfMonth(currentMonth),
@@ -66,6 +69,8 @@ function DashboardContent({ groupId, userId }: { groupId: string, userId: string
     setCurrentMonth(prev => direction === 'next' ? addMonths(prev, 1) : subMonths(prev, 1));
   }
 
+  const mealTypes = useMemo(() => groupData?.settings?.mealTypes ?? [], [groupData]);
+
   return (
     <div className="space-y-6">
       <div>
@@ -78,7 +83,7 @@ function DashboardContent({ groupId, userId }: { groupId: string, userId: string
             <DateCard date={selectedDate} setDate={setSelectedDate} />
             <LogMealCard selectedDate={selectedDate} />
             <AddExpenseCard selectedDate={selectedDate} />
-            <MealLogChecker userId={userId} groupId={groupId} />
+            <MealLogChecker userId={userId} groupId={groupId} mealTypes={mealTypes} isLoading={isGroupLoading} />
             <SendReminderCard />
           </div>
           <div className="lg:col-span-3">
