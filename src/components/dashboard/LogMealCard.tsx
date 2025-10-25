@@ -23,8 +23,9 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Utensils, Trash2 } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
 import { ToastAction } from "../ui/toast";
-import { startOfDay, endOfDay } from "date-fns";
+import { startOfDay, endOfDay, format } from "date-fns";
 import type { MealLog } from "@/lib/types";
+import { Badge } from "../ui/badge";
 
 const AlertDialog = lazy(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialog })));
 const AlertDialogAction = lazy(() => import('@/components/ui/alert-dialog').then(module => ({ default: module.AlertDialogAction })));
@@ -273,48 +274,55 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
         </Form>
 
          <div className="mt-6 pt-6 border-t">
-            <h4 className="font-medium text-center mb-4">Logged for this day</h4>
             {areMealsLoading ? (
                 <div className="space-y-2">
+                    <Skeleton className="h-6 w-1/2 mb-4" />
                     <Skeleton className="h-8 w-full" />
                     <Skeleton className="h-8 w-full" />
                 </div>
             ) : loggedMeals && loggedMeals.length > 0 ? (
-                <div className="space-y-2">
+                <div className="space-y-3">
+                    <h4 className="font-semibold text-lg">{format(selectedDate, "MMMM d, yyyy")}</h4>
                     {loggedMeals.map(meal => (
-                        <div key={meal.id} className="flex items-center justify-between p-2 rounded-md bg-muted/50">
-                           <div>
-                            <p className="font-medium capitalize">
-                                {meal.mealType} (x{meal.mealNumber})
+                        <div key={meal.id} className="flex items-center justify-between group">
+                           <div className="flex items-center gap-3">
+                            <Badge variant="secondary" className="capitalize w-24 justify-center">{meal.mealType}</Badge>
+                            <p className="font-medium text-muted-foreground">
+                                {meal.itemName || 'Meal'}
                             </p>
-                            {meal.itemName && <p className="text-xs text-muted-foreground">{meal.itemName}</p>}
                            </div>
-                           <Suspense fallback={<Skeleton className="h-8 w-8" />}>
-                           <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button variant="ghost" size="icon" className="text-destructive h-8 w-8">
-                                    <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                        This action will permanently delete this meal log.
-                                    </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => handleDelete(meal.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                           </AlertDialog>
-                           </Suspense>
+                           <div className="flex items-center gap-2">
+                            <p className="font-semibold text-muted-foreground">x{meal.mealNumber}</p>
+                            <Suspense fallback={<Skeleton className="h-8 w-8" />}>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="text-destructive h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                                      <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                          This action will permanently delete this meal log.
+                                      </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => handleDelete(meal.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </Suspense>
+                           </div>
                         </div>
                     ))}
                 </div>
             ) : (
-                <p className="text-sm text-muted-foreground text-center">No meals logged for this date yet.</p>
+                 <div className="text-center py-4">
+                    <h4 className="font-semibold">{format(selectedDate, "MMMM d, yyyy")}</h4>
+                    <p className="text-sm text-muted-foreground mt-2">No meals logged for this date yet.</p>
+                </div>
             )}
         </div>
       </CardContent>
