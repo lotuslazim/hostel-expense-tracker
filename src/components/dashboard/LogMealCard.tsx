@@ -98,10 +98,10 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
       mealType: values.mealType,
       mealNumber: values.mealCount,
       description: `${values.mealCount} ${values.mealType}(s) logged. ${values.itemName ? `Item: ${values.itemName}` : ''}`,
-      date: Timestamp.fromDate(selectedDate),
+      date: new Date(), // Use client-side date for immediate UI update
+      createdAt: serverTimestamp(), // Use server timestamp for backend ordering
       userId: currentUser.uid,
       userName: currentUser.displayName || currentUser.email?.split('@')[0],
-      createdAt: serverTimestamp(),
       itemName: values.itemName || null,
       groupId,
     };
@@ -235,5 +235,3 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
     </Card>
   );
 }
-
-    

@@ -1,14 +1,13 @@
+
 "use client";
 
-import { useMemo } from 'react';
-import { useCollection } from '@/firebase';
+import { useMemo, useState, useEffect } from 'react';
+import { collection, query, where, onSnapshot, Timestamp } from 'firebase/firestore';
 import { firestore } from '@/firebase/config';
-import { collection, query, where, Timestamp } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
 import { CheckCircle2, Circle, ListChecks } from 'lucide-react';
-import type { MealLog } from '@/lib/types';
 import { startOfDay, endOfDay } from 'date-fns';
 
 interface MealLogCheckerProps {
@@ -39,44 +38,52 @@ function MealCheckerSkeleton() {
 }
 
 export function MealLogChecker({ userId, groupId }: MealLogCheckerProps) {
-    const todaysMealsQuery = useMemo(() => {
-        if (!userId || !groupId) return null;
-        
+    const [summary, setSummary] = useState<Record<string, number>>({ breakfast: 0, lunch: 0, dinner: 0 });
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        if (!userId || !groupId) {
+            setIsLoading(false);
+            return;
+        };
+
+        setIsLoading(true);
         const todayStart = startOfDay(new Date());
         const todayEnd = endOfDay(new Date());
 
-        return query(
+        const q = query(
             collection(firestore, `groups/${groupId}/meals`),
             where('userId', '==', userId),
             where('date', '>=', Timestamp.fromDate(todayStart)),
             where('date', '<=', Timestamp.fromDate(todayEnd))
         );
+
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const mealCounts: Record<string, number> = { breakfast: 0, lunch: 0, dinner: 0 };
+            snapshot.forEach(doc => {
+                const meal = doc.data();
+                const mealType = meal.mealType.toLowerCase();
+                if (mealCounts.hasOwnProperty(mealType)) {
+                    mealCounts[mealType] += meal.mealNumber;
+                }
+            });
+            setSummary(mealCounts);
+            setIsLoading(false);
+        }, (error) => {
+            console.error("Error fetching meal logs:", error);
+            setIsLoading(false);
+        });
+
+        return () => unsubscribe();
     }, [userId, groupId]);
-
-    const { data: meals, isLoading } = useCollection<MealLog>(todaysMealsQuery);
-
-    const mealStatus = useMemo(() => {
-        if (!meals) return {};
-
-        return meals.reduce((acc, meal) => {
-            const mealType = meal.mealType.toLowerCase();
-            if (!acc[mealType]) {
-                acc[mealType] = 0;
-            }
-            acc[mealType] += meal.mealNumber;
-            return acc;
-        }, {} as Record<string, number>);
-
-    }, [meals]);
 
     if (isLoading) {
         return <MealCheckerSkeleton />;
     }
     
-    const loggedMealTypesCount = MEAL_TYPES_TO_CHECK.filter(type => mealStatus[type] > 0).length;
+    const loggedMealTypesCount = MEAL_TYPES_TO_CHECK.filter(type => summary[type] > 0).length;
     const progress = (loggedMealTypesCount / MEAL_TYPES_TO_CHECK.length) * 100;
-    const totalMealsLoggedToday = Object.values(mealStatus).reduce((sum, count) => sum + count, 0);
-
+    const totalMealsLoggedToday = Object.values(summary).reduce((sum, count) => sum + count, 0);
 
     return (
         <Card>
@@ -93,7 +100,7 @@ export function MealLogChecker({ userId, groupId }: MealLogCheckerProps) {
                 <Progress value={progress} className="h-2" />
                 <div className="space-y-3">
                     {MEAL_TYPES_TO_CHECK.map(mealType => {
-                        const loggedCount = mealStatus[mealType] || 0;
+                        const loggedCount = summary[mealType] || 0;
                         const isLogged = loggedCount > 0;
                         return (
                             <div key={mealType} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
