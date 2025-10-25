@@ -68,7 +68,7 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
       where("date", "<=", end),
       orderBy("date", "desc")
     );
-  }, [currentUser, groupId, selectedDate]);
+  }, [currentUser, groupId, selectedDate, selectedDate.getTime()]);
 
   const { data: loggedMeals, isLoading: areMealsLoading } = useCollection<MealLog>(todaysMealsQuery);
 
@@ -275,15 +275,14 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
         </Form>
 
          <div className="mt-6 pt-6 border-t">
+            <h4 className="font-semibold text-lg text-center mb-4">{format(selectedDate, "MMMM d, yyyy")}</h4>
             {areMealsLoading ? (
                 <div className="space-y-2">
-                    <Skeleton className="h-6 w-1/2 mb-4" />
                     <Skeleton className="h-8 w-full" />
                     <Skeleton className="h-8 w-full" />
                 </div>
             ) : loggedMeals && loggedMeals.length > 0 ? (
                 <div className="space-y-3">
-                    <h4 className="font-semibold text-lg text-center mb-4">{format(selectedDate, "MMMM d, yyyy")}</h4>
                     {loggedMeals.map(meal => (
                         <div key={meal.id} className="flex items-center justify-between group">
                            <div className="flex items-center gap-3">
@@ -321,7 +320,6 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
                 </div>
             ) : (
                  <div className="text-center py-4">
-                    <h4 className="font-semibold">{format(selectedDate, "MMMM d, yyyy")}</h4>
                     <p className="text-sm text-muted-foreground mt-2">No meals logged for this date yet.</p>
                 </div>
             )}
