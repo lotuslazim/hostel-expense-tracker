@@ -58,29 +58,27 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
   const mealsQuery = useMemo(() => {
     if (!currentUser || !groupId) return null;
     
-    console.log("Query Parameters:", {
-        userId: currentUser.uid,
-        groupId,
-        start: dayQueryRange.start.toDate(),
-        end: dayQueryRange.end.toDate(),
-    });
-
     const q = query(
       collection(firestore, `groups/${groupId}/meals`),
       where('userId', '==', currentUser.uid),
       where('date', '>=', dayQueryRange.start),
       where('date', '<=', dayQueryRange.end)
     );
-    console.log("Constructed Query Object:", q);
+    console.log("Query re-running for date:", selectedDate, "with params:", {
+        userId: currentUser.uid,
+        groupId,
+        start: dayQueryRange.start.toDate(),
+        end: dayQueryRange.end.toDate(),
+    });
     return q;
 
-  }, [currentUser, groupId, dayQueryRange]);
+  }, [currentUser, groupId, dayQueryRange, selectedDate]);
 
   const { data: loggedMeals, isLoading: areMealsLoading } = useCollection(mealsQuery);
   
   useEffect(() => {
     if(!areMealsLoading) {
-      console.log("Raw meal data from Firestore:", loggedMeals);
+      console.log("Raw meal data from Firestore for selected date:", loggedMeals);
     }
   }, [loggedMeals, areMealsLoading]);
 
@@ -93,11 +91,12 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
     if (loggedMeals) {
         loggedMeals.forEach(meal => {
             const mealTypeLower = meal.mealType.toLowerCase();
-            if (summary[mealTypeLower] !== undefined) {
+            if (summary.hasOwnProperty(mealTypeLower)) {
                 summary[mealTypeLower] += meal.mealNumber;
             }
         });
     }
+    console.log("Calculated meal summary:", summary);
     return summary;
   }, [loggedMeals, mealTypes]);
   // --- End Meal Checker Logic ---
@@ -320,4 +319,6 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
     </Card>
   );
 }
+    
+
     
