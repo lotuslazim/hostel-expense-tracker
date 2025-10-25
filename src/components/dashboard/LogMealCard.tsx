@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo, useEffect, lazy, Suspense } from "react";
@@ -67,7 +68,7 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
       where("date", "<=", end),
       orderBy("date", "desc")
     );
-  }, [currentUser, groupId, selectedDate]);
+  }, [currentUser, groupId, selectedDate.getTime()]);
 
   const { data: loggedMeals, isLoading: areMealsLoading } = useCollection<MealLog>(todaysMealsQuery);
 
@@ -282,7 +283,7 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
                 </div>
             ) : loggedMeals && loggedMeals.length > 0 ? (
                 <div className="space-y-3">
-                    <h4 className="font-semibold text-lg">{format(selectedDate, "MMMM d, yyyy")}</h4>
+                    <h4 className="font-semibold text-lg text-center mb-4">{format(selectedDate, "MMMM d, yyyy")}</h4>
                     {loggedMeals.map(meal => (
                         <div key={meal.id} className="flex items-center justify-between group">
                            <div className="flex items-center gap-3">
