@@ -27,8 +27,12 @@
     },
     {
       "collectionGroup": "meals",
-      "queryScope": "COLLECTION",
+      "queryScope": "COLLECTION_GROUP",
       "fields": [
+        {
+          "fieldPath": "userId",
+          "order": "ASCENDING"
+        },
         {
           "fieldPath": "date",
           "order": "DESCENDING"
