@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Query,
   onSnapshot,
@@ -26,8 +26,11 @@ export function useCollection<T = any>(
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<FirestoreError | Error | null>(null);
 
+  // Memoize the query to prevent re-renders from creating new query objects
+  const memoizedQuery = useMemo(() => targetRefOrQuery, [targetRefOrQuery]);
+
   useEffect(() => {
-    if (!targetRefOrQuery) {
+    if (!memoizedQuery) {
       setData(null);
       setIsLoading(false);
       setError(null);
@@ -37,7 +40,7 @@ export function useCollection<T = any>(
     setIsLoading(true);
 
     const unsubscribe = onSnapshot(
-      targetRefOrQuery,
+      memoizedQuery,
       (snapshot: QuerySnapshot<DocumentData>) => {
         const results: WithId<T>[] = snapshot.docs.map(doc => ({
           ...(doc.data() as T),
@@ -55,8 +58,10 @@ export function useCollection<T = any>(
       }
     );
 
+    // This cleanup function will run when the component unmounts
+    // or when the memoizedQuery changes, preventing memory leaks.
     return () => unsubscribe();
-  }, [targetRefOrQuery]);
+  }, [memoizedQuery]); // The effect now correctly depends on the memoized query object
 
   return { data, isLoading, error };
 }
