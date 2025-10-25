@@ -17,6 +17,7 @@ import { subMonths } from 'date-fns/subMonths';
 import { startOfMonth } from 'date-fns/startOfMonth';
 import { endOfMonth } from 'date-fns/endOfMonth';
 import { SendReminderCard } from "@/components/dashboard/SendReminderCard";
+import { MealHistory } from "@/components/report/meals/MealHistory";
 
 function DashboardSkeleton() {
   return (
@@ -40,7 +41,7 @@ function DashboardSkeleton() {
   );
 }
 
-function DashboardContent({ groupId }: { groupId: string }) {
+function DashboardContent({ groupId, userId }: { groupId: string, userId: string }) {
   const { firestore } = useFirebase();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [currentMonth, setCurrentMonth] = useState(startOfMonth(new Date()));
@@ -77,6 +78,7 @@ function DashboardContent({ groupId }: { groupId: string }) {
             <DateCard date={selectedDate} setDate={setSelectedDate} />
             <LogMealCard selectedDate={selectedDate} />
             <AddExpenseCard selectedDate={selectedDate} />
+            <MealHistory groupId={groupId} userId={userId} />
             <SendReminderCard />
           </div>
           <div className="lg:col-span-3">
@@ -114,12 +116,13 @@ export default function DashboardPage() {
   }
 
   const groupId = currentUserData?.groupId;
+  const userId = currentUser?.uid;
 
   return (
     <div className="flex flex-col min-h-screen">
       <AppHeader />
       <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {groupId ? <DashboardContent groupId={groupId} /> : <Welcome />}
+        {groupId && userId ? <DashboardContent groupId={groupId} userId={userId} /> : <Welcome />}
       </main>
     </div>
   );
