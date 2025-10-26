@@ -120,7 +120,7 @@ export default function Home() {
   useEffect(() => {
     const timer = setTimeout(() => {
         setIsMinimumTimeElapsed(true);
-    }, 2000);
+    }, 3000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -132,7 +132,7 @@ export default function Home() {
     }
   }, [user, isUserLoading, isMinimumTimeElapsed, router]);
 
-  // Show loading screen if auth isn't resolved OR the minimum 2 seconds haven't passed
+  // Show loading screen if auth isn't resolved OR the minimum 3 seconds haven't passed
   const showLoader = isUserLoading || !isMinimumTimeElapsed;
 
   if (showLoader) {

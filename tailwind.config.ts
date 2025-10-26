@@ -129,7 +129,7 @@ const config = {
         "fade-in-scale": "fade-in-scale 0.8s ease-out forwards",
         "bounce-once": "bounce-once 1s ease-in-out forwards",
         "draw": "draw 6s ease-in-out infinite",
-        "typing": "typing 5s steps(14, end), blink-caret .5s step-end infinite alternate",
+        "typing": "typing 2.5s steps(14, end), blink-caret .5s step-end infinite alternate",
         "move-bg": "move-bg 4s linear infinite",
       },
     },
