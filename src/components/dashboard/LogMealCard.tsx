@@ -185,7 +185,7 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
       return (
           <Card>
               <CardHeader>
-                  <CardTitle className="flex items-center gap-2"><Utensils /> Log a Meal</CardTitle>
+                  <CardTitle className="flex items-center gap-2 text-xl md:text-2xl"><Utensils /> Log a Meal</CardTitle>
                   <CardDescription>Loading group settings...</CardDescription>
               </CardHeader>
               <CardContent>
@@ -215,7 +215,7 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2"><Utensils /> Log a Meal</CardTitle>
+        <CardTitle className="flex items-center gap-2 text-xl md:text-2xl"><Utensils /> Log a Meal</CardTitle>
         <CardDescription>
           Select the meal type and count for {format(selectedDate, "PPP")}.
         </CardDescription>
@@ -223,10 +223,10 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
       <CardContent>
          <Card className="mb-6 bg-muted/30">
             <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2"><Utensils /> Daily Meal Log</CardTitle>
+                <CardTitle className="text-base md:text-lg flex items-center gap-2"><Utensils /> Daily Meal Log</CardTitle>
             </CardHeader>
             <CardContent>
-                <p className="font-semibold mb-3">{format(selectedDate, "MMMM d, yyyy")}</p>
+                <p className="font-semibold mb-3 text-sm md:text-base">{format(selectedDate, "MMMM d, yyyy")}</p>
                  {areMealsLoading ? <Skeleton className="h-24 w-full" /> : 
                   mealTypes && mealTypes.length > 0 ? (
                     <div className="space-y-3">
@@ -234,11 +234,11 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
                         const mealCount = mealSummary[type.toLowerCase()] || 0;
                         const isLogged = mealCount > 0;
                         return (
-                           <div key={type} className="flex items-center justify-between p-3 rounded-lg bg-background">
-                            <span className="font-semibold capitalize">{type}</span>
+                           <div key={type} className="flex items-center justify-between p-2 md:p-3 rounded-lg bg-background">
+                            <span className="font-semibold capitalize text-sm md:text-base">{type}</span>
                             {isLogged ? (
                                 <div className="flex items-center gap-2">
-                                    <CheckCircle className="h-5 w-5 text-green-500" />
+                                    <CheckCircle className="h-4 w-4 md:h-5 md:w-5 text-green-500" />
                                     <span className="text-sm font-medium text-green-600">Logged</span>
                                     <Badge variant="secondary">x{mealCount}</Badge>
                                 </div>
@@ -319,8 +319,3 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
     </Card>
   );
 }
-    
-
-    
-
-    

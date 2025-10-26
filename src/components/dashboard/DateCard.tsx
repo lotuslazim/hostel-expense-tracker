@@ -43,7 +43,7 @@ export function DateCard({ date, setDate }: DateCardProps) {
     return (
         <Card>
             <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base"><CalendarDays /> Selected Date</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-xl md:text-base"><CalendarDays /> Selected Date</CardTitle>
             </CardHeader>
             <CardContent className="flex items-center justify-between gap-2">
                 <Button variant="outline" size="icon" onClick={handlePrevDay}>
