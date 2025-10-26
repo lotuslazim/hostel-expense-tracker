@@ -102,6 +102,22 @@ const config = {
             "0%, 100%": { transform: "translateY(0)" },
             "50%": { transform: "translateY(-15px)" },
         },
+        "draw": {
+            "0%": { strokeDashoffset: "3000" },
+            "50%": { strokeDashoffset: "0" },
+            "100%": { strokeDashoffset: "-3000" },
+        },
+        "typing": {
+            "from": { width: "0" },
+        },
+        "blink-caret": {
+            "0%, 49%": { borderColor: "white" },
+            "50%, 100%": { borderColor: "transparent" },
+        },
+        "move-bg": {
+            "0%": { backgroundPosition: "0 0" },
+            "100%": { backgroundPosition: "40px 40px" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -112,6 +128,9 @@ const config = {
         "loading-dot": "loading-dot 1.4s cubic-bezier(0.45, 0, 0.55, 1) infinite",
         "fade-in-scale": "fade-in-scale 0.8s ease-out forwards",
         "bounce-once": "bounce-once 1s ease-in-out forwards",
+        "draw": "draw 6s ease-in-out infinite",
+        "typing": "typing 5s steps(14, end), blink-caret .5s step-end infinite alternate",
+        "move-bg": "move-bg 4s linear infinite",
       },
     },
   },
