@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo, useState } from "react";
@@ -184,8 +185,8 @@ export function MealConsumptionReport() {
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                  <div>
-                    <h2 className="text-2xl font-bold">Monthly Meal Report</h2>
-                    <p className="text-muted-foreground">Detailed meal and food purchase report for each member.</p>
+                    <h2 className="text-xl md:text-2xl font-bold font-headline">Monthly Meal Report</h2>
+                    <p className="text-sm text-muted-foreground">Detailed meal and food purchase report for each member.</p>
                 </div>
                 <MonthSwitcher currentDate={currentMonth} onMonthChange={handleMonthChange} />
             </div>

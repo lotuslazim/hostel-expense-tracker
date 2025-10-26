@@ -380,7 +380,7 @@ export function Profile() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
+    <div className="max-w-4xl mx-auto space-y-8">
       <div>
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight font-headline">My Profile</h1>
         <p className="text-sm md:text-base text-muted-foreground">View and edit your personal and group information.</p>
@@ -442,7 +442,7 @@ export function Profile() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Home /> Group Details</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-xl md:text-lg"><Home /> Group Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-sm">
              {groupData ? (
@@ -474,7 +474,7 @@ export function Profile() {
         
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Wallet/> Expense History</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-xl md:text-lg"><Wallet/> Expense History</CardTitle>
             <CardDescription>Your personal expense contributions.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -535,5 +535,3 @@ export function Profile() {
     </div>
   );
 }
-
-    

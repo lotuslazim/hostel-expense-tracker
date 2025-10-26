@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo } from "react";
@@ -194,7 +195,7 @@ function AdminControls({ groupData, members, groupId }: { groupData: any, member
     <div className="grid grid-cols-1 gap-8 md:grid-cols-3 items-start">
         <div className="md:col-span-1">
           <h2 className="text-xl font-bold flex items-center gap-2"><Shield /> {t('settings.admin_controls.title')}</h2>
-          <p className="text-muted-foreground">{t('settings.admin_controls.admin_responsibility.description')}</p>
+          <p className="text-sm text-muted-foreground">{t('settings.admin_controls.admin_responsibility.description')}</p>
         </div>
         <div className="md:col-span-2 space-y-6">
             <Card>
@@ -355,7 +356,7 @@ function AccountSettings({ user, userData, groupData, groupId }: { user: any, us
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3 items-start">
           <div className="md:col-span-1">
             <h2 className="text-xl font-bold flex items-center gap-2"><User />{t('settings.account_settings.title')}</h2>
-            <p className="text-muted-foreground">Manage your group and account actions.</p>
+            <p className="text-sm text-muted-foreground">Manage your group and account actions.</p>
           </div>
           <div className="md:col-span-2 space-y-6">
             {groupData && (
@@ -442,7 +443,7 @@ function AppSettings() {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3 items-start">
           <div className="md:col-span-1">
             <h2 className="text-xl font-bold flex items-center gap-2"><SettingsIcon /> {t('settings.app_settings.title')}</h2>
-            <p className="text-muted-foreground">Customize the application's look and feel.</p>
+            <p className="text-sm text-muted-foreground">Customize the application's look and feel.</p>
           </div>
           <div className="md:col-span-2 space-y-6">
              <Card>
@@ -526,8 +527,8 @@ export function Settings() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold font-headline">{t('settings.title')}</h1>
-        <p className="text-muted-foreground">{t('settings.description')}</p>
+        <h1 className="text-2xl md:text-3xl font-bold font-headline">{t('settings.title')}</h1>
+        <p className="text-sm md:text-base text-muted-foreground">{t('settings.description')}</p>
       </div>
       
       <AppSettings />

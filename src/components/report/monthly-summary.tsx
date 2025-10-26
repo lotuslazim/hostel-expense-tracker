@@ -125,9 +125,9 @@ function CollapsibleUtilityItem({
         onClick={() => setIsExpanded(!isExpanded)}
         aria-expanded={isExpanded}
       >
-        <span className="font-medium">{member.name}</span>
+        <span className="font-medium text-sm">{member.name}</span>
         <div className="flex items-center gap-4">
-          <span className="text-muted-foreground font-semibold">
+          <span className="text-muted-foreground font-semibold text-sm">
             ৳{(member.utilityExpensesPaid || 0).toFixed(2)}
           </span>
           <div className="w-9 p-0 flex items-center justify-center">
@@ -373,8 +373,8 @@ export function MonthlySummary() {
     <div className="space-y-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-                <h2 className="text-2xl font-bold">Monthly Summary</h2>
-                <p className="text-muted-foreground">An overview of your group's activity for the selected month.</p>
+                <h2 className="text-xl md:text-2xl font-bold font-headline">Monthly Summary</h2>
+                <p className="text-sm text-muted-foreground">An overview of your group's activity for the selected month.</p>
             </div>
             <MonthSwitcher 
                 currentDate={currentMonth}
@@ -384,7 +384,7 @@ export function MonthlySummary() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="flex flex-col">
             <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Utensils/> Food & Meals</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-xl"><Utensils/> Food & Meals</CardTitle>
             </CardHeader>
             <CardContent className="flex-grow">
                <div className="grid grid-cols-2 gap-4 mb-4">
@@ -408,7 +408,7 @@ export function MonthlySummary() {
         
        <Card className="flex flex-col">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2"><Zap/> Utilities Breakdown</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-xl"><Zap/> Utilities Breakdown</CardTitle>
            <CardDescription>A summary of monthly utility payments.</CardDescription>
         </CardHeader>
         <CardContent className="flex-grow space-y-4">
@@ -433,7 +433,7 @@ export function MonthlySummary() {
       </Card>
        <Card className="flex flex-col">
             <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Package/> Other Expenses</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-xl"><Package/> Other Expenses</CardTitle>
                  <CardDescription>A summary of other expenses.</CardDescription>
             </CardHeader>
             <CardContent className="flex-grow space-y-4">
@@ -508,7 +508,7 @@ export function MonthlySummary() {
 
       <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-xl md:text-2xl">
                 <Scale /> Final Settlement
             </CardTitle>
             <CardDescription>
@@ -608,7 +608,3 @@ export function MonthlySummary() {
     </div>
   );
 }
-
-
-
-    
