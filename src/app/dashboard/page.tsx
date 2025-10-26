@@ -73,7 +73,7 @@ function DashboardContent({ groupId, userId }: { groupId: string, userId: string
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight font-headline text-primary">Dashboard</h1>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight font-headline text-secondary">Dashboard</h1>
         <p className="text-sm md:text-base text-muted-foreground">Log your meals and expenses for the day.</p>
       </div>
       <div className="space-y-8">
