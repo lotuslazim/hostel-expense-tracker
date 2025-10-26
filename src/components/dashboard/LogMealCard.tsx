@@ -28,6 +28,7 @@ import { ToastAction } from "../ui/toast";
 import { Separator } from "../ui/separator";
 import { Badge } from "../ui/badge";
 import type { MealLog } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 interface LogMealCardProps {
     selectedDate: Date;
@@ -60,30 +61,34 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
   const mealsQuery = useMemo(() => {
     if (!currentUser || !groupId) return null;
     
-    const q = query(
+    return query(
       collection(firestore, `groups/${groupId}/meals`),
       where('userId', '==', currentUser.uid),
       where('date', '>=', dayQueryRange.start),
       where('date', '<=', dayQueryRange.end),
       orderBy('date', 'asc')
     );
-    return q;
 
   }, [currentUser, groupId, dayQueryRange, selectedDate]);
 
   const { data: loggedMeals, isLoading: areMealsLoading } = useCollection<MealLog>(mealsQuery);
   
-  const groupedMeals = useMemo(() => {
-    if (!loggedMeals) return {};
-    return loggedMeals.reduce((acc, meal) => {
-      const type = meal.mealType;
-      if (!acc[type]) {
-        acc[type] = [];
-      }
-      acc[type].push(meal);
-      return acc;
-    }, {} as Record<string, MealLog[]>);
-  }, [loggedMeals]);
+  const mealSummary = useMemo(() => {
+    const summary = mealTypes.reduce((acc, type) => {
+        acc[type.toLowerCase()] = 0;
+        return acc;
+    }, {} as Record<string, number>);
+
+    if (loggedMeals) {
+        loggedMeals.forEach(meal => {
+            const type = meal.mealType.toLowerCase();
+            if (summary.hasOwnProperty(type)) {
+                summary[type] += meal.mealNumber;
+            }
+        });
+    }
+    return summary;
+  }, [loggedMeals, mealTypes]);
 
   // --- End Meal Checker Logic ---
 
@@ -223,25 +228,29 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
             <CardContent>
                 <p className="font-semibold mb-3">{format(selectedDate, "MMMM d, yyyy")}</p>
                  {areMealsLoading ? <Skeleton className="h-24 w-full" /> : 
-                  loggedMeals && loggedMeals.length > 0 ? (
-                    <div className="space-y-4">
-                      {Object.keys(groupedMeals).map((mealType, index) => (
-                        <div key={mealType}>
-                          {index > 0 && <Separator className="my-3" />}
-                          <h4 className="capitalize font-semibold text-primary mb-2">{mealType}</h4>
-                          <div className="space-y-2">
-                            {groupedMeals[mealType].map(meal => (
-                                <div key={meal.id} className="flex items-center justify-between text-sm p-2 rounded-md bg-background/50">
-                                    <span className="font-medium">{meal.itemName || `Meal`}</span>
-                                    <span className="font-semibold text-muted-foreground">x {meal.mealNumber}</span>
+                  mealTypes && mealTypes.length > 0 ? (
+                    <div className="space-y-3">
+                      {mealTypes.map((type: string) => {
+                        const mealCount = mealSummary[type.toLowerCase()] || 0;
+                        const isLogged = mealCount > 0;
+                        return (
+                           <div key={type} className="flex items-center justify-between p-3 rounded-lg bg-background">
+                            <span className="font-semibold capitalize">{type}</span>
+                            {isLogged ? (
+                                <div className="flex items-center gap-2">
+                                    <CheckCircle className="h-5 w-5 text-green-500" />
+                                    <span className="text-sm font-medium text-green-600">Logged</span>
+                                    <Badge variant="secondary">x{mealCount}</Badge>
                                 </div>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
+                            ) : (
+                                <span className="text-sm text-muted-foreground">Not Logged</span>
+                            )}
+                           </div>
+                        )
+                      })}
                     </div>
                   ) : (
-                    <p className="text-sm text-muted-foreground text-center py-4">No meals logged for this day.</p>
+                    <p className="text-sm text-muted-foreground text-center py-4">No meal types configured.</p>
                   )}
             </CardContent>
         </Card>
