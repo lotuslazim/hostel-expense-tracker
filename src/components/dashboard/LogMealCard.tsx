@@ -27,6 +27,7 @@ import { Skeleton } from "../ui/skeleton";
 import { ToastAction } from "../ui/toast";
 import { Separator } from "../ui/separator";
 import { Badge } from "../ui/badge";
+import type { MealLog } from "@/lib/types";
 
 interface LogMealCardProps {
     selectedDate: Date;
@@ -66,30 +67,29 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
       where('date', '<=', dayQueryRange.end),
       orderBy('date', 'asc')
     );
-    console.log("Query object:", q);
-    console.log("Query re-running for date:", selectedDate, "with params:", {
-        userId: currentUser.uid,
-        groupId,
-        start: dayQueryRange.start.toDate(),
-        end: dayQueryRange.end.toDate(),
-    });
     return q;
 
   }, [currentUser, groupId, dayQueryRange, selectedDate]);
 
-  const { data: loggedMeals, isLoading: areMealsLoading } = useCollection(mealsQuery);
+  const { data: loggedMeals, isLoading: areMealsLoading } = useCollection<MealLog>(mealsQuery);
   
-  useEffect(() => {
-    if(!areMealsLoading) {
-      console.log("Raw meal data from Firestore for selected date:", loggedMeals);
-    }
-  }, [loggedMeals, areMealsLoading]);
+  const groupedMeals = useMemo(() => {
+    if (!loggedMeals) return {};
+    return loggedMeals.reduce((acc, meal) => {
+      const type = meal.mealType;
+      if (!acc[type]) {
+        acc[type] = [];
+      }
+      acc[type].push(meal);
+      return acc;
+    }, {} as Record<string, MealLog[]>);
+  }, [loggedMeals]);
 
   // --- End Meal Checker Logic ---
 
 
   const mealSchema = useMemo(() => {
-    const safeMealTypes = mealTypes.length > 0 ? mealTypes.map((t: string) => t.toLowerCase()) : ["dummy"];
+    const safeMealTypes = mealTypes.length > 0 ? mealTypes.map((t: string) => t) : ["dummy"];
     
     return z.object({
         mealType: z.enum(safeMealTypes as [string, ...string[]], {
@@ -139,7 +139,7 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
     }
     
     const mealData = {
-      mealType: values.mealType,
+      mealType: values.mealType.toLowerCase(),
       mealNumber: values.mealCount,
       description: `${values.mealCount} ${values.mealType}(s) logged. ${values.itemName ? `Item: ${values.itemName}` : ''}`,
       date: Timestamp.fromDate(selectedDate),
@@ -222,18 +222,23 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
             </CardHeader>
             <CardContent>
                 <p className="font-semibold mb-3">{format(selectedDate, "MMMM d, yyyy")}</p>
-                 {areMealsLoading ? <Skeleton className="h-12 w-full" /> : 
+                 {areMealsLoading ? <Skeleton className="h-24 w-full" /> : 
                   loggedMeals && loggedMeals.length > 0 ? (
-                    <div className="space-y-2">
-                        {loggedMeals.map(meal => (
-                            <div key={meal.id} className="flex items-center justify-between text-sm p-2 rounded-md bg-background">
-                                <div className="flex items-center gap-2">
-                                    <Badge variant="secondary" className="capitalize w-24 justify-center">{meal.mealType}</Badge>
+                    <div className="space-y-4">
+                      {Object.keys(groupedMeals).map((mealType, index) => (
+                        <div key={mealType}>
+                          {index > 0 && <Separator className="my-3" />}
+                          <h4 className="capitalize font-semibold text-primary mb-2">{mealType}</h4>
+                          <div className="space-y-2">
+                            {groupedMeals[mealType].map(meal => (
+                                <div key={meal.id} className="flex items-center justify-between text-sm p-2 rounded-md bg-background/50">
                                     <span className="font-medium">{meal.itemName || `Meal`}</span>
+                                    <span className="font-semibold text-muted-foreground">x {meal.mealNumber}</span>
                                 </div>
-                                <span className="font-semibold">x {meal.mealNumber}</span>
-                            </div>
-                        ))}
+                            ))}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   ) : (
                     <p className="text-sm text-muted-foreground text-center py-4">No meals logged for this day.</p>
@@ -258,7 +263,7 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
                       {mealTypes.length > 0 ? mealTypes.map((type: string) => (
                           <FormItem key={type} className="flex items-center space-x-2 space-y-0">
                             <FormControl>
-                              <RadioGroupItem value={type.toLowerCase()} />
+                              <RadioGroupItem value={type} />
                             </FormControl>
                             <FormLabel className="font-normal capitalize">{type}</FormLabel>
                           </FormItem>
@@ -305,6 +310,8 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
     </Card>
   );
 }
+    
+
     
 
     
