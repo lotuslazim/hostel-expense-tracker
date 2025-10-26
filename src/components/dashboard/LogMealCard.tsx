@@ -26,6 +26,7 @@ import { Loader2, Utensils, CheckCircle } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
 import { ToastAction } from "../ui/toast";
 import { Separator } from "../ui/separator";
+import { Badge } from "../ui/badge";
 
 interface LogMealCardProps {
     selectedDate: Date;
@@ -84,23 +85,6 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
     }
   }, [loggedMeals, areMealsLoading]);
 
-  const mealSummary = useMemo(() => {
-    const summary = mealTypes.reduce((acc: any, type: string) => {
-        acc[type.toLowerCase()] = 0;
-        return acc;
-    }, {});
-    
-    if (loggedMeals) {
-        loggedMeals.forEach(meal => {
-            const mealTypeLower = meal.mealType.toLowerCase();
-            if (summary.hasOwnProperty(mealTypeLower)) {
-                summary[mealTypeLower] += meal.mealNumber;
-            }
-        });
-    }
-    console.log("Calculated meal summary:", summary);
-    return summary;
-  }, [loggedMeals, mealTypes]);
   // --- End Meal Checker Logic ---
 
 
@@ -232,31 +216,31 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4 mb-6">
-            <h4 className="text-sm font-medium text-muted-foreground">Logged Meals for this Day</h4>
-            <div className="p-4 bg-muted/50 rounded-lg space-y-2">
-                {areMealsLoading ? <Skeleton className="h-12 w-full" /> : 
-                mealTypes.map((type: string) => {
-                    const typeLower = type.toLowerCase();
-                    const loggedCount = mealSummary[typeLower];
-                    const isLogged = loggedCount > 0;
-                    return (
-                        <div key={type} className="flex items-center justify-between text-sm">
-                            <span className="font-medium capitalize">{type}</span>
-                            {isLogged ? (
-                                <div className="flex items-center gap-2 text-green-600 font-semibold">
-                                    <CheckCircle className="h-4 w-4"/>
-                                    <span>Logged ({loggedCount})</span>
+         <Card className="mb-6 bg-muted/30">
+            <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2"><Utensils /> Daily Meal Log</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <p className="font-semibold mb-3">{format(selectedDate, "MMMM d, yyyy")}</p>
+                 {areMealsLoading ? <Skeleton className="h-12 w-full" /> : 
+                  loggedMeals && loggedMeals.length > 0 ? (
+                    <div className="space-y-2">
+                        {loggedMeals.map(meal => (
+                            <div key={meal.id} className="flex items-center justify-between text-sm p-2 rounded-md bg-background">
+                                <div className="flex items-center gap-2">
+                                    <Badge variant="secondary" className="capitalize w-24 justify-center">{meal.mealType}</Badge>
+                                    <span className="font-medium">{meal.itemName || `Meal`}</span>
                                 </div>
-                            ) : (
-                                <span className="text-muted-foreground">Not logged</span>
-                            )}
-                        </div>
-                    )
-                })}
-            </div>
-        </div>
-        <Separator className="mb-6"/>
+                                <span className="font-semibold">x {meal.mealNumber}</span>
+                            </div>
+                        ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">No meals logged for this day.</p>
+                  )}
+            </CardContent>
+        </Card>
+        
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
