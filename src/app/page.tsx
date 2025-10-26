@@ -6,7 +6,7 @@ import Link from "next/link";
 import { ArrowRight, Utensils, Scale } from "lucide-react";
 import { useUser } from "@/firebase";
 import { useRouter } from "next/navigation";
-import React, { useEffect, Suspense, lazy } from "react";
+import React, { useEffect, useState, Suspense, lazy } from "react";
 import { Logo } from "@/components/icons/logo";
 import { useInView } from "react-intersection-observer";
 import { cn } from "@/lib/utils";
@@ -107,6 +107,8 @@ const StepCard = ({ number, title, description, delay }: { number: string, title
 export default function Home() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
+  const [isMinimumTimeElapsed, setIsMinimumTimeElapsed] = useState(false);
+
   const { ref: heroRef, inView: heroInView } = useInView({ triggerOnce: true, threshold: 0.1 });
   const { ref: whyRef, inView: whyInView } = useInView({ triggerOnce: true, threshold: 0.2 });
   const { ref: howRef, inView: howInView } = useInView({ triggerOnce: true, threshold: 0.2 });
@@ -116,17 +118,27 @@ export default function Home() {
   const appPreviewImage = PlaceHolderImages.find(p => p.id === 'app-preview');
 
   useEffect(() => {
-    // Only redirect if user is authenticated AND we're not still loading
-    if (!isUserLoading && user) {
+    const timer = setTimeout(() => {
+        setIsMinimumTimeElapsed(true);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    // Only redirect if auth is resolved, min time has passed, AND user exists
+    if (!isUserLoading && isMinimumTimeElapsed && user) {
       router.replace('/dashboard');
     }
-  }, [user, isUserLoading, router]);
+  }, [user, isUserLoading, isMinimumTimeElapsed, router]);
 
-  // Show loading screen only when still loading AND user exists or might exist
-  if (isUserLoading) {
+  // Show loading screen if auth isn't resolved OR the minimum 2 seconds haven't passed
+  const showLoader = isUserLoading || !isMinimumTimeElapsed;
+
+  if (showLoader) {
     return (
       <div className="min-h-screen flex items-center justify-center overflow-hidden relative bg-[#121212]">
-        <div className="animated-bg-grid absolute inset-0 z-0"></div>
+        <div className="animated-bg-grid-green absolute inset-0 z-0"></div>
         <div className="relative z-10 flex flex-col items-center justify-center">
             <div className="mb-[30px]">
                 <svg
@@ -159,89 +171,89 @@ export default function Home() {
   }
 
   // If user exists and loading is complete, they'll be redirected by the useEffect
-  // Only render landing page if no user exists
-  if (user) {
-    return null; // or a very brief loading state while redirect happens
+  // Only render landing page if no user exists and minimum time has passed
+  if (!isUserLoading && isMinimumTimeElapsed && !user) {
+    return (
+      <div className="min-h-screen flex flex-col bg-[#142317]">
+        <main className="flex-grow">
+          {/* Hero Section */}
+          <section
+            ref={heroRef}
+            className="relative text-center py-24 md:py-32 overflow-hidden bg-gradient-to-b from-[#1A2C1F] to-[#142317]"
+          >
+              <div className="absolute inset-0 bg-grid-white/[0.05]"></div>
+
+              {/* Floating Icons */}
+            <FloatingIcon className="top-[10%] left-[5%]" animationDelay="0s">🍛</FloatingIcon>
+            <FloatingIcon className="top-[20%] right-[10%]" animationDelay="1s">💰</FloatingIcon>
+            <FloatingIcon className="bottom-[25%] left-[15%]" animationDelay="2s">📝</FloatingIcon>
+            <FloatingIcon className="bottom-[10%] right-[20%]" animationDelay="3s">🍴</FloatingIcon>
+            <FloatingIcon className="top-[50%] left-[25%]" animationDelay="4s">🍛</FloatingIcon>
+            <FloatingIcon className="top-[60%] right-[30%]" animationDelay="5s">💰</FloatingIcon>
+
+            <div className="container relative p-4 space-y-4 max-w-3xl mx-auto flex flex-col items-center">
+              <div
+                className={cn(
+                  "relative transition-all duration-700 ease-out [filter:drop-shadow(0_4px_8px_rgba(0,0,0,0.5))]",
+                  heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+                )}
+                style={{ transitionDelay: '100ms'}}
+              >
+                  <Logo isMascotAnimated={true} mascotSize="large" isStacked={true} textSize="large" textColor="text-white" />
+              </div>
+              <p
+                className={cn(
+                  "text-base text-white/80 transition-all duration-700 ease-out",
+                  heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+                )}
+                style={{ transitionDelay: '200ms' }}
+              >
+                No notes, no Excel—just one tap, done.
+              </p>
+              <div className="relative [text-shadow:_0_4px_30px_rgba(0,0,0,0.5)]">
+                <h1
+                  className={cn(
+                    "text-3xl md:text-4xl font-bold font-headline text-white mt-4 transition-all duration-700 ease-out",
+                    heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+                  )}
+                  style={{ transitionDelay: '300ms' }}
+                >
+                  Here to make your bachelor life easier — because someone has to. 😌
+                </h1>
+              </div>
+
+              <div
+                className={cn(
+                  "pt-6 transition-all duration-700 ease-out",
+                  heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+                )}
+                style={{ transitionDelay: '500ms' }}
+              >
+                <Button asChild size="lg" className="bg-gradient-to-r from-primary to-green-400 text-slate-800 font-bold text-lg px-8 py-6 rounded-full transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:shadow-primary/30 animate-pulse-slow">
+                  <Link href="/login">
+                    Your Move. <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
+                </Button>
+                  <p
+                  className={cn(
+                    "text-lg md:text-xl text-white/80 mt-4 transition-all duration-700 ease-out",
+                    heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+                  )}
+                  style={{ transitionDelay: '600ms' }}
+                >
+                  Love might ditch you sometimes — I won't.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* Rest of your landing page sections remain the same */}
+          {/* ... */}
+        </main>
+      </div>
+    );
   }
 
-  // Only render the landing page if loading is complete and there's no user.
-  return (
-    <div className="min-h-screen flex flex-col bg-[#142317]">
-      <main className="flex-grow">
-        {/* Hero Section */}
-        <section
-          ref={heroRef}
-          className="relative text-center py-24 md:py-32 overflow-hidden bg-gradient-to-b from-[#1A2C1F] to-[#142317]"
-        >
-            <div className="absolute inset-0 bg-grid-white/[0.05]"></div>
-
-            {/* Floating Icons */}
-          <FloatingIcon className="top-[10%] left-[5%]" animationDelay="0s">🍛</FloatingIcon>
-          <FloatingIcon className="top-[20%] right-[10%]" animationDelay="1s">💰</FloatingIcon>
-          <FloatingIcon className="bottom-[25%] left-[15%]" animationDelay="2s">📝</FloatingIcon>
-          <FloatingIcon className="bottom-[10%] right-[20%]" animationDelay="3s">🍴</FloatingIcon>
-          <FloatingIcon className="top-[50%] left-[25%]" animationDelay="4s">🍛</FloatingIcon>
-          <FloatingIcon className="top-[60%] right-[30%]" animationDelay="5s">💰</FloatingIcon>
-
-          <div className="container relative p-4 space-y-4 max-w-3xl mx-auto flex flex-col items-center">
-            <div
-              className={cn(
-                "relative transition-all duration-700 ease-out [filter:drop-shadow(0_4px_8px_rgba(0,0,0,0.5))]",
-                heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-              )}
-              style={{ transitionDelay: '100ms'}}
-            >
-                <Logo isMascotAnimated={true} mascotSize="large" isStacked={true} textSize="large" textColor="text-white" />
-            </div>
-            <p
-              className={cn(
-                "text-base text-white/80 transition-all duration-700 ease-out",
-                heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-              )}
-              style={{ transitionDelay: '200ms' }}
-            >
-              No notes, no Excel—just one tap, done.
-            </p>
-            <div className="relative [text-shadow:_0_4px_30px_rgba(0,0,0,0.5)]">
-              <h1
-                className={cn(
-                  "text-3xl md:text-4xl font-bold font-headline text-white mt-4 transition-all duration-700 ease-out",
-                  heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-                )}
-                style={{ transitionDelay: '300ms' }}
-              >
-                Here to make your bachelor life easier — because someone has to. 😌
-              </h1>
-            </div>
-
-            <div
-              className={cn(
-                "pt-6 transition-all duration-700 ease-out",
-                heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-              )}
-              style={{ transitionDelay: '500ms' }}
-            >
-              <Button asChild size="lg" className="bg-gradient-to-r from-primary to-green-400 text-slate-800 font-bold text-lg px-8 py-6 rounded-full transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:shadow-primary/30 animate-pulse-slow">
-                <Link href="/login">
-                  Your Move. <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-                <p
-                className={cn(
-                  "text-lg md:text-xl text-white/80 mt-4 transition-all duration-700 ease-out",
-                  heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-                )}
-                style={{ transitionDelay: '600ms' }}
-              >
-                Love might ditch you sometimes — I won't.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Rest of your landing page sections remain the same */}
-        {/* ... */}
-      </main>
-    </div>
-  );
+  // Render null while waiting for redirect or for the landing page to be ready
+  return null;
 }
