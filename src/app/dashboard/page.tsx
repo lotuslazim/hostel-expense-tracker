@@ -6,7 +6,7 @@ import { LogMealCard } from "@/components/dashboard/LogMealCard";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { DateCard } from "@/components/dashboard/DateCard";
 import { AppHeader } from "@/components/app/header";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Welcome } from "@/components/app/welcome";
 import { useUser, useDoc, useFirebase, useCollection } from "@/firebase";
 import { doc, collection, query, where, Timestamp, orderBy } from "firebase/firestore";
@@ -17,6 +17,7 @@ import { subMonths } from 'date-fns/subMonths';
 import { startOfMonth } from 'date-fns/startOfMonth';
 import { endOfMonth } from 'date-fns/endOfMonth';
 import { SendReminderCard } from "@/components/dashboard/SendReminderCard";
+import { IntroDialog } from "@/components/app/IntroDialog";
 
 function DashboardSkeleton() {
   return (
@@ -28,7 +29,7 @@ function DashboardSkeleton() {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
         <div className="lg:col-span-2 space-y-6">
           <Skeleton className="h-32 w-full rounded-lg" />
-          <Skeleton className="h-80 w-full rounded-lg" />
+          <Skeleton className="h-[28rem] w-full rounded-lg" />
           <Skeleton className="h-[28rem] w-full rounded-lg" />
           <Skeleton className="h-48 w-full rounded-lg" />
         </div>
@@ -101,11 +102,25 @@ function DashboardContent({ groupId, userId }: { groupId: string, userId: string
 export default function DashboardPage() {
   const { firestore } = useFirebase();
   const { user: currentUser, isUserLoading } = useUser();
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
 
   const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
   const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
   
   const isLoading = isUserLoading || isCurrentUserDataLoading;
+
+  useEffect(() => {
+    const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
+    if (!hasSeenOnboarding && !isLoading && currentUser) {
+        setShowOnboarding(true);
+    }
+  }, [isLoading, currentUser]);
+
+  const handleOnboardingComplete = () => {
+    localStorage.setItem('hasSeenOnboarding', 'true');
+    setShowOnboarding(false);
+  }
 
   if (isLoading) {
     return (
@@ -125,6 +140,7 @@ export default function DashboardPage() {
     <div className="flex flex-col min-h-screen">
       <AppHeader />
       <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {showOnboarding && <IntroDialog onOpenChange={handleOnboardingComplete} isOnboardingFlow={true} />}
         {groupId && userId ? <DashboardContent groupId={groupId} userId={userId} /> : <Welcome />}
       </main>
     </div>

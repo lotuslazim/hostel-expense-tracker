@@ -14,6 +14,7 @@ import Image from "next/image";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { IntroDialog } from "@/components/app/IntroDialog";
 
 const Dialog = lazy(() => import('@/components/ui/dialog').then(module => ({ default: module.Dialog })));
 const DialogContent = lazy(() => import('@/components/ui/dialog').then(module => ({ default: module.DialogContent })));
@@ -108,6 +109,7 @@ export default function Home() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const [isMinimumTimeElapsed, setIsMinimumTimeElapsed] = useState(false);
+  const [showIntro, setShowIntro] = useState(false);
 
   const { ref: heroRef, inView: heroInView } = useInView({ triggerOnce: true, threshold: 0.1 });
   const { ref: whyRef, inView: whyInView } = useInView({ triggerOnce: true, threshold: 0.2 });
@@ -175,6 +177,7 @@ export default function Home() {
   if (!isUserLoading && isMinimumTimeElapsed && !user) {
     return (
       <div className="min-h-screen flex flex-col bg-[#142317]">
+        {showIntro && <IntroDialog onOpenChange={() => setShowIntro(false)} />}
         <main className="flex-grow">
           {/* Hero Section */}
           <section
@@ -203,7 +206,7 @@ export default function Home() {
               </div>
               <p
                 className={cn(
-                  "text-base text-white/80 transition-all duration-700 ease-out",
+                  "text-base md:text-xl text-white/80 transition-all duration-700 ease-out",
                   heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
                 )}
                 style={{ transitionDelay: '200ms' }}
@@ -229,10 +232,8 @@ export default function Home() {
                 )}
                 style={{ transitionDelay: '500ms' }}
               >
-                <Button asChild size="lg" className="bg-gradient-to-r from-primary to-green-400 text-slate-800 font-bold text-lg px-8 py-6 rounded-full transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:shadow-primary/30 animate-pulse-slow">
-                  <Link href="/login">
+                <Button onClick={() => setShowIntro(true)} size="lg" className="bg-gradient-to-r from-primary to-green-400 text-slate-800 font-bold text-lg px-8 py-6 rounded-full transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:shadow-primary/30 animate-pulse-slow">
                     Your Move. <ArrowRight className="ml-2 h-5 w-5" />
-                  </Link>
                 </Button>
                   <p
                   className={cn(
@@ -257,5 +258,3 @@ export default function Home() {
   // Render null while waiting for redirect or for the landing page to be ready
   return null;
 }
-
-    
