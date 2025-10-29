@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -12,14 +11,13 @@ import { useInView } from "react-intersection-observer";
 import { cn } from "@/lib/utils";
 import { IntroDialog } from "@/components/app/IntroDialog";
 import { LandingHeader } from "@/components/app/landing-header";
+import Image from "next/image";
 
 export default function Home() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const [isMinimumTimeElapsed, setIsMinimumTimeElapsed] = useState(false);
   const [showIntro, setShowIntro] = useState(false);
-
-  const { ref: heroRef, inView: heroInView } = useInView({ triggerOnce: true, threshold: 0.1 });
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -30,13 +28,11 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    // Only redirect if auth is resolved, min time has passed, AND user exists
     if (!isUserLoading && isMinimumTimeElapsed && user) {
       router.replace('/dashboard');
     }
   }, [user, isUserLoading, isMinimumTimeElapsed, router]);
 
-  // Show loading screen if auth isn't resolved OR the minimum 3 seconds haven't passed
   const showLoader = isUserLoading || !isMinimumTimeElapsed;
 
   if (showLoader) {
@@ -78,70 +74,67 @@ export default function Home() {
   // Only render landing page if no user exists and minimum time has passed
   if (!isUserLoading && isMinimumTimeElapsed && !user) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-muted/30">
         {showIntro && <IntroDialog onOpenChange={() => setShowIntro(false)} />}
         <LandingHeader />
-        <main className="flex-grow">
-          {/* Hero Section */}
-          <section
-            ref={heroRef}
-            className="relative text-center py-24 md:py-32 flex items-center justify-center min-h-screen bg-cover bg-center"
-            style={{ backgroundImage: "url('/landingpage.png')"}}
-          >
-            <div className="absolute inset-0 bg-white/30 dark:bg-black/30 backdrop-blur-sm"></div>
-            <div className="container relative p-4 space-y-4 max-w-3xl mx-auto flex flex-col items-center">
-              <div
-                className={cn(
-                  "relative transition-all duration-700 ease-out [filter:drop-shadow(0_4px_8px_rgba(0,0,0,0.5))]",
-                  heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-                )}
-                style={{ transitionDelay: '100ms'}}
-              >
-                  <Logo isMascotAnimated={true} mascotSize="large" isStacked={true} textSize="large" textColor="text-foreground" />
-              </div>
-              <p
-                className={cn(
-                  "text-base md:text-xl text-foreground/80 transition-all duration-700 ease-out",
-                  heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-                )}
-                style={{ transitionDelay: '200ms' }}
-              >
-                No notes, no Excel—just one tap, done.
-              </p>
-              <div className="relative">
-                <h1
-                  className={cn(
-                    "text-3xl md:text-4xl font-bold font-headline text-foreground mt-4 transition-all duration-700 ease-out",
-                    heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-                  )}
-                  style={{ transitionDelay: '300ms' }}
-                >
-                  Here to make your bachelor life easier — because someone has to. 😌
-                </h1>
-              </div>
+        <main className="flex-grow flex items-center justify-center p-4">
+          <div className="relative w-full max-w-5xl aspect-[4/3] bg-card rounded-2xl border shadow-lg overflow-hidden flex items-center justify-center">
+            {/* Decorative elements */}
+            <div className="absolute top-1/4 left-1/4 w-1/3 h-1/3 bg-green-200/20 rounded-full blur-2xl"></div>
+            <div className="absolute bottom-1/4 right-1/4 w-1/3 h-1/3 bg-yellow-200/20 rounded-full blur-2xl"></div>
+            
+            <svg width="100%" height="100%" className="absolute inset-0">
+                <path d="M100,50 C200,150 300,50 400,150" stroke="hsl(var(--border))" fill="none" strokeWidth="1"/>
+                <path d="M-50,200 C50,100 150,300 250,200" stroke="hsl(var(--border))" fill="none" strokeWidth="1"/>
+                <path d="M800,50 C700,150 600,50 500,150" stroke="hsl(var(--border))" fill="none" strokeWidth="1"/>
+                 <path d="M1000,400 C900,300 800,500 700,400" stroke="hsl(var(--border))" fill="none" strokeWidth="1"/>
+            </svg>
 
-              <div
-                className={cn(
-                  "pt-6 transition-all duration-700 ease-out",
-                  heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-                )}
-                style={{ transitionDelay: '500ms' }}
-              >
-                <Button onClick={() => setShowIntro(true)} size="lg" className="bg-primary text-primary-foreground font-bold text-lg px-8 py-6 rounded-full transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:shadow-primary/30 animate-pulse-slow">
+            {/* Central Circle */}
+            <div className="absolute w-[40%] h-[55%] bg-secondary rounded-full -translate-x-1/4"></div>
+
+            {/* Bottom Shape */}
+            <div className="absolute bottom-0 left-0 w-full h-1/3">
+                 <svg viewBox="0 0 1440 320" className="w-full h-full">
+                    <path fill="hsl(var(--foreground))" fillOpacity="1" d="M0,224L80,208C160,192,320,160,480,170.7C640,181,800,235,960,245.3C1120,256,1280,224,1360,208L1440,192L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"></path>
+                </svg>
+            </div>
+
+            {/* Mascot Image */}
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 md:w-1/2 z-10">
+                <Image
+                    src="/mascot.png"
+                    alt="BachelorBite Mascot"
+                    width={800}
+                    height={800}
+                    className="object-contain"
+                    priority
+                />
+            </div>
+
+             {/* UI Elements that should be above mascot */}
+            <div className="absolute top-8 left-8 z-20">
+                <Logo textColor="text-foreground" />
+            </div>
+
+            <div className="absolute top-1/2 -translate-y-1/2 right-10 md:right-24 z-20 space-y-4 text-right">
+                 <h1 className="text-4xl md:text-6xl font-bold font-headline text-foreground">
+                    Life's a mess.
+                    <br />
+                    Let's fix the food part.
+                </h1>
+                <p className="text-muted-foreground text-lg md:text-xl">Shared living, simplified.</p>
+                 <Button onClick={() => setShowIntro(true)} size="lg" className="bg-primary text-primary-foreground font-bold text-lg px-8 py-6 rounded-full transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:shadow-primary/30 animate-pulse-slow">
                     Your Move. <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
-                  <p
-                  className={cn(
-                    "text-lg md:text-xl text-foreground/80 mt-4 transition-all duration-700 ease-out",
-                    heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-                  )}
-                  style={{ transitionDelay: '600ms' }}
-                >
-                  Love might ditch you sometimes — I won't.
-                </p>
-              </div>
             </div>
-          </section>
+             
+             {/* Decorative dots */}
+             <div className="absolute w-4 h-4 bg-green-400 rounded-full top-1/3 right-1/4 animate-float"></div>
+             <div className="absolute w-3 h-3 bg-red-400 rounded-full top-1/2 left-1/4 animate-float [animation-delay:-2s]"></div>
+             <div className="absolute w-2 h-2 bg-yellow-400 rounded-full bottom-1/2 right-1/3 animate-float [animation-delay:-4s]"></div>
+
+          </div>
         </main>
       </div>
     );
