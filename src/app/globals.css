@@ -17,7 +17,7 @@
     --primary: 142 47% 42%; /* #3BA55D */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 45 100% 58%; /* #FFC72C */
+    --secondary: 44 100% 63%; /* #FFC247 */
     --secondary-foreground: 0 0% 12%; /* #1F1F1F */
     
     --muted: 120 4% 93%;
@@ -49,7 +49,7 @@
     --primary: 139 42% 42%; /* #4CA555 */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 45 100% 71%; /* --color-secondary: #FFD66B */
+    --secondary: 44 100% 63%; /* #FFC247 */
     --secondary-foreground: 160 33% 8%;
 
     --muted: 163 22% 16%; /* --color-surface-alt: #23352F */
