@@ -116,12 +116,6 @@ export default function Home() {
              {/* UI Elements that should be above mascot */}
             
 
-            <div className="absolute top-1/2 -translate-y-1/2 right-10 md:right-24 z-20 space-y-4 text-right">
-                <p className="text-muted-foreground text-lg md:text-xl">Shared living, simplified.</p>
-                <Button onClick={() => setShowIntro(true)} size="lg" className="bg-primary text-primary-foreground font-bold text-lg px-8 py-6 rounded-full transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:shadow-primary/30 animate-pulse-slow">
-                    Your Move. <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-            </div>
              
              {/* Decorative dots */}
              <div className="absolute w-4 h-4 bg-green-400 rounded-full top-1/3 right-1/4 animate-float"></div>
@@ -137,3 +131,5 @@ export default function Home() {
   // Render null while waiting for redirect or for the landing page to be ready
   return null;
 }
+
+    
