@@ -91,15 +91,17 @@ export default function Home() {
             </svg>
 
             {/* Tagline */}
-            <h2 className="absolute top-[22%] left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl md:text-3xl font-body font-medium text-center z-30 max-w-sm text-foreground leading-relaxed">
-              <span className="text-primary-foreground">No notes, no Excel - just</span>
+            <h2 className="absolute top-[26%] left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl md:text-3xl font-body font-medium text-center z-30 max-w-sm text-foreground leading-relaxed">
+              <span className="block text-primary-foreground">No notes, no Excel.</span>
+              <span className="block text-primary-foreground">Just</span>
+              <span className="block text-2xl md:text-3xl font-body font-bold text-center z-30 max-w-sm text-foreground">
+                  one tap, Done
+                </span>
             </h2>
 
             {/* Central Circle */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[380px] h-[380px] bg-secondary rounded-full flex items-center justify-center">
-               <div className="text-2xl md:text-3xl font-body font-medium text-center z-30 max-w-sm text-primary">
-                one tap, Done
-              </div>
+               
             </div>
 
             {/* Bottom Shape */}
@@ -137,6 +139,8 @@ export default function Home() {
             <div className="absolute w-4 h-4 bg-lime-400 rounded-full bottom-1/3 left-1/4 animate-float [animation-delay:-4.5s]"></div>
              <div className="absolute w-4 h-4 bg-yellow-400 rounded-full bottom-2/3 right-1/4 animate-float [animation-delay:-5.5s]"></div>
             <div className="absolute w-2 h-2 bg-fuchsia-400 rounded-full top-1/3 left-1/2 animate-float [animation-delay:-6.5s]"></div>
+            <div className="absolute w-3 h-3 bg-emerald-400 rounded-full bottom-1/2 right-1/2 animate-float [animation-delay:-7.5s]"></div>
+            <div className="absolute w-4 h-4 bg-sky-400 rounded-full top-2/3 left-1/2 animate-float [animation-delay:-8.5s]"></div>
 
           </div>
         </main>
@@ -148,4 +152,5 @@ export default function Home() {
   return null;
 }
 
+    
     
