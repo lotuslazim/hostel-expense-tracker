@@ -91,8 +91,13 @@ export default function Home() {
                  <path d="M1000,400 C900,300 800,500 700,400" stroke="hsl(var(--border))" fill="none" strokeWidth="1"/>
             </svg>
 
+            {/* Tagline */}
+            <h2 className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl md:text-3xl font-body font-medium text-center z-30 max-w-sm text-foreground/80">
+              No notes, no Excel—just one tap, done.
+            </h2>
+
             {/* Central Circle */}
-            <div className="absolute top-[55%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[380px] h-[380px] bg-secondary rounded-full"></div>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[380px] h-[380px] bg-secondary rounded-full"></div>
 
             {/* Bottom Shape */}
             <div className="absolute bottom-0 left-0 w-full h-1/3 z-10">
@@ -118,8 +123,8 @@ export default function Home() {
              {/* Decorative dots */}
              <div className="absolute w-4 h-4 bg-green-400 rounded-full top-1/3 right-1/4 animate-float z-30"></div>
              <div className="absolute w-3 h-3 bg-red-400 rounded-full top-1/2 left-1/4 animate-float [animation-delay:-2s]"></div>
-             <div className="absolute w-2 h-2 bg-yellow-400 rounded-full bottom-1/2 right-1/3 animate-float [animation-delay:-4s] z-30"></div>
-             <div className="absolute w-3 h-3 bg-blue-400 rounded-full top-1/4 right-1/2 animate-float [animation-delay:-1s] z-30"></div>
+             <div className="absolute w-2 h-2 bg-blue-400 rounded-full bottom-1/2 right-1/3 animate-float [animation-delay:-4s] z-30"></div>
+             <div className="absolute w-3 h-3 bg-purple-400 rounded-full top-1/4 right-1/2 animate-float [animation-delay:-1s] z-30"></div>
              <div className="absolute w-2 h-2 bg-indigo-400 rounded-full bottom-1/3 left-1/3 animate-float [animation-delay:-3s]"></div>
 
           </div>
