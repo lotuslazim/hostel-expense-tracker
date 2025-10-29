@@ -106,8 +106,8 @@ export default function Home() {
                 <Image
                     src="/mascot.png"
                     alt="BachelorBite Mascot"
-                    width={700}
-                    height={869}
+                    width={800}
+                    height={993}
                     className="object-contain"
                     priority
                 />
