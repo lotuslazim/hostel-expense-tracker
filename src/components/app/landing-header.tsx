@@ -24,7 +24,7 @@ export function LandingHeader() {
   return (
     <header className={cn(
         "fixed top-0 z-50 w-full transition-all duration-300",
-        hasScrolled ? "bg-background/80 backdrop-blur-sm border-b" : "bg-transparent border-b-transparent"
+        hasScrolled ? "bg-background/80 backdrop-blur-sm border-b" : "bg-transparent"
       )}>
       <div className="container flex h-20 items-center">
         <div className="mr-4 hidden md:flex">

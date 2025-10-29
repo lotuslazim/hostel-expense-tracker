@@ -86,8 +86,9 @@ export default function Home() {
           <section
             ref={heroRef}
             className="relative text-center py-24 md:py-32 flex items-center justify-center min-h-screen bg-cover bg-center"
-            style={{ backgroundImage: "url('/hero-background.png')"}}
+            style={{ backgroundImage: "url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1920&q=80')"}}
           >
+            <div className="absolute inset-0 bg-white/30 dark:bg-black/30 backdrop-blur-sm"></div>
             <div className="container relative p-4 space-y-4 max-w-3xl mx-auto flex flex-col items-center">
               <div
                 className={cn(
