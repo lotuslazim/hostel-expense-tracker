@@ -110,7 +110,7 @@ export default function Home() {
             </div>
 
             {/* Mascot Image */}
-            <div className="absolute bottom-[6%] left-1/2 w-[350px] z-20 -translate-x-[47%]">
+            <div className="absolute bottom-[3%] left-1/2 w-[350px] z-20 -translate-x-[47%]">
                 <Image
                     src="/mascot.png"
                     alt="BachelorBite Mascot"
