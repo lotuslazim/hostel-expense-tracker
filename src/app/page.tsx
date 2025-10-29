@@ -113,9 +113,7 @@ export default function Home() {
             </div>
 
              {/* UI Elements that should be above mascot */}
-            <div className="absolute top-8 left-8 z-20">
-                <Logo textColor="text-foreground" />
-            </div>
+            
 
             <div className="absolute top-1/2 -translate-y-1/2 right-10 md:right-24 z-20 space-y-4 text-right">
                  <h1 className="text-4xl md:text-6xl font-bold font-headline text-foreground">
