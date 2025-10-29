@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -77,42 +78,43 @@ export default function Home() {
         {showIntro && <IntroDialog onOpenChange={() => setShowIntro(false)} />}
         <header className="absolute top-0 left-0 w-full z-50 p-4">
             <div className="container mx-auto flex justify-between items-center">
-                <Logo />
+                <Logo textColor="text-white" />
                 <Button asChild>
                     <Link href="/signup">Get started</Link>
                 </Button>
             </div>
         </header>
         <main className="flex-grow flex items-center justify-center p-4">
-          <div className="relative w-full max-w-5xl aspect-[4/3] bg-card rounded-2xl border shadow-lg overflow-hidden flex items-center justify-center">
+          <div className="relative w-full max-w-5xl aspect-[4/3] rounded-2xl overflow-hidden flex items-center justify-center">
             {/* Decorative elements */}
-            <div className="absolute top-1/4 left-1/4 w-1/3 h-1/3 bg-green-200/20 rounded-full blur-2xl"></div>
-            <div className="absolute bottom-1/4 right-1/4 w-1/3 h-1/3 bg-yellow-200/20 rounded-full blur-2xl"></div>
+            <div className="absolute top-1/4 left-1/4 w-1/3 h-1/3 bg-green-200/10 rounded-full blur-2xl"></div>
+            <div className="absolute bottom-1/4 right-1/4 w-1/3 h-1/3 bg-yellow-200/10 rounded-full blur-2xl"></div>
             
             <svg width="100%" height="100%" className="absolute inset-0 z-[1]">
-                <path d="M100,50 C200,150 300,50 400,150" stroke="hsl(var(--border))" fill="none" strokeWidth="1"/>
-                <path d="M-50,200 C50,100 150,300 250,200" stroke="hsl(var(--border))" fill="none" strokeWidth="1"/>
-                <path d="M800,50 C700,150 600,50 500,150" stroke="hsl(var(--border))" fill="none" strokeWidth="1"/>
-                 <path d="M1000,400 C900,300 800,500 700,400" stroke="hsl(var(--border))" fill="none" strokeWidth="1"/>
+                <path d="M100,50 C200,150 300,50 400,150" stroke="hsl(var(--border) / 0.1)" fill="none" strokeWidth="1"/>
+                <path d="M-50,200 C50,100 150,300 250,200" stroke="hsl(var(--border) / 0.1)" fill="none" strokeWidth="1"/>
+                <path d="M800,50 C700,150 600,50 500,150" stroke="hsl(var(--border) / 0.1)" fill="none" strokeWidth="1"/>
+                 <path d="M1000,400 C900,300 800,500 700,400" stroke="hsl(var(--border) / 0.1)" fill="none" strokeWidth="1"/>
             </svg>
 
             {/* Tagline */}
-            <h2 className="absolute top-[26%] left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl md:text-3xl font-body font-medium text-center z-30 max-w-sm text-primary-foreground leading-relaxed">
-              <span>No notes, no Excel</span>
-              <span className="block">Just</span>
+            <h2 className="absolute top-[26%] left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl md:text-3xl font-body font-medium text-center z-30 max-w-sm text-white leading-relaxed">
+              No notes, no Excel
             </h2>
+
+            <span className="absolute top-[33%] left-1/2 -translate-x-1/2 -translate-y-1/2 block text-2xl md:text-3xl font-body font-bold text-center z-30 max-w-sm text-white">
+                Just
+            </span>
+
 
             {/* Central Circle */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[380px] h-[380px] bg-secondary rounded-full flex items-center justify-center">
-               <span className="block text-2xl md:text-3xl font-body font-bold text-center z-30 max-w-sm text-primary-foreground">
-                  one tap, Done
-                </span>
             </div>
 
             {/* Bottom Shape */}
             <div className="absolute bottom-0 left-0 w-full h-1/3 z-10">
                  <svg viewBox="0 0 1440 320" className="w-full h-full">
-                    <path fill="hsl(var(--foreground))" fillOpacity="1" d="M0,224L80,208C160,192,320,160,480,170.7C640,181,800,235,960,245.3C1120,256,1280,224,1360,208L1440,192L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"></path>
+                    <path fill="hsl(var(--background))" fillOpacity="1" d="M0,224L80,208C160,192,320,160,480,170.7C640,181,800,235,960,245.3C1120,256,1280,224,1360,208L1440,192L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"></path>
                 </svg>
             </div>
 
