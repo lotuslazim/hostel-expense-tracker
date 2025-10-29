@@ -92,7 +92,7 @@ export default function Home() {
             </svg>
 
             {/* Central Circle */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[380px] h-[380px] bg-secondary rounded-full"></div>
+            <div className="absolute top-[55%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[380px] h-[380px] bg-secondary rounded-full"></div>
 
             {/* Bottom Shape */}
             <div className="absolute bottom-0 left-0 w-full h-1/3">
