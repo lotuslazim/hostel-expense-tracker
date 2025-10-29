@@ -84,7 +84,7 @@ export default function Home() {
             <div className="absolute top-1/4 left-1/4 w-1/3 h-1/3 bg-green-200/20 rounded-full blur-2xl"></div>
             <div className="absolute bottom-1/4 right-1/4 w-1/3 h-1/3 bg-yellow-200/20 rounded-full blur-2xl"></div>
             
-            <svg width="100%" height="100%" className="absolute inset-0">
+            <svg width="100%" height="100%" className="absolute inset-0 z-[1]">
                 <path d="M100,50 C200,150 300,50 400,150" stroke="hsl(var(--border))" fill="none" strokeWidth="1"/>
                 <path d="M-50,200 C50,100 150,300 250,200" stroke="hsl(var(--border))" fill="none" strokeWidth="1"/>
                 <path d="M800,50 C700,150 600,50 500,150" stroke="hsl(var(--border))" fill="none" strokeWidth="1"/>
@@ -95,14 +95,14 @@ export default function Home() {
             <div className="absolute top-[55%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[380px] h-[380px] bg-secondary rounded-full"></div>
 
             {/* Bottom Shape */}
-            <div className="absolute bottom-0 left-0 w-full h-1/3">
+            <div className="absolute bottom-0 left-0 w-full h-1/3 z-10">
                  <svg viewBox="0 0 1440 320" className="w-full h-full">
                     <path fill="hsl(var(--foreground))" fillOpacity="1" d="M0,224L80,208C160,192,320,160,480,170.7C640,181,800,235,960,245.3C1120,256,1280,224,1360,208L1440,192L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"></path>
                 </svg>
             </div>
 
             {/* Mascot Image */}
-            <div className="absolute top-1 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[360px] z-10">
+            <div className="absolute bottom-0 left-1/2 w-[360px] z-20 -translate-x-[48%]">
                 <Image
                     src="/mascot.png"
                     alt="BachelorBite Mascot"
@@ -115,12 +115,10 @@ export default function Home() {
 
              {/* UI Elements that should be above mascot */}
             
-
-             
              {/* Decorative dots */}
-             <div className="absolute w-4 h-4 bg-green-400 rounded-full top-1/3 right-1/4 animate-float"></div>
+             <div className="absolute w-4 h-4 bg-green-400 rounded-full top-1/3 right-1/4 animate-float z-30"></div>
              <div className="absolute w-3 h-3 bg-red-400 rounded-full top-1/2 left-1/4 animate-float [animation-delay:-2s]"></div>
-             <div className="absolute w-2 h-2 bg-yellow-400 rounded-full bottom-1/2 right-1/3 animate-float [animation-delay:-4s]"></div>
+             <div className="absolute w-2 h-2 bg-yellow-400 rounded-full bottom-1/2 right-1/3 animate-float [animation-delay:-4s] z-30"></div>
 
           </div>
         </main>
