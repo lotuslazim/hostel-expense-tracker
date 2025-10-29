@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -74,7 +73,7 @@ export default function Home() {
   // Only render landing page if no user exists and minimum time has passed
   if (!isUserLoading && isMinimumTimeElapsed && !user) {
     return (
-      <div className="min-h-screen flex flex-col bg-muted/30">
+      <div className="min-h-screen flex flex-col bg-[#1B2A25]">
         {showIntro && <IntroDialog onOpenChange={() => setShowIntro(false)} />}
         <header className="absolute top-0 left-0 w-full z-50 p-4">
             <div className="container mx-auto flex justify-between items-center">
@@ -98,17 +97,16 @@ export default function Home() {
             </svg>
 
             {/* Tagline */}
-            <h2 className="absolute top-[26%] left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl md:text-3xl font-body font-medium text-center z-30 max-w-sm text-foreground leading-relaxed">
-              <span className="text-primary-foreground">No notes, no Excel</span>
-              <span className="block text-primary-foreground">Just</span>
-              <span className="block text-2xl md:text-3xl font-body font-bold text-center z-30 max-w-sm text-foreground">
-                  one tap, Done
-                </span>
+            <h2 className="absolute top-[26%] left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl md:text-3xl font-body font-medium text-center z-30 max-w-sm text-primary-foreground leading-relaxed">
+              <span>No notes, no Excel</span>
+              <span className="block">Just</span>
             </h2>
 
             {/* Central Circle */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[380px] h-[380px] bg-secondary rounded-full flex items-center justify-center">
-               
+               <span className="block text-2xl md:text-3xl font-body font-bold text-center z-30 max-w-sm text-primary-foreground">
+                  one tap, Done
+                </span>
             </div>
 
             {/* Bottom Shape */}
@@ -158,8 +156,3 @@ export default function Home() {
   // Render null while waiting for redirect or for the landing page to be ready
   return null;
 }
-
-    
-    
-
-    
