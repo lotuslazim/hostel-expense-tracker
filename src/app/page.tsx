@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -11,7 +10,6 @@ import { Logo } from "@/components/icons/logo";
 import { useInView } from "react-intersection-observer";
 import { cn } from "@/lib/utils";
 import { IntroDialog } from "@/components/app/IntroDialog";
-import { LandingHeader } from "@/components/app/landing-header";
 import Image from "next/image";
 
 export default function Home() {
@@ -77,7 +75,7 @@ export default function Home() {
     return (
       <div className="min-h-screen flex flex-col bg-muted/30">
         {showIntro && <IntroDialog onOpenChange={() => setShowIntro(false)} />}
-        <LandingHeader />
+        
         <main className="flex-grow flex items-center justify-center p-4">
           <div className="relative w-full max-w-5xl aspect-[4/3] bg-card rounded-2xl border shadow-lg overflow-hidden flex items-center justify-center">
             {/* Decorative elements */}
@@ -111,7 +109,7 @@ export default function Home() {
             </div>
 
             {/* Mascot Image */}
-            <div className="absolute bottom-0 left-1/2 w-[350px] z-20 -translate-x-[48%]">
+            <div className="absolute bottom-[8%] left-1/2 w-[350px] z-20 -translate-x-[47%]">
                 <Image
                     src="/mascot.png"
                     alt="BachelorBite Mascot"
