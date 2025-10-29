@@ -18,7 +18,7 @@ export function Logo({
   isMascotAnimated = false, 
   mascotSize = 'default',
   textSize = 'default',
-  textColor = 'text-foreground dark:text-white',
+  textColor = 'text-foreground',
   className
 }: LogoProps) {
   return (
