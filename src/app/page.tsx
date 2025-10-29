@@ -94,12 +94,14 @@ export default function Home() {
             {/* Tagline */}
             <h2 className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl md:text-3xl font-body font-medium text-center z-30 max-w-sm text-foreground leading-relaxed">
               <span className="text-primary-foreground">No notes, no Excel</span>
-              <br />
-              <span className="text-primary">—just one tap, done.</span>
             </h2>
 
             {/* Central Circle */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[380px] h-[380px] bg-secondary rounded-full"></div>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[380px] h-[380px] bg-secondary rounded-full flex items-center justify-center">
+               <div className="text-2xl md:text-3xl font-body font-medium text-center z-30 max-w-sm text-primary">
+                just one tap, done.
+              </div>
+            </div>
 
             {/* Bottom Shape */}
             <div className="absolute bottom-0 left-0 w-full h-1/3 z-10">
@@ -130,6 +132,8 @@ export default function Home() {
              <div className="absolute w-2 h-2 bg-indigo-400 rounded-full bottom-1/3 left-1/3 animate-float [animation-delay:-3s]"></div>
              <div className="absolute w-4 h-4 bg-pink-400 rounded-full top-2/3 left-1/4 animate-float [animation-delay:-5s]"></div>
              <div className="absolute w-3 h-3 bg-teal-400 rounded-full bottom-1/4 right-1/3 animate-float [animation-delay:-0.5s] z-30"></div>
+             <div className="absolute w-4 h-4 bg-rose-400 rounded-full top-1/3 left-1/3 animate-float [animation-delay:-1.5s]"></div>
+            <div className="absolute w-2 h-2 bg-cyan-400 rounded-full bottom-1/3 right-1/4 animate-float [animation-delay:-2.5s]"></div>
 
           </div>
         </main>
