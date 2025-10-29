@@ -92,7 +92,7 @@ export default function Home() {
             </svg>
 
             {/* Central Circle */}
-            <div className="absolute w-[40%] h-[55%] bg-secondary rounded-full -translate-x-1/4"></div>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[80%] bg-secondary rounded-full"></div>
 
             {/* Bottom Shape */}
             <div className="absolute bottom-0 left-0 w-full h-1/3">
@@ -131,5 +131,3 @@ export default function Home() {
   // Render null while waiting for redirect or for the landing page to be ready
   return null;
 }
-
-    
