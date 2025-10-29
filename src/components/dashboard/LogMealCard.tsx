@@ -69,12 +69,12 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
       orderBy('date', 'asc')
     );
 
-  }, [currentUser, groupId, dayQueryRange, selectedDate]);
+  }, [currentUser, groupId, dayQueryRange]);
 
   const { data: loggedMeals, isLoading: areMealsLoading } = useCollection<MealLog>(mealsQuery);
   
   const mealSummary = useMemo(() => {
-    const summary = mealTypes.reduce((acc, type) => {
+    const summary = mealTypes.reduce((acc: Record<string, number>, type: string) => {
         acc[type.toLowerCase()] = 0;
         return acc;
     }, {} as Record<string, number>);
@@ -185,7 +185,7 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
       return (
           <Card>
               <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-xl md:text-2xl"><Utensils /> Log a Meal</CardTitle>
+                  <CardTitle className="flex items-center gap-2 text-xl md:text-xl"><Utensils /> Log a Meal</CardTitle>
                   <CardDescription>Loading group settings...</CardDescription>
               </CardHeader>
               <CardContent>
@@ -215,8 +215,8 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-xl md:text-2xl"><Utensils /> Log a Meal</CardTitle>
-        <CardDescription>
+        <CardTitle className="flex items-center gap-2 text-xl md:text-xl"><Utensils /> Log a Meal</CardTitle>
+        <CardDescription className="text-sm md:text-base">
           Select the meal type and count for {format(selectedDate, "PPP")}.
         </CardDescription>
       </CardHeader>
