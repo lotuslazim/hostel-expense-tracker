@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -117,7 +118,7 @@ export default function Home() {
 
             <div className="absolute top-1/2 -translate-y-1/2 right-10 md:right-24 z-20 space-y-4 text-right">
                 <p className="text-muted-foreground text-lg md:text-xl">Shared living, simplified.</p>
-                 <Button onClick={() => setShowIntro(true)} size="lg" className="bg-primary text-primary-foreground font-bold text-lg px-8 py-6 rounded-full transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:shadow-primary/30 animate-pulse-slow">
+                <Button onClick={() => setShowIntro(true)} size="lg" className="bg-primary text-primary-foreground font-bold text-lg px-8 py-6 rounded-full transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:shadow-primary/30 animate-pulse-slow">
                     Your Move. <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
             </div>
