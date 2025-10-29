@@ -92,7 +92,7 @@ export default function Home() {
             </svg>
 
             {/* Tagline */}
-            <h2 className="absolute top-[28%] left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl md:text-3xl font-body font-medium text-center z-30 max-w-sm text-foreground leading-relaxed">
+            <h2 className="absolute top-[25%] left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl md:text-3xl font-body font-medium text-center z-30 max-w-sm text-foreground leading-relaxed">
               <span className="text-primary-foreground">No notes, no Excel - just</span>
             </h2>
 
@@ -148,5 +148,3 @@ export default function Home() {
   // Render null while waiting for redirect or for the landing page to be ready
   return null;
 }
-
-    
