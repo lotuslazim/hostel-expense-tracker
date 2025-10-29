@@ -92,8 +92,10 @@ export default function Home() {
             </svg>
 
             {/* Tagline */}
-            <h2 className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl md:text-3xl font-body font-medium text-center z-30 max-w-sm text-foreground">
-              No notes, no Excel—just one tap, done.
+            <h2 className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl md:text-3xl font-body font-medium text-center z-30 max-w-sm text-foreground leading-relaxed">
+              <span className="text-primary-foreground">No notes, no Excel</span>
+              <br />
+              <span className="text-primary">—just one tap, done.</span>
             </h2>
 
             {/* Central Circle */}
