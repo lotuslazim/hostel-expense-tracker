@@ -5,32 +5,6 @@ import { useState } from "react"
 import Image from "next/image"
 import { cn } from "@/lib/utils";
 
-const CoconutTree = ({ className, animationClass }: { className?: string, animationClass?: string }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 150 200"
-    className={cn("absolute bottom-0 w-24 h-32 md:w-48 md:h-64 z-20", className, animationClass)}
-    style={{ transformOrigin: 'bottom center' }}
-  >
-    <path
-      d="M75 180 C 85 130, 85 80, 75 50"
-      stroke="#8B572A"
-      strokeWidth="8"
-      fill="none"
-      strokeLinecap="round"
-    />
-    <g transform="translate(75, 50)">
-      <path d="M0,0 C20,-40 60,-40 80,-20" stroke="#228B22" strokeWidth="6" fill="none" strokeLinecap="round" transform="rotate(20)" />
-      <path d="M0,0 C-20,-40 -60,-40 -80,-20" stroke="#228B22" strokeWidth="6" fill="none" strokeLinecap="round" transform="rotate(-20)" />
-      <path d="M0,0 C20,-30 50,-30 60,-10" stroke="#228B22" strokeWidth="6" fill="none" strokeLinecap="round" transform="rotate(70)" />
-      <path d="M0,0 C-20,-30 -50,-30 -60,-10" stroke="#228B22" strokeWidth="6" fill="none" strokeLinecap="round" transform="rotate(-70)" />
-      <path d="M0,0 C10,-35 40,-35 50,-15" stroke="#228B22" strokeWidth="6" fill="none" strokeLinecap="round" transform="rotate(120)" />
-      <path d="M0,0 C-10,-35 -40,-35 -50,-15" stroke="#228B22" strokeWidth="6" fill="none" strokeLinecap="round" transform="rotate(-120)" />
-    </g>
-  </svg>
-);
-
-
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
@@ -52,10 +26,6 @@ export default function Home() {
           <div className="absolute top-1/3 right-1/4 w-2 h-2 bg-white rounded-full opacity-80 shadow-lg"></div>
           <div className="absolute bottom-[30%] right-[8%] w-3 h-3 bg-teal-500 rounded-full opacity-60"></div>
         </div>
-
-        <CoconutTree className="left-[-2rem] md:left-8" animationClass="animate-sway-left" />
-        <CoconutTree className="right-[-2rem] md:right-8" animationClass="animate-sway-right" />
-
 
         <div className="max-w-7xl mx-auto w-full relative z-10">
           <div className="flex flex-col items-center justify-center -mt-16">
