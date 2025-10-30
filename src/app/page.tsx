@@ -3,23 +3,20 @@
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 import { useUser } from "@/firebase";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState, Suspense } from "react";
+import React, from "react";
 import { Logo } from "@/components/icons/logo";
-import { useInView } from "react-intersection-observer";
-import { cn } from "@/lib/utils";
 import { IntroDialog } from "@/components/app/IntroDialog";
 import Image from "next/image";
 
 export default function Home() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
-  const [isMinimumTimeElapsed, setIsMinimumTimeElapsed] = useState(false);
-  const [showIntro, setShowIntro] = useState(false);
+  const [isMinimumTimeElapsed, setIsMinimumTimeElapsed] = React.useState(false);
+  const [showIntro, setShowIntro] = React.useState(false);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const timer = setTimeout(() => {
         setIsMinimumTimeElapsed(true);
     }, 3000);
@@ -27,7 +24,7 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, []);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!isUserLoading && isMinimumTimeElapsed && user) {
       router.replace('/dashboard');
     }
@@ -72,7 +69,7 @@ export default function Home() {
 
   if (!isUserLoading && isMinimumTimeElapsed && !user) {
     return (
-      <div className="min-h-screen flex flex-col bg-[#1B2A25]">
+      <div className="min-h-screen flex flex-col bg-[#1B2A25] overflow-hidden">
         {showIntro && <IntroDialog onOpenChange={() => setShowIntro(false)} />}
         <header className="absolute top-0 left-0 w-full z-50 p-4">
             <div className="container mx-auto flex justify-between items-center">
@@ -82,27 +79,18 @@ export default function Home() {
                 </Button>
             </div>
         </header>
+        
         <main className="flex-grow flex items-center justify-center p-4">
-          <div className="relative w-full max-w-lg md:max-w-xl aspect-[1/1] md:aspect-[4/3] rounded-2xl overflow-hidden flex items-center justify-center">
-            {/* Decorative elements */}
-            <div className="absolute top-1/4 left-1/4 w-1/3 h-1/3 bg-green-200/10 rounded-full blur-2xl"></div>
-            <div className="absolute bottom-1/4 right-1/4 w-1/3 h-1/3 bg-yellow-200/10 rounded-full blur-2xl"></div>
+          <div className="relative w-full max-w-lg md:max-w-xl aspect-[1/1] flex items-center justify-center">
             
-            <svg width="100%" height="100%" className="absolute inset-0 z-[1]">
-                <path d="M100,50 C200,150 300,50 400,150" stroke="hsl(var(--border) / 0.1)" fill="none" strokeWidth="1"/>
-                <path d="M-50,200 C50,100 150,300 250,200" stroke="hsl(var(--border) / 0.1)" fill="none" strokeWidth="1"/>
-                <path d="M800,50 C700,150 600,50 500,150" stroke="hsl(var(--border) / 0.1)" fill="none" strokeWidth="1"/>
-                 <path d="M1000,400 C900,300 800,500 700,400" stroke="hsl(var(--border) / 0.1)" fill="none" strokeWidth="1"/>
-            </svg>
-
             {/* Central Circle */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] md:w-[380px] md:h-[380px] bg-secondary rounded-full flex items-center justify-center">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] md:w-[380px] md:h-[380px] bg-secondary rounded-full">
             </div>
 
             {/* Bottom Shape */}
             <div className="absolute bottom-0 left-0 w-full h-1/3 z-10">
                  <svg viewBox="0 0 1440 320" className="w-full h-full">
-                    <path fill="hsl(var(--background))" fillOpacity="1" d="M0,224L80,208C160,192,320,160,480,170.7C640,181,800,235,960,245.3C1120,256,1280,224,1360,208L1440,192L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"></path>
+                    <path fill="#1B2A25" fillOpacity="1" d="M0,224L80,208C160,192,320,160,480,170.7C640,181,800,235,960,245.3C1120,256,1280,224,1360,208L1440,192L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"></path>
                 </svg>
             </div>
 
@@ -121,22 +109,21 @@ export default function Home() {
              {/* UI Elements that should be above mascot */}
             
              {/* Decorative dots */}
-             <div className="absolute w-4 h-4 bg-green-400 rounded-full top-[15%] right-[10%] animate-float z-30"></div>
-             <div className="absolute w-3 h-3 bg-red-400 rounded-full top-1/2 left-[10%] animate-float [animation-delay:-2s]"></div>
-             <div className="absolute w-2 h-2 bg-blue-400 rounded-full bottom-1/2 right-[20%] animate-float [animation-delay:-4s] z-30 md:block hidden"></div>
-             <div className="absolute w-3 h-3 bg-purple-400 rounded-full top-[10%] right-1/2 animate-float [animation-delay:-1s] z-30"></div>
-             <div className="absolute w-2 h-2 bg-indigo-400 rounded-full bottom-1/4 left-[30%] animate-float [animation-delay:-3s] md:block hidden"></div>
-             <div className="absolute w-4 h-4 bg-pink-400 rounded-full top-2/3 left-[15%] animate-float [animation-delay:-5s]"></div>
-             <div className="absolute w-3 h-3 bg-teal-400 rounded-full bottom-[15%] right-[15%] animate-float [animation-delay:-0.5s] z-30"></div>
-             <div className="absolute w-4 h-4 bg-rose-400 rounded-full top-1/3 left-1/4 animate-float [animation-delay:-1.5s] md:block hidden"></div>
-            <div className="absolute w-2 h-2 bg-cyan-400 rounded-full bottom-1/3 right-[10%] animate-float [animation-delay:-2.5s]"></div>
-             <div className="absolute w-3 h-3 bg-orange-400 rounded-full top-3/4 right-[25%] animate-float [animation-delay:-3.5s] md:block hidden"></div>
-            <div className="absolute w-4 h-4 bg-lime-400 rounded-full bottom-1/4 left-[10%] animate-float [animation-delay:-4.5s]"></div>
-             <div className="absolute w-4 h-4 bg-yellow-400 rounded-full bottom-2/3 right-1/4 animate-float [animation-delay:-5.5s] md:block hidden"></div>
-            <div className="absolute w-2 h-2 bg-fuchsia-400 rounded-full top-[20%] left-1/2 animate-float [animation-delay:-6.5s]"></div>
-            <div className="absolute w-3 h-3 bg-emerald-400 rounded-full bottom-1/2 right-[45%] animate-float [animation-delay:-7.5s] md:block hidden"></div>
-            <div className="absolute w-4 h-4 bg-sky-400 rounded-full top-2/3 left-1/2 animate-float [animation-delay:-8.5s]"></div>
-
+             <div className="absolute w-4 h-4 bg-green-400 rounded-full top-[20%] right-[15%] animate-float z-30"></div>
+             <div className="absolute w-3 h-3 bg-red-400 rounded-full top-1/2 left-[15%] animate-float [animation-delay:-2s]"></div>
+             <div className="absolute w-2 h-2 bg-blue-400 rounded-full bottom-1/2 right-[25%] animate-float [animation-delay:-4s] z-30 hidden md:block"></div>
+             <div className="absolute w-3 h-3 bg-purple-400 rounded-full top-[15%] right-1/2 animate-float [animation-delay:-1s] z-30"></div>
+             <div className="absolute w-2 h-2 bg-indigo-400 rounded-full bottom-1/4 left-[30%] animate-float [animation-delay:-3s] hidden md:block"></div>
+             <div className="absolute w-4 h-4 bg-pink-400 rounded-full top-2/3 left-[20%] animate-float [animation-delay:-5s]"></div>
+             <div className="absolute w-3 h-3 bg-teal-400 rounded-full bottom-[20%] right-[18%] animate-float [animation-delay:-0.5s] z-30"></div>
+             <div className="absolute w-4 h-4 bg-rose-400 rounded-full top-1/3 left-1/4 animate-float [animation-delay:-1.5s] hidden md:block"></div>
+             <div className="absolute w-2 h-2 bg-cyan-400 rounded-full bottom-1/3 right-[15%] animate-float [animation-delay:-2.5s]"></div>
+             <div className="absolute w-3 h-3 bg-orange-400 rounded-full top-3/4 right-[30%] animate-float [animation-delay:-3.5s] hidden md:block"></div>
+             <div className="absolute w-4 h-4 bg-lime-400 rounded-full bottom-1/4 left-[15%] animate-float [animation-delay:-4.5s]"></div>
+             <div className="absolute w-4 h-4 bg-yellow-400 rounded-full bottom-2/3 right-1/4 animate-float [animation-delay:-5.5s] hidden md:block"></div>
+             <div className="absolute w-2 h-2 bg-fuchsia-400 rounded-full top-[25%] left-1/2 animate-float [animation-delay:-6.5s]"></div>
+             <div className="absolute w-3 h-3 bg-emerald-400 rounded-full bottom-1/2 right-[40%] animate-float [animation-delay:-7.5s] hidden md:block"></div>
+             <div className="absolute w-4 h-4 bg-sky-400 rounded-full top-2/3 left-[40%] animate-float [animation-delay:-8.5s]"></div>
           </div>
         </main>
       </div>
@@ -146,5 +133,3 @@ export default function Home() {
   // Render null while waiting for redirect or for the landing page to be ready
   return null;
 }
-
-    
