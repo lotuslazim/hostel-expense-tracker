@@ -85,7 +85,7 @@ export default function Home() {
             </div>
         </header>
         <main className="flex-grow flex items-center justify-center p-4">
-          <div className="relative w-full max-w-5xl aspect-[4/3] rounded-2xl overflow-hidden flex items-center justify-center">
+          <div className="relative w-full max-w-5xl aspect-video md:aspect-[4/3] rounded-2xl overflow-hidden flex items-center justify-center">
             {/* Decorative elements */}
             <div className="absolute top-1/4 left-1/4 w-1/3 h-1/3 bg-green-200/10 rounded-full blur-2xl"></div>
             <div className="absolute bottom-1/4 right-1/4 w-1/3 h-1/3 bg-yellow-200/10 rounded-full blur-2xl"></div>
@@ -97,11 +97,8 @@ export default function Home() {
                  <path d="M1000,400 C900,300 800,500 700,400" stroke="hsl(var(--border) / 0.1)" fill="none" strokeWidth="1"/>
             </svg>
 
-            {/* Tagline */}
-            
-
             {/* Central Circle */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[380px] h-[380px] bg-secondary rounded-full flex items-center justify-center">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] md:w-[380px] md:h-[380px] bg-secondary rounded-full flex items-center justify-center">
             </div>
 
             {/* Bottom Shape */}
@@ -112,7 +109,7 @@ export default function Home() {
             </div>
 
             {/* Mascot Image */}
-            <div className="absolute bottom-[3%] left-1/2 w-[350px] z-20 -translate-x-[47%]">
+            <div className="absolute bottom-[3%] left-1/2 w-[280px] md:w-[350px] z-20 -translate-x-[47%]">
                 <Image
                     src="/mascot.png"
                     alt="BachelorBite Mascot"
@@ -128,18 +125,18 @@ export default function Home() {
              {/* Decorative dots */}
              <div className="absolute w-4 h-4 bg-green-400 rounded-full top-1/4 right-[20%] animate-float z-30"></div>
              <div className="absolute w-3 h-3 bg-red-400 rounded-full top-1/2 left-[15%] animate-float [animation-delay:-2s]"></div>
-             <div className="absolute w-2 h-2 bg-blue-400 rounded-full bottom-1/2 right-[30%] animate-float [animation-delay:-4s] z-30"></div>
+             <div className="absolute w-2 h-2 bg-blue-400 rounded-full bottom-1/2 right-[30%] animate-float [animation-delay:-4s] z-30 md:block hidden"></div>
              <div className="absolute w-3 h-3 bg-purple-400 rounded-full top-[15%] right-1/2 animate-float [animation-delay:-1s] z-30"></div>
-             <div className="absolute w-2 h-2 bg-indigo-400 rounded-full bottom-1/4 left-[30%] animate-float [animation-delay:-3s]"></div>
+             <div className="absolute w-2 h-2 bg-indigo-400 rounded-full bottom-1/4 left-[30%] animate-float [animation-delay:-3s] md:block hidden"></div>
              <div className="absolute w-4 h-4 bg-pink-400 rounded-full top-2/3 left-[20%] animate-float [animation-delay:-5s]"></div>
              <div className="absolute w-3 h-3 bg-teal-400 rounded-full bottom-[20%] right-[25%] animate-float [animation-delay:-0.5s] z-30"></div>
-             <div className="absolute w-4 h-4 bg-rose-400 rounded-full top-1/3 left-1/4 animate-float [animation-delay:-1.5s]"></div>
+             <div className="absolute w-4 h-4 bg-rose-400 rounded-full top-1/3 left-1/4 animate-float [animation-delay:-1.5s] md:block hidden"></div>
             <div className="absolute w-2 h-2 bg-cyan-400 rounded-full bottom-1/3 right-[20%] animate-float [animation-delay:-2.5s]"></div>
-             <div className="absolute w-3 h-3 bg-orange-400 rounded-full top-3/4 right-[20%] animate-float [animation-delay:-3.5s]"></div>
+             <div className="absolute w-3 h-3 bg-orange-400 rounded-full top-3/4 right-[20%] animate-float [animation-delay:-3.5s] md:block hidden"></div>
             <div className="absolute w-4 h-4 bg-lime-400 rounded-full bottom-1/4 left-[15%] animate-float [animation-delay:-4.5s]"></div>
-             <div className="absolute w-4 h-4 bg-yellow-400 rounded-full bottom-2/3 right-1/4 animate-float [animation-delay:-5.5s]"></div>
+             <div className="absolute w-4 h-4 bg-yellow-400 rounded-full bottom-2/3 right-1/4 animate-float [animation-delay:-5.5s] md:block hidden"></div>
             <div className="absolute w-2 h-2 bg-fuchsia-400 rounded-full top-[20%] left-1/2 animate-float [animation-delay:-6.5s]"></div>
-            <div className="absolute w-3 h-3 bg-emerald-400 rounded-full bottom-1/2 right-[45%] animate-float [animation-delay:-7.5s]"></div>
+            <div className="absolute w-3 h-3 bg-emerald-400 rounded-full bottom-1/2 right-[45%] animate-float [animation-delay:-7.5s] md:block hidden"></div>
             <div className="absolute w-4 h-4 bg-sky-400 rounded-full top-2/3 left-1/2 animate-float [animation-delay:-8.5s]"></div>
 
           </div>
