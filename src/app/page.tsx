@@ -30,7 +30,7 @@ export default function Home() {
           <div className="flex flex-col items-center justify-center">
             {/* Text Content - Top Center */}
             <div className="space-y-4 text-center mb-8 md:mb-12">
-              <p className="text-teal-500 font-semibold text-lg">Meet the</p>
+              <p className="text-teal-500 font-semibold text-lg transform -translate-y-2">Meet the</p>
               <h1 className="text-5xl md:text-6xl font-bold leading-tight">
                 <span className="text-slate-900">{"Bachelor"}</span>
                 <span className="text-amber-400 ml-2">{"Bite"}</span>
