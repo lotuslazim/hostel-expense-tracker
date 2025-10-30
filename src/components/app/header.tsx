@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { Logo } from "@/components/icons/logo";
-import { UserNav } from "@/app/(app)/user-nav";
+import { UserNav } from "@/components/app/user-nav";
 import { Button } from "../ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, MessageCircle, LayoutDashboard, BarChart3, Package, LogOut } from "lucide-react";

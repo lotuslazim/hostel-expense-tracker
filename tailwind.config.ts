@@ -117,6 +117,14 @@ const config = {
             "0%": { backgroundPosition: "0 0" },
             "100%": { backgroundPosition: "40px 40px" },
         },
+        "sway-left": {
+            "0%, 100%": { transform: "rotate(-1deg)" },
+            "50%": { transform: "rotate(2deg)" },
+        },
+        "sway-right": {
+            "0%, 100%": { transform: "rotate(1deg)" },
+            "50%": { transform: "rotate(-2deg)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -130,6 +138,8 @@ const config = {
         "draw": "draw 3s ease-in-out infinite",
         "typing": "typing 2.5s steps(14, end), blink-caret .5s step-end infinite alternate",
         "move-bg": "move-bg 4s linear infinite",
+        "sway-left": "sway-left 8s ease-in-out infinite",
+        "sway-right": "sway-right 8s ease-in-out infinite",
       },
     },
   },

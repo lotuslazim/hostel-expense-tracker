@@ -3,6 +3,33 @@
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import Image from "next/image"
+import { cn } from "@/lib/utils";
+
+const CoconutTree = ({ className, animationClass }: { className?: string, animationClass?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 150 200"
+    className={cn("absolute bottom-0 w-24 h-32 md:w-48 md:h-64 z-20", className, animationClass)}
+    style={{ transformOrigin: 'bottom center' }}
+  >
+    <path
+      d="M75 180 C 85 130, 85 80, 75 50"
+      stroke="#8B572A"
+      strokeWidth="8"
+      fill="none"
+      strokeLinecap="round"
+    />
+    <g transform="translate(75, 50)">
+      <path d="M0,0 C20,-40 60,-40 80,-20" stroke="#228B22" strokeWidth="6" fill="none" strokeLinecap="round" transform="rotate(20)" />
+      <path d="M0,0 C-20,-40 -60,-40 -80,-20" stroke="#228B22" strokeWidth="6" fill="none" strokeLinecap="round" transform="rotate(-20)" />
+      <path d="M0,0 C20,-30 50,-30 60,-10" stroke="#228B22" strokeWidth="6" fill="none" strokeLinecap="round" transform="rotate(70)" />
+      <path d="M0,0 C-20,-30 -50,-30 -60,-10" stroke="#228B22" strokeWidth="6" fill="none" strokeLinecap="round" transform="rotate(-70)" />
+      <path d="M0,0 C10,-35 40,-35 50,-15" stroke="#228B22" strokeWidth="6" fill="none" strokeLinecap="round" transform="rotate(120)" />
+      <path d="M0,0 C-10,-35 -40,-35 -50,-15" stroke="#228B22" strokeWidth="6" fill="none" strokeLinecap="round" transform="rotate(-120)" />
+    </g>
+  </svg>
+);
+
 
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -10,7 +37,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section - Exact Let'sTalk Design */}
-      <section className="pt-32 pb-16 px-4 sm:px-6 lg:px-8 relative overflow-visible min-h-screen flex items-center justify-center">
+      <section className="pt-32 pb-16 px-4 sm:px-6 lg:px-8 relative overflow-x-hidden min-h-screen flex items-center justify-center">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {/* Curved lines matching Let'sTalk */}
           <svg className="absolute w-full h-full" viewBox="0 0 1200 800" preserveAspectRatio="none">
@@ -19,17 +46,21 @@ export default function Home() {
           </svg>
 
           {/* Floating dots - scattered around */}
-          <div className="absolute top-20 left-10 w-3 h-3 bg-teal-500 rounded-full opacity-60"></div>
-          <div className="absolute top-40 right-20 w-4 h-4 bg-pink-500 rounded-full opacity-60"></div>
-          <div className="absolute bottom-32 left-1/4 w-3 h-3 bg-amber-400 rounded-full opacity-60"></div>
+           <div className="absolute top-1/4 left-[10%] w-3 h-3 bg-teal-500 rounded-full opacity-60"></div>
+          <div className="absolute top-1/2 right-[12%] w-4 h-4 bg-pink-500 rounded-full opacity-60"></div>
+          <div className="absolute bottom-1/4 left-[20%] w-3 h-3 bg-amber-400 rounded-full opacity-60"></div>
           <div className="absolute top-1/3 right-1/4 w-2 h-2 bg-white rounded-full opacity-80 shadow-lg"></div>
-          <div className="absolute bottom-1/4 right-10 w-3 h-3 bg-teal-500 rounded-full opacity-60"></div>
+          <div className="absolute bottom-[30%] right-[8%] w-3 h-3 bg-teal-500 rounded-full opacity-60"></div>
         </div>
 
+        <CoconutTree className="left-[-2rem] md:left-8" animationClass="animate-sway-left" />
+        <CoconutTree className="right-[-2rem] md:right-8" animationClass="animate-sway-right" />
+
+
         <div className="max-w-7xl mx-auto w-full relative z-10">
-          <div className="flex flex-col items-center justify-center">
+          <div className="flex flex-col items-center justify-center -mt-16">
             {/* Text Content - Top Center */}
-            <div className="space-y-4 text-center mb-8 md:mb-12 -mt-16">
+            <div className="space-y-4 text-center mb-8 md:mb-12">
               <p className="text-teal-500 font-semibold text-lg transform -translate-y-2">Meet the</p>
               <h1 className="text-5xl md:text-6xl font-bold leading-tight">
                 <span className="text-slate-900">{"Bachelor"}</span>
