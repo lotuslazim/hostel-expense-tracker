@@ -126,20 +126,20 @@ export default function Home() {
              {/* UI Elements that should be above mascot */}
             
              {/* Decorative dots */}
-             <div className="absolute w-4 h-4 bg-green-400 rounded-full top-1/3 right-1/4 animate-float z-30"></div>
-             <div className="absolute w-3 h-3 bg-red-400 rounded-full top-1/2 left-1/4 animate-float [animation-delay:-2s]"></div>
-             <div className="absolute w-2 h-2 bg-blue-400 rounded-full bottom-1/2 right-1/3 animate-float [animation-delay:-4s] z-30"></div>
-             <div className="absolute w-3 h-3 bg-purple-400 rounded-full top-1/4 right-1/2 animate-float [animation-delay:-1s] z-30"></div>
-             <div className="absolute w-2 h-2 bg-indigo-400 rounded-full bottom-1/3 left-1/3 animate-float [animation-delay:-3s]"></div>
-             <div className="absolute w-4 h-4 bg-pink-400 rounded-full top-2/3 left-1/4 animate-float [animation-delay:-5s]"></div>
-             <div className="absolute w-3 h-3 bg-teal-400 rounded-full bottom-1/4 right-1/3 animate-float [animation-delay:-0.5s] z-30"></div>
-             <div className="absolute w-4 h-4 bg-rose-400 rounded-full top-1/3 left-1/3 animate-float [animation-delay:-1.5s]"></div>
-            <div className="absolute w-2 h-2 bg-cyan-400 rounded-full bottom-1/3 right-1/4 animate-float [animation-delay:-2.5s]"></div>
-             <div className="absolute w-3 h-3 bg-orange-400 rounded-full top-1/2 right-1/4 animate-float [animation-delay:-3.5s]"></div>
-            <div className="absolute w-4 h-4 bg-lime-400 rounded-full bottom-1/3 left-1/4 animate-float [animation-delay:-4.5s]"></div>
+             <div className="absolute w-4 h-4 bg-green-400 rounded-full top-1/4 right-[20%] animate-float z-30"></div>
+             <div className="absolute w-3 h-3 bg-red-400 rounded-full top-1/2 left-[15%] animate-float [animation-delay:-2s]"></div>
+             <div className="absolute w-2 h-2 bg-blue-400 rounded-full bottom-1/2 right-[30%] animate-float [animation-delay:-4s] z-30"></div>
+             <div className="absolute w-3 h-3 bg-purple-400 rounded-full top-[15%] right-1/2 animate-float [animation-delay:-1s] z-30"></div>
+             <div className="absolute w-2 h-2 bg-indigo-400 rounded-full bottom-1/4 left-[30%] animate-float [animation-delay:-3s]"></div>
+             <div className="absolute w-4 h-4 bg-pink-400 rounded-full top-2/3 left-[20%] animate-float [animation-delay:-5s]"></div>
+             <div className="absolute w-3 h-3 bg-teal-400 rounded-full bottom-[20%] right-[25%] animate-float [animation-delay:-0.5s] z-30"></div>
+             <div className="absolute w-4 h-4 bg-rose-400 rounded-full top-1/3 left-1/4 animate-float [animation-delay:-1.5s]"></div>
+            <div className="absolute w-2 h-2 bg-cyan-400 rounded-full bottom-1/3 right-[20%] animate-float [animation-delay:-2.5s]"></div>
+             <div className="absolute w-3 h-3 bg-orange-400 rounded-full top-3/4 right-[20%] animate-float [animation-delay:-3.5s]"></div>
+            <div className="absolute w-4 h-4 bg-lime-400 rounded-full bottom-1/4 left-[15%] animate-float [animation-delay:-4.5s]"></div>
              <div className="absolute w-4 h-4 bg-yellow-400 rounded-full bottom-2/3 right-1/4 animate-float [animation-delay:-5.5s]"></div>
-            <div className="absolute w-2 h-2 bg-fuchsia-400 rounded-full top-1/3 left-1/2 animate-float [animation-delay:-6.5s]"></div>
-            <div className="absolute w-3 h-3 bg-emerald-400 rounded-full bottom-1/2 right-1/2 animate-float [animation-delay:-7.5s]"></div>
+            <div className="absolute w-2 h-2 bg-fuchsia-400 rounded-full top-[20%] left-1/2 animate-float [animation-delay:-6.5s]"></div>
+            <div className="absolute w-3 h-3 bg-emerald-400 rounded-full bottom-1/2 right-[45%] animate-float [animation-delay:-7.5s]"></div>
             <div className="absolute w-4 h-4 bg-sky-400 rounded-full top-2/3 left-1/2 animate-float [animation-delay:-8.5s]"></div>
 
           </div>
@@ -151,5 +151,3 @@ export default function Home() {
   // Render null while waiting for redirect or for the landing page to be ready
   return null;
 }
-
-    
