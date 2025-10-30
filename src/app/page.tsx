@@ -98,9 +98,7 @@ export default function Home() {
             </svg>
 
             {/* Tagline */}
-            <h2 className="absolute top-[26%] left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl md:text-3xl font-body font-medium text-center z-30 max-w-sm text-white leading-relaxed">
-              No notes, no Excel
-            </h2>
+            
 
             <span className="absolute top-[33%] left-1/2 -translate-x-1/2 -translate-y-1/2 block text-2xl md:text-3xl font-body font-bold text-center z-30 max-w-sm text-white">
                 Just
