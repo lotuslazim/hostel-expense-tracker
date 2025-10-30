@@ -98,7 +98,7 @@ export default function Home() {
 
       {/* Features Section */}
       <div className="py-12 -mt-24 text-center z-20 relative bg-[#0f172a]">
-        <p className="text-lg text-slate-300">Here to make your bachelor life easier — because someone has to.</p>
+        
       </div>
 
       {/* How It Works */}
