@@ -100,11 +100,6 @@ export default function Home() {
             {/* Tagline */}
             
 
-            <span className="absolute top-[33%] left-1/2 -translate-x-1/2 -translate-y-1/2 block text-2xl md:text-3xl font-body font-bold text-center z-30 max-w-sm text-white">
-                Just
-            </span>
-
-
             {/* Central Circle */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[380px] h-[380px] bg-secondary rounded-full flex items-center justify-center">
             </div>
@@ -156,3 +151,5 @@ export default function Home() {
   // Render null while waiting for redirect or for the landing page to be ready
   return null;
 }
+
+    
