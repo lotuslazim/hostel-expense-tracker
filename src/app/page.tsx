@@ -93,7 +93,7 @@ export default function Home() {
             {/* Mascot */}
             <div
               className={cn(
-                "relative mt-12 transition-all duration-700 ease-out",
+                "relative mt-16 transition-all duration-700 ease-out",
                 step >= 1 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-20",
                 "animate-slide-up-fade"
               )}
