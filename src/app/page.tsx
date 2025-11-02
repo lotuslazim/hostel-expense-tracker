@@ -40,12 +40,33 @@ export default function Home() {
   const getAnimationClass = (s: number) => (step >= s ? "animate-in" : "opacity-0");
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-amber-50 via-yellow-100 to-amber-200 text-slate-800 overflow-hidden">
+    <div className="min-h-screen w-full yellow-gradient-bg text-slate-800 overflow-hidden">
       {/* Subtle background elements */}
-      <div className="absolute inset-0 z-0 opacity-50">
-        <PlateIcon  />
-        <ChartIcon />
-        <TapIcon />
+      <div className="absolute inset-0 z-0">
+        <svg
+          className="absolute inset-0 w-full h-full text-white/30"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M-200 800 L800 -200"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="animate-[draw_20s_ease-in-out_infinite]"
+            strokeDasharray="3000"
+            strokeDashoffset="3000"
+          />
+          <path
+            d="M400 1000 L1400 0"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="animate-[draw_25s_ease-in-out_infinite]"
+            strokeDasharray="3000"
+            strokeDashoffset="3000"
+          />
+        </svg>
+        <div className="absolute top-[10%] left-[5%] w-16 h-16 rounded-full bg-white/20 animate-subtle-float animation-delay-0" />
+        <div className="absolute bottom-[15%] right-[10%] w-24 h-24 rounded-2xl bg-white/10 animate-subtle-float animation-delay-[-5s]" />
+        <div className="absolute top-[25%] right-[20%] w-8 h-8 rounded-full bg-white/10 animate-subtle-float animation-delay-[-10s]" />
       </div>
 
       <main className="relative z-10 flex h-screen flex-col items-center justify-between p-4 md:p-8">
@@ -56,8 +77,10 @@ export default function Home() {
           <div
             className={cn(
               "relative transition-all duration-700 ease-out",
-              step >= 1 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-20"
+              step >= 1 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-20",
+              "animate-slide-up-fade"
             )}
+            style={{ animationDelay: '200ms' }}
           >
             <Image
               src="/mascot.png"
@@ -77,8 +100,9 @@ export default function Home() {
               className={cn(
                 "text-lg font-medium text-slate-600 transition-all duration-500",
                 getAnimationClass(2),
-                "fade-in-0 slide-in-from-bottom-5"
+                "animate-pop-in"
               )}
+               style={{ animationDelay: '700ms' }}
             >
               Meet the
             </h2>
@@ -86,25 +110,27 @@ export default function Home() {
               <span
                 className={cn(
                   "transition-all duration-500 ease-out",
-                  step >= 3 ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-10"
+                   "animate-slide-in-right"
                 )}
+                 style={{ animationDelay: '900ms' }}
               >
                 Bachelor
               </span>
               <span
                 className={cn(
                   "ml-2 text-primary transition-all duration-500 ease-out delay-100",
-                  step >= 3 ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-10"
+                  "animate-slide-in-right"
                 )}
+                 style={{ animationDelay: '1000ms' }}
               >
                 Bite
               </span>
               <span
                 className={cn(
                   "text-primary transition-all duration-300 delay-300",
-                  getAnimationClass(4),
-                  "fade-in-0"
+                  "animate-pop-in"
                 )}
+                 style={{ animationDelay: '1400ms' }}
               >
                 .
               </span>
@@ -112,9 +138,9 @@ export default function Home() {
             <p
               className={cn(
                 "text-md text-slate-500 max-w-xs transition-all duration-500 delay-200",
-                getAnimationClass(5),
-                "fade-in-0 slide-in-from-bottom-2"
+                "animate-slide-up-fade"
               )}
+               style={{ animationDelay: '1600ms' }}
             >
               No notes, no Excel—just one tap, done.
             </p>
@@ -122,7 +148,7 @@ export default function Home() {
         </div>
 
         {/* CTA Button */}
-        <div className={cn("w-full max-w-md pb-4 transition-all duration-500", getAnimationClass(6), "fade-in-0 slide-in-from-bottom-5")}>
+        <div className={cn("w-full max-w-md pb-4 transition-all duration-500", "animate-slide-up-fade")} style={{ animationDelay: '1800ms' }}>
           <Button
             size="lg"
             className="w-full text-lg rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 transform transition-all duration-300"
