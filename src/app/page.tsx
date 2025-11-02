@@ -23,8 +23,6 @@ export default function Home() {
     return () => timers.forEach(clearTimeout)
   }, [])
 
-  const getAnimationClass = (s: number) => (step >= s ? "animate-in" : "opacity-0")
-
   return (
     <div className="min-h-screen w-full yellow-gradient-bg text-slate-800 overflow-hidden">
       {/* Subtle background elements */}
@@ -59,77 +57,77 @@ export default function Home() {
         <div /> 
 
         <div className="flex flex-col items-center text-center">
-          {/* Mascot */}
-          <div
-            className={cn(
-              "relative transition-all duration-700 ease-out",
-              step >= 1 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-20",
-              "animate-slide-up-fade"
-            )}
-            style={{ animationDelay: '200ms' }}
-          >
-            <Image
-              src="/mascot.png"
-              alt="BachelorBite Mascot"
-              width={200}
-              height={200}
-              className="object-contain drop-shadow-xl h-48 w-48 md:h-56 md:w-56"
-              priority
-            />
-            {/* Shadow */}
-            <div className={cn("absolute -bottom-4 left-1/2 -translate-x-1/2 w-48 h-8 bg-black/5 rounded-full blur-lg transition-opacity duration-500", step >=1 ? 'opacity-100' : 'opacity-0')} />
-          </div>
-
-          {/* Text Content */}
-          <div className="mt-8 space-y-2">
-            <h2
-              className={cn(
-                "text-lg font-medium text-slate-600 transition-all duration-500",
-                "animate-pop-in"
-              )}
-               style={{ animationDelay: '700ms', opacity: step >= 2 ? 1: 0 }}
-            >
-              Meet the
-            </h2>
-            <h1 className="flex items-center justify-center text-5xl md:text-6xl font-bold font-headline tracking-tight">
-              <span
+            {/* Text Content */}
+            <div className="mt-8 space-y-2">
+              <h2
                 className={cn(
-                  "transition-all duration-500 ease-out",
-                   "animate-slide-in-right"
-                )}
-                 style={{ animationDelay: '900ms', opacity: step >= 3 ? 1: 0 }}
-              >
-                Bachelor
-              </span>
-              <span
-                className={cn(
-                  "ml-2 text-primary transition-all duration-500 ease-out delay-100",
-                  "animate-slide-in-right"
-                )}
-                 style={{ animationDelay: '1000ms', opacity: step >= 3 ? 1: 0 }}
-              >
-                Bite
-              </span>
-              <span
-                className={cn(
-                  "text-primary transition-all duration-300 delay-300",
+                  "text-lg font-medium text-slate-600 transition-all duration-500",
                   "animate-pop-in"
                 )}
-                 style={{ animationDelay: '1400ms', opacity: step >= 4 ? 1: 0 }}
+                style={{ animationDelay: '700ms', opacity: step >= 2 ? 1: 0 }}
               >
-                .
-              </span>
-            </h1>
-            <p
+                Meet the
+              </h2>
+              <h1 className="flex items-center justify-center text-5xl md:text-6xl font-bold font-headline tracking-tight">
+                <span
+                  className={cn(
+                    "transition-all duration-500 ease-out",
+                    "animate-slide-in-right"
+                  )}
+                  style={{ animationDelay: '900ms', opacity: step >= 3 ? 1: 0 }}
+                >
+                  Bachelor
+                </span>
+                <span
+                  className={cn(
+                    "ml-2 text-primary transition-all duration-500 ease-out delay-100",
+                    "animate-slide-in-right"
+                  )}
+                  style={{ animationDelay: '1000ms', opacity: step >= 3 ? 1: 0 }}
+                >
+                  Bite
+                </span>
+                <span
+                  className={cn(
+                    "text-primary transition-all duration-300 delay-300",
+                    "animate-pop-in"
+                  )}
+                  style={{ animationDelay: '1400ms', opacity: step >= 4 ? 1: 0 }}
+                >
+                  .
+                </span>
+              </h1>
+              <p
+                className={cn(
+                  "text-md text-slate-500 max-w-xs transition-all duration-500 delay-200",
+                  "animate-slide-up-fade"
+                )}
+                style={{ animationDelay: '1600ms', opacity: step >= 5 ? 1: 0 }}
+              >
+                No notes, no Excel—just one tap, done.
+              </p>
+            </div>
+            
+            {/* Mascot */}
+            <div
               className={cn(
-                "text-md text-slate-500 max-w-xs transition-all duration-500 delay-200",
+                "relative transition-all duration-700 ease-out -mt-8",
+                step >= 1 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-20",
                 "animate-slide-up-fade"
               )}
-               style={{ animationDelay: '1600ms', opacity: step >= 5 ? 1: 0 }}
+              style={{ animationDelay: '200ms' }}
             >
-              No notes, no Excel—just one tap, done.
-            </p>
-          </div>
+              <Image
+                src="/mascot.png"
+                alt="BachelorBite Mascot"
+                width={200}
+                height={200}
+                className="object-contain drop-shadow-xl h-48 w-48 md:h-56 md:w-56"
+                priority
+              />
+              {/* Shadow */}
+              <div className={cn("absolute -bottom-4 left-1/2 -translate-x-1/2 w-48 h-8 bg-black/5 rounded-full blur-lg transition-opacity duration-500", step >=1 ? 'opacity-100' : 'opacity-0')} />
+            </div>
         </div>
 
         {/* CTA Button */}
