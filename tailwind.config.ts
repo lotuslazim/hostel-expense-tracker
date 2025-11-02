@@ -24,7 +24,6 @@ const config = {
       fontFamily: {
         body: ["var(--font-poppins)", "sans-serif"],
         headline: ["var(--font-playfair-display)", "serif"],
-        retro: ["var(--font-righteous)", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",

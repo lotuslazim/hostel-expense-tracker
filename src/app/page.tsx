@@ -45,10 +45,10 @@ export default function Home() {
           >
             Meet the
           </h2>
-          <h1 className="flex items-center justify-center text-6xl md:text-7xl font-retro tracking-wide [text-shadow:_4px_4px_0_rgb(0_0_0_/_0.1)]">
+          <h1 className="flex items-center justify-center text-6xl md:text-7xl font-bold font-headline tracking-tight">
             <span
               className={cn(
-                "text-orange-950 transition-all duration-500 ease-out",
+                "text-primary transition-all duration-500 ease-out",
                 "animate-slide-in-right"
               )}
               style={{ animationDelay: '900ms', opacity: step >= 3 ? 1: 0 }}
@@ -66,7 +66,7 @@ export default function Home() {
             </span>
             <span
               className={cn(
-                "text-white transition-all duration-300 delay-300",
+                "text-primary transition-all duration-300 delay-300",
                 "animate-pop-in"
               )}
               style={{ animationDelay: '1400ms', opacity: step >= 4 ? 1: 0 }}
