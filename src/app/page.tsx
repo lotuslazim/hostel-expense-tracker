@@ -18,7 +18,6 @@ export default function Home() {
       setTimeout(() => setStep(3), 900),  // "Bachelor Bite"
       setTimeout(() => setStep(4), 1400), // Dot
       setTimeout(() => setStep(5), 1600), // Subtitle
-      setTimeout(() => setStep(6), 1800), // Button
     ]
     return () => timers.forEach(clearTimeout)
   }, [])
@@ -105,19 +104,8 @@ export default function Home() {
             </div>
         </div>
 
-        {/* CTA Button */}
-        <div className={cn("w-full max-w-md pb-4 transition-all duration-500", "animate-slide-up-fade")} style={{ animationDelay: '1800ms', opacity: step >= 6 ? 1: 0 }}>
-          <Button
-            size="lg"
-            className="w-full text-lg rounded-full shadow-lg bg-orange-900 text-white hover:bg-orange-950 hover:-translate-y-1 transform transition-all duration-300"
-            onClick={() => router.push("/signup")}
-          >
-            Get Started <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
-        </div>
+        <div className="h-20" />
       </main>
     </div>
   )
 }
-
-    
