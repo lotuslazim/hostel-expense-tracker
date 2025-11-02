@@ -76,7 +76,7 @@ export default function Home() {
           </h1>
           <p
             className={cn(
-              "text-md text-slate-800/70 max-w-xs transition-all duration-500 delay-200 transform translate-x-4",
+              "text-md text-slate-800/70 max-w-xs transition-all duration-500 delay-200",
               "animate-slide-up-fade"
             )}
             style={{ animationDelay: '1600ms', opacity: step >= 5 ? 1: 0 }}
