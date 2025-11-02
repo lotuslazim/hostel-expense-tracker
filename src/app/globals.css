@@ -76,8 +76,8 @@
     @apply bg-background text-foreground font-body;
   }
   .yellow-gradient-bg {
-    background-color: #fffbeb;
-    background-image: radial-gradient(circle at 100% 0%, #fffde7 0%, #fffbeb 50%, #fef3c7 100%);
+    background-color: #FFDB58;
+    background-image: radial-gradient(circle at 100% 0%, #ffe488 0%, #FFDB58 50%, #fdd54f 100%);
   }
 }
 
