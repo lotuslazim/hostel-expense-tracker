@@ -1,29 +1,15 @@
-"use client";
+"use client"
 
-import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
-import { ArrowRight, Utensils, LineChart, Hand } from "lucide-react";
-
-// Minimalist icons
-const PlateIcon = () => (
-  <Utensils className="h-full w-full" />
-);
-
-const ChartIcon = () => (
-  <LineChart className="h-full w-full" />
-);
-
-const TapIcon = () => (
-    <Hand className="h-full w-full" />
-)
-
+import { Button } from "@/components/ui/button"
+import { useState, useEffect } from "react"
+import Image from "next/image"
+import { useRouter } from "next/navigation"
+import { cn } from "@/lib/utils"
+import { ArrowRight } from "lucide-react"
 
 export default function Home() {
-  const router = useRouter();
-  const [step, setStep] = useState(0);
+  const router = useRouter()
+  const [step, setStep] = useState(0)
 
   useEffect(() => {
     const timers = [
@@ -33,11 +19,11 @@ export default function Home() {
       setTimeout(() => setStep(4), 1400), // Dot
       setTimeout(() => setStep(5), 1600), // Subtitle
       setTimeout(() => setStep(6), 1800), // Button
-    ];
-    return () => timers.forEach(clearTimeout);
-  }, []);
+    ]
+    return () => timers.forEach(clearTimeout)
+  }, [])
 
-  const getAnimationClass = (s: number) => (step >= s ? "animate-in" : "opacity-0");
+  const getAnimationClass = (s: number) => (step >= s ? "animate-in" : "opacity-0")
 
   return (
     <div className="min-h-screen w-full yellow-gradient-bg text-slate-800 overflow-hidden">
@@ -99,20 +85,19 @@ export default function Home() {
             <h2
               className={cn(
                 "text-lg font-medium text-slate-600 transition-all duration-500",
-                getAnimationClass(2),
                 "animate-pop-in"
               )}
-               style={{ animationDelay: '700ms' }}
+               style={{ animationDelay: '700ms', opacity: step >= 2 ? 1: 0 }}
             >
               Meet the
             </h2>
-            <h1 className="flex items-center text-5xl md:text-6xl font-bold font-headline tracking-tight">
+            <h1 className="flex items-center justify-center text-5xl md:text-6xl font-bold font-headline tracking-tight">
               <span
                 className={cn(
                   "transition-all duration-500 ease-out",
                    "animate-slide-in-right"
                 )}
-                 style={{ animationDelay: '900ms' }}
+                 style={{ animationDelay: '900ms', opacity: step >= 3 ? 1: 0 }}
               >
                 Bachelor
               </span>
@@ -121,7 +106,7 @@ export default function Home() {
                   "ml-2 text-primary transition-all duration-500 ease-out delay-100",
                   "animate-slide-in-right"
                 )}
-                 style={{ animationDelay: '1000ms' }}
+                 style={{ animationDelay: '1000ms', opacity: step >= 3 ? 1: 0 }}
               >
                 Bite
               </span>
@@ -130,7 +115,7 @@ export default function Home() {
                   "text-primary transition-all duration-300 delay-300",
                   "animate-pop-in"
                 )}
-                 style={{ animationDelay: '1400ms' }}
+                 style={{ animationDelay: '1400ms', opacity: step >= 4 ? 1: 0 }}
               >
                 .
               </span>
@@ -140,7 +125,7 @@ export default function Home() {
                 "text-md text-slate-500 max-w-xs transition-all duration-500 delay-200",
                 "animate-slide-up-fade"
               )}
-               style={{ animationDelay: '1600ms' }}
+               style={{ animationDelay: '1600ms', opacity: step >= 5 ? 1: 0 }}
             >
               No notes, no Excel—just one tap, done.
             </p>
@@ -148,7 +133,7 @@ export default function Home() {
         </div>
 
         {/* CTA Button */}
-        <div className={cn("w-full max-w-md pb-4 transition-all duration-500", "animate-slide-up-fade")} style={{ animationDelay: '1800ms' }}>
+        <div className={cn("w-full max-w-md pb-4 transition-all duration-500", "animate-slide-up-fade")} style={{ animationDelay: '1800ms', opacity: step >= 6 ? 1: 0 }}>
           <Button
             size="lg"
             className="w-full text-lg rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 transform transition-all duration-300"
@@ -159,5 +144,5 @@ export default function Home() {
         </div>
       </main>
     </div>
-  );
+  )
 }
