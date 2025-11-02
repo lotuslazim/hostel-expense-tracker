@@ -35,16 +35,18 @@ export default function Home() {
 
       <main className="relative z-10 flex h-screen flex-col items-center justify-around p-4 md:p-8">
         {/* Text Content */}
-        <div className="text-center space-y-2 z-10 mt-16">
-          <h2
-            className={cn(
-              "text-xl font-medium text-slate-800/80 transition-all duration-500 font-headline",
-              "animate-pop-in"
-            )}
-            style={{ animationDelay: '700ms', opacity: step >= 2 ? 1: 0 }}
-          >
-            Meet the
-          </h2>
+        <div className="flex flex-col items-center space-y-2 z-10 mt-16">
+          <div className="text-center">
+              <h2
+                className={cn(
+                  "text-xl font-medium text-slate-800/80 transition-all duration-500 font-headline",
+                  "animate-pop-in"
+                )}
+                style={{ animationDelay: '700ms', opacity: step >= 2 ? 1: 0 }}
+              >
+                Meet the
+              </h2>
+          </div>
           <h1 className="flex items-center justify-center text-6xl md:text-7xl font-bold font-headline tracking-tight">
             <span
               className={cn(
@@ -74,15 +76,17 @@ export default function Home() {
               .
             </span>
           </h1>
-          <p
-            className={cn(
-              "text-md text-slate-800/70 max-w-xs transition-all duration-500 delay-200",
-              "animate-slide-up-fade"
-            )}
-            style={{ animationDelay: '1600ms', opacity: step >= 5 ? 1: 0 }}
-          >
-            No notes, no Excel—just one tap, done.
-          </p>
+           <div className="text-center">
+              <p
+                className={cn(
+                  "text-md text-slate-800/70 max-w-xs transition-all duration-500 delay-200",
+                  "animate-slide-up-fade"
+                )}
+                style={{ animationDelay: '1600ms', opacity: step >= 5 ? 1: 0 }}
+              >
+                No notes, no Excel—just one tap, done.
+              </p>
+          </div>
         </div>
 
         {/* Mascot */}
