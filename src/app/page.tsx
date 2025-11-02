@@ -38,7 +38,7 @@ export default function Home() {
         <div className="text-center space-y-2 z-10 mt-16">
           <h2
             className={cn(
-              "text-xl font-medium text-orange-900/80 transition-all duration-500 font-headline",
+              "text-xl font-medium text-slate-800/80 transition-all duration-500 font-headline",
               "animate-pop-in"
             )}
             style={{ animationDelay: '700ms', opacity: step >= 2 ? 1: 0 }}
@@ -57,7 +57,7 @@ export default function Home() {
             </span>
             <span
               className={cn(
-                "ml-3 text-white transition-all duration-500 ease-out delay-100",
+                "ml-3 text-slate-800 transition-all duration-500 ease-out delay-100",
                 "animate-slide-in-right"
               )}
               style={{ animationDelay: '1000ms', opacity: step >= 3 ? 1: 0 }}
@@ -76,7 +76,7 @@ export default function Home() {
           </h1>
           <p
             className={cn(
-              "text-md text-orange-900/70 max-w-xs transition-all duration-500 delay-200",
+              "text-md text-slate-800/70 max-w-xs transition-all duration-500 delay-200",
               "animate-slide-up-fade"
             )}
             style={{ animationDelay: '1600ms', opacity: step >= 5 ? 1: 0 }}
