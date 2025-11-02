@@ -40,7 +40,7 @@ export default function Home() {
 
         <div className="flex flex-col items-center text-center">
             {/* Text Content */}
-            <div className="space-y-2">
+            <div className="mt-8 space-y-2">
               <h2
                 className={cn(
                   "text-lg font-medium text-slate-600 transition-all duration-500",
