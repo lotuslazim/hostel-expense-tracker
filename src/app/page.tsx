@@ -1,3 +1,4 @@
+
 "use client"
 
 import { Button } from "@/components/ui/button"
@@ -28,29 +29,33 @@ export default function Home() {
       {/* Subtle background elements */}
       <div className="absolute inset-0 z-0">
         <svg
-          className="absolute inset-0 w-full h-full text-white/30"
+          className="absolute inset-0 w-full h-full text-white/20"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
-            d="M-200 800 L800 -200"
+            d="M-200 800 Q 400 400, 800 -200"
             stroke="currentColor"
-            strokeWidth="2"
+            strokeWidth="1"
+            fill="none"
             className="animate-[draw_20s_ease-in-out_infinite]"
             strokeDasharray="3000"
             strokeDashoffset="3000"
           />
           <path
-            d="M400 1000 L1400 0"
+            d="M400 1000 Q 800 500, 1400 0"
             stroke="currentColor"
-            strokeWidth="2"
+            strokeWidth="1"
+            fill="none"
             className="animate-[draw_25s_ease-in-out_infinite]"
             strokeDasharray="3000"
             strokeDashoffset="3000"
           />
         </svg>
-        <div className="absolute top-[10%] left-[5%] w-16 h-16 rounded-full bg-white/20 animate-subtle-float animation-delay-0" />
-        <div className="absolute bottom-[15%] right-[10%] w-24 h-24 rounded-2xl bg-white/10 animate-subtle-float animation-delay-[-5s]" />
-        <div className="absolute top-[25%] right-[20%] w-8 h-8 rounded-full bg-white/10 animate-subtle-float animation-delay-[-10s]" />
+        <div className="absolute top-[10%] left-[5%] w-12 h-12 rounded-full bg-white/10 animate-subtle-float animation-delay-0" />
+        <div className="absolute top-[50%] left-[15%] w-4 h-4 rounded-full bg-white/10 animate-subtle-float animation-delay-[-2s]" />
+        <div className="absolute bottom-[15%] right-[10%] w-20 h-20 rounded-2xl bg-white/5 animate-subtle-float animation-delay-[-5s]" />
+        <div className="absolute top-[25%] right-[20%] w-6 h-6 rounded-full bg-white/5 animate-subtle-float animation-delay-[-10s]" />
+         <div className="absolute bottom-[10%] left-[25%] w-8 h-8 rounded-full bg-white/10 animate-subtle-float animation-delay-[-8s]" />
       </div>
 
       <main className="relative z-10 flex h-screen flex-col items-center justify-between p-4 md:p-8">
