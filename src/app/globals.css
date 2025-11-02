@@ -81,6 +81,11 @@
 }
 
 @layer utilities {
+    .bg-retro-pattern {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='none' stroke='%23FFFFFF' stroke-width='1'%3E%3Cpath d='M20 20 Q40 0 60 20 T100 20'/%3E%3Cpath d='M-20 60 Q0 40 20 60 T60 60'/%3E%3Cpath d='M20 100 Q40 80 60 100 T100 100'/%3E%3C/g%3E%3C/svg%3E");
+      background-size: 80px 80px;
+      opacity: 0.3;
+    }
     .bg-dot-pattern {
       background-color: hsl(var(--background));
       background-image: radial-gradient(hsl(var(--foreground)) 0.5px, transparent 0.5px);
@@ -184,3 +189,5 @@
         transform: translateY(100%);
     }
 }
+
+    

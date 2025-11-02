@@ -24,14 +24,9 @@ export default function Home() {
   }, [])
 
   return (
-    <div className="min-h-screen w-full yellow-gradient-bg text-slate-800 overflow-hidden">
+    <div className="min-h-screen w-full yellow-gradient-bg text-slate-800 overflow-hidden relative">
       {/* Subtle background elements */}
-      <div className="absolute inset-0 z-0 opacity-50">
-        <Users className="absolute top-[10%] left-[5%] w-12 h-12 text-white/50 animate-subtle-float animation-delay-0"/>
-        <FileText className="absolute top-[50%] left-[15%] w-8 h-8 text-white/50 animate-subtle-float animation-delay-[-2s]"/>
-        <Hand className="absolute bottom-[15%] right-[10%] w-20 h-20 text-white/30 animate-subtle-float animation-delay-[-5s]"/>
-        <BarChart className="absolute top-[25%] right-[20%] w-10 h-10 text-white/50 animate-subtle-float animation-delay-[-10s]"/>
-      </div>
+      <div className="absolute inset-0 z-0 bg-retro-pattern" />
 
       <main className="relative z-10 flex h-screen flex-col items-center justify-around p-4 md:p-8">
         {/* Text Content */}
@@ -124,3 +119,5 @@ export default function Home() {
     </div>
   )
 }
+
+    
