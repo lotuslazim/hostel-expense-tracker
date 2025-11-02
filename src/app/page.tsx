@@ -111,7 +111,7 @@ export default function Home() {
             {/* Mascot */}
             <div
               className={cn(
-                "relative transition-all duration-700 ease-out -mt-8",
+                "relative transition-all duration-700 ease-out",
                 step >= 1 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-20",
                 "animate-slide-up-fade"
               )}
@@ -120,9 +120,9 @@ export default function Home() {
               <Image
                 src="/mascot.png"
                 alt="BachelorBite Mascot"
-                width={200}
-                height={200}
-                className="object-contain drop-shadow-xl h-48 w-48 md:h-56 md:w-56"
+                width={250}
+                height={250}
+                className="object-contain drop-shadow-xl h-56 w-56 md:h-64 md:w-64"
                 priority
               />
               {/* Shadow */}
