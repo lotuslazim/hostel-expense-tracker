@@ -46,7 +46,7 @@
     --popover: 164 26% 13%; /* --color-surface: #1B2A25 */
     --popover-foreground: 150 13% 95%; /* --color-text-primary: #F2F5F4 */
 
-    --primary: 150 40% 45%; /* #4A996D - A more premium green for dark mode */
+    --primary: 150.29 39.53% 54.9%; /* #5BB98A */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 44 100% 63%; /* #FFC247 */
@@ -63,7 +63,7 @@
 
     --border: 162 16% 21%; /* --color-border: #2E3E39 */
     --input: 163 22% 16%; /* --color-surface-alt: #23352F */
-    --ring: 150 40% 45%;
+    --ring: 150.29 39.53% 54.9%;
   }
 }
 
@@ -81,6 +81,14 @@
 }
 
 @layer utilities {
+    .header-bg {
+      background-image: linear-gradient(
+          to right,
+          rgba(0, 0, 0, 0.8),
+          rgba(0, 0, 0, 0.8)
+        ),
+        url(https://images.unsplash.com/photo-1464195085758-89f3e55e821e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=2936&q=80);
+    }
     .bg-retro-pattern {
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='none' stroke='%23FFFFFF' stroke-width='1'%3E%3Cpath d='M20 20 Q40 0 60 20 T100 20'/%3E%3Cpath d='M-20 60 Q0 40 20 60 T60 60'/%3E%3Cpath d='M20 100 Q40 80 60 100 T100 100'/%3E%3C/g%3E%3C/svg%3E");
       background-size: 80px 80px;

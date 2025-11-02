@@ -1,111 +1,30 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { useState, useEffect } from "react"
-import Image from "next/image"
-import { useRouter } from "next/navigation"
-import { cn } from "@/lib/utils"
-import { ArrowRight, BarChart, Users, FileText, Hand } from "lucide-react"
+import { Logo } from "@/components/icons/logo"
+import Link from "next/link"
 
 export default function Home() {
-  const router = useRouter()
-  const [step, setStep] = useState(0)
-
-  useEffect(() => {
-    const timers = [
-      setTimeout(() => setStep(1), 200),  // Mascot appears
-      setTimeout(() => setStep(2), 700),  // "Meet the"
-      setTimeout(() => setStep(3), 900),  // "Bachelor Bite"
-      setTimeout(() => setStep(4), 1400), // Dot
-      setTimeout(() => setStep(5), 1600), // Subtitle
-    ]
-    return () => timers.forEach(clearTimeout)
-  }, [])
 
   return (
-    <div className="min-h-screen w-full yellow-gradient-bg text-slate-800 overflow-hidden relative">
-      {/* Subtle background elements */}
-      <div className="absolute inset-0 z-0 bg-retro-pattern" />
+    <header className="relative h-[95vh] header-bg bg-cover bg-top">
+      <div className="absolute top-16 left-16 animate-[moveInRight_1s_ease-out]">
+        <Logo />
+      </div>
 
-      <main className="relative z-10 flex h-screen flex-col items-center justify-around p-4 md:p-8">
-        {/* Text Content */}
-        <div className="flex flex-col items-center space-y-2 z-10 mt-16">
-          <div className="text-center">
-              <h2
-                className={cn(
-                  "text-xl font-medium text-slate-800/80 transition-all duration-500 font-headline",
-                  "animate-pop-in"
-                )}
-                style={{ animationDelay: '700ms', opacity: step >= 2 ? 1: 0 }}
-              >
-                Meet the
-              </h2>
-          </div>
-          <h1 className="flex items-center justify-center text-6xl md:text-7xl font-bold font-headline tracking-tight">
-            <span
-              className={cn(
-                "text-slate-800 transition-all duration-500 ease-out",
-                "animate-slide-in-right"
-              )}
-              style={{ animationDelay: '900ms', opacity: step >= 3 ? 1: 0 }}
-            >
-              Bachelor
+      <div className="absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
+        <div className="text-[#ececec] uppercase text-center mb-16">
+            <span className="block text-6xl font-normal tracking-[3.5rem] animate-[moveInLeft_1s_ease-in]">
+              BachelorBite
             </span>
-            <span
-              className={cn(
-                "ml-3 text-primary transition-all duration-500 ease-out delay-100",
-                "animate-slide-in-right"
-              )}
-              style={{ animationDelay: '1000ms', opacity: step >= 3 ? 1: 0 }}
-            >
-              Bite
+            <span className="block text-xl font-bold tracking-[1.75rem] animate-[moveInRight_1s_ease-out]">
+              is where life happens
             </span>
-            <span
-              className={cn(
-                "text-primary transition-all duration-300 delay-300",
-                "animate-pop-in"
-              )}
-              style={{ animationDelay: '1400ms', opacity: step >= 4 ? 1: 0 }}
-            >
-              .
-            </span>
-          </h1>
-           <div className="text-center">
-              <p
-                className={cn(
-                  "text-md text-slate-800/70 max-w-xs transition-all duration-500 delay-200",
-                  "animate-slide-up-fade"
-                )}
-                style={{ animationDelay: '1600ms', opacity: step >= 5 ? 1: 0 }}
-              >
-                No notes, no Excel—just one tap, done.
-              </p>
-          </div>
         </div>
-
-        {/* Mascot */}
-        <div className="flex flex-col items-center text-center">
-            <div
-              className={cn(
-                "relative transition-all duration-700 ease-out",
-                step >= 1 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-20",
-              )}
-            >
-              <Image
-                src="/mascot.png"
-                alt="BachelorBite Mascot"
-                width={400}
-                height={400}
-                className="object-contain drop-shadow-xl h-64 w-64 md:h-[400px] md:w-[400px]"
-                priority
-              />
-              {/* Shadow */}
-              <div className={cn("absolute -bottom-4 left-1/2 -translate-x-1/2 w-48 h-8 bg-black/10 rounded-full blur-lg transition-opacity duration-500", step >= 1 ? 'opacity-100' : 'opacity-0')} />
-            </div>
-        </div>
-
-        <div className="h-20" />
-      </main>
-    </div>
+        <Button asChild className="uppercase text-lg px-12 py-7 rounded-md relative transition-all duration-200 text-gray-700 bg-white hover:translate-y-[-5px] hover:shadow-[0_1rem_2rem_rgba(0,0,0,0.4)] active:translate-y-[-1px] active:shadow-[0_1rem_1rem_rgba(0,0,0,0.5)] after:content-[''] after:inline-block after:h-full after:w-full after:absolute after:top-0 after:left-0 after:z-[-1] after:rounded-md after:bg-white after:transition-all after:duration-700 hover:after:scale-x-150 hover:after:scale-y-150 hover:after:opacity-0 animate-[moveInBottom_1.5s_ease-in_0.5s_backwards]">
+          <Link href="/signup">Get Started</Link>
+        </Button>
+      </div>
+    </header>
   )
 }

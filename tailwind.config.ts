@@ -132,7 +132,19 @@ const config = {
         "subtle-float": {
             "0%, 100%": { transform: "translateY(0px)" },
             "50%": { transform: "translateY(-10px)" },
-        }
+        },
+         moveInLeft: {
+          "0%": { opacity: "0", transform: "translateX(-10rem)" },
+          "100%": { opacity: "1", transform: "translateX(0)" },
+        },
+        moveInRight: {
+          "0%": { opacity: "0", transform: "translateX(10rem)" },
+          "100%": { opacity: "1", transform: "translateX(0)" },
+        },
+        moveInBottom: {
+          "0%": { transform: "translateY(10rem)", opacity: "0" },
+          "100%": { transform: "translateY(0)", opacity: "1" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
