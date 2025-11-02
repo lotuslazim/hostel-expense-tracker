@@ -35,7 +35,7 @@ export default function Home() {
 
       <main className="relative z-10 flex h-screen flex-col items-center justify-around p-4 md:p-8">
         {/* Text Content */}
-        <div className="text-center space-y-2 z-10">
+        <div className="text-center space-y-2 z-10 mt-16">
           <h2
             className={cn(
               "text-lg font-medium text-slate-600 transition-all duration-500",
