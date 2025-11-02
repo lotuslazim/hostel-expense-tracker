@@ -117,6 +117,22 @@ const config = {
             "0%": { backgroundPosition: "0 0" },
             "100%": { backgroundPosition: "40px 40px" },
         },
+        "slide-up-fade": {
+          "0%": { opacity: "0", transform: "translateY(20px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        "slide-in-right": {
+            "0%": { opacity: "0", transform: "translateX(-20px)" },
+            "100%": { opacity: "1", transform: "translateX(0)" },
+        },
+        "pop-in": {
+            "0%": { opacity: "0", transform: "scale(0.8)" },
+            "100%": { opacity: "1", transform: "scale(1)" },
+        },
+        "subtle-float": {
+            "0%, 100%": { transform: "translateY(0px)" },
+            "50%": { transform: "translateY(-10px)" },
+        }
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -130,6 +146,10 @@ const config = {
         "draw": "draw 3s ease-in-out infinite",
         "typing": "typing 2.5s steps(14, end), blink-caret .5s step-end infinite alternate",
         "move-bg": "move-bg 4s linear infinite",
+        "slide-up-fade": "slide-up-fade 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards",
+        "slide-in-right": "slide-in-right 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards",
+        "pop-in": "pop-in 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards",
+        "subtle-float": "subtle-float 15s ease-in-out infinite",
       },
     },
   },
