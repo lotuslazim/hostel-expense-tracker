@@ -14,7 +14,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 11%;
     
-    --primary: 142 47% 42%; /* #3BA55D */
+    --primary: 150 45% 40%; /* #3A8C5B - A more premium green */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 44 100% 63%; /* #FFC247 */
@@ -24,14 +24,14 @@
     --muted-foreground: 0 0% 37%; /* #5E5E5E */
     
     --accent: 150 25% 94%; /* #DDF1E4 */
-    --accent-foreground: 142 47% 32%;
+    --accent-foreground: 150 45% 30%;
 
     --destructive: 0 79% 64%;
     --destructive-foreground: 0 0% 98%;
 
     --border: 150 5% 91%;
     --input: 120 4% 93%;
-    --ring: 142 47% 42%;
+    --ring: 150 45% 40%;
 
     --radius: 0.5rem;
   }
@@ -46,7 +46,7 @@
     --popover: 164 26% 13%; /* --color-surface: #1B2A25 */
     --popover-foreground: 150 13% 95%; /* --color-text-primary: #F2F5F4 */
 
-    --primary: 139 42% 42%; /* #4CA555 */
+    --primary: 150 40% 45%; /* #4A996D - A more premium green for dark mode */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 44 100% 63%; /* #FFC247 */
@@ -63,7 +63,7 @@
 
     --border: 162 16% 21%; /* --color-border: #2E3E39 */
     --input: 163 22% 16%; /* --color-surface-alt: #23352F */
-    --ring: 139 42% 42%; /* #4CA555 */
+    --ring: 150 40% 45%;
   }
 }
 
