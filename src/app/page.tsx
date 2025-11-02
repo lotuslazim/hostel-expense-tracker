@@ -57,7 +57,7 @@ export default function Home() {
             </div>
 
             {/* Text Content */}
-            <div className="-mt-60 md:-mt-90 space-y-2 z-10">
+            <div className="-mt-60 md:-mt-96 space-y-2 z-10">
               <h2
                 className={cn(
                   "text-lg font-medium text-slate-600 transition-all duration-500",
