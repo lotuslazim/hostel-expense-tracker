@@ -48,7 +48,7 @@ export default function Home() {
           <h1 className="flex items-center justify-center text-6xl md:text-7xl font-bold font-headline tracking-tight">
             <span
               className={cn(
-                "text-primary transition-all duration-500 ease-out",
+                "text-slate-800 transition-all duration-500 ease-out",
                 "animate-slide-in-right"
               )}
               style={{ animationDelay: '900ms', opacity: step >= 3 ? 1: 0 }}
@@ -57,7 +57,7 @@ export default function Home() {
             </span>
             <span
               className={cn(
-                "ml-3 text-slate-800 transition-all duration-500 ease-out delay-100",
+                "ml-3 text-primary transition-all duration-500 ease-out delay-100",
                 "animate-slide-in-right"
               )}
               style={{ animationDelay: '1000ms', opacity: step >= 3 ? 1: 0 }}
