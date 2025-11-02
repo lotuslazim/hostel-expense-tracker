@@ -39,29 +39,8 @@ export default function Home() {
         <div /> 
 
         <div className="flex flex-col items-center text-center">
-            {/* Mascot */}
-            <div
-              className={cn(
-                "relative transition-all duration-700 ease-out",
-                step >= 1 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-20",
-                "animate-slide-up-fade"
-              )}
-              style={{ animationDelay: '200ms' }}
-            >
-              <Image
-                src="/mascot.png"
-                alt="BachelorBite Mascot"
-                width={320}
-                height={320}
-                className="object-contain drop-shadow-xl h-64 w-64 md:h-80 md:w-80"
-                priority
-              />
-              {/* Shadow */}
-              <div className={cn("absolute -bottom-4 left-1/2 -translate-x-1/2 w-48 h-8 bg-black/5 rounded-full blur-lg transition-opacity duration-500", step >=1 ? 'opacity-100' : 'opacity-0')} />
-            </div>
-
             {/* Text Content */}
-            <div className="space-y-2 -mt-16">
+            <div className="space-y-2">
               <h2
                 className={cn(
                   "text-lg font-medium text-slate-600 transition-all duration-500",
@@ -109,6 +88,27 @@ export default function Home() {
               >
                 No notes, no Excel—just one tap, done.
               </p>
+            </div>
+            
+            {/* Mascot */}
+            <div
+              className={cn(
+                "relative mt-12 transition-all duration-700 ease-out",
+                step >= 1 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-20",
+                "animate-slide-up-fade"
+              )}
+              style={{ animationDelay: '200ms' }}
+            >
+              <Image
+                src="/mascot.png"
+                alt="BachelorBite Mascot"
+                width={400}
+                height={400}
+                className="object-contain drop-shadow-xl h-64 w-64 md:h-[400px] md:w-[400px]"
+                priority
+              />
+              {/* Shadow */}
+              <div className={cn("absolute -bottom-4 left-1/2 -translate-x-1/2 w-48 h-8 bg-black/5 rounded-full blur-lg transition-opacity duration-500", step >=1 ? 'opacity-100' : 'opacity-0')} />
             </div>
         </div>
 
