@@ -33,14 +33,63 @@ export default function Home() {
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0_0_24_24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="absolute top-[25%] right-[20%] w-10 h-10 text-white/50 animate-subtle-float animation-delay-[-10s]"><BarChart className="h-full w-full" /></svg>
       </div>
 
-      <main className="relative z-10 flex h-screen flex-col items-center justify-between p-4 md:p-8">
-        <div /> 
+      <main className="relative z-10 flex h-screen flex-col items-center justify-around p-4 md:p-8">
+        {/* Text Content */}
+        <div className="text-center space-y-2 z-10">
+          <h2
+            className={cn(
+              "text-lg font-medium text-slate-600 transition-all duration-500",
+              "animate-pop-in"
+            )}
+            style={{ animationDelay: '700ms', opacity: step >= 2 ? 1: 0 }}
+          >
+            Meet the
+          </h2>
+          <h1 className="flex items-center justify-center text-5xl md:text-6xl font-bold font-headline tracking-tight">
+            <span
+              className={cn(
+                "transition-all duration-500 ease-out",
+                "animate-slide-in-right"
+              )}
+              style={{ animationDelay: '900ms', opacity: step >= 3 ? 1: 0 }}
+            >
+              Bachelor
+            </span>
+            <span
+              className={cn(
+                "ml-2 text-primary transition-all duration-500 ease-out delay-100",
+                "animate-slide-in-right"
+              )}
+              style={{ animationDelay: '1000ms', opacity: step >= 3 ? 1: 0 }}
+            >
+              Bite
+            </span>
+            <span
+              className={cn(
+                "text-primary transition-all duration-300 delay-300",
+                "animate-pop-in"
+              )}
+              style={{ animationDelay: '1400ms', opacity: step >= 4 ? 1: 0 }}
+            >
+              .
+            </span>
+          </h1>
+          <p
+            className={cn(
+              "text-md text-slate-500 max-w-xs transition-all duration-500 delay-200",
+              "animate-slide-up-fade"
+            )}
+            style={{ animationDelay: '1600ms', opacity: step >= 5 ? 1: 0 }}
+          >
+            No notes, no Excel—just one tap, done.
+          </p>
+        </div>
 
+        {/* Mascot */}
         <div className="flex flex-col items-center text-center">
-            {/* Mascot */}
             <div
               className={cn(
-                "relative mt-24 transition-all duration-700 ease-out",
+                "relative transition-all duration-700 ease-out",
                 step >= 1 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-20",
               )}
             >
@@ -54,57 +103,6 @@ export default function Home() {
               />
               {/* Shadow */}
               <div className={cn("absolute -bottom-4 left-1/2 -translate-x-1/2 w-48 h-8 bg-black/5 rounded-full blur-lg transition-opacity duration-500", step >= 1 ? 'opacity-100' : 'opacity-0')} />
-            </div>
-
-            {/* Text Content */}
-            <div className="-mt-60 md:-mt-[28rem] space-y-2 z-10">
-              <h2
-                className={cn(
-                  "text-lg font-medium text-slate-600 transition-all duration-500",
-                  "animate-pop-in"
-                )}
-                style={{ animationDelay: '700ms', opacity: step >= 2 ? 1: 0 }}
-              >
-                Meet the
-              </h2>
-              <h1 className="flex items-center justify-center text-5xl md:text-6xl font-bold font-headline tracking-tight">
-                <span
-                  className={cn(
-                    "transition-all duration-500 ease-out",
-                    "animate-slide-in-right"
-                  )}
-                  style={{ animationDelay: '900ms', opacity: step >= 3 ? 1: 0 }}
-                >
-                  Bachelor
-                </span>
-                <span
-                  className={cn(
-                    "ml-2 text-primary transition-all duration-500 ease-out delay-100",
-                    "animate-slide-in-right"
-                  )}
-                  style={{ animationDelay: '1000ms', opacity: step >= 3 ? 1: 0 }}
-                >
-                  Bite
-                </span>
-                <span
-                  className={cn(
-                    "text-primary transition-all duration-300 delay-300",
-                    "animate-pop-in"
-                  )}
-                  style={{ animationDelay: '1400ms', opacity: step >= 4 ? 1: 0 }}
-                >
-                  .
-                </span>
-              </h1>
-              <p
-                className={cn(
-                  "text-md text-slate-500 max-w-xs transition-all duration-500 delay-200",
-                  "animate-slide-up-fade"
-                )}
-                style={{ animationDelay: '1600ms', opacity: step >= 5 ? 1: 0 }}
-              >
-                No notes, no Excel—just one tap, done.
-              </p>
             </div>
         </div>
 
