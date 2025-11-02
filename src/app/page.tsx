@@ -7,24 +7,43 @@ import Link from "next/link"
 export default function Home() {
 
   return (
-    <header className="relative h-[95vh] header-bg bg-cover bg-top">
-      <div className="absolute top-16 left-16 animate-[moveInRight_1s_ease-out]">
-        <Logo />
-      </div>
-
-      <div className="absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
-        <div className="text-[#ececec] uppercase text-center mb-16">
-            <span className="block text-6xl font-normal tracking-[3.5rem] animate-[moveInLeft_1s_ease-in]">
-              BachelorBite
-            </span>
-            <span className="block text-xl font-bold tracking-[1.75rem] animate-[moveInRight_1s_ease-out]">
-              is where life happens
-            </span>
+    <div className="relative h-screen yellow-gradient-bg bg-retro-pattern overflow-hidden">
+      <main className="relative z-10 flex h-screen flex-col items-center justify-around p-4 md:p-8">
+        {/* Mascot */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-subtle-float" style={{ animationDelay: '0ms', opacity: 1 }}>
+          <Logo isMascotAnimated={true} mascotSize="large" className="opacity-80" />
         </div>
-        <Button asChild className="uppercase text-lg px-12 py-7 rounded-md relative transition-all duration-200 text-gray-700 bg-white hover:translate-y-[-5px] hover:shadow-[0_1rem_2rem_rgba(0,0,0,0.4)] active:translate-y-[-1px] active:shadow-[0_1rem_1rem_rgba(0,0,0,0.5)] after:content-[''] after:inline-block after:h-full after:w-full after:absolute after:top-0 after:left-0 after:z-[-1] after:rounded-md after:bg-white after:transition-all after:duration-700 hover:after:scale-x-150 hover:after:scale-y-150 hover:after:opacity-0 animate-[moveInBottom_1.5s_ease-in_0.5s_backwards]">
-          <Link href="/signup">Get Started</Link>
-        </Button>
-      </div>
-    </header>
+
+        {/* Text Content */}
+        <div className="text-center space-y-2 z-10 mt-16">
+          <div className="text-center">
+            <h2 className="text-2xl font-medium tracking-wide text-slate-800/80 transition-all duration-500 delay-200 animate-slide-in-right" style={{ animationDelay: '600ms', opacity: 1 }}>
+              Meet the
+            </h2>
+          </div>
+          <h1 className="text-6xl font-bold tracking-tight animate-pop-in font-headline" style={{ animationDelay: '800ms', opacity: 1 }}>
+            <span className="text-slate-800 transition-all duration-500 ease-out animate-slide-in-right" style={{ animationDelay: '900ms', opacity: 1 }}>
+              Bachelor
+            </span>
+            <span className="text-primary transition-all duration-500 ease-out animate-slide-in-right" style={{ animationDelay: '1200ms', opacity: 1 }}>
+              Bite
+            </span>
+            <span className="text-primary transition-all duration-500 ease-out animate-slide-in-right" style={{ animationDelay: '1400ms', opacity: 1 }}>
+              .
+            </span>
+          </h1>
+          <div className="text-center">
+            <p className="text-md text-slate-800/70 max-w-xs transition-all duration-500 delay-200 animate-slide-up-fade" style={{ animationDelay: '1600ms', opacity: 1 }}>
+              No notes, no Excel—just one tap, done.
+            </p>
+          </div>
+        </div>
+
+        {/* Action Button */}
+        <div className="z-10 animate-fade-in-scale" style={{ animationDelay: '1800ms', opacity: 1 }}>
+          {/* This button has been removed as per user request. */}
+        </div>
+      </main>
+    </div>
   )
 }
