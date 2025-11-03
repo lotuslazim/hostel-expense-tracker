@@ -32,8 +32,6 @@
     --border: 150 5% 91%;
     --input: 120 4% 93%;
     --ring: 150 45% 40%;
-
-    --radius: 0.5rem;
   }
 
   .dark {
@@ -194,6 +192,70 @@
           transform: rotate(3deg) translate(0px, -4px);
 }
 
+/* Landing Header Styles */
+.landing-nav {
+  --indicator-x: 71.5px;
+  --indicator-y: 0px;
+  
+  position: relative;
+  padding: 0.5rem;
+  border-radius: 9999px;
+  background-color: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.landing-nav ul {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.landing-nav li {
+  position: relative;
+}
+
+.landing-nav .nav-link {
+  padding: 0.75rem 1.5rem;
+  text-decoration: none;
+  color: #333;
+  font-weight: 600;
+  border-radius: 9999px;
+  transition: color 0.3s ease;
+  position: relative;
+  z-index: 2;
+}
+
+.landing-nav .nav-link.active,
+.landing-nav .nav-link:hover {
+  color: white;
+}
+
+.landing-nav::after {
+  content: "";
+  position: absolute;
+  top: 0.5rem;
+  bottom: 0.5rem;
+  left: 0;
+  width: 10px;
+  height: calc(100% - 1rem);
+  background-color: hsl(var(--primary));
+  border-radius: 9999px;
+  transform: translateX(calc(var(--indicator-x) - 5px)) translateY(var(--indicator-y));
+  z-index: 1;
+  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  pointer-events: none;
+  opacity: 0;
+}
+
+.landing-nav.show-indicator::after {
+    opacity: 1;
+}
+
+
 /* Rain animation */
 .rain::before {
     content: '';
@@ -228,3 +290,4 @@
 }
 
     
+

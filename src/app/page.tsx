@@ -9,6 +9,7 @@ import { ArrowRight, Utensils, Wheat, CheckCircle } from "lucide-react";
 import { gsap } from "gsap";
 import { SplitText } from "@/components/animation/SplitText";
 import { useFontLoader } from "@/lib/hooks/use-font-loader";
+import { LandingHeader } from "@/components/app/landing-header";
 
 const FloatingElements = () => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -113,6 +114,7 @@ export default function Home() {
 
   return (
     <div ref={containerRef} className="min-h-screen w-full yellow-gradient-bg text-slate-800 overflow-hidden relative">
+      <LandingHeader />
       {/* Animated Borders */}
       <div className="animated-border left-0">
         {[...Array(5)].map((_, i) => <div key={i} className="animated-border-element" style={{ animationDelay: `${i * 2}s` }}/>)}

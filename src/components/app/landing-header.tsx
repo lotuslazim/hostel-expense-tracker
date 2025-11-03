@@ -1,58 +1,142 @@
 
 "use client";
 
-import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import { Logo } from "@/components/icons/logo";
-import { Button } from "../ui/button";
-import { ArrowRight } from "lucide-react";
-import { ThemeSwitcher } from "../settings/theme-switcher";
-import { useState, useEffect } from "react";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 
+const navItems = [
+    { label: "Home", href: "/" },
+    { label: "About", href: "/about" },
+    { label: "Contact", href: "/contact" }
+];
+
 export function LandingHeader() {
-  const [hasScrolled, setHasScrolled] = useState(false);
+  const navRef = useRef<HTMLDivElement>(null);
+  const itemsRef = useRef<(HTMLLIElement | null)[]>([]);
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [initialPositionSet, setInitialPositionSet] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setHasScrolled(window.scrollY > 20);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    const navElement = navRef.current;
+    if (!navElement) return;
+    
+    let anim: any = null;
 
+    const animateIndicator = (from: number, to: number) => {
+        if (anim) cancelAnimationFrame(anim);
+
+        const start = Date.now();
+
+        const step = () => {
+            const elapsed = Date.now() - start;
+            const progress = Math.min(elapsed / 400, 1); // 400ms duration
+            const ease = 1 - Math.pow(1 - progress, 3); // Ease out cubic
+
+            const currentX = from + (to - from) * ease;
+            const y = -20 * Math.sin(progress * Math.PI); // Gentle bounce
+
+            navElement.style.setProperty('--indicator-x', `${currentX}px`);
+            navElement.style.setProperty('--indicator-y', `${y}px`);
+
+            if (progress < 1) {
+                anim = requestAnimationFrame(step);
+            }
+        };
+
+        anim = requestAnimationFrame(step);
+    };
+
+    const getItemCenter = (item: HTMLLIElement) => {
+      const navRect = navElement.getBoundingClientRect();
+      const itemRect = item.getBoundingClientRect();
+      return itemRect.left - navRect.left + itemRect.width / 2;
+    };
+    
+    const handleMouseEnter = (index: number) => {
+        const item = itemsRef.current[index];
+        if (!item) return;
+
+        const currentPos = parseFloat(navElement.style.getPropertyValue('--indicator-x')) || getItemCenter(item);
+        const targetPos = getItemCenter(item);
+        
+        animateIndicator(currentPos, targetPos);
+        navElement.classList.add("show-indicator");
+    };
+
+    const handleMouseLeave = () => {
+      if (activeIndex !== null) {
+          const activeItem = itemsRef.current[activeIndex];
+          if(activeItem) {
+            const currentPos = parseFloat(navElement.style.getPropertyValue('--indicator-x'));
+            const targetPos = getItemCenter(activeItem);
+            animateIndicator(currentPos, targetPos);
+          }
+      } else {
+        navElement.classList.remove("show-indicator");
+      }
+    };
+    
+    const handleClick = (index: number) => {
+        setActiveIndex(index);
+        const item = itemsRef.current[index];
+        if (item) {
+             const currentPos = parseFloat(navElement.style.getPropertyValue('--indicator-x'));
+             const targetPos = getItemCenter(item);
+             animateIndicator(currentPos, targetPos);
+        }
+    };
+
+    itemsRef.current.forEach((item, index) => {
+        if (item) {
+            item.addEventListener('mouseenter', () => handleMouseEnter(index));
+            item.addEventListener('click', () => handleClick(index));
+        }
+    });
+    
+    navElement.addEventListener('mouseleave', handleMouseLeave);
+    
+    if(!initialPositionSet && itemsRef.current[0]) {
+        const firstItemCenter = getItemCenter(itemsRef.current[0] as HTMLLIElement);
+        navElement.style.setProperty('--indicator-x', `${firstItemCenter}px`);
+        setInitialPositionSet(true);
+    }
+    
+    return () => {
+      if (anim) cancelAnimationFrame(anim);
+       itemsRef.current.forEach((item, index) => {
+        if (item) {
+            item.removeEventListener('mouseenter', () => handleMouseEnter(index));
+            item.removeEventListener('click', () => handleClick(index));
+        }
+      });
+      if(navElement) {
+        navElement.removeEventListener('mouseleave', handleMouseLeave);
+      }
+    };
+  }, [activeIndex, initialPositionSet]);
 
   return (
-    <header className={cn(
-        "fixed top-0 z-50 w-full transition-all duration-300",
-        hasScrolled ? "bg-background/80 backdrop-blur-sm border-b" : "bg-transparent"
-      )}>
-      <div className="container flex h-20 items-center">
-        <div className="mr-4 hidden md:flex">
-          <Link href="/" className="mr-6 flex items-center space-x-2">
-            <Logo textColor="text-foreground" />
-          </Link>
-        </div>
-        
-        <div className="md:hidden flex-1">
-          <Link href="/">
-            <Logo textColor="text-foreground"/>
-          </Link>
-        </div>
-
-        <div className="flex flex-1 items-center justify-end space-x-2">
-          <nav className="flex items-center gap-4">
-             <ThemeSwitcher />
-             <Button asChild variant="ghost" className="hidden md:inline-flex text-foreground hover:bg-foreground/10 hover:text-foreground">
-                <Link href="/login">Sign In</Link>
-             </Button>
-             <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90">
-                <Link href="/signup">
-                    Sign Up <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-             </Button>
-          </nav>
-        </div>
-      </div>
+    <header className="fixed top-4 left-1/2 -translate-x-1/2 z-50">
+        <nav ref={navRef} className="landing-nav group">
+            <ul>
+                {navItems.map((item, index) => (
+                    <li key={item.label} ref={(el) => (itemsRef.current[index] = el)}>
+                        <Link
+                            href={item.href}
+                            className={cn(
+                                "nav-link",
+                                activeIndex === index && "active"
+                            )}
+                        >
+                            {item.label}
+                        </Link>
+                    </li>
+                ))}
+            </ul>
+        </nav>
     </header>
   );
 }
+
