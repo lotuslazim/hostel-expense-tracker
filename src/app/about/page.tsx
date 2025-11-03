@@ -5,7 +5,7 @@ import { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react
 import './about.css';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import Link from 'next/link';
-import { ArrowUp, ArrowDown, Utensils, Wheat, CheckCircle } from 'lucide-react';
+import { ArrowUp, ArrowDown, Utensils, Wheat, CheckCircle, Leaf, Home } from 'lucide-react';
 import Image from 'next/image';
 import { LandingHeader } from '@/components/app/landing-header';
 import { gsap } from "gsap";
@@ -43,6 +43,8 @@ const FloatingElements = () => {
         { Icon: Wheat, size: "w-6 h-6", top: "25%", left: "80%" },
         { Icon: CheckCircle, size: "w-6 h-6", top: "70%", left: "20%" },
         { Icon: Utensils, size: "w-10 h-10", top: "85%", left: "90%" },
+        { Icon: Leaf, size: "w-7 h-7", top: "50%", left: "5%" },
+        { Icon: Home, size: "w-9 h-9", top: "80%", left: "50%" },
     ];
   
     return (
