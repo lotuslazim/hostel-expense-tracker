@@ -51,7 +51,7 @@ function DockItem({
       </div>
       {item.label && (
           <span
-            className="text-xs text-white opacity-80 group-hover:opacity-100 transition-opacity"
+            className="text-xs opacity-80 group-hover:opacity-100 transition-opacity"
             style={{ marginTop: '4px' }}
           >
             {item.label}
@@ -63,9 +63,9 @@ function DockItem({
 
 export default function Dock({
   items,
-  panelHeight = 68,
-  baseItemSize = 40,
-  magnification = 60,
+  panelHeight = 80,
+  baseItemSize = 56,
+  magnification = 24,
   className,
 }: DockProps) {
   const mouseX = useMotionValue(Infinity);
@@ -76,7 +76,7 @@ export default function Dock({
       onMouseLeave={() => mouseX.set(Infinity)}
       style={{ height: `${panelHeight}px` }}
       className={cn(
-        "flex items-start justify-center gap-2 pt-2 px-4",
+        "flex items-center justify-center gap-4 p-4",
         className
       )}
     >

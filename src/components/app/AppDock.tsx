@@ -64,7 +64,7 @@ export default function AppDock() {
       <Dock 
         items={items}
         magnification={24}
-        className="bg-secondary text-secondary-foreground"
+        className="bg-secondary text-secondary-foreground rounded-full"
       />
     </div>
   );
