@@ -1,16 +1,15 @@
 
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { ProfileCard } from '@/components/contact/ProfileCard';
+import { ContactModal } from '@/components/contact/ContactModal';
 import './contact.css';
 import { LandingHeader } from '@/components/app/landing-header';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export default function ContactPage() {
-  const handleContactClick = (name: string) => {
-    console.log(`Contact clicked for ${name}`);
-  };
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const user1 = {
     name: "Lotus Lazim",
@@ -24,7 +23,6 @@ export default function ContactPage() {
     <div className="contact-page-container">
         <LandingHeader />
         <div className="contact-page-content">
-            
             <div className="profile-cards-wrapper">
                 <ProfileCard
                     name={user1.name}
@@ -36,10 +34,11 @@ export default function ContactPage() {
                     contactText="Contact Me"
                     showUserInfo={true}
                     enableTilt={true}
-                    onContactClick={() => handleContactClick(user1.name)}
+                    onContactClick={() => setIsModalOpen(true)}
                 />
             </div>
         </div>
+        <ContactModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
   );
 };
