@@ -26,11 +26,13 @@ export default function ContactPage() {
         <LandingHeader />
 
         <div className="vertical-auth-buttons">
-            <Link href="/signup" className="vertical-auth-btn signup">
-                <UserPlus className="h-5 w-5 icon-anim" /> Sign Up
+            <Link href="/signup" className="vertical-auth-btn signup" title="Sign Up">
+                <UserPlus className="h-5 w-5 icon-anim" />
+                <span className="button-text">Sign Up</span>
             </Link>
-            <Link href="/login" className="vertical-auth-btn login">
-                <LogIn className="h-5 w-5 icon-anim" /> Log In
+            <Link href="/login" className="vertical-auth-btn login" title="Log In">
+                <LogIn className="h-5 w-5 icon-anim" />
+                <span className="button-text">Log In</span>
             </Link>
         </div>
 
