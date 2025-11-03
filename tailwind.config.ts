@@ -154,10 +154,6 @@ const config = {
             "0%": { opacity: "0", transform: "scale(0.8)" },
             "100%": { opacity: "1", transform: "scale(1)" },
         },
-        "subtle-float": {
-            "0%, 100%": { transform: "translateY(0px)" },
-            "50%": { transform: "translateY(-10px)" },
-        },
         moveInLeft: {
           "0%": { opacity: "0", transform: "translateX(-10rem)" },
           "100%": { opacity: "1", transform: "translateX(0)" },
@@ -192,7 +188,6 @@ const config = {
         "slide-up-fade": "slide-up-fade 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards",
         "slide-in-right": "slide-in-right 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards",
         "pop-in": "pop-in 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards",
-        "subtle-float": "subtle-float 15s ease-in-out infinite",
       },
     },
   },
