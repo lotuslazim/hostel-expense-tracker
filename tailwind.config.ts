@@ -61,6 +61,7 @@ const config = {
           foreground: "hsl(var(--card-foreground))",
         },
         'mint-500': '#ECFFDC',
+        'header-yellow': '#C9CF5E',
       },
       borderRadius: {
         lg: "var(--radius)",

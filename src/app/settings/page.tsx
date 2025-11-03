@@ -14,7 +14,7 @@ export default function SettingsPage() {
       <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
          <div className="space-y-8">
             <div>
-                <h1 className="text-2xl md:text-3xl font-bold font-headline text-mint-500 flex items-center gap-3">
+                <h1 className="text-2xl md:text-3xl font-bold font-headline text-header-yellow flex items-center gap-3">
                     <SettingsIcon className="h-8 w-8" />
                     {t('settings.title')}
                 </h1>

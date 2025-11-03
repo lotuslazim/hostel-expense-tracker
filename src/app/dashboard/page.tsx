@@ -75,7 +75,7 @@ function DashboardContent({ groupId, userId }: { groupId: string, userId: string
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight font-headline text-mint-500 flex items-center gap-3">
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight font-headline text-header-yellow flex items-center gap-3">
           <LayoutDashboard className="h-8 w-8" />
           Dashboard
         </h1>
