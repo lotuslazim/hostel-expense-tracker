@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import type { User } from 'firebase/auth';
 import type { ChatMessage as ChatMessageType } from "@/lib/types";
-import { Loader2, Send, Image as ImageIcon, X, MessageSquare, MoreVertical, Brush, Grid } from "lucide-react";
+import { Loader2, Send, Image as ImageIcon, X, MessageSquare, MoreVertical, Brush, Grid, ArrowLeft } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import {
@@ -34,6 +34,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 interface ChatProps {
     groupId: string;
@@ -83,6 +84,7 @@ const backgroundOptions = [
 
 export function Chat({ groupId, currentUser }: ChatProps) {
     const { toast } = useToast();
+    const router = useRouter();
     const [newMessage, setNewMessage] = useState("");
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -206,10 +208,15 @@ export function Chat({ groupId, currentUser }: ChatProps) {
 
     return (
         <Card className="flex flex-col h-full w-full bg-card rounded-none border-0">
-            <CardHeader className="border-b bg-background z-10 flex flex-row items-center justify-between p-3">
-                <CardTitle>
-                    {isGroupDataLoading ? <Skeleton className="h-7 w-48" /> : groupData?.groupName || "Group Chat"}
-                </CardTitle>
+             <CardHeader className="border-b bg-background z-10 flex flex-row items-center justify-between p-2">
+                <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="icon" onClick={() => router.back()} className="h-9 w-9">
+                        <ArrowLeft className="h-5 w-5" />
+                    </Button>
+                    <CardTitle className="text-lg">
+                        {isGroupDataLoading ? <Skeleton className="h-6 w-32" /> : groupData?.groupName || "Group Chat"}
+                    </CardTitle>
+                </div>
                  <Dialog>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
