@@ -23,32 +23,27 @@ export default function Home() {
       onComplete: () => setIsAnimating(false),
     });
 
-    tl.to(".animate-text-meet", {
+    tl.to(".animate-text-meet .char", {
       opacity: 1,
       y: 0,
       duration: 0.6,
       ease: "power3.out",
       stagger: 0.1,
     })
-    .to(".animate-bachelor", {
+    .to([".animate-bachelor", ".animate-bite"], {
         opacity: 1,
         x: 0,
         duration: 0.8,
-        ease: "power3.out"
+        ease: "power3.out",
+        stagger: 0.1,
     }, "-=0.4")
-     .to(".animate-bite", {
-        opacity: 1,
-        x: 0,
-        duration: 0.8,
-        ease: "power3.out"
-    }, "<") // "<" starts this animation at the same time as the previous one
     .to(".animate-dot", {
         opacity: 1,
         scale: 1,
         duration: 0.5,
         ease: "back.out(1.7)"
     })
-    .to(".animate-text-subtitle", {
+    .to(".animate-text-subtitle .char", {
         opacity: 1,
         y: 0,
         duration: 0.6,
@@ -91,16 +86,18 @@ export default function Home() {
         <div className="text-center space-y-4 pt-16 md:pt-24 flex-grow flex flex-col justify-center">
             {areFontsLoaded && (
               <>
-                <SplitText
-                  text="Meet the"
-                  as="h2"
-                  className="text-xl md:text-2xl font-medium text-slate-600 animate-text-meet"
-                  initial={{ opacity: 0, y: 40 }}
-                />
+                 <div className="flex flex-col items-center">
+                    <SplitText
+                      text="Meet the"
+                      as="h2"
+                      className="text-xl md:text-2xl font-medium text-slate-600 animate-text-meet"
+                      initial={{ opacity: 0, y: 40 }}
+                    />
+                </div>
                 <div className="relative">
                   <h1 className="flex items-center justify-center text-5xl md:text-7xl font-bold font-headline tracking-tight">
-                    <span className="animate-bachelor block" style={{ transform: 'translateX(-20px)', opacity: 0}}>Bachelor</span>
-                    <span className="animate-bite block text-primary ml-3" style={{ transform: 'translateX(-20px)', opacity: 0}}>Bite</span>
+                    <span className="animate-bachelor block" style={{ transform: 'translateX(20px)', opacity: 0}}>Bachelor</span>
+                    <span className="animate-bite block text-primary ml-3" style={{ transform: 'translateX(20px)', opacity: 0}}>Bite</span>
                     <span className="animate-dot block text-primary" style={{ opacity: 0, scale: 0 }}>.</span>
                   </h1>
                 </div>
