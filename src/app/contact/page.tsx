@@ -24,7 +24,7 @@ export default function ContactPage() {
     <div className="contact-page-container">
         <LandingHeader />
         <div className="contact-page-content">
-            <h1 className="contact-title">Meet the Team</h1>
+            
             <div className="profile-cards-wrapper">
                 <ProfileCard
                     name={user1.name}
