@@ -14,8 +14,9 @@ export default function AppDock() {
 
   const publicRoutes = ['/login', '/signup', '/', '/about', '/contact'];
   const isPublicRoute = publicRoutes.includes(pathname);
+  const isChatPage = pathname === '/chat';
 
-  if (isPublicRoute || !user || isUserLoading) {
+  if (isPublicRoute || !user || isUserLoading || isChatPage) {
     return null;
   }
 
@@ -33,7 +34,7 @@ export default function AppDock() {
         panelHeight={60}
         baseItemSize={48}
         magnification={24}
-        className="backdrop-blur-md bg-secondary/80 border border-secondary rounded-full shadow-lg text-secondary-foreground"
+        className="backdrop-blur-md bg-secondary/80 border border-secondary rounded-full shadow-lg text-primary-foreground"
       />
     </div>
   );
