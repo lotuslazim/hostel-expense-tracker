@@ -8,63 +8,63 @@
 
 @layer base {
   :root {
-    --background: 150 25% 98%; /* #F8FBF9 */
-    --foreground: 0 0% 11%; /* #1C1C1C */
+    --background: 150 25% 98%; /* #F8FBF9 - Almost white with a hint of green */
+    --foreground: 160 33% 8%; /* #0F1C17 - Very dark green */
     
-    --card: 150 25% 95%; /* #EAF7EF */
-    --card-foreground: 0 0% 11%;
+    --card: 0 0% 100%; /* Pure white */
+    --card-foreground: 160 33% 8%;
     
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 11%;
+    --popover-foreground: 160 33% 8%;
     
-    --primary: 150 50% 48%; /* #41B880 -> A more premium emerald green */
+    --primary: 150 50% 48%; /* #41B880 -> Dark Emerald Green */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 44 100% 63%; /* #FFC247 */
-    --secondary-foreground: 0 0% 12%; /* #1F1F1F */
+    --secondary: 44 100% 63%; /* #FFC247 -> Bright Yellow */
+    --secondary-foreground: 160 33% 8%; /* Dark green text on yellow bg */
     
-    --muted: 120 4% 93%;
-    --muted-foreground: 0 0% 37%; /* #5E5E5E */
+    --muted: 150 15% 95%; /* Lighter gray-green */
+    --muted-foreground: 150 10% 45%; /* Mid-tone gray-green */
     
-    --accent: 150 25% 94%; /* #DDF1E4 */
-    --accent-foreground: 150 45% 30%;
+    --accent: 44 100% 90%; /* Very light yellow for accents/hovers */
+    --accent-foreground: 44 90% 40%; /* Darker yellow for text on accent */
 
     --destructive: 0 79% 64%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 150 5% 91%;
-    --input: 120 4% 93%;
+    --border: 150 10% 90%;
+    --input: 150 10% 92%;
     --ring: 150 45% 40%;
   }
 
   .dark {
-    --background: 160 33% 8%; /* --color-bg: #0F1C17 */
-    --foreground: 150 13% 95%; /* --color-text-primary: #F2F5F4 */
+    --background: 160 33% 8%; /* #0F1C17 - Very dark green */
+    --foreground: 150 13% 95%; /* #F2F5F4 - Off-white */
 
-    --card: 164 26% 13%; /* --color-surface: #1B2A25 */
-    --card-foreground: 150 13% 95%; /* --color-text-primary: #F2F5F4 */
+    --card: 164 26% 13%; /* #1B2A25 - Dark surface */
+    --card-foreground: 150 13% 95%;
 
-    --popover: 164 26% 13%; /* --color-surface: #1B2A25 */
-    --popover-foreground: 150 13% 95%; /* --color-text-primary: #F2F5F4 */
+    --popover: 164 26% 13%;
+    --popover-foreground: 150 13% 95%;
 
-    --primary: 150 50% 48%; /* A more premium emerald green */
+    --primary: 150 50% 48%; /* #41B880 -> Dark Emerald Green */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 44 100% 63%; /* #FFC247 */
-    --secondary-foreground: 160 33% 8%;
+    --secondary: 44 100% 63%; /* #FFC247 -> Bright Yellow */
+    --secondary-foreground: 160 33% 8%; /* Dark green text on yellow bg */
 
-    --muted: 163 22% 16%; /* --color-surface-alt: #23352F */
-    --muted-foreground: 158 14% 80%; /* --color-text-secondary: #C7D0CC */
+    --muted: 163 22% 16%; /* #23352F - Alt dark surface */
+    --muted-foreground: 158 14% 80%; /* #C7D0CC - Lighter gray-green text */
 
-    --accent: 163 22% 16%; /* --color-surface-alt: #23352F */
-    --accent-foreground: 150 13% 95%;
+    --accent: 44 100% 63%; /* Use secondary yellow as accent in dark mode */
+    --accent-foreground: 160 33% 8%;
 
-    --destructive: 0 100% 78%; /* --color-error: #FF8E8E */
+    --destructive: 0 100% 78%; /* #FF8E8E */
     --destructive-foreground: 160 33% 8%;
 
-    --border: 162 16% 21%; /* --color-border: #2E3E39 */
-    --input: 163 22% 16%; /* --color-surface-alt: #23352F */
-    --ring: 150.29 39.53% 54.9%;
+    --border: 162 16% 21%; /* #2E3E39 */
+    --input: 163 22% 16%;
+    --ring: 44 100% 63%; /* Yellow ring */
   }
 }
 
