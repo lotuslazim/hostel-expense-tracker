@@ -11,6 +11,7 @@ import { useMemo } from 'react';
 import { doc } from 'firebase/firestore';
 import { firestore } from '@/firebase/config';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 export default function AppDock() {
   const router = useRouter();
@@ -54,13 +55,16 @@ export default function AppDock() {
       onClick: () => router.push('/chat') 
     },
   ];
+  
+  const activeItem = items.find(item => pathname.startsWith(item.href));
 
   return (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 md:block hidden">
+    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 block">
       <Dock 
         items={items}
         magnification={24}
         className="bg-secondary text-secondary-foreground"
+        activeHref={activeItem?.href}
       />
     </div>
   );
