@@ -1,15 +1,79 @@
 
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useLayoutEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Utensils, Wheat, CheckCircle } from "lucide-react";
 import { gsap } from "gsap";
 import { SplitText } from "@/components/animation/SplitText";
 import { useFontLoader } from "@/lib/hooks/use-font-loader";
+
+// Simple SVG icons for floating elements
+const ForkIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M8 4V20M16 4V20M12 4V20M8 4C8 2.89543 7.10457 2 6 2C4.89543 2 4 2.89543 4 4V9" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const SpoonIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 4V20M12 4C12 2.34315 10.6569 1 9 1C7.34315 1 6 2.34315 6 4C6 5.65685 7.34315 7 9 7C10.6569 7 12 5.65685 12 4Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+);
+
+const PlateIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="10" stroke="white" strokeWidth="2"/>
+    </svg>
+);
+
+
+const FloatingElements = () => {
+    const containerRef = useRef<HTMLDivElement>(null);
+  
+    useLayoutEffect(() => {
+      const ctx = gsap.context(() => {
+        const elements = gsap.utils.toArray(".floating-element");
+        elements.forEach((el: any) => {
+          gsap.to(el, {
+            x: `random(-30, 30)`,
+            y: `random(-20, 20)`,
+            duration: `random(6, 10)`,
+            ease: "sine.inOut",
+            repeat: -1,
+            yoyo: true,
+          });
+        });
+      }, containerRef);
+  
+      return () => ctx.revert();
+    }, []);
+  
+    const elements = [
+        { Icon: PlateIcon, size: "w-8 h-8", top: "15%", left: "10%" },
+        { Icon: ForkIcon, size: "w-6 h-6", top: "25%", left: "80%" },
+        { Icon: SpoonIcon, size: "w-6 h-6", top: "70%", left: "20%" },
+        { Icon: PlateIcon, size: "w-10 h-10", top: "85%", left: "90%" },
+        { Icon: ForkIcon, size: "w-5 h-5", top: "50%", left: "5%" },
+        { Icon: SpoonIcon, size: "w-8 h-8", top: "5%", left: "50%" },
+    ];
+  
+    return (
+      <div ref={containerRef} className="absolute inset-0 z-0 overflow-hidden">
+        {elements.map((el, i) => (
+          <div
+            key={i}
+            className={`floating-element absolute ${el.size} opacity-20 filter drop-shadow-lg`}
+            style={{ top: el.top, left: el.left }}
+          >
+            <el.Icon />
+          </div>
+        ))}
+      </div>
+    );
+};
 
 export default function Home() {
   const router = useRouter();
@@ -78,6 +142,9 @@ export default function Home() {
       <div className="animated-border right-0">
         {[...Array(5)].map((_, i) => <div key={i} className="animated-border-element" style={{ animationDelay: `${i * 2}s` }}/>)}
       </div>
+
+      {/* Floating SVG elements */}
+      <FloatingElements />
 
       {/* Subtle background pattern */}
       <div className="absolute inset-0 z-0 bg-retro-pattern"></div>
