@@ -169,26 +169,39 @@
     transition: opacity 0.4s ease;
 }
 
-.floating-website-btn {
+.vertical-contact-btn {
     position: fixed;
-    bottom: 2rem;
-    right: 2rem;
+    top: 50%;
+    left: -55px; /* Adjust to hide part of the button initially */
+    transform: translateY(-50%) rotate(-90deg);
+    transform-origin: center;
     padding: 0.75rem 1.5rem;
     background: hsl(var(--primary));
     color: hsl(var(--primary-foreground));
-    border-radius: 9999px;
+    border-radius: 0.5rem 0.5rem 0 0;
     text-decoration: none;
     font-weight: 600;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     display: flex;
     align-items: center;
+    z-index: 100;
 }
 
-.floating-website-btn:hover {
-    transform: translateY(-3px) scale(1.05);
+.vertical-contact-btn:hover {
+    left: -40px; /* Slide out on hover */
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
 }
+
+.vertical-contact-btn .icon-anim {
+    transition: transform 0.3s ease;
+    transform: rotate(90deg);
+}
+
+.vertical-contact-btn:hover .icon-anim {
+    transform: rotate(90deg) translateX(5px);
+}
+
 
 /* Responsive Styles */
 @media (min-width: 768px) {
