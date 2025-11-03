@@ -2,11 +2,13 @@
 "use client";
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { ProfileCard } from '@/components/contact/ProfileCard';
 import { ContactModal } from '@/components/contact/ContactModal';
 import './contact.css';
 import { LandingHeader } from '@/components/app/landing-header';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { LogIn, UserPlus } from 'lucide-react';
 
 export default function ContactPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -22,6 +24,16 @@ export default function ContactPage() {
   return (
     <div className="contact-page-container">
         <LandingHeader />
+
+        <div className="vertical-auth-buttons">
+            <Link href="/signup" className="vertical-auth-btn">
+                <UserPlus className="h-5 w-5 mr-2" /> Sign Up
+            </Link>
+            <Link href="/login" className="vertical-auth-btn">
+                <LogIn className="h-5 w-5 mr-2" /> Log In
+            </Link>
+        </div>
+
         <div className="contact-page-content">
             <div className="profile-cards-wrapper">
                 <ProfileCard

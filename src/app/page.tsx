@@ -5,7 +5,7 @@ import { useRef, useEffect, useState, useLayoutEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Utensils, Wheat, CheckCircle, LogIn } from "lucide-react";
+import { ArrowRight, Utensils, Wheat, CheckCircle } from "lucide-react";
 import { gsap } from "gsap";
 import { SplitText } from "@/components/animation/SplitText";
 import { useFontLoader } from "@/lib/hooks/use-font-loader";
@@ -178,17 +178,9 @@ export default function Home() {
                 <Button
                   size="lg"
                   className="w-full sm:w-auto text-lg rounded-full shadow-lg hover:shadow-xl bg-primary text-primary-foreground hover:bg-primary/90 hover:-translate-y-1 transform transition-all duration-300"
-                  onClick={() => router.push("/signup")}
+                  onClick={() => router.push("/about")}
                 >
-                  Sign Up <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="w-full sm:w-auto text-lg rounded-full shadow-lg bg-white/50 border-slate-400 hover:bg-white/80"
-                  onClick={() => router.push("/login")}
-                >
-                  <LogIn className="mr-2 h-5 w-5" /> Log In
+                  Get Started <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </div>
           </div>
