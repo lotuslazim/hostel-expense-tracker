@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -6,6 +7,7 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import Link from 'next/link';
 import { ArrowUp, ArrowDown } from 'lucide-react';
 import Image from 'next/image';
+import { LandingHeader } from '@/components/app/landing-header';
 
 const appFeatures = [
     { name: "Log Meals & Expenses", description: "Quickly log your daily meals and any shared expenses. It’s that simple.", imageId: "app-dashboard" },
@@ -84,6 +86,7 @@ export default function AboutPage() {
 
     return (
         <div className="about-section">
+            <LandingHeader />
             <div className="about-container">
                 <div className="about-carousel" ref={carouselRef}>
                     <button className="nav-arrow up" aria-label="Previous feature" onClick={() => updateCarousel(currentIndex - 1)}><ArrowUp /></button>
