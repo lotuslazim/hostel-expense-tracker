@@ -2,6 +2,7 @@
 
 
 
+
 .contact-page-container {
     width: 100%;
     min-height: 100vh;
@@ -347,7 +348,7 @@
 .vertical-auth-buttons {
     position: fixed;
     top: 50%;
-    left: -100px;
+    left: -80px; /* Corrected: Make partially visible */
     transform: translateY(-50%);
     display: flex;
     flex-direction: column;
@@ -357,7 +358,7 @@
 }
 
 .vertical-auth-buttons:hover {
-    left: -10px;
+    left: 0; /* Corrected: Slide fully into view */
 }
 
 .vertical-auth-btn {
