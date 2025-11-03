@@ -167,7 +167,7 @@ export default function Home() {
               alt="BachelorBite Mascot"
               width={400}
               height={400}
-              className="object-contain drop-shadow-xl h-64 w-64 md:h-80 md:w-80"
+              className="object-contain drop-shadow-xl h-80 w-80 md:h-80 md:w-80"
               priority
             />
             <div className="mascot-shadow opacity-0" />
