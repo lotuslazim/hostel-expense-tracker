@@ -28,7 +28,7 @@ export default function AppDock() {
   ];
 
   return (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 md:hidden">
+    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
       <Dock 
         items={items}
         panelHeight={60}
