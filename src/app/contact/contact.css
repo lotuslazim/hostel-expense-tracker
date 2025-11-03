@@ -342,11 +342,10 @@
     font-size: 1.25rem;
 }
 
-/* New Vertical Auth Buttons */
 .vertical-auth-buttons {
     position: fixed;
     top: 50%;
-    left: -55px; /* Adjust to hide part of the button initially */
+    left: -110px; /* Initially hidden */
     transform: translateY(-50%);
     display: flex;
     flex-direction: column;
@@ -370,34 +369,25 @@
     font-weight: 600;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    transform-origin: left center;
-    width: 150px;
-    height: 50px;
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-    transform: rotate(180deg) translateX(100%);
-    border-radius: 0.5rem 0 0 0.5rem;
+    width: 150px; /* Set a fixed width */
+}
+
+.vertical-auth-btn:first-child {
+    border-radius: 0 0.5rem 0 0;
+}
+
+.vertical-auth-btn:last-child {
+    border-radius: 0 0 0.5rem 0;
 }
 
 .vertical-auth-btn.login {
     background: hsl(var(--secondary));
     color: hsl(var(--secondary-foreground));
-    border-radius: 0 0.5rem 0.5rem 0;
-    transform: rotate(0deg) translateX(0); /* Reset rotation for the bottom button */
-    writing-mode: horizontal-tb; /* Reset writing mode */
-    justify-content: center;
-    width: 50px;
 }
-
 
 .vertical-auth-btn:hover {
     filter: brightness(1.1);
 }
-
-.vertical-auth-btn .icon {
-    margin: 0.5rem 0;
-}
-
 
 @keyframes modal-overlay-fade-in {
     from { opacity: 0; }
@@ -423,3 +413,5 @@
         width: 90vw;
     }
 }
+
+    

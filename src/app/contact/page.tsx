@@ -16,7 +16,7 @@ export default function ContactPage() {
   const user1 = {
     name: "Lotus Lazim",
     title: "Software Engineer",
-    handle: "javicodes",
+    handle: "lotuslazim",
     avatar: PlaceHolderImages.find(p => p.id === 'user-avatar'),
     miniAvatar: PlaceHolderImages.find(p => p.id === 'user-avatar'),
   };
@@ -29,7 +29,7 @@ export default function ContactPage() {
             <Link href="/signup" className="vertical-auth-btn">
                 <UserPlus className="h-5 w-5 mr-2" /> Sign Up
             </Link>
-            <Link href="/login" className="vertical-auth-btn">
+            <Link href="/login" className="vertical-auth-btn login">
                 <LogIn className="h-5 w-5 mr-2" /> Log In
             </Link>
         </div>
@@ -54,3 +54,5 @@ export default function ContactPage() {
     </div>
   );
 };
+
+    
