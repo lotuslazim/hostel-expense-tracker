@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useUser, useDoc, useCollection } from "@/firebase";
@@ -317,7 +318,10 @@ function GroupDetailsPanel({ groupId }: { groupId: string }) {
     return (
         <div className="space-y-8">
             <div>
-                <h1 className="text-2xl md:text-3xl font-bold font-headline tracking-tight">Group Details</h1>
+                <h1 className="text-2xl md:text-3xl font-bold font-headline text-header-yellow flex items-center gap-3">
+                    <Users className="h-8 w-8" />
+                    Group Details
+                </h1>
                 <p className="text-sm md:text-base text-muted-foreground">Information about your current group.</p>
             </div>
 
