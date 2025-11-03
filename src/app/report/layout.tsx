@@ -3,7 +3,7 @@
 
 import { ReportTabs } from "@/components/report/ReportTabs";
 import { AppHeader } from "@/components/app/header";
-import { FileChart } from "lucide-react";
+import { BarChart3 } from "lucide-react";
 
 export default function ReportLayout({
   children,
@@ -16,7 +16,7 @@ export default function ReportLayout({
       <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-6">
             <h1 className="text-2xl md:text-3xl font-bold font-headline text-mint-500 flex items-center gap-3">
-              <FileChart className="h-8 w-8" />
+              <BarChart3 className="h-8 w-8" />
               Reports
             </h1>
             <ReportTabs />
