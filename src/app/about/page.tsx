@@ -131,6 +131,7 @@ export default function AboutPage() {
 
     return (
         <div className="about-section yellow-gradient-bg text-slate-800">
+            <div className="absolute inset-0 z-0 bg-retro-pattern"></div>
             <FloatingElements />
             <LandingHeader />
             <div className="about-container">
