@@ -15,10 +15,9 @@ type DockItemData = {
 
 type DockProps = {
   items: DockItemData[];
-  panelHeight?: number;
-  baseItemSize?: number;
   magnification?: number;
   className?: string;
+  activeHref?: string;
 };
 
 function DockItem({
@@ -26,15 +25,15 @@ function DockItem({
   mouseX,
   baseItemSize,
   magnification,
+  isActive,
 }: {
   item: DockItemData;
   mouseX: any;
   baseItemSize: number;
   magnification: number;
+  isActive: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const pathname = usePathname();
-  const isActive = pathname.startsWith(item.href);
 
   const distance = useTransform(mouseX, (val) => {
     const bounds = ref.current?.getBoundingClientRect();
@@ -50,19 +49,18 @@ function DockItem({
       style={{ width }}
       onClick={item.onClick}
       className={cn(
-        "flex flex-col items-center justify-center cursor-pointer p-2 rounded-full transition-colors group",
-        isActive ? "bg-primary text-primary-foreground" : "hover:bg-primary/20"
+        "flex flex-col items-center justify-center cursor-pointer group transition-transform duration-200 ease-out",
+        isActive ? 'font-bold -translate-y-2' : 'hover:-translate-y-1'
       )}
       whileTap={{ scale: 0.9 }}
     >
-      <div className="flex items-center justify-center w-full h-full">
+      <div className="flex items-center justify-center w-full h-full p-2 rounded-full">
         {item.icon}
       </div>
       {item.label && (
           <motion.span
             className="text-xs whitespace-nowrap block"
-            style={{ marginTop: '4px' }}
-             initial={{ opacity: 0, y: 5 }}
+            initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 5 }}
           >
@@ -75,12 +73,13 @@ function DockItem({
 
 export default function Dock({
   items,
-  panelHeight = 80,
-  baseItemSize = 56,
   magnification = 24,
   className,
+  activeHref,
 }: DockProps) {
   const mouseX = useMotionValue(Infinity);
+  const baseItemSize = 56;
+  const panelHeight = baseItemSize + magnification;
 
   return (
     <motion.div
@@ -88,17 +87,18 @@ export default function Dock({
       onMouseLeave={() => mouseX.set(Infinity)}
       style={{ height: `${panelHeight}px` }}
       className={cn(
-        "flex items-end justify-center gap-4 pb-2 px-4 rounded-full",
+        "flex items-end justify-center gap-2 pb-2 px-4 rounded-full",
         className
       )}
     >
-      {items.map((item, index) => (
+      {items.map((item) => (
         <DockItem
           key={item.href}
           item={item}
           mouseX={mouseX}
           baseItemSize={baseItemSize}
           magnification={magnification}
+          isActive={activeHref === item.href}
         />
       ))}
     </motion.div>
