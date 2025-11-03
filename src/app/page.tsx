@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useRef, useEffect, useState } from "react";
@@ -83,7 +84,7 @@ export default function Home() {
 
       <main className="relative z-10 flex h-screen flex-col items-center justify-between p-4 md:p-8">
         {/* Text Content */}
-        <div className="text-center space-y-4 pt-16 md:pt-24 flex-grow flex flex-col justify-center">
+        <div className="text-center space-y-4 pt-16 md:pt-24 flex-grow flex flex-col justify-start">
             {areFontsLoaded && (
               <>
                  <div className="flex flex-col items-center">
