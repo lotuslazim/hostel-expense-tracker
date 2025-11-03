@@ -1,4 +1,5 @@
 
+
 .contact-page-container {
     width: 100%;
     min-height: 100vh;
@@ -6,9 +7,26 @@
     flex-direction: column;
     align-items: center;
     padding: 2rem;
-    background-color: #111;
+    background: linear-gradient(180deg, hsl(160, 33%, 8%), hsl(164, 26%, 13%));
     overflow-x: hidden;
+    position: relative;
 }
+
+.contact-page-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 3rem 3rem;
+    animation: move-bg 20s linear infinite;
+    opacity: 0.5;
+}
+
 
 .contact-page-content {
     flex-grow: 1;
@@ -17,6 +35,7 @@
     align-items: center;
     justify-content: center;
     width: 100%;
+    z-index: 1;
 }
 
 .contact-title {
