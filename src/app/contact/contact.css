@@ -1,5 +1,6 @@
 
 
+
 .contact-page-container {
     width: 100%;
     min-height: 100vh;
@@ -342,53 +343,6 @@
     font-size: 1.25rem;
 }
 
-.vertical-auth-buttons {
-    position: fixed;
-    top: 50%;
-    left: -110px; /* Initially hidden */
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    z-index: 100;
-    transition: left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-.vertical-auth-buttons:hover {
-    left: 0;
-}
-
-.vertical-auth-btn {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    padding: 0.75rem 1.5rem;
-    background: hsl(var(--primary));
-    color: hsl(var(--primary-foreground));
-    text-decoration: none;
-    font-weight: 600;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    width: 150px; /* Set a fixed width */
-}
-
-.vertical-auth-btn:first-child {
-    border-radius: 0 0.5rem 0 0;
-}
-
-.vertical-auth-btn:last-child {
-    border-radius: 0 0 0.5rem 0;
-}
-
-.vertical-auth-btn.login {
-    background: hsl(var(--secondary));
-    color: hsl(var(--secondary-foreground));
-}
-
-.vertical-auth-btn:hover {
-    filter: brightness(1.1);
-}
-
 @keyframes modal-overlay-fade-in {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -413,5 +367,3 @@
         width: 90vw;
     }
 }
-
-    
