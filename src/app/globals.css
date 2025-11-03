@@ -14,7 +14,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 11%;
     
-    --primary: 150 45% 45%; /* #41B880 */
+    --primary: 150 50% 48%; /* #41B880 -> A more premium emerald green */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 44 100% 63%; /* #FFC247 */
@@ -46,7 +46,7 @@
     --popover: 164 26% 13%; /* --color-surface: #1B2A25 */
     --popover-foreground: 150 13% 95%; /* --color-text-primary: #F2F5F4 */
 
-    --primary: 150 45% 45%; /* #41B880 */
+    --primary: 150 50% 48%; /* A more premium emerald green */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 44 100% 63%; /* #FFC247 */

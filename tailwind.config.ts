@@ -158,7 +158,7 @@ const config = {
             "0%, 100%": { transform: "translateY(0px)" },
             "50%": { transform: "translateY(-10px)" },
         },
-         moveInLeft: {
+        moveInLeft: {
           "0%": { opacity: "0", transform: "translateX(-10rem)" },
           "100%": { opacity: "1", transform: "translateX(0)" },
         },
@@ -200,5 +200,3 @@ const config = {
 } satisfies Config
 
 export default config;
-
-    
