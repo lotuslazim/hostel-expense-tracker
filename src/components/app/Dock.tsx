@@ -50,17 +50,17 @@ function DockItem({
       style={{ width }}
       onClick={item.onClick}
       className={cn(
-        "flex flex-col items-center justify-center cursor-pointer text-center p-2 rounded-full transition-colors",
+        "flex flex-col items-center justify-center cursor-pointer p-2 rounded-full transition-colors group",
         isActive ? "bg-primary text-primary-foreground" : "hover:bg-primary/20"
       )}
       whileTap={{ scale: 0.9 }}
     >
-      <div className="w-full h-full flex items-center justify-center relative">
+      <div className="flex items-center justify-center w-full h-full">
         {item.icon}
       </div>
       {item.label && (
           <motion.span
-            className="text-xs opacity-80 group-hover:opacity-100 transition-opacity whitespace-nowrap"
+            className="text-xs whitespace-nowrap block"
             style={{ marginTop: '4px' }}
              initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
