@@ -20,14 +20,6 @@ export default function ContactPage() {
     miniAvatar: PlaceHolderImages.find(p => p.id === 'user-avatar'),
   };
 
-  const user2 = {
-    name: "Jane Doe",
-    title: "UI/UX Designer",
-    handle: "janedesigns",
-    avatar: PlaceHolderImages.find(p => p.id === 'user-avatar-2'),
-    miniAvatar: PlaceHolderImages.find(p => p.id === 'user-avatar-2'),
-  };
-
   return (
     <div className="contact-page-container">
         <LandingHeader />
@@ -45,18 +37,6 @@ export default function ContactPage() {
                     showUserInfo={true}
                     enableTilt={true}
                     onContactClick={() => handleContactClick(user1.name)}
-                />
-                <ProfileCard
-                    name={user2.name}
-                    title={user2.title}
-                    handle={user2.handle}
-                    status="Online"
-                    avatarUrl={user2.avatar?.imageUrl}
-                    miniAvatarUrl={user2.miniAvatar?.imageUrl}
-                    contactText="Get In Touch"
-                    showUserInfo={true}
-                    enableTilt={true}
-                    onContactClick={() => handleContactClick(user2.name)}
                 />
             </div>
         </div>
