@@ -5,7 +5,7 @@ import { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react
 import './about.css';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import Link from 'next/link';
-import { ArrowUp, ArrowDown, Utensils, Wheat, CheckCircle, Leaf, Home } from 'lucide-react';
+import { ArrowUp, ArrowDown, Utensils, Wheat, CheckCircle, Leaf, Home, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import { LandingHeader } from '@/components/app/landing-header';
 import { gsap } from "gsap";
@@ -164,8 +164,8 @@ export default function AboutPage() {
                 </div>
             </div>
 
-            <Link href="https://bachelorpoint.com" target="_blank" rel="noopener noreferrer" className="floating-website-btn">
-                Visit Our Website
+            <Link href="/contact" className="floating-website-btn">
+                Next <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
         </div>
     );
