@@ -52,7 +52,7 @@ function DockItem({
         "flex flex-col items-center justify-center cursor-pointer group transition-transform duration-200 ease-out",
         isActive ? 'font-bold -translate-y-2' : 'hover:-translate-y-1'
       )}
-      whileTap={{ scale: 0.9 }}
+      whileTap={{ scale: 0.9, y: 2 }}
     >
       <div className="flex items-center justify-center w-full h-full p-2 rounded-full">
         {item.icon}

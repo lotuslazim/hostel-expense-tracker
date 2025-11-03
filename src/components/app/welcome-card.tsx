@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowRight, PlusCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Image from 'next/image';
 
 export function WelcomeCard() {
     const router = useRouter();
@@ -16,7 +17,8 @@ export function WelcomeCard() {
 
     return (
         <Card className="max-w-2xl mx-auto mt-8 text-center shadow-lg">
-            <CardHeader>
+            <CardHeader className="items-center">
+                <Image src="/mascot.png" alt="BachelorBite Mascot" width={128} height={128} className="mb-4" />
                 <CardTitle className="text-3xl font-headline">Welcome to BachelorBite!</CardTitle>
                 <CardDescription className="text-md pt-2">
                     It looks like you&apos;re not part of a group yet.
