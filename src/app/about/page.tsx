@@ -163,6 +163,10 @@ export default function AboutPage() {
                     <p className="feature-description">{currentFeature.description}</p>
                 </div>
             </div>
+            <Link href="/contact" className="next-page-btn">
+                <span>Next</span>
+                <ChevronsRight />
+            </Link>
         </div>
     );
 }
