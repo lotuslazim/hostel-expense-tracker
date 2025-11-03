@@ -63,7 +63,7 @@ export default function AppDock() {
       <Dock 
         items={items}
         magnification={24}
-        className="bg-secondary text-secondary-foreground"
+        className="bg-primary text-primary-foreground"
         activeHref={activeItem?.href}
       />
     </div>
