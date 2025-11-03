@@ -30,7 +30,7 @@ export default function AppDock() {
   const publicRoutes = ['/login', '/signup', '/', '/about', '/contact'];
   const isPublicRoute = publicRoutes.includes(pathname);
   
-  if (isPublicRoute || !user || isUserLoading) {
+  if (isPublicRoute || !user || isUserLoading || pathname === '/chat') {
     return null;
   }
 
@@ -56,11 +56,11 @@ export default function AppDock() {
   ];
 
   return (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
+    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 md:block hidden">
       <Dock 
         items={items}
         magnification={24}
-        className="bg-secondary/10 backdrop-blur-md text-secondary-foreground rounded-full border border-secondary/20"
+        className="bg-secondary text-secondary-foreground"
       />
     </div>
   );
