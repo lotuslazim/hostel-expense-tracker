@@ -205,7 +205,7 @@ export function Chat({ groupId, currentUser }: ChatProps) {
     const isLoading = areMessagesLoading || isGroupDataLoading;
 
     return (
-        <Card className="flex flex-col h-full w-full bg-card rounded-none border-0">
+        <Card className="flex flex-col h-full w-full bg-card rounded-none border-0 pb-20 md:pb-0">
             <CardHeader className="border-b bg-background z-10 flex flex-row items-center justify-between p-3">
                 <CardTitle>
                     {isGroupDataLoading ? <Skeleton className="h-7 w-48" /> : groupData?.groupName || "Group Chat"}
