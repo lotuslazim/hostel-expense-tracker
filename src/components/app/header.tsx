@@ -13,7 +13,7 @@ import { useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { signOut } from "firebase/auth";
 import { auth, firestore } from "@/firebase/config";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { NotificationBell } from "./notification-bell";
 import { doc } from "firebase/firestore";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
@@ -23,6 +23,7 @@ export function AppHeader() {
   const { user, isUserLoading } = useUser();
   const [isClient, setIsClient] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
 
   const userDocRef = useMemo(() => {
     if (!user) return null;
@@ -120,15 +121,33 @@ export function AppHeader() {
     )}>
       <div className="container flex h-16 items-center">
         
-        <div className="flex-1 flex items-center justify-start">
-          {isClient && <div className="md:hidden">{renderNavMenu()}</div>}
-        </div>
-
-        <div className="flex-1 flex items-center justify-center">
-            <Logo className="light-theme-logo" />
+        <div className="flex items-center gap-4">
+          <Logo className="light-theme-logo" />
+          <nav className="hidden md:flex items-center gap-4 text-sm font-medium">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                  "flex items-center gap-1.5 transition-colors hover:text-foreground",
+                  pathname?.startsWith(link.href) ? "text-foreground" : "text-muted-foreground"
+                )}
+              >
+                {link.label}
+                {link.notificationCount && link.notificationCount > 0 && (
+                  <Badge variant="destructive" className="h-4 w-4 p-0 shrink-0 items-center justify-center text-[10px]">
+                    {link.notificationCount}
+                  </Badge>
+                )}
+              </Link>
+            ))}
+          </nav>
         </div>
 
         <div className="flex-1 flex items-center justify-end space-x-1 md:space-x-2">
+           <div className="md:hidden">
+              {isClient && renderNavMenu()}
+           </div>
            <div className="flex items-center space-x-1">
             {renderUserSection()}
            </div>
