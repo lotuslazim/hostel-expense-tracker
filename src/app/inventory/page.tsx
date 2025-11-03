@@ -13,6 +13,7 @@ import { startOfMonth } from 'date-fns/startOfMonth';
 import { endOfMonth } from 'date-fns/endOfMonth';
 import { MonthSwitcher } from "@/components/report/month-switcher";
 import { WelcomeCard } from "@/components/app/welcome-card";
+import { Package } from "lucide-react";
 
 const PURCHASE_PAGE_SIZE = 20;
 
@@ -135,7 +136,10 @@ export default function InventoryPage() {
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl md:text-3xl font-bold font-headline text-mint-500">Inventory</h1>
+                    <h1 className="text-2xl md:text-3xl font-bold font-headline text-mint-500 flex items-center gap-3">
+                      <Package className="h-8 w-8" />
+                      Inventory
+                    </h1>
                     <p className="text-sm md:text-base text-muted-foreground">A summary of all food and grocery items purchased.</p>
                 </div>
                 <MonthSwitcher currentDate={currentMonth} onMonthChange={handleMonthChange} />

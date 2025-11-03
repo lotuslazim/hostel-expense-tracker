@@ -18,6 +18,7 @@ import { startOfMonth } from 'date-fns/startOfMonth';
 import { endOfMonth } from 'date-fns/endOfMonth';
 import { SendReminderCard } from "@/components/dashboard/SendReminderCard";
 import { IntroDialog } from "@/components/app/IntroDialog";
+import { LayoutDashboard } from "lucide-react";
 
 function DashboardSkeleton() {
   return (
@@ -74,7 +75,10 @@ function DashboardContent({ groupId, userId }: { groupId: string, userId: string
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight font-headline text-mint-500">Dashboard</h1>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight font-headline text-mint-500 flex items-center gap-3">
+          <LayoutDashboard className="h-8 w-8" />
+          Dashboard
+        </h1>
         <p className="text-sm text-muted-foreground">Log your meals and expenses for the day.</p>
       </div>
       <div className="space-y-8">

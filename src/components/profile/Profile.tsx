@@ -14,7 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { Camera, User, Mail, Home, Users, Wallet, ChevronDown, Loader2, LogOut, Trash2, Copy, Receipt } from "lucide-react";
+import { Camera, User, Mail, Home, Users, Wallet, ChevronDown, Loader2, LogOut, Trash2, Copy, Receipt, UserCircle } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { format } from 'date-fns/format';
 import type { Expense, Member, User as UserType } from "@/lib/types";
@@ -382,7 +382,10 @@ export function Profile() {
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight font-headline">My Profile</h1>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight font-headline text-mint-500 flex items-center gap-3">
+          <UserCircle className="h-8 w-8" />
+          My Profile
+        </h1>
         <p className="text-sm md:text-base text-muted-foreground">View and edit your personal and group information.</p>
       </div>
 

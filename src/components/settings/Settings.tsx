@@ -53,7 +53,6 @@ import { format } from 'date-fns/format';
 function SettingsSkeleton() {
   return (
     <div className="space-y-8">
-      <Skeleton className="h-8 w-48" />
       <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
         <div className="md:col-span-1">
           <Skeleton className="h-6 w-32 mb-2" />
@@ -502,7 +501,6 @@ function AppSettings() {
 
 export function Settings() {
   const { user, isUserLoading } = useUser();
-  const { t } = useI18n();
 
   const userRef = useMemo(() => (user ? doc(firestore, "users", user.uid) : null), [user]);
   const { data: userData, isLoading: isUserDataLoading } = useDoc(userRef);
@@ -525,22 +523,17 @@ export function Settings() {
   const isUserAdmin = userData?.isAdmin ?? false;
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl md:text-3xl font-bold font-headline">{t('settings.title')}</h1>
-        <p className="text-sm md:text-base text-muted-foreground">{t('settings.description')}</p>
-      </div>
-      
+    <>
       <AppSettings />
       
-      {user && <AccountSettings user={user} userData={userData} groupData={groupData} groupId={groupId}/>}
+      {user && <><Separator className="my-8" /><AccountSettings user={user} userData={userData} groupData={groupData} groupId={groupId}/></>}
       
       {isUserAdmin && groupData && members && (
         <>
-            
+            <Separator className="my-8" />
             <AdminControls groupData={groupData} members={members} groupId={groupId!} />
         </>
       )}
-    </div>
+    </>
   );
 }
