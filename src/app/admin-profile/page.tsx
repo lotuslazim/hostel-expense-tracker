@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo, useState } from "react";
@@ -413,7 +414,10 @@ export default function AdminProfilePage() {
             ) : (
                 <div className="space-y-8">
                     <div>
-                        <h1 className="text-2xl md:text-3xl font-bold font-headline">Admin Dashboard</h1>
+                        <h1 className="text-2xl md:text-3xl font-bold font-headline text-header-yellow flex items-center gap-3">
+                           <Shield className="h-8 w-8" />
+                           Admin Dashboard
+                        </h1>
                         <p className="text-sm md:text-base text-muted-foreground">Manage your group, members, and settings.</p>
                     </div>
         
