@@ -224,7 +224,7 @@
 .landing-nav .nav-link {
   padding: 0.75rem 1.5rem;
   text-decoration: none;
-  color: white;
+  color: #333;
   font-weight: 600;
   border-radius: 9999px;
   transition: color 0.3s ease;

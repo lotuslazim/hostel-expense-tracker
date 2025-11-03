@@ -12,6 +12,10 @@
     position: relative;
 }
 
+.contact-page-container .landing-nav .nav-link {
+    color: white;
+}
+
 .contact-page-container::before {
     content: '';
     position: absolute;
