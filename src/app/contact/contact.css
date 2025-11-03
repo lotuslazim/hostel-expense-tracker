@@ -38,15 +38,6 @@
     z-index: 1;
 }
 
-.contact-title {
-    font-size: 2.5rem;
-    font-weight: 700;
-    font-family: var(--font-headline);
-    color: #fff;
-    margin-bottom: 3rem;
-    text-align: center;
-}
-
 .profile-cards-wrapper {
     display: flex;
     justify-content: center;
@@ -69,7 +60,7 @@
     width: var(--card-width);
     height: var(--card-height);
     border-radius: var(--card-radius);
-    background: rgba(20, 20, 31, 0.6);
+    background: rgba(27, 42, 37, 0.6);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -187,7 +178,7 @@
     right: 0;
     padding: 1rem;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(20, 20, 31, 0.5);
+    background: rgba(27, 42, 37, 0.5);
     border-radius: 0 0 var(--card-radius) var(--card-radius);
     display: flex;
     align-items: center;
@@ -256,9 +247,5 @@
     .profile-card {
         --card-width: 300px;
         --card-height: 420px;
-    }
-    .contact-title {
-        font-size: 2rem;
-        margin-bottom: 2rem;
     }
 }
