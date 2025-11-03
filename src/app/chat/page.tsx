@@ -1,7 +1,7 @@
+
 "use client";
 
 import { Chat } from "@/components/chat/Chat";
-import { AppHeader } from "@/components/app/header";
 import { useUser, useDoc, useFirebase } from "@/firebase";
 import { useMemo, useEffect } from "react";
 import { doc, writeBatch, arrayUnion } from "firebase/firestore";
@@ -11,7 +11,7 @@ import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 
 function ChatPageSkeleton() {
     return (
-        <div className="flex flex-col flex-grow h-[calc(100vh-4rem)]">
+        <div className="flex flex-col flex-grow h-screen">
             {/* Message List Skeleton */}
             <div className="flex-grow p-4 space-y-4">
                 <div className="flex items-end gap-2">
@@ -68,7 +68,6 @@ export default function ChatPage() {
 
     return (
     <div className="flex flex-col h-screen">
-      <AppHeader />
       <main className="flex flex-col flex-grow bg-background overflow-hidden">
         {isLoading ? <ChatPageSkeleton /> : 
          !groupId ? (
