@@ -8,6 +8,7 @@ import { ContactModal } from '@/components/contact/ContactModal';
 import './contact.css';
 import { LandingHeader } from '@/components/app/landing-header';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { LogIn, UserPlus } from 'lucide-react';
 
 export default function ContactPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -15,7 +16,7 @@ export default function ContactPage() {
   const user1 = {
     name: "Lotus Lazim",
     title: "Software Engineer",
-    handle: "lotuslazim",
+    handle: "javicodes",
     avatar: PlaceHolderImages.find(p => p.id === 'user-avatar'),
     miniAvatar: PlaceHolderImages.find(p => p.id === 'user-avatar'),
   };
@@ -23,6 +24,16 @@ export default function ContactPage() {
   return (
     <div className="contact-page-container">
         <LandingHeader />
+
+        <div className="vertical-auth-buttons">
+            <Link href="/signup" className="vertical-auth-btn signup">
+                <UserPlus className="h-5 w-5 icon-anim" /> Sign Up
+            </Link>
+            <Link href="/login" className="vertical-auth-btn login">
+                <LogIn className="h-5 w-5 icon-anim" /> Log In
+            </Link>
+        </div>
+
         <div className="contact-page-content">
             <div className="profile-cards-wrapper">
                 <ProfileCard

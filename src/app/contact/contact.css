@@ -1,6 +1,7 @@
 
 
 
+
 .contact-page-container {
     width: 100%;
     min-height: 100vh;
@@ -341,6 +342,51 @@
 
 .modal-link .icon {
     font-size: 1.25rem;
+}
+
+.vertical-auth-buttons {
+    position: fixed;
+    top: 50%;
+    left: -100px;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    z-index: 100;
+    transition: left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.vertical-auth-buttons:hover {
+    left: -10px;
+}
+
+.vertical-auth-btn {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 0 0.5rem 0.5rem 0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transform-origin: left center;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    gap: 0.5rem;
+}
+
+.vertical-auth-btn.signup {
+    background: hsl(var(--primary));
+}
+
+.vertical-auth-btn.login {
+    background: hsl(var(--secondary));
+    color: hsl(var(--secondary-foreground));
+}
+
+.vertical-auth-btn .icon-anim {
+    transform: rotate(90deg);
 }
 
 @keyframes modal-overlay-fade-in {
