@@ -68,7 +68,49 @@ export function AppHeader() {
   };
   
   const renderNavMenu = () => {
-    return null; // The AppDock component now handles mobile navigation
+    if (!user) return null;
+    return (
+      <Sheet>
+        <SheetTrigger asChild>
+            <Button variant="ghost" size="icon" className="md:hidden">
+              <Menu />
+              <span className="sr-only">Open Menu</span>
+            </Button>
+        </SheetTrigger>
+        <SheetContent side="left">
+          <SheetHeader>
+              <SheetTitle>
+                  <Logo />
+              </SheetTitle>
+          </SheetHeader>
+          <div className="flex flex-col h-full py-4">
+              <nav className="flex flex-col gap-2 flex-grow">
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:bg-muted"
+                  >
+                    <link.icon className="h-5 w-5" />
+                    {link.label}
+                    {link.notificationCount && link.notificationCount > 0 && (
+                      <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
+                        {link.notificationCount}
+                      </Badge>
+                    )}
+                  </Link>
+                ))}
+              </nav>
+              <div className="mt-auto">
+                 <Button variant="ghost" onClick={handleLogout} className="w-full justify-start gap-3 text-muted-foreground">
+                    <LogOut className="h-5 w-5" />
+                    Log Out
+                 </Button>
+              </div>
+          </div>
+        </SheetContent>
+      </Sheet>
+    );
   };
 
   return (
@@ -79,7 +121,7 @@ export function AppHeader() {
       <div className="container flex h-16 items-center">
         
         <div className="flex-1 flex items-center justify-start">
-          {isClient && <div className="hidden md:block">{renderNavMenu()}</div>}
+          {isClient && <div className="md:hidden">{renderNavMenu()}</div>}
         </div>
 
         <div className="flex-1 flex items-center justify-center">
