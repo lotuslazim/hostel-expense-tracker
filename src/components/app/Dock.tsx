@@ -77,7 +77,7 @@ export default function Dock({
       onMouseLeave={() => mouseX.set(Infinity)}
       style={{ height: `${panelHeight}px` }}
       className={cn(
-        'flex items-end justify-center gap-2 pb-2 px-4 rounded-full',
+        "flex items-end justify-center gap-2 pb-2 px-4 rounded-full",
         className
       )}
     >
