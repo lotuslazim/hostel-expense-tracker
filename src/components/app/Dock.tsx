@@ -40,32 +40,28 @@ function DockItem({
     return bounds ? val - bounds.x - bounds.width / 2 : 0;
   });
 
-  const widthSync = useTransform(distance, [-magnification, 0, magnification], [baseItemSize, baseItemSize + magnification, baseItemSize]);
-  const width = useSpring(widthSync, { mass: 0.1, stiffness: 150, damping: 12 });
+  // Apply a subtle scale effect on hover instead of width change
+  const scaleSync = useTransform(distance, [-100, 0, 100], [1, 1.15, 1]);
+  const scale = useSpring(scaleSync, { mass: 0.1, stiffness: 150, damping: 12 });
 
   return (
     <motion.div
       ref={ref}
-      style={{ width }}
+      style={{ scale }}
       onClick={item.onClick}
       className={cn(
-        "flex flex-col items-center justify-center cursor-pointer group transition-transform duration-200 ease-out",
-        isActive ? 'font-bold -translate-y-2' : 'hover:-translate-y-1'
+        "flex items-center justify-center gap-2 px-4 py-2 cursor-pointer group rounded-full transition-colors duration-200 ease-out",
+        isActive ? 'bg-primary-foreground/20' : 'hover:bg-primary-foreground/10'
       )}
-      whileTap={{ scale: 0.9, y: 2 }}
+      whileTap={{ scale: 0.95 }}
     >
-      <div className="flex items-center justify-center w-full h-full p-2 rounded-full">
+      <div className="flex items-center justify-center w-6 h-6">
         {item.icon}
       </div>
       {item.label && (
-          <motion.span
-            className="text-xs whitespace-nowrap block"
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 5 }}
-          >
+          <span className="text-sm font-medium whitespace-nowrap">
             {item.label}
-          </motion.span>
+          </span>
         )}
     </motion.div>
   );
@@ -78,16 +74,13 @@ export default function Dock({
   activeHref,
 }: DockProps) {
   const mouseX = useMotionValue(Infinity);
-  const baseItemSize = 56;
-  const panelHeight = baseItemSize + magnification;
 
   return (
     <motion.div
       onMouseMove={(e) => mouseX.set(e.pageX)}
       onMouseLeave={() => mouseX.set(Infinity)}
-      style={{ height: `${panelHeight}px` }}
       className={cn(
-        "flex items-end justify-center gap-2 pb-2 px-4 rounded-full",
+        "flex items-end justify-center gap-2 p-2 rounded-full",
         className
       )}
     >
@@ -96,7 +89,7 @@ export default function Dock({
           key={item.href}
           item={item}
           mouseX={mouseX}
-          baseItemSize={baseItemSize}
+          baseItemSize={120} // Increased base size to accommodate text
           magnification={magnification}
           isActive={activeHref === item.href}
         />
