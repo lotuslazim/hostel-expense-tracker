@@ -1,9 +1,9 @@
+
 "use client";
 
-import React, { useRef, useEffect, useState, useLayoutEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
-import { gsap } from "gsap";
 
 interface ProfileCardProps {
     name: string;
@@ -52,8 +52,8 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
             const rect = card.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
-            card.style.setProperty('--pointer-x', `${x}px`);
-            card.style.setProperty('--pointer-y', `${y}px`);
+            card.style.setProperty('--pointer-x', `${x / rect.width * 100}%`);
+            card.style.setProperty('--pointer-y', `${y / rect.height * 100}%`);
         };
 
         const handleMouseLeave = () => {
@@ -70,55 +70,19 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
         };
     }, [shouldEnableTilt]);
 
-    useLayoutEffect(() => {
-        const card = cardRef.current;
-        if (!card) return;
-
-        const ctx = gsap.context(() => {
-            gsap.fromTo(card,
-                { opacity: 0, scale: 0.9, y: 50 },
-                { opacity: 1, scale: 1, y: 0, duration: 0.8, ease: "power3.out" }
-            );
-        }, card);
-
-        return () => ctx.revert();
-    }, []);
 
     return (
         <div ref={cardRef} className={cn('profile-card', { 'tilt-enabled': shouldEnableTilt })}>
-            <div className="card-shine"></div>
-            <div className="card-glare"></div>
-            <div className="card-background"></div>
+             <div className="card-shine"></div>
             
-            <div className="card-content">
-                {showUserInfo && (
-                    <>
-                        <div className="user-info">
-                            <div className="name-title">
-                                <h2>{name}</h2>
-                                <p>{title}</p>
-                            </div>
-                            <div className="handle-status">
-                                <span className="handle">@{handle}</span>
-                                <span className={`status ${status.toLowerCase()}`}>{status}</span>
-                            </div>
-                        </div>
-                        <div className="mini-avatar">
-                            {miniAvatarUrl && (
-                                <Image
-                                    src={miniAvatarUrl}
-                                    alt={`${name}'s mini avatar`}
-                                    width={24}
-                                    height={24}
-                                    className="rounded-full object-cover"
-                                />
-                            )}
-                        </div>
-                    </>
-                )}
-            </div>
-
-            <div className="card-avatar">
+            {showUserInfo && (
+                <div className="card-header-content">
+                    <h2>{name}</h2>
+                    <p>{title}</p>
+                </div>
+            )}
+            
+            <div className="card-avatar-container">
                 {avatarUrl && (
                     <Image
                         src={avatarUrl}
@@ -130,13 +94,32 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
                 )}
             </div>
 
-            <button
-                className="contact-button"
-                onClick={onContactClick}
-                aria-label={`Contact ${name}`}
-            >
-                {contactText}
-            </button>
+            <div className="card-footer-content">
+                <div className="footer-user-info">
+                    {miniAvatarUrl && (
+                         <div className="mini-avatar">
+                            <Image
+                                src={miniAvatarUrl}
+                                alt={`${name}'s mini avatar`}
+                                width={40}
+                                height={40}
+                                className="rounded-full object-cover"
+                            />
+                        </div>
+                    )}
+                    <div className="user-details">
+                        <p className="handle">@{handle}</p>
+                        <p className={`status ${status.toLowerCase()}`}>{status}</p>
+                    </div>
+                </div>
+                <button
+                    className="contact-button"
+                    onClick={onContactClick}
+                    aria-label={`Contact ${name}`}
+                >
+                    {contactText}
+                </button>
+            </div>
         </div>
     );
 };

@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react';
@@ -16,7 +17,7 @@ export default function ContactPage() {
     title: "Software Engineer",
     handle: "javicodes",
     avatar: PlaceHolderImages.find(p => p.id === 'user-avatar'),
-    miniAvatar: PlaceHolderImages.find(p => p.id === 'user-avatar-3'),
+    miniAvatar: PlaceHolderImages.find(p => p.id === 'user-avatar'),
   };
 
   const user2 = {
@@ -24,7 +25,7 @@ export default function ContactPage() {
     title: "UI/UX Designer",
     handle: "janedesigns",
     avatar: PlaceHolderImages.find(p => p.id === 'user-avatar-2'),
-    miniAvatar: PlaceHolderImages.find(p => p.id === 'user-avatar-3'),
+    miniAvatar: PlaceHolderImages.find(p => p.id === 'user-avatar-2'),
   };
 
   return (
@@ -49,7 +50,7 @@ export default function ContactPage() {
                     name={user2.name}
                     title={user2.title}
                     handle={user2.handle}
-                    status="Available"
+                    status="Online"
                     avatarUrl={user2.avatar?.imageUrl}
                     miniAvatarUrl={user2.miniAvatar?.imageUrl}
                     contactText="Get In Touch"
