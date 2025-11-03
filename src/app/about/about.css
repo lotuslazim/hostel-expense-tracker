@@ -5,8 +5,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: hsl(var(--background));
-    color: hsl(var(--foreground));
     padding: 2rem;
     overflow: hidden;
     position: relative;

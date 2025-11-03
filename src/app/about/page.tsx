@@ -85,7 +85,7 @@ export default function AboutPage() {
     const currentFeature = appFeatures[currentIndex];
 
     return (
-        <div className="about-section">
+        <div className="about-section yellow-gradient-bg text-slate-800">
             <LandingHeader />
             <div className="about-container">
                 <div className="about-carousel" ref={carouselRef}>
@@ -115,7 +115,7 @@ export default function AboutPage() {
                 </div>
             </div>
 
-            <Link href="https://bachelorbite.com" target="_blank" rel="noopener noreferrer" className="floating-website-btn">
+            <Link href="https://bachelorpoint.com" target="_blank" rel="noopener noreferrer" className="floating-website-btn">
                 Visit Our Website
             </Link>
         </div>
