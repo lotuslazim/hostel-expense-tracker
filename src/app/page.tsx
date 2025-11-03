@@ -173,7 +173,7 @@ export default function Home() {
             <div className="mascot-shadow opacity-0" />
           </div>
           
-          <div className="h-20 mt-4 flex items-center justify-center w-full">
+          <div className="h-auto mt-0 flex items-center justify-center w-full">
               <div className="cta-buttons opacity-0 flex flex-col sm:flex-row items-center gap-4">
                 <Button
                   size="lg"
