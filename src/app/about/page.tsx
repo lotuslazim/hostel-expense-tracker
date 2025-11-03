@@ -163,10 +163,6 @@ export default function AboutPage() {
                     <p className="feature-description">{currentFeature.description}</p>
                 </div>
             </div>
-
-            <Link href="/contact" className="vertical-contact-btn">
-                Contact <ChevronsRight className="h-5 w-5 icon-anim" />
-            </Link>
         </div>
     );
 }
