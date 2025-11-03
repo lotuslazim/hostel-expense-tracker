@@ -179,7 +179,7 @@ export default function Home() {
                 <Button
                   size="lg"
                   className="text-lg rounded-full shadow-lg hover:shadow-xl bg-primary text-primary-foreground hover:bg-primary/90 hover:-translate-y-1 transform transition-all duration-300"
-                  onClick={() => router.push("/signup")}
+                  onClick={() => router.push("/about")}
                 >
                   Get Started <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
