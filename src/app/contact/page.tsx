@@ -13,7 +13,7 @@ export default function ContactPage() {
   };
 
   const user1 = {
-    name: "Javi A. Torres",
+    name: "Lotus Lazim",
     title: "Software Engineer",
     handle: "javicodes",
     avatar: PlaceHolderImages.find(p => p.id === 'user-avatar'),
