@@ -73,7 +73,7 @@ export function AppHeader() {
     return (
       <Sheet>
         <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="md:hidden">
+            <Button variant="ghost" size="icon">
               <Menu />
               <span className="sr-only">Open Menu</span>
             </Button>
@@ -122,8 +122,9 @@ export function AppHeader() {
       <div className="container flex h-16 items-center">
         
         <div className="flex items-center gap-4">
+          {renderNavMenu()}
           <Logo className="light-theme-logo" />
-          <nav className="hidden md:flex items-center gap-4 text-sm font-medium">
+          <nav className="hidden">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -145,9 +146,6 @@ export function AppHeader() {
         </div>
 
         <div className="flex-1 flex items-center justify-end space-x-1 md:space-x-2">
-           <div className="md:hidden">
-              {isClient && renderNavMenu()}
-           </div>
            <div className="flex items-center space-x-1">
             {renderUserSection()}
            </div>
