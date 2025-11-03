@@ -29,13 +29,8 @@ export default function AppDock() {
 
   const publicRoutes = ['/login', '/signup', '/', '/about', '/contact'];
   const isPublicRoute = publicRoutes.includes(pathname);
-  const isChatPage = pathname === '/chat';
-
+  
   if (isPublicRoute || !user || isUserLoading) {
-    return null;
-  }
-    
-  if(isChatPage) {
     return null;
   }
 

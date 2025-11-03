@@ -45,6 +45,7 @@ function DockItem({
       style={{ width }}
       onClick={item.onClick}
       className="flex flex-col items-center justify-center cursor-pointer text-center"
+      whileTap={{ scale: 0.9 }}
     >
       <div className="w-full h-full flex items-center justify-center relative">
         {item.icon}
@@ -76,7 +77,7 @@ export default function Dock({
       onMouseLeave={() => mouseX.set(Infinity)}
       style={{ height: `${panelHeight}px` }}
       className={cn(
-        "flex items-center justify-center gap-4 p-4",
+        "flex items-end justify-center gap-2 p-4 rounded-full",
         className
       )}
     >
