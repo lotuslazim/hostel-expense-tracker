@@ -14,7 +14,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 11%;
     
-    --primary: 150.29 39.53% 54.9%; /* #5BB98A */
+    --primary: 150 45% 45%; /* #41B880 */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 44 100% 63%; /* #FFC247 */
@@ -46,7 +46,7 @@
     --popover: 164 26% 13%; /* --color-surface: #1B2A25 */
     --popover-foreground: 150 13% 95%; /* --color-text-primary: #F2F5F4 */
 
-    --primary: 150.29 39.53% 54.9%; /* #5BB98A */
+    --primary: 150 45% 45%; /* #41B880 */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 44 100% 63%; /* #FFC247 */
@@ -76,7 +76,7 @@
     @apply bg-background text-foreground font-body;
   }
   .yellow-gradient-bg {
-    background-color: #FFDB58;
+    background-image: linear-gradient(to top, #FFDB58, #FFC947);
   }
 }
 
@@ -135,6 +135,35 @@
       background-image: linear-gradient(135deg, hsl(160 33% 8%) 25%, hsl(164 26% 13%) 25%, hsl(164 26% 13%) 50%, hsl(160 33% 8%) 50%, hsl(160 33% 8%) 75%, hsl(164 26% 13%) 75%, hsl(164 26% 13%));
       background-size: 40px 40px;
       animation: move-bg 4s linear infinite;
+    }
+
+    .animated-border {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 40px;
+        overflow: hidden;
+    }
+    .animated-border-element {
+        position: absolute;
+        left: 10px;
+        width: 20px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.4);
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        animation: border-anim-y 10s linear infinite;
+    }
+    .mascot-shadow {
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%) scale(1.2);
+        width: 150px;
+        height: 20px;
+        background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0) 70%);
+        border-radius: 50%;
+        z-index: -1;
     }
 }
 
@@ -199,4 +228,3 @@
 }
 
     
-

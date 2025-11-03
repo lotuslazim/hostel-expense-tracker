@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 const config = {
@@ -75,6 +76,30 @@ const config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "border-anim-y": {
+            "from": { transform: "translateY(-100%)" },
+            "to": { transform: "translateY(100vh)" },
+        },
+        "slide-up": {
+            "0%": { transform: "translateY(100%)", opacity: "0" },
+            "100%": { transform: "translateY(0)", opacity: "1" },
+        },
+        "shadow-fade-in": {
+            "0%": { opacity: "0", transform: "translateX(-50%) scale(0.8)" },
+            "100%": { opacity: "1", transform: "translateX(-50%) scale(1.2)" },
+        },
+        "text-pop-in": {
+            "0%": { opacity: "0", transform: "scale(0.9)" },
+            "100%": { opacity: "1", transform: "scale(1)" },
+        },
+        "text-slide-in": {
+            "0%": { opacity: "0", transform: "translateX(20px)" },
+            "100%": { opacity: "1", transform: "translateX(0)" },
+        },
+        "glow-pulse": {
+            "0%, 100%": { opacity: "0.5", transform: "scale(1)" },
+            "50%": { opacity: "1", transform: "scale(1.1)" },
+        },
         "float": {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-20px)" },
@@ -149,6 +174,12 @@ const config = {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "border-anim-y": "border-anim-y 10s linear infinite",
+        "slide-up": "slide-up 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards",
+        "shadow-fade-in": "shadow-fade-in 1s ease-out forwards",
+        "text-pop-in": "pop-in 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards",
+        "text-slide-in": "slide-in-right 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards",
+        "glow-pulse": "glow-pulse 2s ease-in-out infinite",
         "float": "float 6s ease-in-out infinite",
         "pulse-slow": "pulse-slow 3s ease-in-out infinite",
         "mascot-idle": "mascot-idle 5s ease-in-out infinite",
@@ -169,3 +200,5 @@ const config = {
 } satisfies Config
 
 export default config;
+
+    
