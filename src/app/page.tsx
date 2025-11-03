@@ -131,14 +131,14 @@ export default function Home() {
 
       <main className="relative z-10 flex h-screen flex-col items-center justify-center p-4 md:p-8 pt-20 md:pt-24">
         {/* Text Content */}
-        <div className="text-center space-y-4 pt-20 md:pt-12 flex-grow flex flex-col justify-center">
+        <div className="text-center space-y-4 pt-12 flex-grow flex flex-col justify-center">
             {areFontsLoaded && (
               <>
-                 <div className="flex flex-col items-center">
+                <div className="flex flex-col items-center">
                     <SplitText
                       text="Meet the"
                       as="h2"
-                      className="text-xl md:text-2xl font-medium text-slate-600 animate-text-meet hidden md:flex"
+                      className="text-xl md:text-2xl font-medium text-slate-600 animate-text-meet flex"
                       initial={{ opacity: 0, y: 40 }}
                     />
                 </div>
