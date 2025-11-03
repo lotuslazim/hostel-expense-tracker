@@ -34,7 +34,7 @@ export default function AppDock() {
         panelHeight={60}
         baseItemSize={48}
         magnification={24}
-        className="backdrop-blur-md bg-secondary/80 border border-secondary rounded-full shadow-lg text-primary-foreground"
+        className="backdrop-blur-md bg-background/80 border border-border rounded-full shadow-lg text-foreground"
       />
     </div>
   );
