@@ -208,7 +208,7 @@ export function Chat({ groupId, currentUser }: ChatProps) {
 
     return (
         <Card className="flex flex-col h-full w-full bg-card rounded-none border-0">
-             <CardHeader className="border-b bg-background z-10 flex flex-row items-center justify-between p-2">
+             <CardHeader className="border-b bg-background z-10 flex flex-row items-center justify-between p-2 h-14">
                 <div className="flex items-center gap-2">
                     <Button variant="ghost" size="icon" onClick={() => router.back()} className="h-9 w-9">
                         <ArrowLeft className="h-5 w-5" />
@@ -339,3 +339,5 @@ export function Chat({ groupId, currentUser }: ChatProps) {
         </Card>
     );
 }
+
+    
