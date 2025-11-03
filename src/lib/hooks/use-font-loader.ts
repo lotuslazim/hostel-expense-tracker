@@ -1,11 +1,12 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
 
 // This matches the variables set in src/app/layout.tsx
 const FONT_FAMILIES = {
-  body: 'var(--font-poppins)',
-  headline: 'var(--font-playfair-display)',
+  body: 'Poppins',
+  headline: 'Playfair Display',
 };
 
 export function useFontLoader() {
