@@ -60,7 +60,7 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        'mint-500': '#A7DE83',
+        'mint-500': '#ECFFDC',
       },
       borderRadius: {
         lg: "var(--radius)",

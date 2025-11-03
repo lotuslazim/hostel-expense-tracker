@@ -135,7 +135,7 @@ export default function InventoryPage() {
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl md:text-3xl font-bold font-headline">Inventory</h1>
+                    <h1 className="text-2xl md:text-3xl font-bold font-headline text-mint-500">Inventory</h1>
                     <p className="text-sm md:text-base text-muted-foreground">A summary of all food and grocery items purchased.</p>
                 </div>
                 <MonthSwitcher currentDate={currentMonth} onMonthChange={handleMonthChange} />
