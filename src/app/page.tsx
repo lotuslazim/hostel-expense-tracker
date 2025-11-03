@@ -134,7 +134,7 @@ export default function Home() {
         <div className="text-center space-y-4 pt-20 md:pt-12 flex-grow flex flex-col justify-center">
             {areFontsLoaded && (
               <>
-                 <div className="flex flex-col items-center">
+                 <div className="flex flex-col items-center mb-2">
                     <SplitText
                       text="Meet the"
                       as="h2"
