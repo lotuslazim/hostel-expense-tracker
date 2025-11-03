@@ -155,13 +155,13 @@
     font-weight: 700;
     font-family: var(--font-headline);
     margin-bottom: 0.5rem;
-    color: hsl(var(--primary));
+    color: #1e293b; /* slate-800 */
     transition: opacity 0.4s ease;
 }
 
 .feature-description {
     font-size: 1rem;
-    color: hsl(var(--muted-foreground));
+    color: #475569; /* slate-600 */
     max-width: 400px;
     margin: 0 auto;
     transition: opacity 0.4s ease;
