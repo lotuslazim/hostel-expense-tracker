@@ -129,7 +129,7 @@ export default function Home() {
       {/* Subtle background pattern */}
       <div className="absolute inset-0 z-0 bg-retro-pattern"></div>
 
-      <main className="relative z-10 flex h-screen flex-col items-center justify-center p-4 md:p-8">
+      <main className="relative z-10 flex h-screen flex-col items-center justify-center p-4 md:p-8 pt-20 md:pt-24">
         {/* Text Content */}
         <div className="text-center space-y-4 pt-20 md:pt-12 flex-grow flex flex-col justify-center">
             {areFontsLoaded && (
