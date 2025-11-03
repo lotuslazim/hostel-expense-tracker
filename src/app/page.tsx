@@ -82,7 +82,7 @@ export default function Home() {
       {/* Subtle background pattern */}
       <div className="absolute inset-0 z-0 bg-retro-pattern"></div>
 
-      <main className="relative z-10 flex h-screen flex-col items-center justify-between p-4 md:p-8">
+      <main className="relative z-10 flex h-screen flex-col items-center justify-around p-4 md:p-8">
         {/* Text Content */}
         <div className="text-center space-y-4 pt-8 md:pt-12 flex-grow flex flex-col justify-start">
             {areFontsLoaded && (
@@ -120,7 +120,7 @@ export default function Home() {
               alt="BachelorBite Mascot"
               width={400}
               height={400}
-              className="object-contain drop-shadow-xl h-48 w-48 md:h-64 md:w-64"
+              className="object-contain drop-shadow-xl h-64 w-64 md:h-80 md:w-80"
               priority
             />
             <div className="mascot-shadow opacity-0" />
