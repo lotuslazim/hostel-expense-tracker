@@ -129,16 +129,16 @@ export default function Home() {
       {/* Subtle background pattern */}
       <div className="absolute inset-0 z-0 bg-retro-pattern"></div>
 
-      <main className="relative z-10 flex h-screen flex-col items-center justify-around p-4 md:p-8">
+      <main className="relative z-10 flex h-screen flex-col items-center justify-center p-4 md:p-8">
         {/* Text Content */}
-        <div className="text-center space-y-4 pt-8 md:pt-12 flex-grow flex flex-col justify-start">
+        <div className="text-center space-y-4 pt-20 md:pt-12 flex-grow flex flex-col justify-center">
             {areFontsLoaded && (
               <>
                  <div className="flex flex-col items-center">
                     <SplitText
                       text="Meet the"
                       as="h2"
-                      className="text-xl md:text-2xl font-medium text-slate-600 animate-text-meet"
+                      className="text-xl md:text-2xl font-medium text-slate-600 animate-text-meet hidden md:flex"
                       initial={{ opacity: 0, y: 40 }}
                     />
                 </div>
@@ -160,7 +160,7 @@ export default function Home() {
         </div>
 
         {/* Mascot & CTA */}
-        <div className="flex flex-col items-center text-center w-full flex-shrink-0">
+        <div className="flex flex-col items-center text-center w-full">
           <div className="relative mascot-container opacity-0">
             <Image
               src="/mascot.png"
@@ -173,7 +173,7 @@ export default function Home() {
             <div className="mascot-shadow opacity-0" />
           </div>
           
-          <div className="h-20 mt-4 flex items-center justify-center">
+          <div className="h-20 mt-4 flex items-center justify-center w-full">
               <div className="cta-buttons opacity-0 flex flex-col sm:flex-row items-center gap-4">
                 <Button
                   size="lg"
