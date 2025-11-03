@@ -124,25 +124,6 @@ export function AppHeader() {
         <div className="flex items-center gap-4">
           {renderNavMenu()}
           <Logo className="light-theme-logo" />
-          <nav className="hidden">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  "flex items-center gap-1.5 transition-colors hover:text-foreground",
-                  pathname?.startsWith(link.href) ? "text-foreground" : "text-muted-foreground"
-                )}
-              >
-                {link.label}
-                {link.notificationCount && link.notificationCount > 0 && (
-                  <Badge variant="destructive" className="h-4 w-4 p-0 shrink-0 items-center justify-center text-[10px]">
-                    {link.notificationCount}
-                  </Badge>
-                )}
-              </Link>
-            ))}
-          </nav>
         </div>
 
         <div className="flex-1 flex items-center justify-end space-x-1 md:space-x-2">
