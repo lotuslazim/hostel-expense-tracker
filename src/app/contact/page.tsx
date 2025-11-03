@@ -25,17 +25,6 @@ export default function ContactPage() {
     <div className="contact-page-container">
         <LandingHeader />
 
-        <div className="vertical-auth-buttons">
-            <Link href="/signup" className="vertical-auth-btn signup" title="Sign Up">
-                <UserPlus className="h-5 w-5 icon-anim" />
-                <span className="button-text">Sign Up</span>
-            </Link>
-            <Link href="/login" className="vertical-auth-btn login" title="Log In">
-                <LogIn className="h-5 w-5 icon-anim" />
-                <span className="button-text">Log In</span>
-            </Link>
-        </div>
-
         <div className="contact-page-content">
             <div className="profile-cards-wrapper">
                 <ProfileCard
@@ -50,6 +39,16 @@ export default function ContactPage() {
                     enableTilt={true}
                     onContactClick={() => setIsModalOpen(true)}
                 />
+            </div>
+             <div className="vertical-auth-buttons">
+                <Link href="/signup" className="vertical-auth-btn signup" title="Sign Up">
+                    <UserPlus className="h-5 w-5 icon-anim" />
+                    <span className="button-text">Sign Up</span>
+                </Link>
+                <Link href="/login" className="vertical-auth-btn login" title="Log In">
+                    <LogIn className="h-5 w-5 icon-anim" />
+                    <span className="button-text">Log In</span>
+                </Link>
             </div>
         </div>
         <ContactModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />

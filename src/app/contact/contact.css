@@ -419,4 +419,33 @@
     .contact-modal {
         width: 90vw;
     }
+
+    .vertical-auth-buttons {
+        position: relative;
+        top: auto;
+        left: auto;
+        transform: none;
+        flex-direction: column;
+        gap: 1rem;
+        width: 100%;
+        max-width: 300px;
+        margin-top: 2rem;
+    }
+
+    .vertical-auth-btn {
+        width: 100%;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        justify-content: center;
+    }
+    
+    .vertical-auth-btn:hover {
+        width: 100%;
+    }
+
+    .vertical-auth-btn .button-text {
+        opacity: 1;
+        transition: none;
+        transition-delay: 0s;
+    }
 }
