@@ -138,7 +138,7 @@ export default function Home() {
                     <SplitText
                       text="Meet the"
                       as="h2"
-                      className="text-xl md:text-2xl font-medium text-slate-600 animate-text-meet flex"
+                      className="text-xl md:text-2xl font-medium text-slate-600 flex animate-text-meet"
                       initial={{ opacity: 0, y: 40 }}
                     />
                 </div>
