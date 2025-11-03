@@ -159,11 +159,12 @@
     border-radius: 1.5rem;
     padding: 1.5rem;
     box-shadow: 0 8px 30px rgba(0,0,0,0.15);
-    margin-top: 1rem;
+    margin-top: 2.5rem;
+    border: 1px solid hsl(var(--border));
 }
 
 .feature-name {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 700;
     font-family: var(--font-headline);
     margin-bottom: 0.5rem;
@@ -172,7 +173,7 @@
 }
 
 .feature-description {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     color: #475569; /* slate-600 */
     max-width: 400px;
     margin: 0 auto;
@@ -234,6 +235,7 @@
         padding: 0;
         box-shadow: none;
         margin-top: 0;
+        border: none;
     }
     
     .feature-name {
