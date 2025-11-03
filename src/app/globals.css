@@ -17,24 +17,24 @@
     --popover: 0 0% 100%;
     --popover-foreground: 160 33% 8%;
     
-    --primary: 150 50% 48%; /* #41B880 -> Dark Emerald Green */
-    --primary-foreground: 0 0% 100%;
+    --primary: 44 100% 63%; /* #FFC247 -> Bright Yellow */
+    --primary-foreground: 160 33% 8%; /* Dark green text on yellow bg */
 
-    --secondary: 44 100% 63%; /* #FFC247 -> Bright Yellow */
-    --secondary-foreground: 160 33% 8%; /* Dark green text on yellow bg */
+    --secondary: 150 50% 48%; /* #41B880 -> Dark Emerald Green */
+    --secondary-foreground: 0 0% 100%; /* White text on green bg */
     
     --muted: 150 15% 95%; /* Lighter gray-green */
     --muted-foreground: 150 10% 45%; /* Mid-tone gray-green */
     
-    --accent: 44 100% 90%; /* Very light yellow for accents/hovers */
-    --accent-foreground: 44 90% 40%; /* Darker yellow for text on accent */
+    --accent: 150 45% 90%; /* Very light mint for accents/hovers */
+    --accent-foreground: 150 50% 40%; /* Darker mint for text on accent */
 
     --destructive: 0 79% 64%;
     --destructive-foreground: 0 0% 98%;
 
     --border: 150 10% 90%;
     --input: 150 10% 92%;
-    --ring: 150 45% 40%;
+    --ring: 44 100% 63%; /* Yellow ring */
 
     --radius: 1rem;
   }
@@ -49,17 +49,17 @@
     --popover: 164 26% 13%;
     --popover-foreground: 150 13% 95%;
 
-    --primary: 150 50% 48%; /* #41B880 -> Dark Emerald Green */
-    --primary-foreground: 0 0% 100%;
+    --primary: 44 100% 63%; /* #FFC247 -> Bright Yellow */
+    --primary-foreground: 160 33% 8%; /* Dark green text on yellow bg */
 
-    --secondary: 44 100% 63%; /* #FFC247 -> Bright Yellow */
-    --secondary-foreground: 160 33% 8%; /* Dark green text on yellow bg */
+    --secondary: 150 50% 48%; /* #41B880 -> Dark Emerald Green */
+    --secondary-foreground: 0 0% 100%;
 
     --muted: 163 22% 18%; /* #263832 - Slightly lighter muted */
     --muted-foreground: 158 14% 80%; /* #C7D0CC - Lighter gray-green text */
 
-    --accent: 44 100% 63%; /* Use secondary yellow as accent in dark mode */
-    --accent-foreground: 160 33% 8%;
+    --accent: 163 22% 18%; /* Use muted for accent in dark mode */
+    --accent-foreground: 150 13% 95%;
 
     --destructive: 0 100% 78%; /* #FF8E8E */
     --destructive-foreground: 160 33% 8%;
@@ -249,7 +249,7 @@
   left: 0;
   width: 10px;
   height: calc(100% - 1rem);
-  background-color: hsl(var(--primary));
+  background-color: hsl(var(--secondary));
   border-radius: 9999px;
   transform: translateX(calc(var(--indicator-x) - 5px)) translateY(var(--indicator-y));
   z-index: 1;
@@ -295,3 +295,5 @@
         transform: translateY(100%);
     }
 }
+
+    
