@@ -44,20 +44,19 @@ function DockItem({
       ref={ref}
       style={{ width }}
       onClick={item.onClick}
-      className="aspect-square flex items-center justify-center rounded-full cursor-pointer"
+      className="flex flex-col items-center justify-center cursor-pointer text-center"
     >
       <div className="w-full h-full flex items-center justify-center relative">
         {item.icon}
-        {item.label && (
-          <motion.div
-            className="absolute bottom-full mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded"
-            initial={{ opacity: 0, y: 10 }}
-            whileHover={{ opacity: 1, y: 0 }}
+      </div>
+      {item.label && (
+          <span
+            className="text-xs text-white opacity-80 group-hover:opacity-100 transition-opacity"
+            style={{ marginTop: '4px' }}
           >
             {item.label}
-          </motion.div>
+          </span>
         )}
-      </div>
     </motion.div>
   );
 }
@@ -77,7 +76,7 @@ export default function Dock({
       onMouseLeave={() => mouseX.set(Infinity)}
       style={{ height: `${panelHeight}px` }}
       className={cn(
-        "flex items-end justify-center gap-2 pb-2 px-4 rounded-full",
+        "flex items-start justify-center gap-2 pt-2 px-4",
         className
       )}
     >

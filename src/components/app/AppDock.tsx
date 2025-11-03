@@ -16,25 +16,29 @@ export default function AppDock() {
   const isPublicRoute = publicRoutes.includes(pathname);
   const isChatPage = pathname === '/chat';
 
-  if (isPublicRoute || !user || isUserLoading || isChatPage) {
+  if (isPublicRoute || !user || isUserLoading) {
+    return null;
+  }
+    
+  if(isChatPage) {
     return null;
   }
 
   const items = [
-    { icon: <VscGraph size={28} />, label: 'Dashboard', onClick: () => router.push('/dashboard') },
-    { icon: <VscCalendar size={28} />, label: 'Monthly Report', onClick: () => router.push('/report') },
-    { icon: <VscPackage size={28} />, label: 'Inventory', onClick: () => router.push('/inventory') },
-    { icon: <VscComment size={28} />, label: 'Chat', onClick: () => router.push('/chat') },
+    { icon: <VscGraph size={24} />, label: 'Dashboard', onClick: () => router.push('/dashboard') },
+    { icon: <VscCalendar size={24} />, label: 'Report', onClick: () => router.push('/report') },
+    { icon: <VscPackage size={24} />, label: 'Inventory', onClick: () => router.push('/inventory') },
+    { icon: <VscComment size={24} />, label: 'Chat', onClick: () => router.push('/chat') },
   ];
 
   return (
     <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
       <Dock 
         items={items}
-        panelHeight={60}
-        baseItemSize={48}
-        magnification={24}
-        className="backdrop-blur-md bg-background/80 border border-border rounded-full shadow-lg text-foreground"
+        panelHeight={70}
+        baseItemSize={60}
+        magnification={20}
+        className="backdrop-blur-md bg-black/50 border border-white/10 rounded-full shadow-lg text-white"
       />
     </div>
   );
