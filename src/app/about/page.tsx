@@ -152,15 +152,16 @@ export default function AboutPage() {
                     <button className="nav-arrow down" aria-label="Next feature" onClick={() => updateCarousel(currentIndex + 1)}><ArrowDown /></button>
                 </div>
 
-                <div className="carousel-dots">
-                    {appFeatures.map((_, i) => (
-                        <div key={i} className={`dot ${i === currentIndex ? 'active' : ''}`} onClick={() => updateCarousel(i)}></div>
-                    ))}
-                </div>
-
                 <div className="feature-info">
-                    <h2 className="feature-name">{currentFeature.name}</h2>
-                    <p className="feature-description">{currentFeature.description}</p>
+                     <div className="carousel-dots">
+                        {appFeatures.map((_, i) => (
+                            <div key={i} className={`dot ${i === currentIndex ? 'active' : ''}`} onClick={() => updateCarousel(i)}></div>
+                        ))}
+                    </div>
+                    <div className="feature-info-box">
+                        <h2 className="feature-name">{currentFeature.name}</h2>
+                        <p className="feature-description">{currentFeature.description}</p>
+                    </div>
                 </div>
             </div>
             <Link href="/contact" className="next-page-btn">
