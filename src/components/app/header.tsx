@@ -68,55 +68,7 @@ export function AppHeader() {
   };
   
   const renderNavMenu = () => {
-    return (
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-8 w-8 md:h-9 md:w-9">
-            <Menu className="h-6 w-6" />
-            <span className="sr-only">Open navigation menu</span>
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="w-[300px] sm:w-[350px]">
-           <SheetHeader>
-            <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-          </SheetHeader>
-          <div className="flex flex-col h-full">
-            <div className="flex flex-col gap-4 py-6">
-                <div className="px-4 mb-4">
-                <Logo className="light-theme-logo" />
-                </div>
-                <nav className="flex flex-col gap-2 px-4">
-                {navLinks.map((link) => (
-                    <Link
-                    key={link.href}
-                    href={link.href}
-                    className="flex items-center justify-between rounded-lg px-3 py-3 text-muted-foreground transition-all hover:text-primary text-base font-medium"
-                    >
-                    <div className="flex items-center gap-3">
-                      <link.icon className="h-5 w-5" />
-                      {link.label}
-                    </div>
-                    {link.notificationCount && link.notificationCount > 0 && (
-                      <Badge variant="destructive">{link.notificationCount}</Badge>
-                    )}
-                    </Link>
-                ))}
-                </nav>
-            </div>
-            <div className="mt-auto p-4 border-t border-border">
-                 <Button
-                    variant="ghost"
-                    onClick={handleLogout}
-                    className="w-full justify-start flex items-center gap-3 rounded-lg px-3 py-3 text-muted-foreground transition-all hover:text-primary text-base font-medium"
-                >
-                    <LogOut className="h-5 w-5" />
-                    Log Out
-                </Button>
-            </div>
-          </div>
-        </SheetContent>
-      </Sheet>
-    );
+    return null; // The AppDock component now handles mobile navigation
   };
 
   return (
