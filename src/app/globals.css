@@ -1,4 +1,6 @@
 
+@import "./about/about.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -290,4 +292,3 @@
 }
 
     
-

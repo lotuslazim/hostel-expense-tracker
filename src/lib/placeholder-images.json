@@ -39,19 +39,19 @@
     {
       "id": "app-dashboard",
       "description": "An image representing the app's main dashboard view.",
-      "imageUrl": "/dashboard.jpg",
+      "imageUrl": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1920&q=80",
       "imageHint": "dashboard ui"
     },
     {
       "id": "app-report",
       "description": "An image representing the app's monthly report feature.",
-      "imageUrl": "/addexpense.jpg",
+      "imageUrl": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1920&q=80",
       "imageHint": "report chart"
     },
     {
       "id": "app-inventory",
       "description": "An image representing the app's inventory management feature.",
-      "imageUrl": "/finalsettlement.jpg",
+      "imageUrl": "https://images.unsplash.com/photo-1583258292688-d0213dc5a3a8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1920&q=80",
       "imageHint": "inventory list"
     }
   ]
