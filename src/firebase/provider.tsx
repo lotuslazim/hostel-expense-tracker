@@ -69,7 +69,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   });
   
   // Define public routes
-  const publicRoutes = ['/login', '/signup', '/', '/about'];
+  const publicRoutes = ['/login', '/signup', '/', '/about', '/contact'];
   const isPublicRoute = publicRoutes.includes(pathname);
 
   // This effect listens for all authentication state changes (login, logout).
@@ -91,8 +91,8 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   useEffect(() => {
     // Wait until auth state is determined
     if (!userAuthState.isUserLoading) {
-      if (userAuthState.user && isPublicRoute && pathname !== '/about' && pathname !== '/') {
-        // If user is logged in and on a public page (but not the landing or about page), redirect to dashboard.
+      if (userAuthState.user && publicRoutes.includes(pathname) && pathname !== '/about' && pathname !== '/' && pathname !== '/contact') {
+        // If user is logged in and on a public page (but not the landing, about or contact page), redirect to dashboard.
         router.push('/dashboard');
       } else if (!userAuthState.user && !isPublicRoute) {
         // If user is not logged in and on a protected page, redirect to login.
