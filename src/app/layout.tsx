@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { ClientProviders } from "./client-providers";
 import { Suspense } from "react";
 import { ProgressBar } from "@/components/app/progress-bar";
+import AppDock from "@/components/app/AppDock";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -37,7 +38,10 @@ export default function RootLayout({
         <Suspense fallback={null}>
           <ProgressBar />
         </Suspense>
-        <ClientProviders>{children}</ClientProviders>
+        <ClientProviders>
+          {children}
+          <AppDock />
+        </ClientProviders>
       </body>
     </html>
   );

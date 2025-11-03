@@ -127,7 +127,7 @@ export function AppHeader() {
       <div className="container flex h-16 items-center">
         
         <div className="flex-1 flex items-center justify-start">
-          {isClient && renderNavMenu()}
+          {isClient && <div className="hidden md:block">{renderNavMenu()}</div>}
         </div>
 
         <div className="flex-1 flex items-center justify-center">
