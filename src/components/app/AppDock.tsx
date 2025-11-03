@@ -35,10 +35,11 @@ export default function AppDock() {
   }
 
   const items = [
-    { icon: <VscGraph size={28} />, label: 'Dashboard', onClick: () => router.push('/dashboard') },
-    { icon: <VscCalendar size={28} />, label: 'Report', onClick: () => router.push('/report') },
-    { icon: <VscPackage size={28} />, label: 'Inventory', onClick: () => router.push('/inventory') },
+    { href: '/dashboard', icon: <VscGraph size={28} />, label: 'Dashboard', onClick: () => router.push('/dashboard') },
+    { href: '/report', icon: <VscCalendar size={28} />, label: 'Report', onClick: () => router.push('/report') },
+    { href: '/inventory', icon: <VscPackage size={28} />, label: 'Inventory', onClick: () => router.push('/inventory') },
     { 
+      href: '/chat',
       icon: (
         <div className="relative">
           <VscComment size={28} />
@@ -59,7 +60,7 @@ export default function AppDock() {
       <Dock 
         items={items}
         magnification={24}
-        className="bg-secondary text-secondary-foreground rounded-full"
+        className="bg-secondary/10 backdrop-blur-md text-secondary-foreground rounded-full border border-secondary/20"
       />
     </div>
   );

@@ -4,8 +4,10 @@
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import React, { useRef, ReactNode } from 'react';
 import { cn } from '@/lib/utils';
+import { usePathname } from 'next/navigation';
 
 type DockItemData = {
+  href: string;
   icon: ReactNode;
   label?: string;
   onClick?: () => void;
@@ -31,6 +33,9 @@ function DockItem({
   magnification: number;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
+  const isActive = pathname.startsWith(item.href);
+
   const distance = useTransform(mouseX, (val) => {
     const bounds = ref.current?.getBoundingClientRect();
     return bounds ? val - bounds.x - bounds.width / 2 : 0;
@@ -44,7 +49,10 @@ function DockItem({
       ref={ref}
       style={{ width }}
       onClick={item.onClick}
-      className="flex flex-col items-center justify-center cursor-pointer text-center"
+      className={cn(
+        "flex flex-col items-center justify-center cursor-pointer text-center p-2 rounded-full transition-colors",
+        isActive ? "bg-primary text-primary-foreground" : "hover:bg-primary/20"
+      )}
       whileTap={{ scale: 0.9 }}
     >
       <div className="w-full h-full flex items-center justify-center relative">
@@ -52,7 +60,7 @@ function DockItem({
       </div>
       {item.label && (
           <span
-            className="text-xs opacity-80 group-hover:opacity-100 transition-opacity"
+            className="text-xs opacity-80 group-hover:opacity-100 transition-opacity whitespace-nowrap"
             style={{ marginTop: '4px' }}
           >
             {item.label}
@@ -77,13 +85,13 @@ export default function Dock({
       onMouseLeave={() => mouseX.set(Infinity)}
       style={{ height: `${panelHeight}px` }}
       className={cn(
-        "flex items-end justify-center gap-2 p-4 rounded-full",
+        "flex items-end justify-center gap-2 pb-2 px-4",
         className
       )}
     >
       {items.map((item, index) => (
         <DockItem
-          key={index}
+          key={item.href}
           item={item}
           mouseX={mouseX}
           baseItemSize={baseItemSize}
