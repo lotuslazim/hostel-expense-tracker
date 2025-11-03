@@ -1,13 +1,14 @@
 
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import './about.css';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import Link from 'next/link';
-import { ArrowUp, ArrowDown } from 'lucide-react';
+import { ArrowUp, ArrowDown, Utensils, Wheat, CheckCircle } from 'lucide-react';
 import Image from 'next/image';
 import { LandingHeader } from '@/components/app/landing-header';
+import { gsap } from "gsap";
 
 const appFeatures = [
     { name: "Log Meals & Expenses", description: "Quickly log your daily meals and any shared expenses. It’s that simple.", imageId: "app-dashboard" },
@@ -15,6 +16,50 @@ const appFeatures = [
     { name: "Track Your Inventory", description: "Groceries are automatically added to a monthly inventory list from your expenses.", imageId: "app-inventory" },
     { name: "Community Chat", description: "Connect with your flatmates, share updates, and coordinate easily.", imageId: "landing-hero" }
 ];
+
+const FloatingElements = () => {
+    const containerRef = useRef<HTMLDivElement>(null);
+  
+    useLayoutEffect(() => {
+      const ctx = gsap.context(() => {
+        const elements = gsap.utils.toArray(".floating-element-about");
+        elements.forEach((el: any) => {
+          gsap.to(el, {
+            y: 'random(-20, 20)',
+            x: 'random(-10, 10)',
+            duration: 'random(5, 8)',
+            ease: 'sine.inOut',
+            repeat: -1,
+            yoyo: true,
+          });
+        });
+      }, containerRef);
+  
+      return () => ctx.revert();
+    }, []);
+  
+    const elements = [
+        { Icon: Utensils, size: "w-8 h-8", top: "15%", left: "10%" },
+        { Icon: Wheat, size: "w-6 h-6", top: "25%", left: "80%" },
+        { Icon: CheckCircle, size: "w-6 h-6", top: "70%", left: "20%" },
+        { Icon: Utensils, size: "w-10 h-10", top: "85%", left: "90%" },
+    ];
+  
+    return (
+      <div ref={containerRef} className="absolute inset-0 z-0 overflow-hidden">
+        {elements.map((el, i) => (
+          <div
+            key={i}
+            className={`floating-element-about absolute ${el.size} text-white opacity-80 filter drop-shadow-lg`}
+            style={{ top: el.top, left: el.left }}
+          >
+            <el.Icon strokeWidth={1.5}/>
+          </div>
+        ))}
+      </div>
+    );
+};
+
 
 export default function AboutPage() {
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -86,6 +131,7 @@ export default function AboutPage() {
 
     return (
         <div className="about-section yellow-gradient-bg text-slate-800">
+            <FloatingElements />
             <LandingHeader />
             <div className="about-container">
                 <div className="about-carousel" ref={carouselRef}>
