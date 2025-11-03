@@ -5,7 +5,7 @@ import { useRef, useEffect, useState, useLayoutEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Utensils, Wheat, CheckCircle } from "lucide-react";
+import { ArrowRight, Utensils, Wheat, CheckCircle, LogIn } from "lucide-react";
 import { gsap } from "gsap";
 import { SplitText } from "@/components/animation/SplitText";
 import { useFontLoader } from "@/lib/hooks/use-font-loader";
@@ -104,7 +104,7 @@ export default function Home() {
         { opacity: 1, scale: 1.2, duration: 1, ease: "power3.out" },
         "-=0.8"
     )
-    .fromTo(".cta-button, .swipe-indicator",
+    .fromTo(".cta-buttons",
         { opacity: 0, y: 20 },
         { opacity: 1, y: 0, duration: 0.8, ease: "power3.out"},
         "-=0.5"
@@ -173,24 +173,23 @@ export default function Home() {
             <div className="mascot-shadow opacity-0" />
           </div>
           
-          <div className="h-20 mt-4">
-              {/* Desktop CTA */}
-              <div className="hidden md:block cta-button opacity-0">
+          <div className="h-20 mt-4 flex items-center justify-center">
+              <div className="cta-buttons opacity-0 flex flex-col sm:flex-row items-center gap-4">
                 <Button
                   size="lg"
-                  className="text-lg rounded-full shadow-lg hover:shadow-xl bg-primary text-primary-foreground hover:bg-primary/90 hover:-translate-y-1 transform transition-all duration-300"
-                  onClick={() => router.push("/about")}
+                  className="w-full sm:w-auto text-lg rounded-full shadow-lg hover:shadow-xl bg-primary text-primary-foreground hover:bg-primary/90 hover:-translate-y-1 transform transition-all duration-300"
+                  onClick={() => router.push("/signup")}
                 >
-                  Get Started <ArrowRight className="ml-2 h-5 w-5" />
+                  Sign Up <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
-              </div>
-
-               {/* Mobile CTA */}
-              <div className="md:hidden swipe-indicator opacity-0 flex flex-col items-center gap-2" onTouchStart={() => router.push('/login')}>
-                  <div className="w-12 h-12 rounded-full bg-white/50 animate-glow-pulse flex items-center justify-center">
-                    <ArrowRight className="h-6 w-6 -rotate-90 text-slate-800" />
-                  </div>
-                   <span className="text-sm font-medium text-slate-600">Swipe Up</span>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full sm:w-auto text-lg rounded-full shadow-lg bg-white/50 border-slate-400 hover:bg-white/80"
+                  onClick={() => router.push("/login")}
+                >
+                  <LogIn className="mr-2 h-5 w-5" /> Log In
+                </Button>
               </div>
           </div>
         </div>
