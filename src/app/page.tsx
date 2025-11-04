@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useRef } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import './landing.css';
@@ -9,7 +9,6 @@ import { CardSwap, Card } from '@/components/landing/CardSwap';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export default function LandingDesktopPage() {
-    const aboutRef = useRef<HTMLDivElement>(null);
 
     const appFeatures = [
         { name: "Log Meals & Expenses", imageId: "app-dashboard" },
@@ -39,7 +38,7 @@ export default function LandingDesktopPage() {
 
             {/* Right Section: Card Animation */}
             <div className="landing-right-section">
-                <CardSwap cardDistance={60} verticalDistance={70} delay={4000} pauseOnHover={true}>
+                <CardSwap cardDistance={-20} verticalDistance={-20} delay={4000} pauseOnHover={true}>
                     {appFeatures.map(feature => {
                         const image = PlaceHolderImages.find(p => p.id === feature.imageId);
                         return (

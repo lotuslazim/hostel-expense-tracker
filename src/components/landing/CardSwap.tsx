@@ -21,8 +21,8 @@ interface CardSwapProps {
 
 export const CardSwap: React.FC<CardSwapProps> = ({
   children,
-  cardDistance = 60,
-  verticalDistance = 70,
+  cardDistance = -20, // Negative distance for overlapping
+  verticalDistance = -20, // Negative distance for stacking effect
   delay = 5000,
   pauseOnHover = true,
 }) => {
@@ -45,11 +45,12 @@ export const CardSwap: React.FC<CardSwapProps> = ({
   const getStyle = (cardIndex: number) => {
     const relativeIndex = (cardIndex - index + cards.length) % cards.length;
     
-    if (relativeIndex >= 3) { // Only show top 3 cards
-        return { opacity: 0, y: verticalDistance, scale: 0.8, zIndex: 0 };
+    // Only render top 3-4 cards for performance
+    if (relativeIndex >= 4) { 
+        return { opacity: 0, y: verticalDistance * 2, scale: 0.8, zIndex: 0 };
     }
 
-    const y = -relativeIndex * verticalDistance;
+    const y = relativeIndex * verticalDistance;
     const scale = 1 - relativeIndex * 0.05;
     const zIndex = cards.length - relativeIndex;
 
@@ -78,7 +79,7 @@ export const CardSwap: React.FC<CardSwapProps> = ({
             key={i}
             initial={getStyle(i)}
             animate={getStyle(i)}
-            exit={{ opacity: 0, y: 100, scale: 0.8 }}
+            exit={{ opacity: 0, y: verticalDistance * 4, scale: 0.5 }}
             className="card-swap-card"
           >
             {card}

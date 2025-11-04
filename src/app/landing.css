@@ -3,13 +3,14 @@
     display: flex;
     width: 100vw;
     height: 100vh;
-    background: #FFD85A; /* app yellow */
+    background: #132A13; /* Dark Green/near-black for the new theme */
     position: relative;
     overflow: hidden;
+    color: #f0f0f0; /* Light text for dark background */
 }
 
 .landing-left-section {
-    flex: 0 0 500px;
+    flex: 0 0 50%;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -23,19 +24,19 @@
 }
 
 .landing-logo {
-    font-size: 4rem;
-    font-weight: 900;
-    color: #132A13; /* dark green */
+    font-size: 3.5rem; /* Adjusted for new look */
+    font-weight: 700;
+    color: #FFFFFF; /* White text */
     margin-bottom: 1.2rem;
-    line-height: 1.1;
+    line-height: 1.2;
     font-family: var(--font-headline);
 }
 
 .landing-slogan {
-    font-size: 1.5rem;
-    color: #111;
+    font-size: 1.25rem; /* Adjusted for new look */
+    color: #a0a0a0; /* Softer gray text */
     margin-bottom: 2rem;
-    font-weight: 500;
+    font-weight: 400;
 }
 
 .landing-right-section {
@@ -58,32 +59,34 @@
 }
 
 .nav-btn {
-  background: #132A13; /* dark green */
+  background: #1A3A1A; /* Slightly lighter green */
   color: #FFD85A; /* brand yellow */
-  border: none;
+  border: 1px solid #FFD85A;
   border-radius: 9999px;
   font-size: 1rem;
-  padding: 12px 32px;
+  padding: 10px 28px;
   font-weight: bold;
-  box-shadow: 0 2px 12px rgba(39,50,83,0.08);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.2);
   cursor: pointer;
   margin: 0 8px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
   text-decoration: none;
 }
 
 .nav-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 20px rgba(39,50,83,0.12);
+    background-color: #FFD85A;
+    color: #132A13;
+    box-shadow: 0 4px 20px rgba(255,216,90,0.2);
 }
 
 /* CardSwap specific styles */
 .card-swap-container {
     position: relative;
     width: 70%;
-    max-width: 600px;
+    max-width: 500px;
     height: 70%;
-    max-height: 450px;
+    max-height: 350px;
 }
 
 .card-swap-card {
@@ -93,10 +96,10 @@
     border-radius: 16px;
     overflow: hidden;
     cursor: pointer;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    border: 3px solid white;
-    transform-origin: center bottom;
-    background-color: #333; /* Fallback */
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transform-origin: center center; /* Changed from bottom */
+    background-color: #1a1a1a; /* Dark card background */
 }
 
 .card-swap-card .card-image {
@@ -115,16 +118,16 @@
     bottom: 0;
     left: 0;
     right: 0;
-    padding: 1rem;
-    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
+    padding: 1.5rem;
+    background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
 }
 
 .card-title-overlay h3 {
     color: #fff;
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     font-weight: bold;
     margin: 0;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    text-shadow: 0 2px 5px rgba(0,0,0,0.7);
 }
 
 @media (max-width: 1024px) {
@@ -136,14 +139,22 @@
         padding: 48px;
         text-align: center;
         align-items: center;
+        order: 2; /* Text comes after cards on mobile */
     }
     .landing-right-section {
         flex: 1;
         width: 100%;
-        padding: 0 24px;
+        padding: 48px 24px 0; /* Add padding at top */
+        order: 1;
     }
     .card-swap-container {
         width: 90%;
         height: 60%;
+    }
+    .landing-logo {
+        font-size: 2.5rem;
+    }
+    .landing-slogan {
+        font-size: 1.1rem;
     }
 }
