@@ -39,7 +39,7 @@ export default function LandingPage() {
             name: "Welcome", 
             icon: <Zap />,
             content: (
-                 <div className="w-full h-full grid grid-cols-2 items-center animated-bg-grid-green border border-black/10">
+                 <div className="w-full h-full grid grid-cols-2 items-center animated-bg-grid-green">
                     <div className="relative h-full flex items-center justify-center">
                          <Image 
                           src="/mascot.png"
@@ -146,4 +146,3 @@ export default function LandingPage() {
         </div>
     );
 }
-
