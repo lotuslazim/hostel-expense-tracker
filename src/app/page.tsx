@@ -20,8 +20,6 @@ export default function LandingDesktopPage() {
 
     return (
         <div className="landing-container">
-            <LandingHeader/>
-
             {/* Left Section: Logo and Slogan */}
             <div className="landing-left-section">
                 <div className="landing-content-wrapper">
@@ -40,11 +38,9 @@ export default function LandingDesktopPage() {
                         return (
                              <Card key={feature.name}>
                                 {image && (
-                                    <Image 
+                                    <img 
                                         src={image.imageUrl} 
                                         alt={feature.name} 
-                                        fill
-                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                         className="card-image" 
                                     />
                                 )}
