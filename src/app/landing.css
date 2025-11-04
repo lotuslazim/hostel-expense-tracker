@@ -1,180 +1,107 @@
-/* =========================
-   BachelorBite — Landing CSS
-   Cleaned / documented
-   Colors: dark-green (#132A13), yellow (#FFD85A), black/near-black (#000 / #111)
-   ========================= */
+:root {
+  --color-dark-green: #132A13;
+  --color-yellow: #FFD85A;
+  --color-black: #000000;
+  --color-near-black: #111111;
 
-   :root {
-    /* Brand colors */
-    --color-dark-green: #132A13;
-    --color-yellow: #FFD85A;
-    --color-black: #000000;
-    --color-near-black: #111111;
-  
-    /* UI variables */
-    --page-text: #f0f0f0;
-    --nav-button-bg: #1A3A1A; /* slightly lighter green for nav pills */
-    --nav-button-outline: var(--color-yellow);
-    --nav-button-radius: 9999px;
-    --card-border: rgba(255, 255, 255, 0.2);
-    --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-    --font-headline: "Poppins", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  }
-  
-  /* ---------- Page container ---------- */
-  .landing-container {
-    display: flex;
-    width: 100vw;
-    height: 100vh;
-    background: var(--color-dark-green);        /* dark green background */
-    position: relative;
-    overflow: hidden;
-    color: var(--page-text);
-    font-family: var(--font-headline);
-  }
-  
-  /* ---------- Left content (logo + slogan) ---------- */
-  .landing-left-section {
-    flex: 0 0 50%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
-    padding: 48px 64px;
-    z-index: 10;
-  }
-  
-  .landing-content-wrapper {
-    max-width: 450px;
-  }
-  
-  .landing-logo {
-    font-size: 3.5rem;        /* large headline */
-    font-weight: 700;
-    color: #FFFFFF;           /* readable on dark-green background */
-    margin-bottom: 1.2rem;
-    line-height: 1.2;
-    font-family: var(--font-headline);
-  }
-  
-  .landing-slogan {
-    font-size: 1.25rem;
-    color: #a0a0a0;           /* softer gray for subtitle */
-    margin-bottom: 2rem;
-    font-weight: 400;
-  }
-  
-  /* ---------- Right section (card swap / visuals) ---------- */
-  .landing-right-section {
-    flex: 1;
-    position: relative;
-    display: flex;
-    justify-content: flex-end;
-    align-items: flex-end;
-    padding: 2rem;
-  }
-  
-  /* ---------- Card Swap Container — anchored bottom-right with 3D perspective ---------- */
-  .card-swap-container {
-    position: relative;
-    perspective: 900px;
-    overflow: visible;
-  
-    width: 500px;
-    height: 350px;
-  }
-  
-  /* Cards — merged styling, preserving 3D & stacked behavior */
-  .card-swap-card {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    border-radius: 16px;
-    overflow: hidden;
-    cursor: pointer;
-    box-shadow: var(--card-shadow);
-    border: 1px solid var(--card-border);
-    background: var(--color-black);
-    transform-style: preserve-3d;
-    will-change: transform;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-  }
-  
-  /* Image inside each card (screenshot cover) */
-  .card-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.4s ease;
-  }
-  
-  .card-swap-card:hover .card-image {
-    transform: scale(1.05);
-  }
-  
-  /* Title overlay (gradient strip at bottom of card) */
-  .card-title-overlay {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 1.5rem;
-    background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
-  }
-  
-  .card-title-overlay h3 {
-    color: #fff;
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin: 0;
-    text-shadow: 0 2px 5px rgba(0,0,0,0.7);
-  }
-  
-  /* ---------- Responsive behavior for large screens (desktop-first) ---------- */
-  @media (max-width: 1280px) {
-    .landing-left-section {
-      padding: 40px 48px;
-    }
-    .landing-logo {
-      font-size: 3rem;
-    }
-  }
-  
-  /* On small desktops / tablets, stack content and scale card area */
-  @media (max-width: 1024px) {
-    .landing-container {
-      flex-direction: column;
-    }
-  
-    .landing-left-section {
-      flex: 0 0 auto;
-      padding: 48px;
-      text-align: center;
-      align-items: center;
-      order: 2; /* text comes after cards visually */
-    }
-  
-    .landing-right-section {
-      flex: 1;
-      width: 100%;
-      padding: 48px 24px 0;
-      order: 1;
-      justify-content: center;
-      align-items: center;
-    }
-  
-    .card-swap-container {
-      width: 90%;
-      height: 60%;
-    }
-  
-    .landing-logo { font-size: 2.5rem; }
-    .landing-slogan { font-size: 1.1rem; }
-  }
-  
-  /* Mobile small fallback (kept minimal) */
-  @media (max-width: 480px) {
-    .nav-btn { padding: 8px 18px; font-size: 0.95rem; }
-  }
+  --page-text: #f0f0f0;
+  --nav-button-bg: #1A3A1A;
+  --nav-button-outline: var(--color-yellow);
+  --nav-button-radius: 9999px;
+  --card-border: rgba(255, 255, 255, 0.2);
+  --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  --font-headline: "Poppins", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+/* Landing Container */
+.landing-container {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  background: var(--color-dark-green);
+  position: relative;
+  overflow: hidden;
+  color: var(--page-text);
+  font-family: var(--font-headline);
+}
+
+/* Left Section */
+.landing-left-section {
+  flex: 0 0 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 48px 64px;
+  z-index: 10;
+}
+.landing-content-wrapper { max-width: 450px; }
+.landing-logo { font-size: 3.5rem; font-weight: 700; color: #fff; margin-bottom: 1.2rem; line-height: 1.2; }
+.landing-slogan { font-size: 1.25rem; color: #a0a0a0; margin-bottom: 2rem; font-weight: 400; }
+
+/* Right Section */
+.landing-right-section {
+  flex: 1;
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  padding: 2rem;
+}
+
+/* Card Swap Container */
+.card-swap-container {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  transform: translate(5%, 20%);
+  perspective: 900px;
+  overflow: visible;
+  width: 500px;
+  height: 350px;
+}
+
+/* Individual Cards */
+.card-swap-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--card-border);
+  background: var(--color-black);
+  transform-style: preserve-3d;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Card Image */
+.card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+.card-swap-card:hover .card-image { transform: scale(1.05); }
+
+/* Title Overlay */
+.card-title-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1.5rem;
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+}
+.card-title-overlay h3 { color: #fff; font-size: 1.5rem; font-weight: 700; margin: 0; text-shadow: 0 2px 5px rgba(0,0,0,0.7); }
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .card-swap-container { width: 90%; height: 60%; transform: translate(0,0); }
+}
+@media (max-width: 480px) {
+  .card-swap-container { width: 100%; height: 240px; }
+}
