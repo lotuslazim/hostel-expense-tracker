@@ -1,8 +1,10 @@
+
 "use client";
 
 import React from 'react';
 import CardSwap, { Card } from '@/components/CardSwap';
 import { Filter, SlidersHorizontal, Zap } from 'lucide-react';
+import { Logo } from '@/components/icons/logo';
 
 export default function LandingPage() {
     const appFeatures = [
@@ -12,8 +14,17 @@ export default function LandingPage() {
     ];
 
     return (
-        <div style={{ height: '100vh', width: '100vw', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0D0D12' }}>
-            <div style={{ height: '600px', width: '100%', maxWidth: '1200px', position: 'relative' }}>
+        <div className="landing-page-container">
+            <div className="landing-left-section">
+                <div className="text-content">
+                    <h2 className="headline-top">No notes, no Excel—just one tap, done.</h2>
+                    <div className="brand-name">
+                        <Logo textSize="large" textColor="text-primary-foreground"/>
+                    </div>
+                    <p className="sub-headline">Here to make your bachelor life easier — because someone has to. 😌</p>
+                </div>
+            </div>
+            <div className="landing-right-section">
                 <CardSwap
                     cardDistance={60}
                     verticalDistance={70}
