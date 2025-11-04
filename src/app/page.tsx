@@ -16,7 +16,7 @@ export default function LandingPage() {
     return (
         <div className="landing-page-container new-landing-style">
             <div className="landing-left-section">
-                <div className="background-headline">BachelorBite</div>
+                
                 <div className="text-content">
                     
                 </div>
