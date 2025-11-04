@@ -5,7 +5,7 @@
   right: 0;
   width: 500px;
   height: 400px;
-  transform: translate(15%, 25%);
+  transform: translate(15%, 25%) rotateZ(5deg);
   transform-origin: bottom right;
   perspective: 900px;
   overflow: visible;
@@ -20,9 +20,6 @@
   border-radius: 16px;
   overflow: hidden;
   cursor: pointer;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: #000;
   transform-style: preserve-3d;
   will-change: transform;
   backface-visibility: hidden;
@@ -31,12 +28,12 @@
 
 @media (max-width: 768px) {
   .card-swap-container {
-    transform: scale(0.75) translate(25%, 25%);
+    transform: scale(0.75) translate(25%, 25%) rotateZ(5deg);
   }
 }
 
 @media (max-width: 480px) {
   .card-swap-container {
-    transform: scale(0.55) translate(25%, 25%);
+    transform: scale(0.55) translate(25%, 25%) rotateZ(5deg);
   }
 }

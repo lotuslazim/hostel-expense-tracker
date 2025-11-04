@@ -4,15 +4,14 @@
 import React from 'react';
 import './landing.css';
 import CardSwap, { Card } from '@/components/CardSwap';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { Filter, SlidersHorizontal, Zap } from 'lucide-react';
 
 export default function LandingDesktopPage() {
 
     const appFeatures = [
-        { name: "Log Meals & Expenses", imageId: "app-dashboard" },
-        { name: "Automated Reports", imageId: "app-report" },
-        { name: "Track Your Inventory", imageId: "app-inventory" },
-        { name: "Community Chat", imageId: "landing-hero" }
+        { name: "Smooth", icon: <Zap /> },
+        { name: "Customizable", icon: <SlidersHorizontal /> },
+        { name: "Filterable", icon: <Filter /> },
     ];
 
     return (
@@ -30,23 +29,19 @@ export default function LandingDesktopPage() {
             {/* Right Section: Card Animation */}
             <div className="landing-right-section">
                 <CardSwap cardDistance={-20} verticalDistance={-20} delay={4000} pauseOnHover={true}>
-                    {appFeatures.map(feature => {
-                        const image = PlaceHolderImages.find(p => p.id === feature.imageId);
-                        return (
-                             <Card key={feature.name}>
-                                {image && (
-                                    <img 
-                                        src={image.imageUrl} 
-                                        alt={feature.name} 
-                                        className="card-image" 
-                                    />
-                                )}
-                                <div className="card-title-overlay">
-                                    <h3>{feature.name}</h3>
+                    {appFeatures.map((feature, index) => (
+                         <Card key={feature.name}>
+                            <div className="card-header">
+                                {feature.icon}
+                                <h3>{feature.name}</h3>
+                            </div>
+                            <div className="card-content-wrapper">
+                                <div className="card-content">
+                                    <div className="card-number">{index + 1}</div>
                                 </div>
-                            </Card>
-                        );
-                    })}
+                            </div>
+                        </Card>
+                    ))}
                 </CardSwap>
             </div>
         </div>
