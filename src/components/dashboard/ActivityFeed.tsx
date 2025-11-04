@@ -37,7 +37,7 @@ const categoryIcons: Record<ExpenseCategory, React.ReactNode> = {
 
 const CategoryBadge = memo(({ category }: { category: ExpenseCategory }) => {
     return (
-        <Badge variant="secondary" className="inline-flex items-center justify-center gap-1.5 py-1 px-2">
+        <Badge variant="outline" className="inline-flex items-center justify-center gap-1.5 py-1 px-2">
             {categoryIcons[category]}
             <span>{category}</span>
         </Badge>
