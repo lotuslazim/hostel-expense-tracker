@@ -5,6 +5,7 @@ import React from 'react';
 import CardSwap, { Card } from '@/components/CardSwap';
 import { Filter, SlidersHorizontal, Zap } from 'lucide-react';
 import { Logo } from '@/components/icons/logo';
+import Link from 'next/link';
 
 export default function LandingPage() {
     const appFeatures = [
@@ -16,9 +17,23 @@ export default function LandingPage() {
     return (
         <div className="landing-page-container new-landing-style">
             <div className="landing-left-section">
-                
+                {/* Left Text Section */}
                 <div className="text-content">
-                    
+                     <h1 className="background-headline">
+                        BachelorBite
+                    </h1>
+                    <p className="headline-main">
+                        The smoothest and easiest way to manage meals and expenses in a shared flat.
+                    </p>
+
+                    <div className="flex gap-4 mt-8">
+                        <Link href="/signup" className="bg-black text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:opacity-90 transition-all shadow-sm">
+                           <span></span> SIGN UP
+                        </Link>
+                         <Link href="/login" className="border border-black text-black px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:bg-gray-100 transition-all shadow-sm">
+                           <span>▶</span> LOG IN
+                        </Link>
+                    </div>
                 </div>
             </div>
             <div className="landing-right-section">
