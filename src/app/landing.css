@@ -129,7 +129,6 @@
   }
   
   /* Cards — merged styling, preserving 3D & stacked behavior */
-  .card,
   .card-swap-card {
     position: absolute;                       /* absolute so they stack inside the container */
     top: 50%;
@@ -145,6 +144,7 @@
     will-change: transform;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
+    position: relative; /* <-- FIX: Added this line */
   }
   
   /* Image inside each card (screenshot cover) */
