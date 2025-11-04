@@ -3,17 +3,71 @@
 
 import React from 'react';
 import CardSwap, { Card } from '@/components/CardSwap';
-import { Filter, SlidersHorizontal, Zap } from 'lucide-react';
+import { Utensils, Calculator, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { LandingHeader } from '@/components/app/landing-header';
 import DotGrid from '@/components/DotGrid';
 import Image from 'next/image';
 
+const FloatingIcon = ({ icon: Icon, top, left, delay }: { icon: React.ElementType, top: string, left: string, delay: string }) => (
+    <div
+      className="absolute text-white/80 animate-float"
+      style={{
+        top,
+        left,
+        animationDelay: delay,
+        animationDuration: `${Math.random() * 5 + 5}s`,
+      }}
+    >
+      <Icon className="h-6 w-6" strokeWidth={1.5} />
+    </div>
+);
+
+
 export default function LandingPage() {
     const appFeatures = [
-        { name: "Smooth", icon: <Zap /> },
-        { name: "Customizable", icon: <SlidersHorizontal /> },
-        { name: "Filterable", icon: <Filter /> },
+        { 
+            name: "Welcome", 
+            icon: <Zap />,
+            content: (
+                <div className="w-full h-full relative flex items-center justify-center overflow-hidden animated-bg-grid-green">
+                    <FloatingIcon icon={Utensils} top="15%" left="10%" delay="0s" />
+                    <FloatingIcon icon={Calculator} top="25%" left="80%" delay="1s" />
+                    <FloatingIcon icon={Zap} top="70%" left="20%" delay="2s" />
+                    <FloatingIcon icon={Utensils} top="85%" left="90%" delay="0.5s" />
+                    <Image 
+                      src="/mascot.png"
+                      alt="BachelorBite Mascot"
+                      width={200}
+                      height={200}
+                      className="object-contain relative z-10 animate-mascot-idle"
+                    />
+                    <div className="mascot-shadow"></div>
+                </div>
+            )
+        },
+        { 
+            name: "Effortless Logging", 
+            icon: <Utensils />,
+            content: (
+                <div className="card-feature-content">
+                    <Utensils className="h-12 w-12 text-secondary mb-4" />
+                    <h4 className="font-bold text-xl mb-2">Log Meals & Expenses</h4>
+                    <p className="text-sm text-center">Quickly log daily meals and shared expenses. No more forgotten payments or confusing notes.</p>
+                </div>
+            )
+        },
+        { 
+            name: "Auto Settlements", 
+            icon: <Calculator />,
+            content: (
+                <div className="card-feature-content">
+                    <Calculator className="h-12 w-12 text-secondary mb-4" />
+                    <h4 className="font-bold text-xl mb-2">Automatic Settlements</h4>
+                    <p className="text-sm text-center">Get a detailed report with a final settlement, all calculated automatically at the end of the month.</p>
+                </div>
+            )
+        },
     ];
 
     return (
@@ -61,20 +115,14 @@ export default function LandingPage() {
                     pauseOnHover={true}
                     onCardClick={() => {}}
                 >
-                    {appFeatures.map((feature, index) => (
+                    {appFeatures.map((feature) => (
                          <Card key={feature.name}>
                             <div className="card-header" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', borderBottom: '1px solid rgba(0, 0, 0, 0.1)', color: '#333' }}>
                                 {feature.icon}
                                 <h3>{feature.name}</h3>
                             </div>
-                            <div className="card-content-wrapper" style={{ flexGrow: 1, position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <Image 
-                                  src="/mascot.png"
-                                  alt="BachelorBite Mascot"
-                                  width={200}
-                                  height={200}
-                                  className="object-contain"
-                                />
+                            <div className="card-content-wrapper">
+                                {feature.content}
                             </div>
                         </Card>
                     ))}

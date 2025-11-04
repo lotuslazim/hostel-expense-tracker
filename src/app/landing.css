@@ -1,5 +1,6 @@
 
 
+
 .landing-page-container {
     display: flex;
     min-height: 100vh;
@@ -45,12 +46,33 @@
 }
 
 .landing-right-section {
-    flex: 1; /* Allow right section to take remaining space */
+    flex: 1.5; /* Allow right section to take remaining space */
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center; /* Center the cards horizontally */
 }
+
+.card-content-wrapper {
+    flex-grow: 1; 
+    position: relative; 
+    overflow: hidden; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    height: 100%;
+}
+
+.card-feature-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    text-align: center;
+    height: 100%;
+}
+
 
 /* Specificity to override previous styles when new style is applied */
 .new-landing-style.landing-page-container {
