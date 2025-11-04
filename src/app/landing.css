@@ -1,6 +1,5 @@
 
 
-
 .landing-page-container {
     display: flex;
     min-height: 100vh;
@@ -46,8 +45,10 @@
 }
 
 .landing-right-section {
-    flex: 1;
+    flex: 1.5;
     position: relative;
+    display: flex;
+    align-items: center;
 }
 
 /* Specificity to override previous styles when new style is applied */
@@ -89,5 +90,7 @@
         height: 40vh; /* Adjust height for mobile */
         width: 100%;
         margin-top: 2rem;
+        align-items: center;
+        justify-content: center;
     }
 }
