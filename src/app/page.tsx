@@ -18,9 +18,7 @@ export default function LandingPage() {
             <div className="landing-left-section">
                 <div className="background-headline">BachelorBite</div>
                 <div className="text-content">
-                    <h2 className="headline-main">
-                        The smoothest and safest way to store, buy, and sell your digital assets.
-                    </h2>
+                    
                 </div>
             </div>
             <div className="landing-right-section">
