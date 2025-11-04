@@ -7,6 +7,7 @@ import { Filter, SlidersHorizontal, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { LandingHeader } from '@/components/app/landing-header';
 import DotGrid from '@/components/DotGrid';
+import Image from 'next/image';
 
 export default function LandingPage() {
     const appFeatures = [
@@ -68,7 +69,13 @@ export default function LandingPage() {
                             </div>
                             <div className="card-content-wrapper" style={{ flexGrow: 1, position: 'relative', overflow: 'hidden' }}>
                                 <div className="card-content" style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <div className="card-number" style={{ fontSize: '12rem', fontWeight: 700, color: 'rgba(192, 132, 252, 0.8)', textShadow: '0 0 30px rgba(192, 132, 252, 0.3)' }}>{index + 1}</div>
+                                    <Image 
+                                      src="/mascot.png"
+                                      alt="BachelorBite Mascot"
+                                      width={200}
+                                      height={200}
+                                      className="object-contain"
+                                    />
                                 </div>
                             </div>
                         </Card>
