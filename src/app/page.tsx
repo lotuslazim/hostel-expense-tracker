@@ -39,19 +39,25 @@ export default function LandingPage() {
             name: "Welcome", 
             icon: <Zap />,
             content: (
-                <div className="w-full h-full relative flex items-center justify-center overflow-hidden animated-bg-grid-green border border-black/10">
-                    <FloatingIcon icon={Utensils} top="15%" left="10%" delay="0s" />
-                    <FloatingIcon icon={Calculator} top="25%" left="80%" delay="1s" />
-                    <FloatingIcon icon={Zap} top="70%" left="20%" delay="2s" />
-                    <FloatingIcon icon={Utensils} top="85%" left="90%" delay="0.5s" />
-                    <Image 
-                      src="/mascot.png"
-                      alt="BachelorBite Mascot"
-                      width={200}
-                      height={200}
-                      className="object-contain relative z-10 animate-mascot-idle"
-                    />
-                    <div className="mascot-shadow"></div>
+                 <div className="w-full h-full grid grid-cols-2 items-center animated-bg-grid-green border border-black/10">
+                    <div className="relative h-full flex items-center justify-center">
+                         <Image 
+                          src="/mascot.png"
+                          alt="BachelorBite Mascot"
+                          width={200}
+                          height={200}
+                          className="object-contain relative z-10 animate-mascot-idle"
+                        />
+                        <div className="mascot-shadow"></div>
+                    </div>
+                    <div className="p-8 text-center flex flex-col justify-center">
+                        <h4 className="font-bold text-xl mb-2">BachelorBite</h4>
+                        <ul className="text-sm text-left space-y-2 list-disc pl-5">
+                            <li>Log Meals</li>
+                            <li>Track Expenses</li>
+                            <li>Auto-Settle</li>
+                        </ul>
+                    </div>
                 </div>
             )
         },
