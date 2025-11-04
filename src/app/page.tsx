@@ -19,7 +19,7 @@ export default function LandingPage() {
                 <div className="text-content">
                     <h2 className="headline-top">No notes, no Excel—just one tap, done.</h2>
                     <div className="brand-name">
-                        <Logo textSize="large" textColor="text-primary-foreground"/>
+                        <Logo textSize="large" textColor="text-primary-foreground" secondaryColor="text-secondary" />
                     </div>
                     <p className="sub-headline">Here to make your bachelor life easier — because someone has to. 😌</p>
                 </div>

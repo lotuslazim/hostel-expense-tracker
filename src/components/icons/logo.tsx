@@ -11,6 +11,7 @@ interface LogoProps {
   className?: string;
   textSize?: 'default' | 'large';
   textColor?: string;
+  secondaryColor?: string;
 }
 
 export function Logo({ 
@@ -19,6 +20,7 @@ export function Logo({
   mascotSize = 'default',
   textSize = 'default',
   textColor = 'text-foreground',
+  secondaryColor = 'text-primary',
   className
 }: LogoProps) {
   return (
@@ -54,7 +56,7 @@ export function Logo({
         )}
       >
         <span className={cn(textColor)}>Bachelor</span>
-        <span className="text-primary">Bite</span>
+        <span className={cn(secondaryColor)}>Bite</span>
       </div>
     </div>
   );
