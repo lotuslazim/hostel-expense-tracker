@@ -35,7 +35,7 @@ export default function LandingPage() {
                 {/* Left Text Section */}
                 <div className="text-content">
                      <h1 className="background-headline">
-                        <span className="text-black">Bachelor</span><span className="text-secondary">.</span><span className="text-secondary">Bite</span>
+                        <span className="text-black">Bachelor</span><span className="text-secondary">Bite</span>
                     </h1>
                     <p className="headline-main">
                         The smoothest and easiest way to manage meals and expenses in a shared flat.
