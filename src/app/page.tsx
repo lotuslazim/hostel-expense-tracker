@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react';
@@ -14,7 +15,7 @@ export default function LandingPage() {
     ];
 
     return (
-        <div className="landing-page-container new-landing-style">
+        <div className="landing-page-container yellow-gradient-bg text-slate-800">
             <LandingHeader />
             <div className="landing-left-section">
                 {/* Left Text Section */}
