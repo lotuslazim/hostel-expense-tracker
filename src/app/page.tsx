@@ -35,7 +35,7 @@ export default function LandingPage() {
                 {/* Left Text Section */}
                 <div className="text-content">
                      <h1 className="background-headline">
-                        <span className="text-black">Bachelor</span><span className="text-secondary">Bite</span>
+                        <span className="text-black">Bachelor</span><span className="text-secondary">Bite.</span>
                     </h1>
                     <p className="headline-main">
                         The smoothest and easiest way to manage meals and expenses in a shared flat.
@@ -60,7 +60,7 @@ export default function LandingPage() {
                     onCardClick={() => {}}
                 >
                     {appFeatures.map((feature, index) => (
-                        <Card key={feature.name}>
+                         <Card key={feature.name}>
                             <div className="card-header" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', borderBottom: '1px solid rgba(0, 0, 0, 0.1)', color: '#333' }}>
                                 {feature.icon}
                                 <h3>{feature.name}</h3>
