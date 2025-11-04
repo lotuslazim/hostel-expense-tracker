@@ -42,8 +42,8 @@
 
 /* Right Section */
 .landing-right-section {
-  flex: 1;
-  position: relative; /* This is crucial for absolute positioning of children */
+  flex-basis: 50%;
+  position: relative;
 }
 
 /* Card Image */
