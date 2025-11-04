@@ -1,13 +1,10 @@
-
 "use client";
 
 import React from 'react';
-import './landing.css';
 import CardSwap, { Card } from '@/components/CardSwap';
 import { Filter, SlidersHorizontal, Zap } from 'lucide-react';
 
-export default function LandingDesktopPage() {
-
+export default function LandingPage() {
     const appFeatures = [
         { name: "Smooth", icon: <Zap /> },
         { name: "Customizable", icon: <SlidersHorizontal /> },
@@ -15,29 +12,23 @@ export default function LandingDesktopPage() {
     ];
 
     return (
-        <div className="landing-container">
-            {/* Left Section: Logo and Slogan */}
-            <div className="landing-left-section">
-                <div className="landing-content-wrapper">
-                    <h1 className="landing-logo">Card stacks have never looked so good</h1>
-                    <h3 className="landing-slogan">
-                        Just look at it go!
-                    </h3>
-                </div>
-            </div>
-
-            {/* Right Section: Card Animation */}
-            <div className="landing-right-section">
-                <CardSwap cardDistance={-20} verticalDistance={-20} delay={4000} pauseOnHover={true}>
+        <div style={{ height: '100vh', width: '100vw', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0D0D12' }}>
+            <div style={{ height: '600px', width: '100%', maxWidth: '1200px', position: 'relative' }}>
+                <CardSwap
+                    cardDistance={60}
+                    verticalDistance={70}
+                    delay={5000}
+                    pauseOnHover={true}
+                >
                     {appFeatures.map((feature, index) => (
-                         <Card key={feature.name}>
-                            <div className="card-header">
+                        <Card key={feature.name}>
+                            <div className="card-header" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', color: '#F0F0F5' }}>
                                 {feature.icon}
                                 <h3>{feature.name}</h3>
                             </div>
-                            <div className="card-content-wrapper">
-                                <div className="card-content">
-                                    <div className="card-number">{index + 1}</div>
+                            <div className="card-content-wrapper" style={{ flexGrow: 1, position: 'relative', overflow: 'hidden' }}>
+                                <div className="card-content" style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <div className="card-number" style={{ fontSize: '12rem', fontWeight: 700, color: 'rgba(192, 132, 252, 0.8)', textShadow: '0 0 30px rgba(192, 132, 252, 0.3)' }}>{index + 1}</div>
                                 </div>
                             </div>
                         </Card>

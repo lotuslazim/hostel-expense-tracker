@@ -1,10 +1,7 @@
-
 import React, { Children, cloneElement, forwardRef, isValidElement, useEffect, useMemo, useRef } from 'react';
 import gsap from 'gsap';
 import './CardSwap.css';
 
-// Rationale: Removed TypeScript generics and types from the .jsx file to resolve syntax errors.
-// The component is now a standard JavaScript forwardRef component.
 export const Card = forwardRef(({ customClass, ...rest }, ref) => (
   <div ref={ref} {...rest} className={`card ${customClass ?? ''} ${rest.className ?? ''}`.trim()} />
 ));
@@ -30,9 +27,6 @@ const placeNow = (el, slot, skew) =>
     force3D: true
   });
 
-
-// Rationale: Removed TypeScript prop type definitions from the function signature to conform to JavaScript syntax.
-// The props are destructured with default values as before.
 const CardSwap = ({
   width = 500,
   height = 400,
@@ -67,7 +61,6 @@ const CardSwap = ({
   const childArr = useMemo(() => Children.toArray(children), [children]);
   const refs = useMemo(
     () => childArr.map(() => React.createRef()),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [childArr.length]
   );
 
@@ -80,9 +73,9 @@ const CardSwap = ({
   useEffect(() => {
     const total = refs.length;
     refs.forEach((r, i) => {
-        if(r.current) {
-            placeNow(r.current, makeSlot(i, cardDistance, verticalDistance, total), skewAmount)
-        }
+      if(r.current) {
+        placeNow(r.current, makeSlot(i, cardDistance, verticalDistance, total), skewAmount)
+      }
     });
 
     const swap = () => {
@@ -170,7 +163,7 @@ const CardSwap = ({
     }
     return () => clearInterval(intervalRef.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cardDistance, verticalDistance, delay, pauseOnHover, skewAmount, easing]);
+  }, [cardDistance, verticalDistance, delay, pauseOnHover, skewAmount, easing, config.durDrop, config.durMove, config.durReturn, config.ease, config.promoteOverlap, config.returnDelay, refs]);
 
   const rendered = childArr.map((child, i) =>
     isValidElement(child)
@@ -179,8 +172,8 @@ const CardSwap = ({
           ref: refs[i],
           style: { width, height, ...(child.props.style ?? {}) },
           onClick: e => {
-            child.props.onClick?.(e);
-            onCardClick?.(i);
+            if (onCardClick) onCardClick(i);
+            if (child.props.onClick) child.props.onClick(e);
           }
         })
       : child
