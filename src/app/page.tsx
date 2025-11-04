@@ -67,16 +67,14 @@ export default function LandingPage() {
                                 {feature.icon}
                                 <h3>{feature.name}</h3>
                             </div>
-                            <div className="card-content-wrapper" style={{ flexGrow: 1, position: 'relative', overflow: 'hidden' }}>
-                                <div className="card-content" style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <Image 
-                                      src="/mascot.png"
-                                      alt="BachelorBite Mascot"
-                                      width={200}
-                                      height={200}
-                                      className="object-contain"
-                                    />
-                                </div>
+                            <div className="card-content-wrapper" style={{ flexGrow: 1, position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Image 
+                                  src="/mascot.png"
+                                  alt="BachelorBite Mascot"
+                                  width={200}
+                                  height={200}
+                                  className="object-contain"
+                                />
                             </div>
                         </Card>
                     ))}
