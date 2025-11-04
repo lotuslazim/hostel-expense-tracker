@@ -1,6 +1,8 @@
 
+
 @import "./about/about.css";
 @import "./contact/contact.css";
+@import "./landing.css";
 
 @tailwind base;
 @tailwind components;
