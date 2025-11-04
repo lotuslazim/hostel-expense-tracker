@@ -69,17 +69,14 @@
     flex: 1;
     position: relative;
     display: flex;
-    justify-content: center;
-    align-items: center;
+    justify-content: flex-end;
+    align-items: flex-end;
+    padding: 2rem;
   }
   
   /* ---------- Card Swap Container — anchored bottom-right with 3D perspective ---------- */
   .card-swap-container {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    transform: translate(5%, 20%);
-    transform-origin: bottom right;
+    position: relative;
     perspective: 900px;
     overflow: visible;
   
@@ -164,10 +161,11 @@
       width: 100%;
       padding: 48px 24px 0;
       order: 1;
+      justify-content: center;
+      align-items: center;
     }
   
     .card-swap-container {
-      transform: scale(0.75) translate(25%, 25%);
       width: 90%;
       height: 60%;
     }
@@ -178,9 +176,5 @@
   
   /* Mobile small fallback (kept minimal) */
   @media (max-width: 480px) {
-    .card-swap-container {
-      transform: scale(0.55) translate(25%, 25%);
-    }
-  
     .nav-btn { padding: 8px 18px; font-size: 0.95rem; }
   }
