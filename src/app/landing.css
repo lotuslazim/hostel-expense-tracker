@@ -41,7 +41,7 @@
 .landing-right-section {
     flex: 1;
     position: relative;
-    background-color: #0D0D12;
+    background-color: hsl(var(--primary));
 }
 
 @media (max-width: 768px) {

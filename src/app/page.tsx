@@ -33,7 +33,7 @@ export default function LandingPage() {
                 >
                     {appFeatures.map((feature, index) => (
                         <Card key={feature.name}>
-                            <div className="card-header" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', color: '#F0F0F5' }}>
+                            <div className="card-header" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', borderBottom: '1px solid rgba(0, 0, 0, 0.1)', color: '#333' }}>
                                 {feature.icon}
                                 <h3>{feature.name}</h3>
                             </div>
