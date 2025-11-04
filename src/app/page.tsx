@@ -38,7 +38,7 @@ export default function LandingPage() {
                         <span className="text-black">Bachelor</span><span className="text-secondary">Bite.</span>
                     </h1>
                     <p className="headline-main">
-                        The smoothest and easiest way to manage meals and expenses in a shared flat.
+                        Here to make your bachelor life easier — because someone has to.
                     </p>
 
                     <div className="flex gap-4 mt-8">
@@ -77,3 +77,4 @@ export default function LandingPage() {
         </div>
     );
 }
+
