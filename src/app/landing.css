@@ -7,17 +7,17 @@
 }
 
 .landing-left-section {
-    flex: 1;
+    flex: 0 0 50%; /* Give left section a fixed 50% width */
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: flex-start;
-    padding: 2rem 2rem 2rem 5rem; /* Adjusted padding */
+    padding: 2rem 2rem 2rem 5rem;
     position: relative;
 }
 
 .text-content {
-    max-width: 550px; /* Increased max-width */
+    max-width: 550px;
     z-index: 1;
 }
 
@@ -45,10 +45,11 @@
 }
 
 .landing-right-section {
-    flex: 1.5;
+    flex: 1; /* Allow right section to take remaining space */
     position: relative;
     display: flex;
     align-items: center;
+    justify-content: center; /* Center the cards horizontally */
 }
 
 /* Specificity to override previous styles when new style is applied */
