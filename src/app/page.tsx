@@ -6,6 +6,7 @@ import CardSwap, { Card } from '@/components/CardSwap';
 import { Filter, SlidersHorizontal, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { LandingHeader } from '@/components/app/landing-header';
+import DotGrid from '@/components/DotGrid';
 
 export default function LandingPage() {
     const appFeatures = [
@@ -15,7 +16,20 @@ export default function LandingPage() {
     ];
 
     return (
-        <div className="landing-page-container yellow-gradient-bg text-slate-800">
+        <div className="landing-page-container yellow-gradient-bg text-slate-800 relative">
+            <div className="absolute inset-0 z-0">
+                <DotGrid
+                    dotSize={2}
+                    gap={25}
+                    baseColor="rgba(255,255,255,0.3)"
+                    activeColor="rgba(255,255,255,0.8)"
+                    proximity={100}
+                    shockRadius={200}
+                    shockStrength={2}
+                    resistance={500}
+                    returnDuration={1}
+                />
+            </div>
             <LandingHeader />
             <div className="landing-left-section">
                 {/* Left Text Section */}
