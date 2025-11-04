@@ -43,6 +43,7 @@ export default function LandingPage() {
                     verticalDistance={70}
                     delay={5000}
                     pauseOnHover={true}
+                    onCardClick={() => {}}
                 >
                     {appFeatures.map((feature, index) => (
                         <Card key={feature.name}>
