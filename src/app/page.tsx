@@ -1,11 +1,10 @@
-
 "use client";
 
 import React from 'react';
 import CardSwap, { Card } from '@/components/CardSwap';
 import { Filter, SlidersHorizontal, Zap } from 'lucide-react';
-import { Logo } from '@/components/icons/logo';
 import Link from 'next/link';
+import { LandingHeader } from '@/components/app/landing-header';
 
 export default function LandingPage() {
     const appFeatures = [
@@ -16,6 +15,7 @@ export default function LandingPage() {
 
     return (
         <div className="landing-page-container new-landing-style">
+            <LandingHeader />
             <div className="landing-left-section">
                 {/* Left Text Section */}
                 <div className="text-content">
