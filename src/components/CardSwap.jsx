@@ -2,8 +2,10 @@ import React, { Children, cloneElement, forwardRef, isValidElement, useEffect, u
 import gsap from 'gsap';
 import './CardSwap.css';
 
-export const Card = forwardRef(({ customClass, ...rest }, ref) => (
-  <div ref={ref} {...rest} className={`card ${customClass ?? ''} ${rest.className ?? ''}`.trim()} />
+export const Card = forwardRef(({ customClass, children, ...rest }, ref) => (
+  <div ref={ref} {...rest} className={`card ${customClass ?? ''} ${rest.className ?? ''}`.trim()}>
+    {children}
+  </div>
 ));
 Card.displayName = 'Card';
 
