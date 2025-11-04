@@ -21,7 +21,7 @@ export default function LandingPage() {
                 <DotGrid
                     dotSize={2}
                     gap={25}
-                    baseColor="rgba(255,255,255,0.3)"
+                    baseColor="rgba(0,0,0,0.3)"
                     activeColor="rgba(255,255,255,0.8)"
                     proximity={100}
                     shockRadius={200}
