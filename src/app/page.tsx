@@ -7,6 +7,7 @@ import Image from 'next/image';
 import './landing.css';
 import { CardSwap, Card } from '@/components/landing/CardSwap';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { LandingHeader } from '@/components/app/landing-header';
 
 export default function LandingDesktopPage() {
 
@@ -19,19 +20,14 @@ export default function LandingDesktopPage() {
 
     return (
         <div className="landing-container">
-            {/* Top Navigation */}
-            <nav className="landing-nav-bar">
-                <Link href="/" className="nav-btn">Home</Link>
-                <Link href="/about" className="nav-btn">About</Link>
-                <Link href="/contact" className="nav-btn">Contact</Link>
-            </nav>
+            <LandingHeader/>
 
             {/* Left Section: Logo and Slogan */}
             <div className="landing-left-section">
                 <div className="landing-content-wrapper">
-                    <h1 className="landing-logo">BachelorBite</h1>
+                    <h1 className="landing-logo">Card stacks have never looked so good</h1>
                     <h3 className="landing-slogan">
-                        No notes, no Excel—just one tap, done.
+                        Just look at it go!
                     </h3>
                 </div>
             </div>
