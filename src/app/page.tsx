@@ -39,7 +39,7 @@ export default function LandingPage() {
             name: "Welcome", 
             icon: <Zap />,
             content: (
-                <div className="w-full h-full relative flex items-center justify-center overflow-hidden animated-bg-grid-green">
+                <div className="w-full h-full relative flex items-center justify-center overflow-hidden animated-bg-grid-green border border-black/10">
                     <FloatingIcon icon={Utensils} top="15%" left="10%" delay="0s" />
                     <FloatingIcon icon={Calculator} top="25%" left="80%" delay="1s" />
                     <FloatingIcon icon={Zap} top="70%" left="20%" delay="2s" />
@@ -98,7 +98,7 @@ export default function LandingPage() {
             <div className="landing-left-section">
                 {/* Left Text Section */}
                 <div className="text-content">
-                     <p className="text-lg mb-2 font-medium">No notes, no Excel—just one tap, done.</p>
+                     <p className="text-lg text-foreground/80 mb-2 font-medium">No notes, no Excel—just one tap, done.</p>
                      <h1 className="background-headline">
                         <span className="text-black">Bachelor</span><span className="text-secondary">Bite.</span>
                     </h1>
