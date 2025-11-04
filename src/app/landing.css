@@ -28,7 +28,7 @@
 
 /* Left Section */
 .landing-left-section {
-  flex: 0 0 50%;
+  flex-basis: 50%;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -42,7 +42,7 @@
 
 /* Right Section */
 .landing-right-section {
-  flex-basis: 50%;
+  flex: 1;
   position: relative;
 }
 
@@ -52,8 +52,10 @@
   height: 100%;
   object-fit: cover;
   transition: transform 0.4s ease;
+  border-radius: 12px;
 }
-.card-swap-card:hover .card-image { transform: scale(1.05); }
+
+.card:hover .card-image { transform: scale(1.05); }
 
 /* Title Overlay */
 .card-title-overlay {
@@ -63,6 +65,7 @@
   right: 0;
   padding: 1.5rem;
   background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+  border-radius: 0 0 12px 12px;
 }
 .card-title-overlay h3 { color: #fff; font-size: 1.5rem; font-weight: 700; margin: 0; text-shadow: 0 2px 5px rgba(0,0,0,0.7); }
 
