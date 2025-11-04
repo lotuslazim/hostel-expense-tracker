@@ -43,28 +43,7 @@
 /* Right Section */
 .landing-right-section {
   flex: 1;
-  position: relative;
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-end;
-  padding: 2rem;
-}
-
-/* Individual Cards */
-.card-swap-card {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  border-radius: 16px;
-  overflow: hidden;
-  cursor: pointer;
-  box-shadow: var(--card-shadow);
-  border: 1px solid var(--card-border);
-  background: var(--color-black);
-  transform-style: preserve-3d;
-  will-change: transform;
-  backface-visibility: hidden;
+  position: relative; /* This is crucial for absolute positioning of children */
 }
 
 /* Card Image */
@@ -89,9 +68,12 @@
 
 /* Responsive */
 @media (max-width: 1024px) {
-  .card-swap-container { width: 90%; height: 60%; transform: translate(0,0); }
+  .landing-left-section {
+    flex-basis: 100%;
+    align-items: center;
+    text-align: center;
+  }
+  .landing-right-section {
+    display: none;
+  }
 }
-@media (max-width: 480px) {
-  .card-swap-container { width: 100%; height: 240px; }
-}
-
