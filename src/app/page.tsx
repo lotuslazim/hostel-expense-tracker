@@ -14,14 +14,13 @@ export default function LandingPage() {
     ];
 
     return (
-        <div className="landing-page-container">
+        <div className="landing-page-container new-landing-style">
             <div className="landing-left-section">
+                <div className="background-headline">BachelorBite</div>
                 <div className="text-content">
-                    <h2 className="headline-top">No notes, no Excel—just one tap, done.</h2>
-                    <div className="brand-name">
-                        <Logo textSize="large" textColor="text-primary-foreground" secondaryColor="text-secondary" />
-                    </div>
-                    <p className="sub-headline">Here to make your bachelor life easier — because someone has to. 😌</p>
+                    <h2 className="headline-main">
+                        The smoothest and safest way to store, buy, and sell your digital assets.
+                    </h2>
                 </div>
             </div>
             <div className="landing-right-section">

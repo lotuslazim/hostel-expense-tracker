@@ -4,45 +4,68 @@
     display: flex;
     min-height: 100vh;
     background-color: #F8F9F8;
-    color: #F0F0F5;
+    color: #333; /* Default text color for this style */
 }
 
 .landing-left-section {
     flex: 1;
-    background-color: hsl(var(--primary));
-    color: hsl(var(--primary-foreground));
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: flex-start;
     padding: 3rem;
+    position: relative; /* Needed for background text positioning */
+    overflow: hidden; /* Prevent background text from spilling out */
+}
+
+.background-headline {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    font-size: 15vw; /* Responsive font size based on viewport width */
+    font-weight: 900;
+    color: #e5ccff; /* Light pinkish/purple color from image */
+    z-index: 0;
+    white-space: nowrap;
+    user-select: none;
+    line-height: 1;
 }
 
 .text-content {
     max-width: 500px;
+    z-index: 1; /* Ensure text is above the background headline */
 }
 
-.headline-top {
-    font-size: 1.7rem;
-    margin-bottom: 2rem;
+.headline-main {
+    font-size: 2.5rem;
     font-weight: 500;
+    color: #000;
+    line-height: 1.2;
 }
 
-.brand-name {
-    margin-bottom: 2rem;
-}
-
+/* Hide old elements */
+.headline-top,
+.brand-name,
 .sub-headline {
-    font-size: 1.3rem;
-    opacity: 0.9;
+    display: none;
 }
-
 
 .landing-right-section {
     flex: 1;
     position: relative;
-    background-color: hsl(var(--primary));
+    background-color: transparent; /* Right side should be transparent to show page bg */
 }
+
+/* Specificity to override previous styles when new style is applied */
+.new-landing-style.landing-page-container {
+    background-color: #f0f0f0; /* Light grey background */
+}
+
+.new-landing-style .landing-left-section {
+    background-color: transparent; /* Left section should also be transparent */
+}
+
 
 @media (max-width: 768px) {
     .landing-page-container {
@@ -52,13 +75,26 @@
     .landing-left-section {
         flex-basis: auto;
         padding: 2rem;
-        text-align: center;
+        text-align: left;
         height: 50vh;
-        align-items: center;
+        align-items: flex-start;
+        justify-content: flex-end; /* Align content to bottom */
+        padding-bottom: 4rem;
+    }
+    
+    .background-headline {
+        font-size: 20vw;
+        top: 30%;
+    }
+
+    .headline-main {
+        font-size: 1.8rem;
     }
 
     .landing-right-section {
         flex-basis: auto;
         height: 50vh;
+        width: 100%;
     }
 }
+
