@@ -34,6 +34,7 @@ export default function LandingPage() {
             <div className="landing-left-section">
                 {/* Left Text Section */}
                 <div className="text-content">
+                     <p className="text-lg text-muted-foreground mb-2 font-medium">No notes, no Excel—just one tap, done.</p>
                      <h1 className="background-headline">
                         <span className="text-black">Bachelor</span><span className="text-secondary">Bite.</span>
                     </h1>
@@ -51,7 +52,7 @@ export default function LandingPage() {
                     </div>
                 </div>
             </div>
-            <div className="landing-right-section relative">
+            <div className="landing-right-section">
                 <CardSwap
                     cardDistance={60}
                     verticalDistance={70}
