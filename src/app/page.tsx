@@ -2,12 +2,9 @@
 "use client";
 
 import React from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
 import './landing.css';
-import { CardSwap, Card } from '@/components/landing/CardSwap';
+import CardSwap, { Card } from '@/components/CardSwap';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { LandingHeader } from '@/components/app/landing-header';
 
 export default function LandingDesktopPage() {
 
