@@ -1,7 +1,7 @@
 
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import CardSwap, { Card } from '@/components/CardSwap';
 import { Utensils, Calculator, Zap } from 'lucide-react';
 import Link from 'next/link';
@@ -9,19 +9,28 @@ import { LandingHeader } from '@/components/app/landing-header';
 import DotGrid from '@/components/DotGrid';
 import Image from 'next/image';
 
-const FloatingIcon = ({ icon: Icon, top, left, delay }: { icon: React.ElementType, top: string, left: string, delay: string }) => (
-    <div
-      className="absolute text-white/80 animate-float"
-      style={{
-        top,
-        left,
-        animationDelay: delay,
-        animationDuration: `${Math.random() * 5 + 5}s`,
-      }}
-    >
-      <Icon className="h-6 w-6" strokeWidth={1.5} />
-    </div>
-);
+const FloatingIcon = ({ icon: Icon, top, left, delay }: { icon: React.ElementType, top: string, left: string, delay: string }) => {
+    const [duration, setDuration] = useState('8s');
+
+    useEffect(() => {
+        // This code now runs only on the client, after hydration
+        setDuration(`${Math.random() * 5 + 5}s`);
+    }, []);
+
+    return (
+        <div
+          className="absolute text-white/80 animate-float"
+          style={{
+            top,
+            left,
+            animationDelay: delay,
+            animationDuration: duration,
+          }}
+        >
+          <Icon className="h-6 w-6" strokeWidth={1.5} />
+        </div>
+    );
+};
 
 
 export default function LandingPage() {
@@ -131,3 +140,4 @@ export default function LandingPage() {
         </div>
     );
 }
+
