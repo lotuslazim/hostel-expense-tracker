@@ -39,7 +39,7 @@ export default function LandingPage() {
             name: "Welcome", 
             icon: <Zap />,
             content: (
-                 <div className="w-full h-full grid grid-cols-2 items-center animated-bg-grid-green">
+                 <div className="w-full h-full grid grid-cols-2 items-center animated-bg-grid-green border border-black/10">
                     <div className="relative h-full flex items-center justify-center">
                          <Image 
                           src="/mascot.png"
@@ -91,8 +91,8 @@ export default function LandingPage() {
                 <DotGrid
                     dotSize={2}
                     gap={25}
-                    baseColor="rgba(0,0,0,0.3)"
-                    activeColor="rgba(0,0,0,0.5)"
+                    baseColor="rgba(0,0,0,0.1)"
+                    activeColor="rgba(0,0,0,0.3)"
                     proximity={100}
                     shockRadius={200}
                     shockStrength={2}
@@ -104,7 +104,7 @@ export default function LandingPage() {
             <div className="landing-left-section">
                 {/* Left Text Section */}
                 <div className="text-content">
-                     <p className="text-lg text-foreground/80 mb-2 font-medium">No notes, no Excel—just one tap, done.</p>
+                     <p className="text-lg text-black mb-2 font-medium">No notes, no Excel—just one tap, done.</p>
                      <h1 className="background-headline">
                         <span className="text-black">Bachelor</span><span className="text-secondary">Bite.</span>
                     </h1>
