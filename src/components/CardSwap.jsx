@@ -1,8 +1,9 @@
-
 import React, { Children, cloneElement, forwardRef, isValidElement, useEffect, useMemo, useRef } from 'react';
 import gsap from 'gsap';
 import './CardSwap.css';
 
+// Rationale: Removed TypeScript generics and types from the .jsx file to resolve syntax errors.
+// The component is now a standard JavaScript forwardRef component.
 export const Card = forwardRef(({ customClass, ...rest }, ref) => (
   <div ref={ref} {...rest} className={`card ${customClass ?? ''} ${rest.className ?? ''}`.trim()} />
 ));
@@ -27,6 +28,8 @@ const placeNow = (el, slot, skew) =>
     force3D: true
   });
 
+// Rationale: Removed TypeScript prop type definitions from the function signature to conform to JavaScript syntax.
+// The props are destructured with default values as before.
 const CardSwap = ({
   width = 500,
   height = 400,
@@ -73,13 +76,19 @@ const CardSwap = ({
 
   useEffect(() => {
     const total = refs.length;
-    refs.forEach((r, i) => placeNow(r.current, makeSlot(i, cardDistance, verticalDistance, total), skewAmount));
+    refs.forEach((r, i) => {
+        if(r.current) {
+            placeNow(r.current, makeSlot(i, cardDistance, verticalDistance, total), skewAmount)
+        }
+    });
 
     const swap = () => {
       if (order.current.length < 2) return;
 
       const [front, ...rest] = order.current;
       const elFront = refs[front].current;
+      if (!elFront) return;
+
       const tl = gsap.timeline();
       tlRef.current = tl;
 
@@ -92,6 +101,7 @@ const CardSwap = ({
       tl.addLabel('promote', `-=${config.durDrop * config.promoteOverlap}`);
       rest.forEach((idx, i) => {
         const el = refs[idx].current;
+        if (!el) return;
         const slot = makeSlot(i, cardDistance, verticalDistance, refs.length);
         tl.set(el, { zIndex: slot.zIndex }, 'promote');
         tl.to(
@@ -138,6 +148,7 @@ const CardSwap = ({
 
     if (pauseOnHover) {
       const node = container.current;
+      if (!node) return;
       const pause = () => {
         tlRef.current?.pause();
         clearInterval(intervalRef.current);
