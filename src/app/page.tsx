@@ -131,7 +131,7 @@ export default function LandingPage() {
     ];
 
     return (
-        <div className="landing-page-container text-slate-800 relative new-landing-style">
+        <div className="landing-page-container text-slate-800 relative new-landing-style yellow-gradient-bg">
             {/* Common background and header for both layouts */}
             <div className="absolute inset-0 z-0">
                 <DotGrid
@@ -188,7 +188,7 @@ export default function LandingPage() {
                     onCardClick={() => {}}
                 >
                     {appFeatures.map((feature) => (
-                         <Card key={feature.name}>
+                        <Card key={feature.name}>
                             <div className="card-header" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', borderBottom: '1px solid rgba(0, 0, 0, 0.1)', color: '#333' }}>
                                 {feature.icon}
                                 <h3>{feature.name}</h3>
@@ -203,7 +203,7 @@ export default function LandingPage() {
 
             {/* Mobile Layout (hidden on desktop) */}
             <div className="flex md:hidden flex-col items-center justify-center w-full min-h-screen mobile-landing-gradient p-4">
-                <div className="absolute inset-0 z-0">
+                 <div className="absolute inset-0 z-0">
                     <DotGrid dotSize={2} gap={25} baseColor="rgba(255,255,255,0.1)" activeColor="rgba(255,255,255,0.3)" proximity={100} shockRadius={200} shockStrength={2} resistance={500} returnDuration={1} />
                 </div>
                 <div className="flex flex-col items-center justify-center w-full h-full z-10 text-center">
