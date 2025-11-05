@@ -149,12 +149,11 @@ export default function LandingPage() {
             
             {/* Desktop Layout (hidden on mobile) */}
             <div className="hidden md:flex landing-left-section">
-                <div className="flex-grow" />
                 <Logo className="mb-10" textColor="text-slate-800" secondaryColor="text-secondary" />
                 <div className="flex-grow" />
                 <div className="text-content">
                      <p className="text-xl text-slate-800 mb-2 font-medium">No notes, no Excel—just one tap, done.</p>
-                     <h1 className="text-8xl font-extrabold tracking-tighter leading-none" style={{ userSelect: 'none' }}>
+                     <h1 className="text-7xl font-extrabold tracking-tighter leading-none" style={{ userSelect: 'none' }}>
                         <span className="text-slate-800">Bachelor</span><span className="text-secondary">Bite.</span>
                     </h1>
                     <p className="text-2xl text-slate-600 font-medium mt-6">
@@ -212,10 +211,8 @@ export default function LandingPage() {
                     </p>
                 </div>
                 <div className="w-full pb-8">
-                    <Link href="/about" legacyBehavior>
-                        <a className="bg-secondary text-white px-8 py-4 rounded-full font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-lg w-full max-w-sm mx-auto">
-                           Get Started <ArrowRight className="h-5 w-5" />
-                        </a>
+                    <Link href="/about" className="bg-secondary text-white px-8 py-4 rounded-full font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-lg w-full max-w-sm mx-auto">
+                       Get Started <ArrowRight className="h-5 w-5" />
                     </Link>
                 </div>
             </div>
