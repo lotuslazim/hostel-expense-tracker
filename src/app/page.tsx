@@ -1,40 +1,16 @@
 
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, from 'react';
 import CardSwap, { Card } from '@/components/CardSwap';
-import { Utensils, Calculator, Zap, CheckCircle, ArrowRight } from 'lucide-react';
+import { Utensils, Calculator, Zap, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { LandingHeader } from '@/components/app/landing-header';
 import DotGrid from '@/components/DotGrid';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { cn } from '@/lib/utils';
-import { Logo } from '@/components/icons/logo';
 import { Button } from '@/components/ui/button';
-
-
-const FloatingIcon = ({ icon: Icon, top, left, delay }: { icon: React.ComponentType, top: string, left: string, delay: string }) => {
-    const [duration, setDuration] = useState('8s');
-  
-    useEffect(() => {
-      // Generate a random duration on the client-side to avoid hydration mismatch
-      setDuration(`${(Math.random() * 5 + 5).toFixed(2)}s`);
-    }, []);
-  
-    const style = {
-      top,
-      left,
-      animationDelay: delay,
-      animationDuration: duration,
-    };
-  
-    return (
-      <div className="absolute text-white/80 animate-float" style={style}>
-        <Icon />
-      </div>
-    );
-};
 
 
 export default function LandingPage() {
@@ -57,7 +33,7 @@ export default function LandingPage() {
                             <div className="w-full h-full rounded-[1.5rem] overflow-hidden">
                                  <div className="w-full h-full bg-[#FFC247] flex flex-col items-center justify-between p-3">
                                     <p className="text-[10px] text-black/80 font-medium mt-2">Meet the</p>
-                                    <div className="relative w-24 h-24">
+                                    <div className="relative w-32 h-32">
                                          <Image src="/mascot.png" alt="Mascot" layout="fill" objectFit="contain" />
                                     </div>
                                     <div className="text-center">
