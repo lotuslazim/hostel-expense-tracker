@@ -75,7 +75,7 @@ export default function LandingPage() {
                         </ul>
                     </div>
                     <div className="h-full flex items-center justify-center p-4" style={{ perspective: '1000px' }}>
-                        <div className="relative w-48 h-96 bg-black rounded-[2rem] border-4 border-black shadow-lg" style={{ transform: 'rotateY(-20deg) rotateX(10deg)' }}>
+                        <div className="relative w-48 h-96 bg-black rounded-[2rem] border-4 border-black shadow-lg" style={{ transform: 'rotateY(-20deg) rotateX(10deg) translateY(-2rem)' }}>
                             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-4 bg-black rounded-b-lg"></div>
                             <div className="w-full h-full rounded-[1.7rem] overflow-hidden">
                                  <div className="w-full h-full bg-[#FFC247] flex flex-col items-center justify-between p-3">
