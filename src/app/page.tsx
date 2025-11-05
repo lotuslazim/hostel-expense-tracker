@@ -23,8 +23,8 @@ export default function LandingPage() {
             icon: <Zap />,
             content: (
                 <div className="w-full h-full grid grid-cols-1 md:grid-cols-2 bg-slate-800">
-                    <div className="p-8 flex flex-col justify-center h-full text-white">
-                         <h2 className="text-2xl font-bold font-headline mb-4">Welcome to BachelorBite.</h2>
+                    <div className="p-8 flex flex-col justify-center h-full">
+                         <h2 className="text-2xl font-bold font-headline mb-4 text-primary">Welcome to BachelorBite.</h2>
                         <p className="text-slate-300 text-sm">Effortlessly log meals, track expenses, and split costs with your flatmates—no spreadsheets, no hassle, just simple living made easy.</p>
                     </div>
                      <div className="h-full flex items-center justify-center p-4" style={{ perspective: '1000px' }}>
