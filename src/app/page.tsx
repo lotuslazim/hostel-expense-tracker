@@ -27,7 +27,7 @@ export default function LandingPage() {
                          <h2 className="text-2xl font-bold font-headline mb-4">Welcome to BachelorBite.</h2>
                         <p className="text-slate-300 text-sm">Effortlessly log meals, track expenses, and split costs with your flatmates—no spreadsheets, no hassle, just simple living made easy.</p>
                     </div>
-                    <div className="h-full flex items-center justify-center p-4" style={{ perspective: '1000px' }}>
+                     <div className="h-full flex items-center justify-center p-4" style={{ perspective: '1000px' }}>
                          <div className="relative w-40 h-80 bg-black rounded-[1.8rem] border-4 border-black shadow-lg" style={{ transform: 'rotateY(-20deg) rotateX(10deg) translateY(0) scale(0.9)' }}>
                             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-4 bg-black rounded-b-lg"></div>
                             <div className="w-full h-full rounded-[1.5rem] overflow-hidden">
@@ -105,11 +105,11 @@ export default function LandingPage() {
             <div className="landing-left-section">
                 {/* Left Text Section */}
                 <div className="text-content">
-                     <p className="text-lg text-white mb-2 font-medium">No notes, no Excel—just one tap, done.</p>
+                     <p className="text-lg text-slate-800 mb-2 font-medium">No notes, no Excel—just one tap, done.</p>
                      <h1 className="background-headline">
-                        <span className="text-white">Bachelor</span><span className="text-secondary">Bite.</span>
+                        <span className="text-slate-800">Bachelor</span><span className="text-secondary">Bite.</span>
                     </h1>
-                    <p className="headline-main text-gray-200">
+                    <p className="headline-main text-slate-600">
                         Here to make your bachelor life easier — because someone has to.
                     </p>
 
