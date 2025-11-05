@@ -61,29 +61,24 @@ export default function LandingPage() {
             name: "Effortless Logging",
             icon: <Utensils />,
             content: (
-                 <div className="w-full h-full bg-slate-100 text-slate-800 p-8 flex flex-col justify-between">
+                 <div className="w-full h-full bg-slate-50 text-slate-800 p-8 flex flex-col justify-between">
                     <div className="relative flex-grow flex items-center justify-center">
-                        <div className="absolute w-full h-full opacity-30">
-                            <div className="absolute w-24 h-24 bg-amber-100 rounded-full top-5 left-5"></div>
-                            <div className="absolute w-16 h-16 bg-green-100 rounded-full bottom-10 right-10"></div>
-                            <div className="absolute w-8 h-8 bg-slate-200 rounded-full bottom-20 left-16"></div>
-                        </div>
-
-                        <div className="relative w-56 h-56 flex items-center justify-center">
-                            <div className="absolute w-full h-full bg-white rounded-full shadow-inner"></div>
-                            <div className="absolute w-40 h-40 bg-white rounded-full flex items-center justify-center shadow-lg">
-                                <Plus className="h-16 w-16 text-green-500 stroke-[1.5]" />
-                            </div>
-                            <div className="absolute top-0 left-0 w-16 h-16 bg-white rounded-full shadow-md flex items-center justify-center animate-float" style={{ animationDelay: '0s' }}>
-                                <Utensils className="h-8 w-8 text-amber-500 opacity-80" />
-                            </div>
-                             <div className="absolute bottom-0 right-0 w-16 h-16 bg-white rounded-full shadow-md flex items-center justify-center animate-float" style={{ animationDelay: '1.5s' }}>
-                                <Wallet className="h-8 w-8 text-red-500 opacity-80" />
+                        <div className="absolute inset-0 bg-grid-pattern opacity-50"></div>
+                        <div className="relative w-60 h-40 bg-white rounded-xl shadow-lg flex items-center justify-center p-4">
+                            <div className="flex items-center gap-4">
+                                <button className="flex flex-col items-center justify-center h-20 w-20 bg-amber-100 text-amber-600 rounded-lg shadow-sm hover:scale-105 transition-transform">
+                                    <Utensils className="h-8 w-8"/>
+                                    <span className="text-xs font-medium mt-1">Log Meal</span>
+                                </button>
+                                 <button className="flex flex-col items-center justify-center h-20 w-20 bg-green-100 text-green-600 rounded-lg shadow-sm hover:scale-105 transition-transform">
+                                    <Wallet className="h-8 w-8"/>
+                                    <span className="text-xs font-medium mt-1">Add Expense</span>
+                                </button>
                             </div>
                         </div>
                     </div>
-                    <div>
-                        <h4 className="font-bold text-xl mb-1">Log Meals & Expenses</h4>
+                    <div className="relative z-10">
+                        <h4 className="font-bold text-xl mb-1">Effortless Logging</h4>
                         <p className="text-sm text-slate-500">Quickly log daily meals and shared expenses. No more forgotten payments or confusing notes.</p>
                         <Button variant="ghost" className="mt-4 p-0 h-auto text-green-600 hover:text-green-700">
                             Log an Entry <ArrowRight className="ml-2 h-4 w-4" />
@@ -96,34 +91,30 @@ export default function LandingPage() {
             name: "Auto Settlements",
             icon: <Calculator />,
             content: (
-                 <div className="w-full h-full bg-slate-100 text-slate-800 p-8 flex flex-col justify-between">
+                 <div className="w-full h-full bg-slate-50 text-slate-800 p-8 flex flex-col justify-between">
                     <div className="relative flex-grow flex items-center justify-center">
-                         <div className="absolute w-full h-full opacity-30">
-                            <div className="absolute w-24 h-24 bg-green-100 rounded-full top-5 right-5"></div>
-                            <div className="absolute w-16 h-16 bg-amber-100 rounded-full bottom-10 left-10"></div>
-                            <div className="absolute w-8 h-8 bg-slate-200 rounded-full top-20 left-16"></div>
-                        </div>
-                        <div className="relative w-64 h-48 bg-white rounded-2xl shadow-lg p-4 flex flex-col justify-between">
-                            <div className="flex justify-between items-center">
-                                <p className="text-xs font-semibold text-slate-500">Monthly Report</p>
+                        <div className="absolute inset-0 bg-grid-pattern opacity-50"></div>
+                        <div className="relative w-72 bg-white rounded-2xl shadow-lg p-4">
+                             <div className="flex justify-between items-center mb-3">
+                                <p className="text-xs font-semibold text-slate-400">Monthly Settlement</p>
                                 <FileText className="h-5 w-5 text-slate-400" />
                             </div>
-                            <div className="flex items-end gap-2">
-                                <div className="w-6 h-16 bg-amber-200 rounded-t-md animate-slide-up-fade" style={{ animationDelay: '0.2s' }}></div>
-                                <div className="w-6 h-24 bg-green-300 rounded-t-md animate-slide-up-fade" style={{ animationDelay: '0s' }}></div>
-                                <div className="w-6 h-12 bg-amber-200 rounded-t-md animate-slide-up-fade" style={{ animationDelay: '0.4s' }}></div>
-                                <div className="w-6 h-20 bg-red-200 rounded-t-md animate-slide-up-fade" style={{ animationDelay: '0.1s' }}></div>
-                            </div>
-                            <div className="border-t pt-2">
-                                <p className="text-xs text-slate-500">Balance</p>
-                                <p className="font-bold text-lg text-green-600">You get back ৳1,250.00</p>
+                             <div className="space-y-3">
+                                <div className="flex justify-between items-center p-2 rounded-lg bg-red-50 border border-red-200">
+                                    <p className="text-sm font-medium text-red-700">Alice Owes</p>
+                                    <p className="font-bold text-red-700">৳850.00</p>
+                                </div>
+                                <div className="flex justify-between items-center p-2 rounded-lg bg-green-50 border border-green-200">
+                                    <p className="text-sm font-medium text-green-700">Bob Gets Back</p>
+                                    <p className="font-bold text-green-700">৳1,250.00</p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div>
+                    <div className="relative z-10">
                         <h4 className="font-bold text-xl mb-1">Automatic Settlements</h4>
                         <p className="text-sm text-slate-500">Get a detailed report with a final settlement, all calculated automatically at the end of the month.</p>
-                        <Button variant="ghost" className="mt-4 p-0 h-auto text-green-600 hover:text-green-700">
+                        <Button variant="default" className="mt-4 bg-secondary text-secondary-foreground hover:bg-secondary/90">
                             View Report <ArrowRight className="ml-2 h-4 w-4" />
                         </Button>
                     </div>
@@ -193,3 +184,4 @@ export default function LandingPage() {
         </div>
     );
 }
+
