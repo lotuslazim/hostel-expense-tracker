@@ -22,7 +22,7 @@ export default function LandingPage() {
             name: "Welcome",
             icon: <Zap />,
             content: (
-                <div className="w-full h-full grid grid-cols-1 md:grid-cols-2 items-center animated-bg-grid-green">
+                <div className="w-full h-full grid grid-cols-1 md:grid-cols-2 animated-bg-grid-green">
                     <div className="p-8 flex flex-col justify-center h-full text-white">
                          <h2 className="text-2xl font-bold font-headline mb-4">Welcome to BachelorBite.</h2>
                         <p className="text-slate-300 text-sm">Effortlessly log meals, track expenses, and split costs with your flatmates—no spreadsheets, no hassle, just simple living made easy.</p>
@@ -117,7 +117,7 @@ export default function LandingPage() {
                         <Link href="/signup" className="bg-black text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:opacity-90 transition-all shadow-sm">
                            <span></span> SIGN UP
                         </Link>
-                         <Link href="/login" className="border border-white text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:bg-white/10 transition-all shadow-sm">
+                         <Link href="/login" className="border border-black text-black px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:bg-black/10 transition-all shadow-sm">
                            <span>▶</span> LOG IN
                          </Link>
                     </div>
