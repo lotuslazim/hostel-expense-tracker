@@ -22,7 +22,7 @@ export default function LandingPage() {
             name: "Welcome",
             icon: <Zap />,
             content: (
-                <div className="w-full h-full grid grid-cols-1 md:grid-cols-2 animated-bg-grid-green">
+                <div className="w-full h-full grid grid-cols-1 md:grid-cols-2">
                     <div className="p-8 flex flex-col justify-center h-full text-white">
                          <h2 className="text-2xl font-bold font-headline mb-4">Welcome to BachelorBite.</h2>
                         <p className="text-slate-300 text-sm">Effortlessly log meals, track expenses, and split costs with your flatmates—no spreadsheets, no hassle, just simple living made easy.</p>
@@ -32,12 +32,12 @@ export default function LandingPage() {
                             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-4 bg-black rounded-b-lg"></div>
                             <div className="w-full h-full rounded-[1.5rem] overflow-hidden">
                                  <div className="w-full h-full bg-[#FFC247] flex flex-col items-center justify-between p-3">
-                                     <p className="text-[10px] text-black/80 font-medium mt-1">Meet the</p>
-                                    <div className="relative w-36 h-36">
+                                     <p className="text-[10px] text-black/80 font-medium mt-2">Meet the</p>
+                                    <div className="relative w-40 h-40">
                                          <Image src="/mascot.png" alt="Mascot" fill sizes="10vw" className="object-contain" />
                                     </div>
                                     <div className="text-center">
-                                        <h1 className="font-headline text-[12px] font-bold leading-tight">
+                                        <h1 className="font-headline text-lg font-bold leading-tight">
                                             <span className="text-black">Bachelor</span>
                                             <span className="text-green-600">Bite.</span>
                                         </h1>
