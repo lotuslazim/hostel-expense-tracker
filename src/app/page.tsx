@@ -31,7 +31,7 @@ export default function LandingPage() {
                         <p className="text-slate-300 text-sm leading-relaxed">Your shared living, simplified. Log meals, track expenses, and split costs with your flatmates — no spreadsheets, no stress.</p>
                     </div>
                      <div className="relative h-full flex items-center justify-center" style={{ perspective: '1000px' }}>
-                         <div className="relative w-48 h-[24rem] transition-transform duration-500 hover:scale-105" style={{ transform: 'rotateY(-20deg) rotateX(10deg)' }}>
+                         <div className="relative w-56 h-[30rem] transition-transform duration-500 hover:scale-105" style={{ transform: 'rotateY(-20deg) rotateX(10deg)' }}>
                             <div className="absolute inset-0 bg-lime-400/20 rounded-full blur-3xl -z-10"></div>
                             <div className="relative w-full h-full bg-black/50 rounded-[2rem] border-2 border-slate-700/50 shadow-2xl backdrop-blur-sm">
                                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-4 bg-slate-900 rounded-b-lg"></div>
@@ -39,7 +39,7 @@ export default function LandingPage() {
                                      <div className="w-full h-full bg-[#FFC247] flex flex-col items-center justify-around p-3 rounded-[1.4rem]">
                                         <div className="mt-4">
                                             <p className="text-center text-xs text-slate-800 font-medium">Meet the</p>
-                                            <div className="relative w-40 h-40 mt-1">
+                                            <div className="relative w-44 h-44 mt-1">
                                                  <Image src="/mascot.png" alt="Mascot" fill sizes="10vw" className="object-contain" />
                                             </div>
                                         </div>
@@ -131,9 +131,6 @@ export default function LandingPage() {
 
     return (
         <div className="landing-page-container text-slate-800 relative new-landing-style yellow-gradient-bg">
-            <div className="absolute top-4 left-4 z-50">
-                <Logo className="text-slate-800" secondaryColor="text-secondary" />
-            </div>
             <div className="absolute inset-0 z-0">
                 <DotGrid
                     dotSize={2}
@@ -149,6 +146,7 @@ export default function LandingPage() {
             </div>
             <LandingHeader />
             <div className="landing-left-section">
+                <Logo className="text-slate-800 mb-10" secondaryColor="text-secondary" />
                 {/* Left Text Section */}
                 <div className="text-content">
                      <p className="text-xl text-slate-800 mb-2 font-medium">No notes, no Excel—just one tap, done.</p>
