@@ -33,7 +33,7 @@ export default function LandingPage() {
                             <div className="w-full h-full rounded-[1.8rem] overflow-hidden">
                                  <div className="w-full h-full bg-[#FFC247] flex flex-col items-center justify-between p-3">
                                      <p className="text-[10px] text-black/80 font-medium mt-2">Meet the</p>
-                                    <div className="relative w-44 h-44">
+                                    <div className="relative w-52 h-52">
                                          <Image src="/mascot.png" alt="Mascot" fill sizes="10vw" className="object-contain" />
                                     </div>
                                     <div className="text-center">
@@ -43,7 +43,7 @@ export default function LandingPage() {
                                         </h1>
                                         <p className="text-[8px] text-black/70 mt-0.5 px-1">No notes, no Excel—just one tap, done.</p>
                                     </div>
-                                    <Button className="w-full h-5 text-[9px] bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-full">
+                                    <Button className="w-full h-5 text-[9px] bg-emerald-500 hover:bg-emerald-600 text-white rounded-full">
                                         Get Started
                                         <ArrowRight className="ml-1 h-2 w-2" />
                                     </Button>
