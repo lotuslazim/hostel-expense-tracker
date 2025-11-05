@@ -25,7 +25,7 @@ export default function LandingPage() {
                  <div className="w-full h-full grid grid-cols-1 md:grid-cols-2 bg-[#232A34]">
                     <div className="p-8 flex flex-col justify-center h-full text-white">
                          <h2 className="text-2xl font-bold font-headline mb-4 text-[#FFC247]">Welcome to BachelorBite.</h2>
-                        <p className="text-slate-300 text-sm">Effortlessly log meals, track expenses, and split costs with your flatmates—no spreadsheets, no hassle, just simple living made easy.</p>
+                        <p className="text-slate-300 text-sm">Welcome to BachelorBite. Log meals, track expenses, and split costs with your flatmates — no spreadsheets, no hassle. Just simple living, made effortless.</p>
                     </div>
                      <div className="h-full flex items-center justify-center p-4" style={{ perspective: '1000px' }}>
                          <div className="relative">
@@ -100,13 +100,13 @@ export default function LandingPage() {
                                 <FileText className="h-5 w-5 text-slate-400" />
                             </div>
                              <div className="space-y-3">
-                                <div className="flex justify-between items-center p-2 rounded-lg bg-red-50 border border-red-200">
-                                    <p className="text-sm font-medium text-red-700">Alice Owes</p>
-                                    <p className="font-bold text-red-700">৳850.00</p>
+                                <div className="flex justify-between items-center p-2 rounded-lg bg-red-100 border border-red-200">
+                                    <p className="text-sm font-medium text-red-800">Alice Owes</p>
+                                    <p className="font-bold text-red-800">৳850.00</p>
                                 </div>
-                                <div className="flex justify-between items-center p-2 rounded-lg bg-green-50 border border-green-200">
-                                    <p className="text-sm font-medium text-green-700">Bob Gets Back</p>
-                                    <p className="font-bold text-green-700">৳1,250.00</p>
+                                <div className="flex justify-between items-center p-2 rounded-lg bg-green-100 border border-green-200">
+                                    <p className="text-sm font-medium text-green-800">Bob Gets Back</p>
+                                    <p className="font-bold text-green-800">৳1,250.00</p>
                                 </div>
                             </div>
                         </div>
@@ -186,4 +186,5 @@ export default function LandingPage() {
         </div>
     );
 }
+
 
