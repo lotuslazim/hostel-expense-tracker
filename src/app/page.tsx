@@ -76,7 +76,7 @@ export default function LandingPage() {
             icon: <Utensils />,
             content: (
                 <div className={cn("card-feature-content", "relative w-full h-full text-white p-6 flex flex-col justify-end")}>
-                     {dashboardImage && <Image src={dashboardImage.imageUrl} alt="Effortless Logging" layout="fill" className="object-cover" />}
+                     {dashboardImage && <Image src={dashboardImage.imageUrl} alt="Effortless Logging" fill className="object-cover" />}
                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                      <div className="relative z-10">
                         <Utensils className="h-8 w-8 text-primary mb-2" />
@@ -91,7 +91,7 @@ export default function LandingPage() {
             icon: <Calculator />,
             content: (
                 <div className={cn("card-feature-content", "relative w-full h-full text-white p-6 flex flex-col justify-end")}>
-                    {reportImage && <Image src={reportImage.imageUrl} alt="Auto Settlements" layout="fill" className="object-cover" />}
+                    {reportImage && <Image src={reportImage.imageUrl} alt="Auto Settlements" fill className="object-cover" />}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                     <div className="relative z-10">
                         <Calculator className="h-8 w-8 text-primary mb-2" />
