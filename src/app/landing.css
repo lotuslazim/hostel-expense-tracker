@@ -76,7 +76,7 @@
 
 /* Specificity to override previous styles when new style is applied */
 .new-landing-style.landing-page-container {
-    background-color: #f5f5f5; /* Light grey background */
+    background-color: #FFC247;
 }
 
 .new-landing-style .landing-left-section {
