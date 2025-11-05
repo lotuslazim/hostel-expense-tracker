@@ -47,45 +47,43 @@ export default function LandingPage() {
             icon: <Zap />,
             content: (
                 <div className="w-full h-full grid grid-cols-2 items-center bg-gray-50">
-                    <div className="p-6 flex flex-col justify-center h-full">
+                    <div className="p-4 flex flex-col justify-center h-full">
                         <Logo textColor="text-black" secondaryColor="text-green-600" />
-                        <p className="mt-2 text-gray-600 text-sm">Your all-in-one solution for shared living.</p>
-                        <ul className="mt-4 space-y-2 text-gray-700 text-sm">
+                        <p className="mt-1 text-gray-600 text-xs">Your all-in-one solution for shared living.</p>
+                        <ul className="mt-3 space-y-1.5 text-gray-700 text-xs">
                             <li className="flex items-start gap-2">
-                                <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
+                                <CheckCircle className="h-3.5 w-3.5 text-green-600 mt-0.5 shrink-0" />
                                 <span><span className="font-semibold">Log Meals:</span> Keep track of daily meals effortlessly.</span>
                             </li>
                             <li className="flex items-start gap-2">
-                                <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
+                                <CheckCircle className="h-3.5 w-3.5 text-green-600 mt-0.5 shrink-0" />
                                 <span><span className="font-semibold">Track Expenses:</span> Record shared costs for groceries, bills, and more.</span>
                             </li>
                              <li className="flex items-start gap-2">
-                                <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
+                                <CheckCircle className="h-3.5 w-3.5 text-green-600 mt-0.5 shrink-0" />
                                 <span><span className="font-semibold">Auto-Settle:</span> Automatically calculate who owes what at the end of the month.</span>
                             </li>
                         </ul>
                     </div>
                     <div className="h-full flex items-center justify-center bg-gray-100 p-4">
-                        {/* Phone Mockup */}
-                        <div className="relative w-48 h-96 bg-black rounded-[2rem] border-8 border-black shadow-2xl">
-                             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-3 bg-black rounded-b-md"></div>
-                            <div className="w-full h-full rounded-[1.5rem] overflow-hidden">
-                                 {/* Phone Screen Content */}
-                                 <div className="w-full h-full bg-[#FFC247] flex flex-col items-center justify-between p-3">
-                                    <div className="text-center mt-6">
-                                        <p className="text-xs text-black/80">Meet the</p>
-                                        <h1 className="font-headline text-xl font-bold">
+                        <div className="relative w-40 h-80 bg-black rounded-[1.5rem] border-4 border-black shadow-lg">
+                             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-10 h-2.5 bg-black rounded-b-md"></div>
+                            <div className="w-full h-full rounded-[1.2rem] overflow-hidden">
+                                 <div className="w-full h-full bg-[#FFC247] flex flex-col items-center justify-between p-2">
+                                    <div className="text-center mt-4">
+                                        <p className="text-[10px] text-black/80">Meet the</p>
+                                        <h1 className="font-headline text-lg font-bold leading-tight">
                                             <span className="text-black">Bachelor</span>
                                             <span className="text-green-600">Bite.</span>
                                         </h1>
-                                        <p className="text-[10px] text-black/70 mt-1">No notes, no Excel—just one tap, done.</p>
+                                        <p className="text-[9px] text-black/70 mt-0.5">No notes, no Excel—just one tap, done.</p>
                                     </div>
-                                    <div className="relative w-28 h-28">
+                                    <div className="relative w-24 h-24">
                                          <Image src="/mascot.png" alt="Mascot" layout="fill" objectFit="contain" />
                                     </div>
-                                     <Button className="w-full h-8 text-xs bg-green-600 hover:bg-green-700 text-white rounded-full">
+                                     <Button className="w-full h-7 text-[10px] bg-green-600 hover:bg-green-700 text-white rounded-full">
                                         Get Started
-                                        <ArrowRight className="ml-1 h-3 w-3" />
+                                        <ArrowRight className="ml-1 h-2.5 w-2.5" />
                                     </Button>
                                  </div>
                             </div>
