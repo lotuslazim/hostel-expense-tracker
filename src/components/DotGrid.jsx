@@ -41,7 +41,7 @@ const DotGrid = ({
   resistance = 750,
   returnDuration = 1.5,
   className = '',
-  style
+  style = {}
 }) => {
   const wrapperRef = useRef(null);
   const canvasRef = useRef(null);
@@ -266,3 +266,5 @@ const DotGrid = ({
 };
 
 export default DotGrid;
+
+    
