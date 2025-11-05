@@ -203,7 +203,7 @@ export default function LandingPage() {
                 </div>
                 <div className="flex-grow flex items-center">
                     <div className="text-content">
-                         <p className="text-xl text-slate-800 font-medium">No notes, no Excel—just one tap, done.</p>
+                         <p className="text-2xl text-slate-800 font-medium">No notes, no Excel—just one tap, done.</p>
                          <h1 className="text-8xl font-extrabold tracking-tighter leading-none my-4" style={{ userSelect: 'none' }}>
                             <span className="text-slate-800">Bachelor</span><span className="text-secondary">Bite.</span>
                         </h1>
@@ -277,7 +277,7 @@ export default function LandingPage() {
             </h1>
             <p className="text-sm text-slate-600">No notes, no Excel—just one tap, done.</p>
             <p className="text-base text-slate-600 font-medium mt-1">
-                Here to make your bachelor life easier.
+                Here to make your bachelor<br/> life easier.
             </p>
             <Link
                 href="/about"
