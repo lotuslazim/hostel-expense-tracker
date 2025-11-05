@@ -113,7 +113,7 @@ export default function LandingPage() {
                     </div>
                     <div className="relative z-10">
                         <h4 className="font-bold text-xl mb-1">Automatic Settlements</h4>
-                        <p className="text-sm text-slate-500">Get a detailed report with a final settlement, all calculated automatically at the end of the month.</p>
+                        <p className="text-sm text-slate-500">Let us take care of the numbers. Each month, we automatically prepare your final settlement and give you a clear, downloadable report — so wrapping up your accounts feels effortless.</p>
                         <Button variant="default" className="mt-4 bg-secondary text-secondary-foreground hover:bg-secondary/90">
                             View Report <ArrowRight className="ml-2 h-4 w-4" />
                         </Button>
@@ -184,4 +184,5 @@ export default function LandingPage() {
         </div>
     );
 }
+
 
