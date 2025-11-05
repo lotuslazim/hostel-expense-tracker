@@ -23,7 +23,7 @@ export default function LandingPage() {
             icon: <Zap />,
             content: (
                 <div className="w-full h-full grid grid-cols-1 md:grid-cols-2 bg-gradient-to-r from-[#0F172A] via-[#1E293B] to-[#0F172A] text-white p-8 md:p-12 overflow-hidden">
-                    <div className="flex flex-col justify-center h-full">
+                    <div className="flex flex-col">
                         <h2 className="text-3xl md:text-4xl font-bold font-headline mb-4">
                            Welcome to <span className="text-gradient-brand">BachelorBite</span>.
                         </h2>
@@ -190,3 +190,5 @@ export default function LandingPage() {
         </div>
     );
 }
+
+    
