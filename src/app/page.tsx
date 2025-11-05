@@ -146,7 +146,7 @@ export default function LandingPage() {
             </div>
             <LandingHeader />
             <div className="landing-left-section">
-                <Logo className="text-slate-800" secondaryColor="text-secondary" />
+                <Logo className="mb-10 text-slate-800" textColor="text-black" secondaryColor="text-secondary" />
                 <div className="flex-grow" />
                 {/* Left Text Section */}
                 <div className="text-content">
