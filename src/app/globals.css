@@ -82,9 +82,6 @@
   body {
     @apply bg-background text-foreground font-body;
   }
-  .yellow-gradient-bg {
-    background-image: linear-gradient(to top, #FFDB58, #FFC947);
-  }
 }
 
 @layer utilities {

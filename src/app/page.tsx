@@ -87,29 +87,16 @@ export default function LandingPage() {
     ];
 
     return (
-        <div className="landing-page-container yellow-gradient-bg text-slate-800 relative new-landing-style">
-            <div className="absolute inset-0 z-0">
-                <DotGrid
-                    dotSize={2}
-                    gap={25}
-                    baseColor="rgba(0,0,0,0.1)"
-                    activeColor="rgba(0,0,0,0.3)"
-                    proximity={100}
-                    shockRadius={200}
-                    shockStrength={2}
-                    resistance={500}
-                    returnDuration={1}
-                />
-            </div>
+        <div className="landing-page-container text-slate-800 relative new-landing-style">
             <LandingHeader />
             <div className="landing-left-section">
                 {/* Left Text Section */}
                 <div className="text-content">
-                     <p className="text-lg text-black mb-2 font-medium">No notes, no Excel—just one tap, done.</p>
+                     <p className="text-lg text-white mb-2 font-medium">No notes, no Excel—just one tap, done.</p>
                      <h1 className="background-headline">
-                        <span className="text-black">Bachelor</span><span className="text-secondary">Bite.</span>
+                        <span className="text-white">Bachelor</span><span className="text-secondary">Bite.</span>
                     </h1>
-                    <p className="headline-main">
+                    <p className="headline-main text-slate-300">
                         Here to make your bachelor life easier — because someone has to.
                     </p>
 
@@ -117,7 +104,7 @@ export default function LandingPage() {
                         <Link href="/signup" className="bg-black text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:opacity-90 transition-all shadow-sm">
                            <span></span> SIGN UP
                         </Link>
-                         <Link href="/login" className="border border-black text-black px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:bg-gray-100 transition-all shadow-sm">
+                         <Link href="/login" className="border border-white text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:bg-gray-100/10 transition-all shadow-sm">
                            <span>▶</span> LOG IN
                          </Link>
                     </div>
