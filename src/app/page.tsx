@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React from 'react';
@@ -22,25 +23,32 @@ export default function LandingPage() {
             name: "Welcome",
             icon: <Zap />,
             content: (
-                 <div className="w-full h-full grid grid-cols-1 md:grid-cols-2 bg-[#232A34]">
-                    <div className="p-8 flex flex-col justify-center h-full text-white">
-                         <h2 className="text-2xl font-bold font-headline mb-4 text-[#FFC247]">Welcome to BachelorBite.</h2>
-                        <p className="text-slate-300 text-sm">Welcome to BachelorBite. Log meals, track expenses, and split costs with your flatmates — no spreadsheets, no hassle. Just simple living, made effortless.</p>
+                <div className="w-full h-full grid grid-cols-1 md:grid-cols-2 bg-gradient-to-r from-[#0F172A] via-[#1E293B] to-[#0F172A] text-white p-8 md:p-12 overflow-hidden">
+                    <div className="flex flex-col justify-center h-full">
+                        <h2 className="text-3xl md:text-4xl font-bold font-headline mb-4">
+                            Welcome to <span className="text-gradient-brand">BachelorBite.</span>
+                        </h2>
+                        <p className="text-slate-300 text-sm leading-relaxed">Your shared living, simplified. Log meals, track expenses, and split costs with your flatmates — no spreadsheets, no stress.</p>
+                         <Button asChild className="mt-8 w-fit bg-slate-50 text-slate-800 hover:bg-slate-200">
+                           <Link href="/signup">
+                                Get Started Free <ArrowRight className="ml-2 h-4 w-4" />
+                           </Link>
+                        </Button>
                     </div>
-                     <div className="h-full flex items-center justify-center p-4" style={{ perspective: '1000px' }}>
-                         <div className="relative">
-                            <div className="relative w-48 h-96 bg-black rounded-[2rem] border-4 border-black shadow-lg" style={{ transform: 'rotateY(-20deg) rotateX(10deg) translateY(-2rem) scale(0.8)' }}>
-                                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-4 bg-black rounded-b-lg"></div>
-                                <div className="w-full h-full rounded-[1.8rem] overflow-hidden">
-                                     <div className="w-full h-full bg-[#FFC247] flex flex-col items-center justify-between p-3">
-                                         <p className="text-[10px] text-black/80 font-medium mt-2">Meet the</p>
+                     <div className="relative h-full flex items-center justify-center" style={{ perspective: '1000px' }}>
+                         <div className="relative w-48 h-96 transition-transform duration-500 hover:scale-105" style={{ transform: 'rotateY(-20deg) rotateX(10deg) translateY(-1rem)' }}>
+                            <div className="absolute inset-0 bg-lime-400/20 rounded-full blur-3xl -z-10"></div>
+                            <div className="relative w-full h-full bg-black/50 rounded-[2rem] border-2 border-slate-700/50 shadow-2xl backdrop-blur-sm">
+                                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-4 bg-slate-900 rounded-b-lg"></div>
+                                <div className="w-full h-full rounded-[1.8rem] overflow-hidden p-1.5">
+                                     <div className="w-full h-full bg-[#FFC247] flex flex-col items-center justify-between p-3 rounded-[1.4rem]">
                                         <div className="relative w-52 h-52">
                                              <Image src="/mascot.png" alt="Mascot" fill sizes="10vw" className="object-contain" />
                                         </div>
-                                        <div className="text-center">
+                                        <div className="text-center -mt-8">
                                             <h1 className="font-headline text-lg font-bold leading-tight">
-                                                <span className="text-black">Bachelor</span>
-                                                <span className="text-green-600">Bite.</span>
+                                                <span className="text-slate-800">Bachelor</span>
+                                                <span className="text-green-700">Bite.</span>
                                             </h1>
                                             <p className="text-[8px] text-black/70 mt-0.5 px-1">No notes, no Excel—just one tap, done.</p>
                                         </div>
@@ -51,7 +59,6 @@ export default function LandingPage() {
                                      </div>
                                 </div>
                             </div>
-                            <div className="mascot-shadow"></div>
                          </div>
                     </div>
                 </div>
@@ -100,7 +107,7 @@ export default function LandingPage() {
                                 <FileText className="h-5 w-5 text-slate-400" />
                             </div>
                              <div className="space-y-3">
-                                <div className="flex justify-between items-center p-2 rounded-lg bg-red-100 border border-red-200">
+                                 <div className="flex justify-between items-center p-2 rounded-lg bg-red-100 border border-red-200">
                                     <p className="text-sm font-medium text-red-800">Alice Owes</p>
                                     <p className="font-bold text-red-800">৳850.00</p>
                                 </div>
@@ -186,5 +193,3 @@ export default function LandingPage() {
         </div>
     );
 }
-
-
