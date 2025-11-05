@@ -23,7 +23,7 @@ export default function LandingPage() {
             icon: <Zap />,
             content: (
                  <div className="w-full h-full grid grid-cols-1 md:grid-cols-2 bg-[#232A34]">
-                    <div className="p-8 flex flex-col justify-center h-full text-white">
+                    <div className="p-8 flex flex-col justify-center h-full">
                          <h2 className="text-2xl font-bold font-headline mb-4 text-[#FFC247]">Welcome to BachelorBite.</h2>
                         <p className="text-slate-300 text-sm">Effortlessly log meals, track expenses, and split costs with your flatmates—no spreadsheets, no hassle, just simple living made easy.</p>
                     </div>
@@ -31,18 +31,17 @@ export default function LandingPage() {
                          <div className="relative">
                             <div className="relative w-48 h-96 bg-black rounded-[2rem] border-4 border-black shadow-lg" style={{ transform: 'rotateY(-20deg) rotateX(10deg) translateY(-2rem) scale(0.8)' }}>
                                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-4 bg-black rounded-b-lg"></div>
-                                <div className="w-full h-full rounded-[1.8rem] overflow-hidden">
-                                     <div className="w-full h-full bg-[#FFC247] flex flex-col items-center justify-between p-3">
-                                         <p className="text-[10px] text-black/80 font-medium mt-2">Meet the</p>
+                                <div className="w-full h-full bg-[#232A34] flex flex-col items-center justify-between p-3">
+                                         <p className="text-[10px] text-white/80 font-medium mt-2">Meet the</p>
                                         <div className="relative w-52 h-52">
                                              <Image src="/mascot.png" alt="Mascot" fill sizes="10vw" className="object-contain" />
                                         </div>
                                         <div className="text-center">
                                             <h1 className="font-headline text-lg font-bold leading-tight">
-                                                <span className="text-black">Bachelor</span>
+                                                <span className="text-white">Bachelor</span>
                                                 <span className="text-green-600">Bite.</span>
                                             </h1>
-                                            <p className="text-[8px] text-black/70 mt-0.5 px-1">No notes, no Excel—just one tap, done.</p>
+                                            <p className="text-[8px] text-white/70 mt-0.5 px-1">No notes, no Excel—just one tap, done.</p>
                                         </div>
                                         <Button className="w-full h-5 text-[9px] bg-emerald-500 hover:bg-emerald-600 text-white rounded-full">
                                             Get Started
@@ -79,7 +78,7 @@ export default function LandingPage() {
                     </div>
                     <div className="relative z-10">
                         <h4 className="font-bold text-xl mb-1">Effortless Logging</h4>
-                        <p className="text-sm text-slate-500">Go beyond notes. One-tap entries are automatically organized for instant tracking and settlement.</p>
+                        <p className="text-sm text-slate-500">Log everything with a single tap — we’ll handle the rest. Every entry is automatically organized for easy tracking and hassle-free settlements.</p>
                         <Button variant="ghost" className="mt-4 p-0 h-auto text-green-600 hover:text-green-700">
                             Log an Entry <ArrowRight className="ml-2 h-4 w-4" />
                         </Button>
@@ -184,5 +183,3 @@ export default function LandingPage() {
         </div>
     );
 }
-
-
