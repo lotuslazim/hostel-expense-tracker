@@ -1,9 +1,9 @@
 
 "use client";
 
-import React from 'react';
+import React, { useRef, useLayoutEffect } from 'react';
 import CardSwap, { Card } from '@/components/CardSwap';
-import { Utensils, Calculator, Zap, ArrowRight, Wallet, Check, Plus, FileText, BarChart2, Calendar } from 'lucide-react';
+import { Utensils, Calculator, Zap, ArrowRight, Wallet, Check, Plus, FileText, BarChart2, Calendar, Wheat, CheckCircle, Leaf, Home } from 'lucide-react';
 import Link from 'next/link';
 import { LandingHeader } from '@/components/app/landing-header';
 import DotGrid from '@/components/DotGrid';
@@ -12,6 +12,53 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/icons/logo';
+import { gsap } from "gsap";
+
+
+const FloatingElements = () => {
+    const containerRef = useRef<HTMLDivElement>(null);
+  
+    useLayoutEffect(() => {
+      const ctx = gsap.context(() => {
+        const elements = gsap.utils.toArray(".floating-element-landing");
+        elements.forEach((el: any) => {
+          gsap.to(el, {
+            y: 'random(-20, 20)',
+            x: 'random(-10, 10)',
+            duration: 'random(5, 8)',
+            ease: 'sine.inOut',
+            repeat: -1,
+            yoyo: true,
+          });
+        });
+      }, containerRef);
+  
+      return () => ctx.revert();
+    }, []);
+  
+    const elements = [
+        { Icon: Utensils, size: "w-8 h-8", top: "15%", left: "10%" },
+        { Icon: Wheat, size: "w-6 h-6", top: "25%", left: "80%" },
+        { Icon: CheckCircle, size: "w-6 h-6", top: "70%", left: "20%" },
+        { Icon: Utensils, size: "w-10 h-10", top: "85%", left: "90%" },
+        { Icon: Leaf, size: "w-7 h-7", top: "50%", left: "5%" },
+        { Icon: Home, size: "w-9 h-9", top: "80%", left: "50%" },
+    ];
+  
+    return (
+      <div ref={containerRef} className="absolute inset-0 z-0 overflow-hidden">
+        {elements.map((el, i) => (
+          <div
+            key={i}
+            className={`floating-element-landing absolute ${el.size} text-white opacity-80 filter drop-shadow-lg`}
+            style={{ top: el.top, left: el.left }}
+          >
+            <el.Icon strokeWidth={1.5}/>
+          </div>
+        ))}
+      </div>
+    );
+};
 
 
 export default function LandingPage() {
@@ -131,7 +178,7 @@ export default function LandingPage() {
 
     return (
         <div className="landing-page-container text-slate-800 relative new-landing-style yellow-gradient-bg">
-            {/* Common background and header for both layouts */}
+            {/* Common background for both layouts */}
             <div className="absolute inset-0 z-0">
                 <DotGrid
                     dotSize={2}
@@ -145,11 +192,11 @@ export default function LandingPage() {
                     returnDuration={1}
                 />
             </div>
-            <div className="hidden md:block">
-              <LandingHeader />
-            </div>
             
             {/* Desktop Layout (hidden on mobile) */}
+             <div className="hidden md:block fixed top-4 left-0 right-0 w-full px-4 z-50">
+                <LandingHeader />
+            </div>
             <div className="hidden md:flex landing-left-section">
                 <div className="flex-grow-0">
                     <Logo textColor="text-slate-800" secondaryColor="text-secondary" />
@@ -176,7 +223,7 @@ export default function LandingPage() {
                 </div>
                  <div className="flex-grow-0" />
             </div>
-            <div className="hidden md:flex landing-right-section mt-16">
+            <div className="hidden md:flex landing-right-section">
                 <CardSwap
                     width={580}
                     height={480}
@@ -202,6 +249,7 @@ export default function LandingPage() {
 
             {/* Mobile Layout (hidden on desktop) */}
             <div className="flex md:hidden flex-col items-center justify-center w-full min-h-screen px-4 text-center z-10">
+                 <FloatingElements />
                 <div className="flex-grow flex flex-col items-center justify-center gap-2">
                     <p className="text-2xl font-medium text-slate-800">Meet the</p>
                     <div className="relative w-[22rem] h-[22rem] my-1">
