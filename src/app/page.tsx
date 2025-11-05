@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React from 'react';
@@ -26,7 +25,7 @@ export default function LandingPage() {
                 <div className="w-full h-full grid grid-cols-1 md:grid-cols-2 bg-gradient-to-r from-[#0F172A] via-[#1E293B] to-[#0F172A] text-white p-8 md:p-12 overflow-hidden">
                     <div className="flex flex-col justify-center h-full">
                         <h2 className="text-3xl md:text-4xl font-bold font-headline mb-4">
-                            Welcome to <span className="text-gradient-brand">BachelorBite.</span>
+                            Welcome to <span className="text-gradient-brand">BachelorBite</span>.
                         </h2>
                         <p className="text-slate-300 text-sm leading-relaxed">Your shared living, simplified. Log meals, track expenses, and split costs with your flatmates — no spreadsheets, no stress.</p>
                          <Button asChild className="mt-8 w-fit bg-slate-50 text-slate-800 hover:bg-slate-200">
@@ -42,7 +41,7 @@ export default function LandingPage() {
                                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-4 bg-slate-900 rounded-b-lg"></div>
                                 <div className="w-full h-full rounded-[1.8rem] overflow-hidden p-1.5">
                                      <div className="w-full h-full bg-[#FFC247] flex flex-col items-center justify-between p-3 rounded-[1.4rem]">
-                                        <div className="relative w-28 h-28">
+                                        <div className="relative w-36 h-36">
                                              <Image src="/mascot.png" alt="Mascot" fill sizes="10vw" className="object-contain" />
                                         </div>
                                         <div className="text-center">
