@@ -46,36 +46,13 @@ export default function LandingPage() {
             name: "Welcome",
             icon: <Zap />,
             content: (
-                <div className="w-full h-full grid grid-cols-2 items-center bg-slate-900">
+                <div className="w-full h-full grid grid-cols-1 md:grid-cols-2 items-center bg-slate-900">
                     <div className="p-8 flex flex-col justify-center h-full text-white">
-                        <h2 className="text-3xl font-bold font-headline mb-4">Simplify Shared Living</h2>
-                        <p className="text-slate-400 text-sm mb-6">BachelorBite is the all-in-one solution for managing meals and expenses with your flatmates.</p>
-                        <ul className="space-y-4 text-slate-300 text-sm">
-                            <li className="flex items-start gap-3">
-                                <CheckCircle className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-                                <div>
-                                    <span className="font-semibold text-white">Log Meals & Expenses</span>
-                                    <p className="text-xs text-slate-400">Keep track of daily meals effortlessly.</p>
-                                </div>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <CheckCircle className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-                                <div>
-                                    <span className="font-semibold text-white">Track Expenses</span>
-                                    <p className="text-xs text-slate-400">Record shared costs for groceries, bills, and more.</p>
-                                </div>
-                            </li>
-                             <li className="flex items-start gap-3">
-                                <CheckCircle className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-                                <div>
-                                    <span className="font-semibold text-white">Auto-Settle</span>
-                                    <p className="text-xs text-slate-400">Automatically calculate who owes what.</p>
-                                </div>
-                            </li>
-                        </ul>
+                         <h2 className="text-2xl font-bold font-headline mb-4">Welcome to BachelorBite.</h2>
+                        <p className="text-slate-300 text-base">Effortlessly log meals, track expenses, and split costs with your flatmates—no spreadsheets, no hassle, just simple living made easy.</p>
                     </div>
                     <div className="h-full flex items-center justify-center p-4" style={{ perspective: '1000px' }}>
-                        <div className="relative w-48 h-96 bg-black rounded-[2rem] border-4 border-black shadow-lg" style={{ transform: 'rotateY(-20deg) rotateX(10deg) translateY(-2rem)' }}>
+                         <div className="relative w-48 h-96 bg-black rounded-[2rem] border-4 border-black shadow-lg" style={{ transform: 'rotateY(-15deg) rotateX(5deg) translateY(-1rem) scale(0.95)' }}>
                             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-4 bg-black rounded-b-lg"></div>
                             <div className="w-full h-full rounded-[1.7rem] overflow-hidden">
                                  <div className="w-full h-full bg-[#FFC247] flex flex-col items-center justify-between p-3">
