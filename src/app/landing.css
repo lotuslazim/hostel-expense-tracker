@@ -2,6 +2,7 @@
 
 
 
+
 .landing-page-container {
     display: flex;
     min-height: 100vh;
@@ -24,7 +25,7 @@
 }
 
 .background-headline {
-    font-size: 8rem; /* Adjusted font size */
+    font-size: 7rem; /* Adjusted font size */
     line-height: 1;
     font-weight: 800; /* extrabold */
     color: #e9b8ef; /* soft pink */
@@ -33,7 +34,7 @@
 }
 
 .headline-main {
-    font-size: 1.5rem; /* 2xl */
+    font-size: 1.25rem; /* 2xl -> xl */
     color: #374151; /* gray-700 */
     font-weight: 500; /* medium */
     margin-top: 1.5rem; /* mt-6 */
@@ -108,3 +109,6 @@
         justify-content: center;
     }
 }
+
+
+    
