@@ -28,6 +28,7 @@
     justify-content: center;
     width: 100%;
     height: 300px; /* Reduced for mobile */
+    flex-shrink: 0; /* Prevents the carousel from shrinking */
 }
 
 .carousel-cards {

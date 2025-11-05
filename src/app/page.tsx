@@ -8,6 +8,8 @@ import Link from 'next/link';
 import { LandingHeader } from '@/components/app/landing-header';
 import DotGrid from '@/components/DotGrid';
 import Image from 'next/image';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { cn } from '@/lib/utils';
 
 const FloatingIcon = ({ icon: Icon, top, left, delay }: { icon: React.ElementType, top: string, left: string, delay: string }) => {
     const [duration, setDuration] = useState('8s');
@@ -34,14 +36,17 @@ const FloatingIcon = ({ icon: Icon, top, left, delay }: { icon: React.ElementTyp
 
 
 export default function LandingPage() {
+    const dashboardImage = PlaceHolderImages.find(p => p.id === 'app-dashboard');
+    const reportImage = PlaceHolderImages.find(p => p.id === 'app-report');
+
     const appFeatures = [
-        { 
-            name: "Welcome", 
+        {
+            name: "Welcome",
             icon: <Zap />,
             content: (
                  <div className="w-full h-full grid grid-cols-2 items-center animated-bg-grid-green border border-black/10">
                     <div className="relative h-full flex items-center justify-center">
-                         <Image 
+                         <Image
                           src="/mascot.png"
                           alt="BachelorBite Mascot"
                           width={200}
@@ -51,8 +56,8 @@ export default function LandingPage() {
                         <div className="mascot-shadow"></div>
                     </div>
                     <div className="p-8 text-center flex flex-col justify-center">
-                        <h4 className="font-bold text-xl mb-2">BachelorBite</h4>
-                        <ul className="text-sm text-left space-y-2 list-disc pl-5">
+                        <h4 className="font-bold text-xl mb-2 text-white">BachelorBite</h4>
+                        <ul className="text-sm text-left space-y-2 list-disc pl-5 text-gray-200">
                             <li>Log Meals</li>
                             <li>Track Expenses</li>
                             <li>Auto-Settle</li>
@@ -61,25 +66,33 @@ export default function LandingPage() {
                 </div>
             )
         },
-        { 
-            name: "Effortless Logging", 
+        {
+            name: "Effortless Logging",
             icon: <Utensils />,
             content: (
-                <div className="card-feature-content">
-                    <Utensils className="h-12 w-12 text-secondary mb-4" />
-                    <h4 className="font-bold text-xl mb-2">Log Meals & Expenses</h4>
-                    <p className="text-sm text-center">Quickly log daily meals and shared expenses. No more forgotten payments or confusing notes.</p>
+                <div className={cn("card-feature-content", "relative w-full h-full text-white p-6 flex flex-col justify-end")}>
+                     {dashboardImage && <Image src={dashboardImage.imageUrl} alt="Effortless Logging" layout="fill" className="object-cover" />}
+                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                     <div className="relative z-10">
+                        <Utensils className="h-8 w-8 text-primary mb-2" />
+                        <h4 className="font-bold text-xl mb-1">Log Meals & Expenses</h4>
+                        <p className="text-sm text-gray-200">Quickly log daily meals and shared expenses. No more forgotten payments or confusing notes.</p>
+                     </div>
                 </div>
             )
         },
-        { 
-            name: "Auto Settlements", 
+        {
+            name: "Auto Settlements",
             icon: <Calculator />,
             content: (
-                <div className="card-feature-content">
-                    <Calculator className="h-12 w-12 text-secondary mb-4" />
-                    <h4 className="font-bold text-xl mb-2">Automatic Settlements</h4>
-                    <p className="text-sm text-center">Get a detailed report with a final settlement, all calculated automatically at the end of the month.</p>
+                <div className={cn("card-feature-content", "relative w-full h-full text-white p-6 flex flex-col justify-end")}>
+                    {reportImage && <Image src={reportImage.imageUrl} alt="Auto Settlements" layout="fill" className="object-cover" />}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                    <div className="relative z-10">
+                        <Calculator className="h-8 w-8 text-primary mb-2" />
+                        <h4 className="font-bold text-xl mb-1">Automatic Settlements</h4>
+                        <p className="text-sm text-gray-200">Get a detailed report with a final settlement, all calculated automatically at the end of the month.</p>
+                    </div>
                 </div>
             )
         },
@@ -118,7 +131,7 @@ export default function LandingPage() {
                         </Link>
                          <Link href="/login" className="border border-black text-black px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:bg-gray-100 transition-all shadow-sm">
                            <span>▶</span> LOG IN
-                        </Link>
+                         </Link>
                     </div>
                 </div>
             </div>
