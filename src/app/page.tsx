@@ -65,7 +65,7 @@ export default function LandingPage() {
                                     <p className="text-xs text-slate-400">Record shared costs for groceries, bills, and more.</p>
                                 </div>
                             </li>
-                            <li className="flex items-start gap-3">
+                             <li className="flex items-start gap-3">
                                 <CheckCircle className="h-5 w-5 text-primary mt-0.5 shrink-0" />
                                 <div>
                                     <span className="font-semibold text-white">Auto-Settle</span>
@@ -75,7 +75,7 @@ export default function LandingPage() {
                         </ul>
                     </div>
                     <div className="h-full flex items-center justify-center p-4" style={{ perspective: '1000px' }}>
-                        <div className="relative w-40 h-80 bg-black rounded-[1.5rem] border-4 border-black shadow-lg" style={{ transform: 'rotateY(-20deg) rotateX(10deg)' }}>
+                        <div className="relative w-40 h-80 bg-black rounded-[1.5rem] border-4 border-black shadow-lg" style={{ transform: 'rotateY(-20deg) rotateX(10deg) scale(0.9)' }}>
                             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-3 bg-black rounded-b-lg"></div>
                             <div className="w-full h-full rounded-[1.2rem] overflow-hidden">
                                  <div className="w-full h-full bg-[#FFC247] flex flex-col items-center justify-between p-2">
