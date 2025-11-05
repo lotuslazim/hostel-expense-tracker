@@ -1,10 +1,9 @@
 
-
 "use client";
 
-import React, { useRef, useLayoutEffect } from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
 import CardSwap, { Card } from '@/components/CardSwap';
-import { Utensils, Calculator, Zap, ArrowRight, Wallet, Check, Plus, FileText, BarChart2, Calendar, Wheat, CheckCircle, Leaf, Home } from 'lucide-react';
+import { Utensils, Calculator, Zap, ArrowRight, Wallet, Check, Plus, FileText, BarChart2, Calendar, Leaf, Home, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import { LandingHeader } from '@/components/app/landing-header';
 import DotGrid from '@/components/DotGrid';
@@ -39,9 +38,9 @@ const FloatingElements = () => {
   
     const elements = [
         { Icon: Utensils, size: "w-8 h-8", top: "15%", left: "10%" },
-        { Icon: Wheat, size: "w-6 h-6", top: "25%", left: "80%" },
+        { Icon: BarChart2, size: "w-6 h-6", top: "25%", left: "80%" },
         { Icon: CheckCircle, size: "w-6 h-6", top: "70%", left: "20%" },
-        { Icon: Utensils, size: "w-10 h-10", top: "85%", left: "90%" },
+        { Icon: Wallet, size: "w-10 h-10", top: "85%", left: "90%" },
         { Icon: Leaf, size: "w-7 h-7", top: "50%", left: "5%" },
         { Icon: Home, size: "w-9 h-9", top: "80%", left: "50%" },
     ];
@@ -51,7 +50,7 @@ const FloatingElements = () => {
         {elements.map((el, i) => (
           <div
             key={i}
-            className={`floating-element-landing absolute ${el.size} text-white opacity-80 filter drop-shadow-lg`}
+            className={`floating-element-landing absolute ${el.size} text-white opacity-20 filter drop-shadow-lg`}
             style={{ top: el.top, left: el.left }}
           >
             <el.Icon strokeWidth={1.5}/>
@@ -178,55 +177,53 @@ export default function LandingPage() {
     ];
 
     return (
-        <div className="landing-page-container relative new-landing-style">
+        <div className="landing-page-container text-slate-800 relative new-landing-style yellow-gradient-bg">
+            {/* Common background and header for both layouts */}
+            <div className="absolute inset-0 z-0">
+                <DotGrid
+                    dotSize={2}
+                    gap={25}
+                    baseColor="rgba(255,255,255,0.1)"
+                    activeColor="rgba(255,255,255,0.3)"
+                    proximity={100}
+                    shockRadius={200}
+                    shockStrength={2}
+                    resistance={500}
+                    returnDuration={1}
+                />
+            </div>
+            <div className="hidden md:block">
+              <LandingHeader />
+            </div>
             
             {/* Desktop Layout (hidden on mobile) */}
-             <div className="hidden md:block fixed top-4 left-0 right-0 w-full px-4 z-50">
-                <LandingHeader />
-            </div>
-            <div className="hidden md:flex flex-col flex-1 yellow-gradient-bg">
-                <div className="absolute inset-0 z-0">
-                    <DotGrid
-                        dotSize={2}
-                        gap={25}
-                        baseColor="rgba(255,255,255,0.1)"
-                        activeColor="rgba(255,255,255,0.3)"
-                        proximity={100}
-                        shockRadius={200}
-                        shockStrength={2}
-                        resistance={500}
-                        returnDuration={1}
-                        style={{}}
-                    />
+            <div className="hidden md:flex landing-left-section">
+                <div className="flex-grow-0">
+                    <Logo textColor="text-slate-800" secondaryColor="text-secondary" />
                 </div>
-                <div className="flex landing-left-section">
-                    <div className="flex-grow-0">
-                        <Logo textColor="text-slate-800" secondaryColor="text-secondary" />
-                    </div>
-                    <div className="flex-grow flex items-center">
-                        <div className="text-content">
-                             <p className="text-3xl text-slate-800 font-medium">No notes, no Excel—just one tap, done.</p>
-                             <h1 className="text-9xl font-extrabold tracking-tighter leading-none my-4" style={{ userSelect: 'none' }}>
-                                <span className="text-slate-800">Bachelor</span><span className="text-secondary">Bite.</span>
-                            </h1>
-                            <p className="text-3xl text-slate-600 font-medium">
-                                Here to make your bachelor life easier — <br/> because someone has to.
-                            </p>
+                <div className="flex-grow flex items-center">
+                    <div className="text-content">
+                         <p className="text-xl text-slate-800 font-medium">No notes, no Excel—just one tap, done.</p>
+                         <h1 className="text-8xl font-extrabold tracking-tighter leading-none my-4" style={{ userSelect: 'none' }}>
+                            <span className="text-slate-800">Bachelor</span><span className="text-secondary">Bite.</span>
+                        </h1>
+                        <p className="text-xl text-slate-600 font-medium">
+                            Here to make your bachelor life easier — <br/> because someone has to.
+                        </p>
 
-                            <div className="flex gap-4 mt-8">
-                                <Link href="/signup" className="bg-black text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:opacity-90 transition-all shadow-md">
-                                   <span></span> SIGN UP
-                                </Link>
-                                 <Link href="/login" className="border border-black text-black px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:bg-black/10 transition-all shadow-md">
-                                   <span>▶</span> LOG IN
-                                 </Link>
-                            </div>
+                        <div className="flex gap-4 mt-8">
+                            <Link href="/signup" className="bg-black text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:opacity-90 transition-all shadow-md">
+                               <span></span> SIGN UP
+                            </Link>
+                             <Link href="/login" className="border border-black text-black px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:bg-black/10 transition-all shadow-md">
+                               <span>▶</span> LOG IN
+                             </Link>
                         </div>
                     </div>
-                     <div className="flex-grow-0" />
                 </div>
+                 <div className="flex-grow-0" />
             </div>
-            <div className="hidden md:flex landing-right-section">
+            <div className="hidden md:flex landing-right-section mt-16">
                 <CardSwap
                     width={580}
                     height={480}
@@ -238,7 +235,7 @@ export default function LandingPage() {
                 >
                     {appFeatures.map((feature) => (
                          <Card key={feature.name}>
-                             <div className="card-header" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', borderBottom: '1px solid rgba(0, 0, 0, 0.1)', color: '#333' }}>
+                            <div className="card-header" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', borderBottom: '1px solid rgba(0, 0, 0, 0.1)', color: '#333' }}>
                                 {feature.icon}
                                 <h3>{feature.name}</h3>
                             </div>
@@ -250,36 +247,52 @@ export default function LandingPage() {
                 </CardSwap>
             </div>
 
-            {/* Mobile Layout (hidden on desktop) */}
-            <div className="flex md:hidden flex-col w-full min-h-screen mobile-landing-gradient text-blue-950">
-                <FloatingElements />
-                <div className="flex-grow grid grid-cols-2 items-center px-4 gap-4 z-10">
-                    <div className="flex flex-col text-left space-y-2">
-                        <p className="text-xl font-medium">Meet the</p>
-                        <p className="text-base">No notes, no Excel—just one tap, done.</p>
-                        <h1 className="text-6xl font-extrabold tracking-tighter leading-none" style={{ userSelect: 'none' }}>
-                            <span className="text-blue-950">Bachelor</span><span className="text-secondary">Bite.</span>
-                        </h1>
-                        <p className="text-lg font-medium mt-1">
-                            Here to make your bachelor life easier — because someone has to.
-                        </p>
-                    </div>
-                    <div className="flex items-center justify-center">
-                        <div className="relative w-full" style={{ aspectRatio: '1 / 1' }}>
-                            <Image src="/mascot.png" alt="Mascot" fill sizes="50vw" className="object-contain" />
-                        </div>
-                    </div>
+{/* Mobile Layout (hidden on desktop) */}
+<div className="flex md:hidden flex-col items-center justify-center w-full min-h-screen mobile-landing-gradient">
+    <div className="absolute inset-0 z-0">
+        <DotGrid dotSize={2} gap={25} baseColor="rgba(255,255,255,0.1)" activeColor="rgba(255,255,255,0.3)" proximity={100} shockRadius={200} shockStrength={2} resistance={500} returnDuration={1} />
+        <FloatingElements />
+    </div>
+
+    <div className="grid grid-cols-2 items-center justify-center w-full flex-grow px-4 z-10">
+        {/* Left Column (Text) */}
+        <div className="flex flex-col items-start text-left gap-2">
+            <div className="flex flex-wrap gap-2 justify-start mb-2">
+                <div className="flex items-center gap-1.5 bg-white bg-opacity-70 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm text-xs">
+                    <Zap className="w-4 h-4 text-slate-700" />
+                    <span className="font-semibold text-slate-800">Fast</span>
                 </div>
-                <div className="w-full pb-8 px-4 z-10">
-                     <Link
-                        href="/about"
-                        className="bg-secondary text-white px-8 py-4 rounded-full font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-lg w-full max-w-sm mx-auto"
-                    >
-                       Get Started <ArrowRight className="h-5 w-5" />
-                    </Link>
+                <div className="flex items-center gap-1.5 bg-white bg-opacity-70 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm text-xs">
+                    <Check className="w-4 h-4 text-slate-700" />
+                    <span className="font-semibold text-slate-800">Simple</span>
+                </div>
+                <div className="flex items-center gap-1.5 bg-white bg-opacity-70 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm text-xs">
+                    <Calendar className="w-4 h-4 text-slate-700" />
+                    <span className="font-semibold text-slate-800">Smart</span>
                 </div>
             </div>
+            <p className="text-xl font-medium text-slate-800">Meet the</p>
+            <h1 className="text-6xl font-extrabold tracking-tighter leading-none" style={{ userSelect: 'none' }}>
+                <span className="text-slate-800">Bachelor</span><span className="text-secondary">Bite.</span>
+            </h1>
+            <p className="text-sm text-slate-600">No notes, no Excel—just one tap, done.</p>
+            <p className="text-base text-slate-600 font-medium mt-1">
+                Here to make your bachelor life easier.
+            </p>
+            <Link
+                href="/about"
+                className="bg-secondary text-white px-6 py-3 mt-4 rounded-full font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-lg text-sm"
+            >
+               Get Started <ArrowRight className="h-4 w-4" />
+            </Link>
+        </div>
+
+        {/* Right Column (Mascot) */}
+        <div className="relative w-full h-full flex items-center justify-center">
+            <Image src="/mascot.png" alt="Mascot" fill sizes="50vw" className="object-contain" />
+        </div>
+    </div>
+</div>
         </div>
     );
 }
-
