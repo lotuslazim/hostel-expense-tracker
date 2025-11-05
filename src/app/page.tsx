@@ -30,7 +30,7 @@ export default function LandingPage() {
                         <p className="text-slate-300 text-sm leading-relaxed">Your shared living, simplified. Log meals, track expenses, and split costs with your flatmates — no spreadsheets, no stress.</p>
                     </div>
                      <div className="relative h-full flex items-center justify-center" style={{ perspective: '1000px' }}>
-                         <div className="relative w-48 h-[24rem] transition-transform duration-500 hover:scale-105" style={{ transform: 'rotateY(-20deg) rotateX(10deg)' }}>
+                         <div className="relative w-44 h-[22rem] transition-transform duration-500 hover:scale-105" style={{ transform: 'rotateY(-20deg) rotateX(10deg)' }}>
                             <div className="absolute inset-0 bg-lime-400/20 rounded-full blur-3xl -z-10"></div>
                             <div className="relative w-full h-full bg-black/50 rounded-[2rem] border-2 border-slate-700/50 shadow-2xl backdrop-blur-sm">
                                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-4 bg-slate-900 rounded-b-lg"></div>
@@ -38,16 +38,21 @@ export default function LandingPage() {
                                      <div className="w-full h-full bg-[#FFC247] flex flex-col items-center justify-around p-3 rounded-[1.4rem]">
                                         <div className="mt-4">
                                             <p className="text-center text-xs text-slate-800 font-medium">Meet the</p>
-                                            <div className="relative w-44 h-44 mt-1">
+                                            <div className="relative w-36 h-36 mt-1">
                                                  <Image src="/mascot.png" alt="Mascot" fill sizes="10vw" className="object-contain" />
                                             </div>
                                         </div>
-                                        <div className="text-center mb-1">
+                                        <div className="text-center">
                                             <h1 className="font-headline text-lg font-bold leading-tight">
                                                 <span className="text-slate-800">Bachelor</span>
                                                 <span className="text-green-700">Bite.</span>
                                             </h1>
                                             <p className="text-[8px] text-black/70 mt-0.5 px-1">No notes, no Excel—just one tap, done.</p>
+                                        </div>
+                                        <div className="text-center w-full px-2">
+                                            <button className="w-full bg-black text-white text-[10px] font-bold py-2 rounded-lg shadow-md hover:bg-black/80 transition-colors">
+                                                Get Started
+                                            </button>
                                         </div>
                                      </div>
                                 </div>
