@@ -36,21 +36,21 @@ export default function LandingPage() {
                         </Button>
                     </div>
                      <div className="relative h-full flex items-center justify-center" style={{ perspective: '1000px' }}>
-                         <div className="relative w-48 h-96 transition-transform duration-500 hover:scale-105" style={{ transform: 'rotateY(-20deg) rotateX(10deg) translateY(-1rem)' }}>
+                         <div className="relative w-40 h-80 transition-transform duration-500 hover:scale-105" style={{ transform: 'rotateY(-20deg) rotateX(10deg) translateY(-1rem)' }}>
                             <div className="absolute inset-0 bg-lime-400/20 rounded-full blur-3xl -z-10"></div>
                             <div className="relative w-full h-full bg-black/50 rounded-[2rem] border-2 border-slate-700/50 shadow-2xl backdrop-blur-sm">
                                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-4 bg-slate-900 rounded-b-lg"></div>
                                 <div className="w-full h-full rounded-[1.8rem] overflow-hidden p-1.5">
                                      <div className="w-full h-full bg-[#FFC247] flex flex-col items-center justify-between p-3 rounded-[1.4rem]">
-                                        <div className="relative w-52 h-52">
+                                        <div className="relative w-28 h-28">
                                              <Image src="/mascot.png" alt="Mascot" fill sizes="10vw" className="object-contain" />
                                         </div>
-                                        <div className="text-center -mt-8">
-                                            <h1 className="font-headline text-lg font-bold leading-tight">
+                                        <div className="text-center">
+                                            <h1 className="font-headline text-base font-bold leading-tight">
                                                 <span className="text-slate-800">Bachelor</span>
                                                 <span className="text-green-700">Bite.</span>
                                             </h1>
-                                            <p className="text-[8px] text-black/70 mt-0.5 px-1">No notes, no Excel—just one tap, done.</p>
+                                            <p className="text-[7px] text-black/70 mt-0.5 px-1">No notes, no Excel—just one tap, done.</p>
                                         </div>
                                         <Button className="w-full h-5 text-[9px] bg-emerald-500 hover:bg-emerald-600 text-white rounded-full">
                                             Get Started
