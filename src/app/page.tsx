@@ -57,7 +57,7 @@ export default function LandingPage() {
                             <div className="w-full h-full rounded-[1.5rem] overflow-hidden">
                                  <div className="w-full h-full bg-[#FFC247] flex flex-col items-center justify-between p-3">
                                     <p className="text-[10px] text-black/80 font-medium">Meet the</p>
-                                    <div className="relative w-24 h-24">
+                                    <div className="relative w-28 h-28">
                                          <Image src="/mascot.png" alt="Mascot" layout="fill" objectFit="contain" />
                                     </div>
                                     <div className="text-center">
