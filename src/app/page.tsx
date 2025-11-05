@@ -3,7 +3,7 @@
 
 import React from 'react';
 import CardSwap, { Card } from '@/components/CardSwap';
-import { Utensils, Calculator, Zap, ArrowRight } from 'lucide-react';
+import { Utensils, Calculator, Zap, ArrowRight, Wallet, Check, Plus, FileText, BarChart2 } from 'lucide-react';
 import Link from 'next/link';
 import { LandingHeader } from '@/components/app/landing-header';
 import DotGrid from '@/components/DotGrid';
@@ -22,9 +22,9 @@ export default function LandingPage() {
             name: "Welcome",
             icon: <Zap />,
             content: (
-                <div className="w-full h-full grid grid-cols-1 md:grid-cols-2 bg-slate-800">
-                    <div className="p-8 flex flex-col justify-center h-full">
-                         <h2 className="text-2xl font-bold font-headline mb-4 text-primary">Welcome to BachelorBite.</h2>
+                 <div className="w-full h-full grid grid-cols-1 md:grid-cols-2 bg-[#232A34]">
+                    <div className="p-8 flex flex-col justify-center h-full text-white">
+                         <h2 className="text-2xl font-bold font-headline mb-4 text-[#FFC247]">Welcome to BachelorBite.</h2>
                         <p className="text-slate-300 text-sm">Effortlessly log meals, track expenses, and split costs with your flatmates—no spreadsheets, no hassle, just simple living made easy.</p>
                     </div>
                      <div className="h-full flex items-center justify-center p-4" style={{ perspective: '1000px' }}>
@@ -61,14 +61,34 @@ export default function LandingPage() {
             name: "Effortless Logging",
             icon: <Utensils />,
             content: (
-                <div className={cn("card-feature-content", "relative w-full h-full text-white p-6 flex flex-col justify-end")}>
-                     {dashboardImage && <Image src={dashboardImage.imageUrl} alt="Effortless Logging" fill sizes="33vw" className="object-cover" />}
-                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                     <div className="relative z-10">
-                        <Utensils className="h-8 w-8 text-primary mb-2" />
+                 <div className="w-full h-full bg-slate-100 text-slate-800 p-8 flex flex-col justify-between">
+                    <div className="relative flex-grow flex items-center justify-center">
+                        <div className="absolute w-full h-full opacity-30">
+                            <div className="absolute w-24 h-24 bg-amber-100 rounded-full top-5 left-5"></div>
+                            <div className="absolute w-16 h-16 bg-green-100 rounded-full bottom-10 right-10"></div>
+                            <div className="absolute w-8 h-8 bg-slate-200 rounded-full bottom-20 left-16"></div>
+                        </div>
+
+                        <div className="relative w-56 h-56 flex items-center justify-center">
+                            <div className="absolute w-full h-full bg-white rounded-full shadow-inner"></div>
+                            <div className="absolute w-40 h-40 bg-white rounded-full flex items-center justify-center shadow-lg">
+                                <Plus className="h-16 w-16 text-green-500 stroke-[1.5]" />
+                            </div>
+                            <div className="absolute top-0 left-0 w-16 h-16 bg-white rounded-full shadow-md flex items-center justify-center animate-float" style={{ animationDelay: '0s' }}>
+                                <Utensils className="h-8 w-8 text-amber-500 opacity-80" />
+                            </div>
+                             <div className="absolute bottom-0 right-0 w-16 h-16 bg-white rounded-full shadow-md flex items-center justify-center animate-float" style={{ animationDelay: '1.5s' }}>
+                                <Wallet className="h-8 w-8 text-red-500 opacity-80" />
+                            </div>
+                        </div>
+                    </div>
+                    <div>
                         <h4 className="font-bold text-xl mb-1">Log Meals & Expenses</h4>
-                        <p className="text-sm text-gray-200">Quickly log daily meals and shared expenses. No more forgotten payments or confusing notes.</p>
-                     </div>
+                        <p className="text-sm text-slate-500">Quickly log daily meals and shared expenses. No more forgotten payments or confusing notes.</p>
+                        <Button variant="ghost" className="mt-4 p-0 h-auto text-green-600 hover:text-green-700">
+                            Log an Entry <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                    </div>
                 </div>
             )
         },
@@ -76,13 +96,36 @@ export default function LandingPage() {
             name: "Auto Settlements",
             icon: <Calculator />,
             content: (
-                <div className={cn("card-feature-content", "relative w-full h-full text-white p-6 flex flex-col justify-end")}>
-                    {reportImage && <Image src={reportImage.imageUrl} alt="Auto Settlements" fill sizes="33vw" className="object-cover" />}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                    <div className="relative z-10">
-                        <Calculator className="h-8 w-8 text-primary mb-2" />
+                 <div className="w-full h-full bg-slate-100 text-slate-800 p-8 flex flex-col justify-between">
+                    <div className="relative flex-grow flex items-center justify-center">
+                         <div className="absolute w-full h-full opacity-30">
+                            <div className="absolute w-24 h-24 bg-green-100 rounded-full top-5 right-5"></div>
+                            <div className="absolute w-16 h-16 bg-amber-100 rounded-full bottom-10 left-10"></div>
+                            <div className="absolute w-8 h-8 bg-slate-200 rounded-full top-20 left-16"></div>
+                        </div>
+                        <div className="relative w-64 h-48 bg-white rounded-2xl shadow-lg p-4 flex flex-col justify-between">
+                            <div className="flex justify-between items-center">
+                                <p className="text-xs font-semibold text-slate-500">Monthly Report</p>
+                                <FileText className="h-5 w-5 text-slate-400" />
+                            </div>
+                            <div className="flex items-end gap-2">
+                                <div className="w-6 h-16 bg-amber-200 rounded-t-md animate-slide-up-fade" style={{ animationDelay: '0.2s' }}></div>
+                                <div className="w-6 h-24 bg-green-300 rounded-t-md animate-slide-up-fade" style={{ animationDelay: '0s' }}></div>
+                                <div className="w-6 h-12 bg-amber-200 rounded-t-md animate-slide-up-fade" style={{ animationDelay: '0.4s' }}></div>
+                                <div className="w-6 h-20 bg-red-200 rounded-t-md animate-slide-up-fade" style={{ animationDelay: '0.1s' }}></div>
+                            </div>
+                            <div className="border-t pt-2">
+                                <p className="text-xs text-slate-500">Balance</p>
+                                <p className="font-bold text-lg text-green-600">You get back ৳1,250.00</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
                         <h4 className="font-bold text-xl mb-1">Automatic Settlements</h4>
-                        <p className="text-sm text-gray-200">Get a detailed report with a final settlement, all calculated automatically at the end of the month.</p>
+                        <p className="text-sm text-slate-500">Get a detailed report with a final settlement, all calculated automatically at the end of the month.</p>
+                        <Button variant="ghost" className="mt-4 p-0 h-auto text-green-600 hover:text-green-700">
+                            View Report <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
                     </div>
                 </div>
             )
