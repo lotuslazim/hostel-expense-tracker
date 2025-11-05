@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React, { useRef, useLayoutEffect } from 'react';
@@ -177,51 +178,53 @@ export default function LandingPage() {
     ];
 
     return (
-        <div className="landing-page-container text-slate-800 relative new-landing-style yellow-gradient-bg">
-            {/* Common background for both layouts */}
-            <div className="absolute inset-0 z-0">
-                <DotGrid
-                    dotSize={2}
-                    gap={25}
-                    baseColor="rgba(255,255,255,0.1)"
-                    activeColor="rgba(255,255,255,0.3)"
-                    proximity={100}
-                    shockRadius={200}
-                    shockStrength={2}
-                    resistance={500}
-                    returnDuration={1}
-                />
-            </div>
+        <div className="landing-page-container relative new-landing-style">
             
             {/* Desktop Layout (hidden on mobile) */}
              <div className="hidden md:block fixed top-4 left-0 right-0 w-full px-4 z-50">
                 <LandingHeader />
             </div>
-            <div className="hidden md:flex landing-left-section">
-                <div className="flex-grow-0">
-                    <Logo textColor="text-slate-800" secondaryColor="text-secondary" />
+            <div className="hidden md:flex flex-col flex-1 yellow-gradient-bg">
+                <div className="absolute inset-0 z-0">
+                    <DotGrid
+                        dotSize={2}
+                        gap={25}
+                        baseColor="rgba(255,255,255,0.1)"
+                        activeColor="rgba(255,255,255,0.3)"
+                        proximity={100}
+                        shockRadius={200}
+                        shockStrength={2}
+                        resistance={500}
+                        returnDuration={1}
+                        style={{}}
+                    />
                 </div>
-                <div className="flex-grow flex items-center">
-                    <div className="text-content">
-                         <p className="text-3xl text-slate-800 font-medium">No notes, no Excel—just one tap, done.</p>
-                         <h1 className="text-9xl font-extrabold tracking-tighter leading-none my-4" style={{ userSelect: 'none' }}>
-                            <span className="text-slate-800">Bachelor</span><span className="text-secondary">Bite.</span>
-                        </h1>
-                        <p className="text-3xl text-slate-600 font-medium">
-                            Here to make your bachelor life easier — <br/> because someone has to.
-                        </p>
+                <div className="flex landing-left-section">
+                    <div className="flex-grow-0">
+                        <Logo textColor="text-slate-800" secondaryColor="text-secondary" />
+                    </div>
+                    <div className="flex-grow flex items-center">
+                        <div className="text-content">
+                             <p className="text-3xl text-slate-800 font-medium">No notes, no Excel—just one tap, done.</p>
+                             <h1 className="text-9xl font-extrabold tracking-tighter leading-none my-4" style={{ userSelect: 'none' }}>
+                                <span className="text-slate-800">Bachelor</span><span className="text-secondary">Bite.</span>
+                            </h1>
+                            <p className="text-3xl text-slate-600 font-medium">
+                                Here to make your bachelor life easier — <br/> because someone has to.
+                            </p>
 
-                        <div className="flex gap-4 mt-8">
-                            <Link href="/signup" className="bg-black text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:opacity-90 transition-all shadow-md">
-                               <span></span> SIGN UP
-                            </Link>
-                             <Link href="/login" className="border border-black text-black px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:bg-black/10 transition-all shadow-md">
-                               <span>▶</span> LOG IN
-                             </Link>
+                            <div className="flex gap-4 mt-8">
+                                <Link href="/signup" className="bg-black text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:opacity-90 transition-all shadow-md">
+                                   <span></span> SIGN UP
+                                </Link>
+                                 <Link href="/login" className="border border-black text-black px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:bg-black/10 transition-all shadow-md">
+                                   <span>▶</span> LOG IN
+                                 </Link>
+                            </div>
                         </div>
                     </div>
+                     <div className="flex-grow-0" />
                 </div>
-                 <div className="flex-grow-0" />
             </div>
             <div className="hidden md:flex landing-right-section">
                 <CardSwap
@@ -248,37 +251,23 @@ export default function LandingPage() {
             </div>
 
             {/* Mobile Layout (hidden on desktop) */}
-            <div className="flex md:hidden flex-col items-center justify-center w-full min-h-screen px-4 text-center z-10">
+            <div className="flex md:hidden flex-col items-center justify-between w-full min-h-screen mobile-landing-gradient text-blue-950">
                  <FloatingElements />
-                <div className="flex-grow flex flex-col items-center justify-center gap-2">
-                    <p className="text-2xl font-medium text-slate-800">Meet the</p>
-                    <div className="relative w-[22rem] h-[22rem] my-1">
-                        <Image src="/mascot.png" alt="Mascot" fill sizes="80vw" className="object-contain" />
+                <div className="flex-grow flex flex-col items-center justify-center gap-2 text-center px-4 z-10">
+                    <p className="text-xl font-medium">Meet the</p>
+                    <div className="relative w-72 h-72 my-1">
+                        <Image src="/mascot.png" alt="Mascot" fill sizes="50vw" className="object-contain" />
                     </div>
-                    <p className="text-base text-slate-600">No notes, no Excel—just one tap, done.</p>
-                    <h1 className="text-6xl font-extrabold tracking-tighter leading-none" style={{ userSelect: 'none' }}>
-                        <span className="text-slate-800">Bachelor</span><span className="text-secondary">Bite.</span>
+                    <p className="text-base">No notes, no Excel—just one tap, done.</p>
+                     <h1 className="text-7xl font-extrabold tracking-tighter leading-none" style={{ userSelect: 'none' }}>
+                        <span className="text-blue-950">Bachelor</span><span className="text-secondary">Bite.</span>
                     </h1>
-                    <p className="text-lg text-slate-600 font-medium mt-1 max-w-xs">
+                    <p className="text-lg font-medium mt-1 max-w-xs">
                         Here to make your bachelor life easier — because someone has to.
                     </p>
-                    <div className="flex flex-wrap gap-2 justify-center mt-4">
-                        <div className="flex items-center gap-1.5 bg-white bg-opacity-70 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm text-xs">
-                            <Zap className="w-4 h-4 text-slate-700" />
-                            <span className="font-semibold text-slate-800">Fast</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 bg-white bg-opacity-70 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm text-xs">
-                            <Check className="w-4 h-4 text-slate-700" />
-                            <span className="font-semibold text-slate-800">Simple</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 bg-white bg-opacity-70 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm text-xs">
-                            <Calendar className="w-4 h-4 text-slate-700" />
-                            <span className="font-semibold text-slate-800">Smart</span>
-                        </div>
-                    </div>
                 </div>
-                <div className="w-full pb-8">
-                    <Link
+                <div className="w-full pb-8 px-4 z-10">
+                     <Link
                         href="/about"
                         className="bg-secondary text-white px-8 py-4 rounded-full font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-lg w-full max-w-sm mx-auto"
                     >
@@ -289,3 +278,4 @@ export default function LandingPage() {
         </div>
     );
 }
+
