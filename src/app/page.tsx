@@ -147,10 +147,10 @@ export default function LandingPage() {
                 {/* Left Text Section */}
                 <div className="text-content">
                      <p className="text-lg text-slate-800 mb-2 font-medium">No notes, no Excel—just one tap, done.</p>
-                     <h1 className="text-7xl font-extrabold tracking-tighter leading-none" style={{ userSelect: 'none' }}>
+                     <h1 className="text-8xl font-extrabold tracking-tighter leading-none" style={{ userSelect: 'none' }}>
                         <span className="text-slate-800">Bachelor</span><span className="text-secondary">Bite.</span>
                     </h1>
-                    <p className="text-xl text-slate-600 font-medium mt-6">
+                    <p className="text-2xl text-slate-600 font-medium mt-6">
                         Here to make your bachelor life easier — because someone has to.
                     </p>
 
@@ -190,7 +190,3 @@ export default function LandingPage() {
         </div>
     );
 }
-
-    
-
-    
