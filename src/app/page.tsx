@@ -49,26 +49,26 @@ export default function LandingPage() {
                 <div className="w-full h-full grid grid-cols-1 md:grid-cols-2 items-center bg-slate-900">
                     <div className="p-8 flex flex-col justify-center h-full text-white">
                          <h2 className="text-2xl font-bold font-headline mb-4">Welcome to BachelorBite.</h2>
-                        <p className="text-slate-300 text-base">Effortlessly log meals, track expenses, and split costs with your flatmates—no spreadsheets, no hassle, just simple living made easy.</p>
+                        <p className="text-slate-300 text-sm">Effortlessly log meals, track expenses, and split costs with your flatmates—no spreadsheets, no hassle, just simple living made easy.</p>
                     </div>
                     <div className="h-full flex items-center justify-center p-4" style={{ perspective: '1000px' }}>
-                         <div className="relative w-48 h-96 bg-black rounded-[2rem] border-4 border-black shadow-lg" style={{ transform: 'rotateY(-15deg) rotateX(5deg) translateY(-2rem) scale(0.8)' }}>
+                         <div className="relative w-40 h-80 bg-black rounded-[1.8rem] border-4 border-black shadow-lg" style={{ transform: 'rotateY(-20deg) rotateX(10deg) translateY(-1rem) scale(0.9)' }}>
                             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-4 bg-black rounded-b-lg"></div>
-                            <div className="w-full h-full rounded-[1.7rem] overflow-hidden">
-                                 <div className="w-full h-full bg-[#FFC247] flex flex-col items-center justify-between p-2">
-                                    <div className="text-center mt-2">
-                                        <h1 className="font-headline text-base font-bold leading-tight">
+                            <div className="w-full h-full rounded-[1.5rem] overflow-hidden">
+                                 <div className="w-full h-full bg-[#FFC247] flex flex-col items-center justify-between p-1.5">
+                                    <div className="text-center mt-1.5">
+                                        <h1 className="font-headline text-[11px] font-bold leading-tight">
                                             <span className="text-black">Bachelor</span>
                                             <span className="text-green-600">Bite.</span>
                                         </h1>
-                                        <p className="text-[9px] text-black/70 mt-0.5 px-2">No notes, no Excel—just one tap, done.</p>
+                                        <p className="text-[7px] text-black/70 mt-0.5 px-1">No notes, no Excel—just one tap, done.</p>
                                     </div>
-                                    <div className="relative w-20 h-20">
+                                    <div className="relative w-14 h-14">
                                          <Image src="/mascot.png" alt="Mascot" layout="fill" objectFit="contain" />
                                     </div>
-                                     <Button className="w-full h-6 text-[10px] bg-green-600 hover:bg-green-700 text-white rounded-full">
+                                     <Button className="w-full h-4 text-[8px] bg-green-600 hover:bg-green-700 text-white rounded-full">
                                         Get Started
-                                        <ArrowRight className="ml-1 h-2.5 w-2.5" />
+                                        <ArrowRight className="ml-1 h-2 w-2" />
                                     </Button>
                                  </div>
                             </div>
