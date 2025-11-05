@@ -17,6 +17,7 @@
     align-items: flex-start;
     padding: 2rem 2rem 2rem 5rem;
     position: relative;
+    justify-content: center;
 }
 
 .text-content {
