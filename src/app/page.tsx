@@ -149,7 +149,7 @@ export default function LandingPage() {
             
             {/* Desktop Layout (hidden on mobile) */}
             <div className="hidden md:flex landing-left-section">
-                 <div className="flex-grow-0">
+                <div className="flex-grow-0">
                     <Logo textColor="text-slate-800" secondaryColor="text-secondary" />
                 </div>
                 <div className="flex-grow flex items-center">
@@ -202,7 +202,7 @@ export default function LandingPage() {
             <div className="flex md:hidden flex-col items-center justify-center w-full min-h-screen px-4 text-center z-10">
                 <div className="flex-grow flex flex-col items-center justify-center gap-2">
                     <p className="text-lg font-medium text-slate-800">Meet the</p>
-                    <div className="relative w-56 h-56 my-1">
+                    <div className="relative w-64 h-64 my-1">
                         <Image src="/mascot.png" alt="Mascot" fill sizes="50vw" className="object-contain" />
                     </div>
                     <p className="text-base text-slate-600">No notes, no Excel—just one tap, done.</p>
@@ -214,7 +214,7 @@ export default function LandingPage() {
                     </p>
                 </div>
                 <div className="w-full pb-8">
-                    <Link
+                     <Link
                         href="/about"
                         className="bg-secondary text-white px-8 py-4 rounded-full font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-lg w-full max-w-sm mx-auto"
                     >
@@ -225,3 +225,5 @@ export default function LandingPage() {
         </div>
     );
 }
+
+    
