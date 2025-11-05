@@ -1,87 +1,172 @@
 
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import CardSwap, { Card } from '@/components/CardSwap';
+import { Utensils, Calculator, Zap, CheckCircle, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { LandingHeader } from '@/components/app/landing-header';
+import DotGrid from '@/components/DotGrid';
 import Image from 'next/image';
-import { Button } from '@/components/ui/button';
-import { ArrowRight, Check, Utensils, Wallet } from 'lucide-react';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { cn } from '@/lib/utils';
 import { Logo } from '@/components/icons/logo';
+import { Button } from '@/components/ui/button';
+
+
+const FloatingIcon = ({ icon: Icon, top, left, delay }: { icon: React.ComponentType, top: string, left: string, delay: string }) => {
+    const [duration, setDuration] = useState('8s');
+  
+    useEffect(() => {
+      // Generate a random duration on the client-side to avoid hydration mismatch
+      setDuration(`${(Math.random() * 5 + 5).toFixed(2)}s`);
+    }, []);
+  
+    const style = {
+      top,
+      left,
+      animationDelay: delay,
+      animationDuration: duration,
+    };
+  
+    return (
+      <div className="absolute text-white/80 animate-float" style={style}>
+        <Icon />
+      </div>
+    );
+};
 
 
 export default function LandingPage() {
-    return (
-        <div className="min-h-screen flex flex-col lg:flex-row bg-background">
-            <LandingHeader />
+    const dashboardImage = PlaceHolderImages.find(p => p.id === 'app-dashboard');
+    const reportImage = PlaceHolderImages.find(p => p.id === 'app-report');
 
-            {/* Left Section */}
-            <div className="flex-1 flex items-center justify-center p-8 lg:p-12 text-center lg:text-left bg-white">
-                <div className="max-w-md w-full">
-                    <Logo 
-                        isStacked={false}
-                        mascotSize='default'
-                        textSize='large'
-                        textColor="text-slate-800"
-                        secondaryColor="text-green-600"
-                        className="justify-center lg:justify-start"
-                    />
-                    <h1 className="mt-6 text-3xl md:text-4xl font-bold font-headline text-slate-800">
-                        Welcome to BachelorBite.
+    const appFeatures = [
+        {
+            name: "Welcome",
+            icon: <Zap />,
+            content: (
+                <div className="w-full h-full grid grid-cols-1 md:grid-cols-2 items-center bg-slate-900">
+                    <div className="p-8 flex flex-col justify-center h-full text-white">
+                         <h2 className="text-2xl font-bold font-headline mb-4">Welcome to BachelorBite.</h2>
+                        <p className="text-slate-300 text-sm">Effortlessly log meals, track expenses, and split costs with your flatmates—no spreadsheets, no hassle, just simple living made easy.</p>
+                    </div>
+                    <div className="h-full flex items-center justify-center p-4" style={{ perspective: '1000px' }}>
+                         <div className="relative w-40 h-80 bg-black rounded-[1.8rem] border-4 border-black shadow-lg" style={{ transform: 'rotateY(-20deg) rotateX(10deg) translateY(-2rem) scale(0.9)' }}>
+                            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-4 bg-black rounded-b-lg"></div>
+                            <div className="w-full h-full rounded-[1.5rem] overflow-hidden">
+                                 <div className="w-full h-full bg-[#FFC247] flex flex-col items-center justify-between p-3">
+                                    <p className="text-[10px] text-black/80 font-medium">Meet the</p>
+                                    <div className="relative w-24 h-24 mt-4">
+                                         <Image src="/mascot.png" alt="Mascot" layout="fill" objectFit="contain" />
+                                    </div>
+                                    <div className="text-center mb-2">
+                                        <h1 className="font-headline text-[13px] font-bold leading-tight">
+                                            <span className="text-black">Bachelor</span>
+                                            <span className="text-green-600">Bite.</span>
+                                        </h1>
+                                        <p className="text-[7px] text-black/70 mt-0.5 px-1">No notes, no Excel—just one tap, done.</p>
+                                    </div>
+                                    <Button className="w-full h-5 text-[9px] bg-green-600 hover:bg-green-700 text-white rounded-full">
+                                        Get Started
+                                        <ArrowRight className="ml-1 h-2 w-2" />
+                                    </Button>
+                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )
+        },
+        {
+            name: "Effortless Logging",
+            icon: <Utensils />,
+            content: (
+                <div className={cn("card-feature-content", "relative w-full h-full text-white p-6 flex flex-col justify-end")}>
+                     {dashboardImage && <Image src={dashboardImage.imageUrl} alt="Effortless Logging" fill className="object-cover" />}
+                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                     <div className="relative z-10">
+                        <Utensils className="h-8 w-8 text-primary mb-2" />
+                        <h4 className="font-bold text-xl mb-1">Log Meals & Expenses</h4>
+                        <p className="text-sm text-gray-200">Quickly log daily meals and shared expenses. No more forgotten payments or confusing notes.</p>
+                     </div>
+                </div>
+            )
+        },
+        {
+            name: "Auto Settlements",
+            icon: <Calculator />,
+            content: (
+                <div className={cn("card-feature-content", "relative w-full h-full text-white p-6 flex flex-col justify-end")}>
+                    {reportImage && <Image src={reportImage.imageUrl} alt="Auto Settlements" fill className="object-cover" />}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                    <div className="relative z-10">
+                        <Calculator className="h-8 w-8 text-primary mb-2" />
+                        <h4 className="font-bold text-xl mb-1">Automatic Settlements</h4>
+                        <p className="text-sm text-gray-200">Get a detailed report with a final settlement, all calculated automatically at the end of the month.</p>
+                    </div>
+                </div>
+            )
+        },
+    ];
+
+    return (
+        <div className="landing-page-container yellow-gradient-bg text-slate-800 relative new-landing-style">
+            <div className="absolute inset-0 z-0">
+                <DotGrid
+                    dotSize={2}
+                    gap={25}
+                    baseColor="rgba(0,0,0,0.1)"
+                    activeColor="rgba(0,0,0,0.3)"
+                    proximity={100}
+                    shockRadius={200}
+                    shockStrength={2}
+                    resistance={500}
+                    returnDuration={1}
+                />
+            </div>
+            <LandingHeader />
+            <div className="landing-left-section">
+                {/* Left Text Section */}
+                <div className="text-content">
+                     <p className="text-lg text-black mb-2 font-medium">No notes, no Excel—just one tap, done.</p>
+                     <h1 className="background-headline">
+                        <span className="text-black">Bachelor</span><span className="text-secondary">Bite.</span>
                     </h1>
-                    <p className="mt-4 text-base md:text-lg text-slate-600">
-                        Effortlessly log meals, track expenses, and split costs with your flatmates—no spreadsheets, no hassle, just simple living made easy.
+                    <p className="headline-main">
+                        Here to make your bachelor life easier — because someone has to.
                     </p>
-                    <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                        <Link href="/signup">
-                            <Button size="lg" className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white rounded-full text-lg shadow-lg">
-                                Get Started <ArrowRight className="ml-2 h-5 w-5" />
-                            </Button>
+
+                    <div className="flex gap-4 mt-8">
+                        <Link href="/signup" className="bg-black text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:opacity-90 transition-all shadow-sm">
+                           <span></span> SIGN UP
                         </Link>
-                         <Link href="/about">
-                            <Button size="lg" variant="ghost" className="w-full sm:w-auto">
-                               Learn more
-                            </Button>
-                        </Link>
+                         <Link href="/login" className="border border-black text-black px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:bg-gray-100 transition-all shadow-sm">
+                           <span>▶</span> LOG IN
+                         </Link>
                     </div>
                 </div>
             </div>
-
-            {/* Right Section */}
-            <div className="flex-1 bg-[#1C1C1C] flex items-center justify-center p-4 relative overflow-hidden">
-                <div 
-                    className="relative w-[280px] h-[570px] bg-neutral-900 rounded-[40px] border-[10px] border-neutral-950 overflow-hidden shadow-2xl transition-transform duration-300 ease-in-out"
-                    style={{
-                        transform: 'rotateX(10deg) rotateY(-15deg) rotateZ(3deg) scale(0.95)',
-                        transformStyle: 'preserve-3d',
-                    }}
+            <div className="landing-right-section">
+                <CardSwap
+                    cardDistance={60}
+                    verticalDistance={70}
+                    delay={5000}
+                    pauseOnHover={true}
+                    onCardClick={() => {}}
                 >
-                    {/* The screen content of the phone mockup */}
-                    <div className="w-full h-full bg-[#FFC247] flex flex-col items-center justify-between p-4">
-                        <div className="flex-grow flex flex-col items-center justify-center text-center w-full">
-                             <main className="flex flex-col items-center justify-center">
-                                <p className="text-lg font-medium text-slate-700 mb-2">Meet the</p>
-                                <Logo 
-                                    isStacked 
-                                    mascotSize="large"
-                                    textSize="large"
-                                    textColor="text-slate-800"
-                                    secondaryColor="text-green-600"
-                                />
-                                <p className="text-base text-slate-500 mt-4 max-w-sm">
-                                    No notes, no Excel—just one tap, done.
-                                </p>
-                            </main>
-                        </div>
-                        <div className="w-full max-w-sm pb-2">
-                             <Link href="/signup">
-                                <Button size="lg" className="w-full bg-green-600 hover:bg-green-700 text-white rounded-full text-lg shadow-lg">
-                                    Get Started <ArrowRight className="ml-2 h-5 w-5" />
-                                </Button>
-                            </Link>
-                        </div>
-                    </div>
-                </div>
+                    {appFeatures.map((feature) => (
+                         <Card key={feature.name}>
+                            <div className="card-header" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', borderBottom: '1px solid rgba(0, 0, 0, 0.1)', color: '#333' }}>
+                                {feature.icon}
+                                <h3>{feature.name}</h3>
+                            </div>
+                            <div className="card-content-wrapper">
+                                {feature.content}
+                            </div>
+                        </Card>
+                    ))}
+                </CardSwap>
             </div>
         </div>
     );
