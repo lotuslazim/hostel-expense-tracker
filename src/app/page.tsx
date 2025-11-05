@@ -3,36 +3,15 @@
 
 import React, { useState, useEffect } from 'react';
 import CardSwap, { Card } from '@/components/CardSwap';
-import { Utensils, Calculator, Zap } from 'lucide-react';
+import { Utensils, Calculator, Zap, CheckCircle, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { LandingHeader } from '@/components/app/landing-header';
 import DotGrid from '@/components/DotGrid';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { cn } from '@/lib/utils';
-
-const FloatingIcon = ({ icon: Icon, top, left, delay }: { icon: React.ElementType, top: string, left: string, delay: string }) => {
-    const [duration, setDuration] = useState('8s');
-
-    useEffect(() => {
-        // This code now runs only on the client, after hydration
-        setDuration(`${Math.random() * 5 + 5}s`);
-    }, []);
-
-    return (
-        <div
-          className="absolute text-white/80 animate-float"
-          style={{
-            top,
-            left,
-            animationDelay: delay,
-            animationDuration: duration,
-          }}
-        >
-          <Icon className="h-6 w-6" strokeWidth={1.5} />
-        </div>
-    );
-};
+import { Logo } from '@/components/icons/logo';
+import { Button } from '@/components/ui/button';
 
 
 export default function LandingPage() {
@@ -44,24 +23,50 @@ export default function LandingPage() {
             name: "Welcome",
             icon: <Zap />,
             content: (
-                 <div className="w-full h-full grid grid-cols-2 items-center animated-bg-grid-green border border-black/10">
-                    <div className="relative h-full flex items-center justify-center">
-                         <Image
-                          src="/mascot.png"
-                          alt="BachelorBite Mascot"
-                          width={200}
-                          height={200}
-                          className="object-contain relative z-10 animate-mascot-idle"
-                        />
-                        <div className="mascot-shadow"></div>
-                    </div>
-                    <div className="p-8 text-center flex flex-col justify-center">
-                        <h4 className="font-bold text-xl mb-2 text-white">BachelorBite</h4>
-                        <ul className="text-sm text-left space-y-2 list-disc pl-5 text-gray-200">
-                            <li>Log Meals</li>
-                            <li>Track Expenses</li>
-                            <li>Auto-Settle</li>
+                <div className="w-full h-full grid grid-cols-2 items-center bg-gray-50">
+                    <div className="p-8 flex flex-col justify-center h-full">
+                        <Logo textColor="text-black" secondaryColor="text-green-600" />
+                        <p className="mt-4 text-gray-600 text-sm">Your all-in-one solution for shared living.</p>
+                        <ul className="mt-6 space-y-3 text-gray-700">
+                            <li className="flex items-start gap-2">
+                                <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 shrink-0" />
+                                <span><span className="font-semibold">Log Meals:</span> Keep track of daily meals effortlessly.</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                                <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 shrink-0" />
+                                <span><span className="font-semibold">Track Expenses:</span> Record shared costs for groceries, bills, and more.</span>
+                            </li>
+                             <li className="flex items-start gap-2">
+                                <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 shrink-0" />
+                                <span><span className="font-semibold">Auto-Settle:</span> Automatically calculate who owes what at the end of the month.</span>
+                            </li>
                         </ul>
+                    </div>
+                    <div className="h-full flex items-center justify-center bg-gray-100 p-4">
+                        {/* Phone Mockup */}
+                        <div className="relative w-48 h-96 bg-black rounded-[2.5rem] border-[10px] border-black shadow-2xl">
+                             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-4 bg-black rounded-b-lg"></div>
+                            <div className="w-full h-full rounded-[2rem] overflow-hidden">
+                                 {/* Phone Screen Content */}
+                                 <div className="w-full h-full bg-[#FFC247] flex flex-col items-center justify-between p-4">
+                                    <div className="text-center mt-8">
+                                        <p className="text-sm text-black/80">Meet the</p>
+                                        <h1 className="font-headline text-2xl font-bold">
+                                            <span className="text-black">Bachelor</span>
+                                            <span className="text-green-600">Bite.</span>
+                                        </h1>
+                                        <p className="text-xs text-black/70 mt-1">No notes, no Excel—just one tap, done.</p>
+                                    </div>
+                                    <div className="relative w-32 h-32">
+                                         <Image src="/mascot.png" alt="Mascot" layout="fill" objectFit="contain" />
+                                    </div>
+                                     <Button className="w-full bg-green-600 hover:bg-green-700 text-white rounded-full">
+                                        Get Started
+                                        <ArrowRight className="ml-2 h-4 w-4" />
+                                    </Button>
+                                 </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )
@@ -99,7 +104,7 @@ export default function LandingPage() {
     ];
 
     return (
-        <div className="landing-page-container yellow-gradient-bg text-slate-800 relative">
+        <div className="landing-page-container yellow-gradient-bg text-slate-800 relative new-landing-style">
             <div className="absolute inset-0 z-0">
                 <DotGrid
                     dotSize={2}
