@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, from 'react';
+import React from 'react';
 import CardSwap, { Card } from '@/components/CardSwap';
 import { Utensils, Calculator, Zap, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
@@ -32,7 +32,7 @@ export default function LandingPage() {
                             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-4 bg-black rounded-b-lg"></div>
                             <div className="w-full h-full rounded-[1.5rem] overflow-hidden">
                                  <div className="w-full h-full bg-[#FFC247] flex flex-col items-center justify-between p-3">
-                                    <p className="text-[10px] text-black/80 font-medium mt-1">Meet the</p>
+                                     <p className="text-[10px] text-black/80 font-medium mt-1">Meet the</p>
                                     <div className="relative w-28 h-28">
                                          <Image src="/mascot.png" alt="Mascot" fill sizes="10vw" className="object-contain" />
                                     </div>
@@ -87,7 +87,7 @@ export default function LandingPage() {
     ];
 
     return (
-        <div className="landing-page-container yellow-gradient-bg text-slate-800 relative new-landing-style animated-bg-grid-green">
+        <div className="landing-page-container text-slate-800 relative new-landing-style yellow-gradient-bg">
             <div className="absolute inset-0 z-0">
                 <DotGrid
                     dotSize={2}
