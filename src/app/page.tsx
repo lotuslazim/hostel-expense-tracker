@@ -57,17 +57,17 @@ export default function LandingPage() {
                             <div className="w-full h-full rounded-[1.5rem] overflow-hidden">
                                  <div className="w-full h-full bg-[#FFC247] flex flex-col items-center justify-between p-3">
                                     <p className="text-[10px] text-black/80 font-medium">Meet the</p>
-                                    <div className="relative w-24 h-24 mt-4">
+                                    <div className="relative w-24 h-24">
                                          <Image src="/mascot.png" alt="Mascot" layout="fill" objectFit="contain" />
                                     </div>
-                                    <div className="text-center mb-2">
+                                    <div className="text-center">
                                         <h1 className="font-headline text-[13px] font-bold leading-tight">
                                             <span className="text-black">Bachelor</span>
                                             <span className="text-green-600">Bite.</span>
                                         </h1>
                                         <p className="text-[7px] text-black/70 mt-0.5 px-1">No notes, no Excel—just one tap, done.</p>
                                     </div>
-                                    <Button className="w-full h-5 text-[9px] bg-green-600 hover:bg-green-700 text-white rounded-full">
+                                    <Button className="w-full h-5 text-[9px] bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-full">
                                         Get Started
                                         <ArrowRight className="ml-1 h-2 w-2" />
                                     </Button>
