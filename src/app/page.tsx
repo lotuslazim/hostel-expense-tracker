@@ -1,92 +1,173 @@
 
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import CardSwap, { Card } from '@/components/CardSwap';
+import { Utensils, Calculator, Zap, CheckCircle, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { LandingHeader } from '@/components/app/landing-header';
+import DotGrid from '@/components/DotGrid';
 import Image from 'next/image';
-import { ArrowRight, CheckCircle, Wheat } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Logo } from '@/components/icons/logo';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { cn } from '@/lib/utils';
-import { SplitText } from '@/components/animation/SplitText';
-import { useFontLoader } from '@/lib/hooks/use-font-loader';
+import { Logo } from '@/components/icons/logo';
+import { Button } from '@/components/ui/button';
 
-const FloatingIcon = ({ icon: Icon, className, style }: { icon: React.ComponentType<{className?: string}>, className: string, style: React.CSSProperties }) => {
+
+const FloatingIcon = ({ icon: Icon, top, left, delay }: { icon: React.ComponentType, top: string, left: string, delay: string }) => {
+    const [duration, setDuration] = useState('8s');
+  
+    useEffect(() => {
+      // Generate a random duration on the client-side to avoid hydration mismatch
+      setDuration(`${(Math.random() * 5 + 5).toFixed(2)}s`);
+    }, []);
+  
+    const style = {
+      top,
+      left,
+      animationDelay: delay,
+      animationDuration: duration,
+    };
+  
     return (
-        <div className={cn("floating-element", className)} style={style}>
-            <Icon />
-        </div>
+      <div className="absolute text-white/80 animate-float" style={style}>
+        <Icon />
+      </div>
     );
 };
 
-const Psymbol = ({ className }: { className?: string }) => (
-    <svg className={className} width="41" height="41" viewBox="0 0 41 41" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M25.4049 34.2559C23.4141 34.2559 21.5518 33.7256 19.8179 32.665C18.084 31.6045 16.6387 30.1323 15.4819 28.2485C14.3252 26.3647 13.7468 24.2163 13.7468 21.8032V1H21.3191V21.8032C21.3191 22.8105 21.5518 23.6426 22.017 24.2993C22.4822 24.9561 23.1633 25.2845 24.0603 25.2845C24.8289 25.2845 25.4526 25.0193 25.9314 24.489C26.4103 23.9587 26.6497 23.2126 26.6497 22.2505V1H34.222V22.2505C34.222 24.6091 33.6436 26.7031 32.4868 28.5325C31.3301 30.3618 29.8386 31.7915 27.9941 32.8213C26.1496 33.8511 24.1206 34.366 21.9072 34.366H20.4891V41H25.4049V34.2559Z" fill="black" fillOpacity="0.1"/>
-    </svg>
-)
 
 export default function LandingPage() {
-    const areFontsLoaded = useFontLoader();
+    const dashboardImage = PlaceHolderImages.find(p => p.id === 'app-dashboard');
+    const reportImage = PlaceHolderImages.find(p => p.id === 'app-report');
 
-    return (
-        <div className={cn("landing-page-container new-landing-style", !areFontsLoaded && 'opacity-0')}>
-            <div className="wavy-bg"></div>
-            <LandingHeader />
-
-            <main className="landing-content">
-                <FloatingIcon icon={Psymbol} className="w-8 h-8 top-[15%] left-[10%]" style={{ animationDelay: '0.5s' }} />
-                <FloatingIcon icon={Wheat} className="w-7 h-7 text-black/10 top-[20%] right-[15%]" style={{ animationDelay: '1s' }} />
-                <FloatingIcon icon={Psymbol} className="w-10 h-10 bottom-[15%] right-[10%]" style={{ animationDelay: '1.5s' }} />
-                <FloatingIcon icon={CheckCircle} className="w-6 h-6 text-black/10 bottom-[25%] left-[15%]" style={{ animationDelay: '2s' }} />
-
-                <div className="content-wrapper">
-                    <SplitText
-                        as="p"
-                        text="Meet the"
-                        className="meet-the-text"
-                        initial={{ y: 20, opacity: 0 }}
-                    />
-                    
-                    <h1 className="landing-headline">
-                        <SplitText as="span" text="Bachelor" initial={{ y: 20, opacity: 0 }}/>
-                        <SplitText as="span" text="Bite." className="text-secondary" initial={{ y: 20, opacity: 0 }}/>
-                    </h1>
-                    
-                    <SplitText
-                        as="p"
-                        text="No notes, no Excel—just one tap, done."
-                        className="tagline"
-                        initial={{ y: 20, opacity: 0 }}
-                    />
-
-                    <div className="mascot-container">
-                        <div className="mascot-shadow"></div>
-                        <Image
-                            src="/mascot.png"
-                            alt="BachelorBite Mascot"
-                            width={280}
-                            height={280}
-                            className="mascot-image"
-                            priority
-                        />
+    const appFeatures = [
+        {
+            name: "Welcome",
+            icon: <Zap />,
+            content: (
+                <div className="w-full h-full grid grid-cols-1 md:grid-cols-2 items-center bg-slate-900">
+                    <div className="p-8 flex flex-col justify-center h-full text-white">
+                         <h2 className="text-2xl font-bold font-headline mb-4">Welcome to BachelorBite.</h2>
+                        <p className="text-slate-300 text-sm">Effortlessly log meals, track expenses, and split costs with your flatmates—no spreadsheets, no hassle, just simple living made easy.</p>
                     </div>
-
-                    <div className="actions">
-                        <Link href="/signup" passHref>
-                             <Button asChild className="get-started-btn">
-                                <a>
-                                    Get Started <ArrowRight className="ml-2 h-5 w-5" />
-                                </a>
-                            </Button>
-                        </Link>
-                         <Link href="/login" passHref>
-                            <div className="login-icon-wrapper">N</div>
-                        </Link>
+                    <div className="h-full flex items-center justify-center p-4" style={{ perspective: '1000px' }}>
+                         <div className="relative w-40 h-80 bg-black rounded-[1.8rem] border-4 border-black shadow-lg" style={{ transform: 'rotateY(-20deg) rotateX(10deg) translateY(-2rem) scale(0.9)' }}>
+                            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-4 bg-black rounded-b-lg"></div>
+                            <div className="w-full h-full rounded-[1.5rem] overflow-hidden">
+                                 <div className="w-full h-full bg-[#FFC247] flex flex-col items-center justify-between p-3">
+                                    <p className="text-[10px] text-black/80 font-medium mt-2">Meet the</p>
+                                    <div className="relative w-24 h-24">
+                                         <Image src="/mascot.png" alt="Mascot" layout="fill" objectFit="contain" />
+                                    </div>
+                                    <div className="text-center">
+                                        <h1 className="font-headline text-[13px] font-bold leading-tight">
+                                            <span className="text-black">Bachelor</span>
+                                            <span className="text-green-600">Bite.</span>
+                                        </h1>
+                                        <p className="text-[7px] text-black/70 mt-0.5 px-1">No notes, no Excel—just one tap, done.</p>
+                                    </div>
+                                    <Button className="w-full h-5 text-[9px] bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-full">
+                                        Get Started
+                                        <ArrowRight className="ml-1 h-2 w-2" />
+                                    </Button>
+                                 </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </main>
+            )
+        },
+        {
+            name: "Effortless Logging",
+            icon: <Utensils />,
+            content: (
+                <div className={cn("card-feature-content", "relative w-full h-full text-white p-6 flex flex-col justify-end")}>
+                     {dashboardImage && <Image src={dashboardImage.imageUrl} alt="Effortless Logging" fill className="object-cover" />}
+                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                     <div className="relative z-10">
+                        <Utensils className="h-8 w-8 text-primary mb-2" />
+                        <h4 className="font-bold text-xl mb-1">Log Meals & Expenses</h4>
+                        <p className="text-sm text-gray-200">Quickly log daily meals and shared expenses. No more forgotten payments or confusing notes.</p>
+                     </div>
+                </div>
+            )
+        },
+        {
+            name: "Auto Settlements",
+            icon: <Calculator />,
+            content: (
+                <div className={cn("card-feature-content", "relative w-full h-full text-white p-6 flex flex-col justify-end")}>
+                    {reportImage && <Image src={reportImage.imageUrl} alt="Auto Settlements" fill className="object-cover" />}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                    <div className="relative z-10">
+                        <Calculator className="h-8 w-8 text-primary mb-2" />
+                        <h4 className="font-bold text-xl mb-1">Automatic Settlements</h4>
+                        <p className="text-sm text-gray-200">Get a detailed report with a final settlement, all calculated automatically at the end of the month.</p>
+                    </div>
+                </div>
+            )
+        },
+    ];
+
+    return (
+        <div className="landing-page-container yellow-gradient-bg text-slate-800 relative new-landing-style">
+            <div className="absolute inset-0 z-0">
+                <DotGrid
+                    dotSize={2}
+                    gap={25}
+                    baseColor="rgba(0,0,0,0.1)"
+                    activeColor="rgba(0,0,0,0.3)"
+                    proximity={100}
+                    shockRadius={200}
+                    shockStrength={2}
+                    resistance={500}
+                    returnDuration={1}
+                />
+            </div>
+            <LandingHeader />
+            <div className="landing-left-section">
+                {/* Left Text Section */}
+                <div className="text-content">
+                     <p className="text-lg text-black mb-2 font-medium">No notes, no Excel—just one tap, done.</p>
+                     <h1 className="background-headline">
+                        <span className="text-black">Bachelor</span><span className="text-secondary">Bite.</span>
+                    </h1>
+                    <p className="headline-main">
+                        Here to make your bachelor life easier — because someone has to.
+                    </p>
+
+                    <div className="flex gap-4 mt-8">
+                        <Link href="/signup" className="bg-black text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:opacity-90 transition-all shadow-sm">
+                           <span></span> SIGN UP
+                        </Link>
+                         <Link href="/login" className="border border-black text-black px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:bg-gray-100 transition-all shadow-sm">
+                           <span>▶</span> LOG IN
+                         </Link>
+                    </div>
+                </div>
+            </div>
+            <div className="landing-right-section">
+                <CardSwap
+                    cardDistance={60}
+                    verticalDistance={70}
+                    delay={5000}
+                    pauseOnHover={true}
+                    onCardClick={() => {}}
+                >
+                    {appFeatures.map((feature) => (
+                         <Card key={feature.name}>
+                            <div className="card-header" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', borderBottom: '1px solid rgba(0, 0, 0, 0.1)', color: '#333' }}>
+                                {feature.icon}
+                                <h3>{feature.name}</h3>
+                            </div>
+                            <div className="card-content-wrapper">
+                                {feature.content}
+                            </div>
+                        </Card>
+                    ))}
+                </CardSwap>
+            </div>
         </div>
     );
 }
-
