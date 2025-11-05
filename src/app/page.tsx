@@ -28,11 +28,6 @@ export default function LandingPage() {
                            Welcome to <span className="text-gradient-brand">BachelorBite</span>.
                         </h2>
                         <p className="text-slate-300 text-sm leading-relaxed">Your shared living, simplified. Log meals, track expenses, and split costs with your flatmates — no spreadsheets, no stress.</p>
-                         <Button asChild className="mt-8 w-fit bg-slate-50 text-slate-800 hover:bg-slate-200">
-                           <Link href="/signup">
-                                Get Started Free <ArrowRight className="ml-2 h-4 w-4" />
-                           </Link>
-                        </Button>
                     </div>
                      <div className="relative h-full flex items-center justify-center" style={{ perspective: '1000px' }}>
                          <div className="relative w-48 h-96 transition-transform duration-500 hover:scale-105" style={{ transform: 'rotateY(-20deg) rotateX(10deg) translateY(-1rem)' }}>
