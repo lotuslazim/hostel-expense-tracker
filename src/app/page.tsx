@@ -31,7 +31,7 @@ export default function LandingPage() {
                          <div className="relative">
                             <div className="relative w-48 h-96 bg-black rounded-[2rem] border-4 border-black shadow-lg" style={{ transform: 'rotateY(-20deg) rotateX(10deg) translateY(-2rem) scale(0.8)' }}>
                                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-4 bg-black rounded-b-lg"></div>
-                                <div className="w-full h-full bg-[#232A34] flex flex-col items-center justify-between p-3">
+                                <div className="w-full h-full bg-[#232A24] flex flex-col items-center justify-between p-3">
                                          <p className="text-[10px] text-white/80 font-medium mt-2">Meet the</p>
                                         <div className="relative w-52 h-52">
                                              <Image src="/mascot.png" alt="Mascot" fill sizes="10vw" className="object-contain" />
@@ -63,17 +63,24 @@ export default function LandingPage() {
                  <div className="w-full h-full bg-slate-50 text-slate-800 p-8 flex flex-col justify-between">
                     <div className="relative flex-grow flex items-center justify-center">
                         <div className="absolute inset-0 bg-grid-pattern opacity-50"></div>
-                        <div className="relative w-60 h-40 bg-white rounded-xl shadow-lg flex items-center justify-center p-4">
-                            <div className="flex items-center gap-4">
-                                <button className="flex flex-col items-center justify-center h-20 w-20 bg-amber-100 text-amber-600 rounded-lg shadow-sm hover:scale-105 transition-transform">
-                                    <Utensils className="h-8 w-8"/>
-                                    <span className="text-xs font-medium mt-1">Log Meal</span>
-                                </button>
-                                 <button className="flex flex-col items-center justify-center h-20 w-20 bg-green-100 text-green-600 rounded-lg shadow-sm hover:scale-105 transition-transform">
-                                    <Wallet className="h-8 w-8"/>
-                                    <span className="text-xs font-medium mt-1">Add Expense</span>
-                                </button>
+                        <div className="relative w-72 bg-white rounded-2xl shadow-lg p-6 space-y-4">
+                            <div className="flex items-center gap-3">
+                                <div className="p-3 bg-amber-100 rounded-full">
+                                    <Utensils className="h-6 w-6 text-amber-600" />
+                                </div>
+                                <p className="font-semibold text-lg">Log Today's Meal</p>
                             </div>
+                            <div className="flex items-center justify-between p-3 rounded-lg bg-slate-100">
+                                <span className="font-medium text-slate-600">Lunch</span>
+                                <div className="flex items-center gap-2">
+                                    <button className="h-6 w-6 rounded-md bg-white border">-</button>
+                                    <span className="font-bold w-4 text-center">1</span>
+                                    <button className="h-6 w-6 rounded-md bg-white border">+</button>
+                                </div>
+                            </div>
+                            <Button className="w-full bg-slate-800 text-white hover:bg-slate-700">
+                                Confirm Entry <Check className="ml-2 h-4 w-4"/>
+                            </Button>
                         </div>
                     </div>
                     <div className="relative z-10">
@@ -93,19 +100,25 @@ export default function LandingPage() {
                  <div className="w-full h-full bg-slate-50 text-slate-800 p-8 flex flex-col justify-between">
                     <div className="relative flex-grow flex items-center justify-center">
                         <div className="absolute inset-0 bg-grid-pattern opacity-50"></div>
-                        <div className="relative w-72 bg-white rounded-2xl shadow-lg p-4">
-                             <div className="flex justify-between items-center mb-3">
-                                <p className="text-xs font-semibold text-slate-400">Monthly Settlement</p>
+                        <div className="relative w-80 bg-white rounded-2xl shadow-lg p-6">
+                             <div className="flex justify-between items-center mb-4">
+                                <p className="text-sm font-semibold text-slate-400">Monthly Settlement</p>
                                 <FileText className="h-5 w-5 text-slate-400" />
                             </div>
                              <div className="space-y-3">
-                                <div className="flex justify-between items-center p-2 rounded-lg bg-red-50 border border-red-200">
-                                    <p className="text-sm font-medium text-red-700">Alice Owes</p>
-                                    <p className="font-bold text-red-700">৳850.00</p>
+                                <div className="flex justify-between items-center p-3 rounded-xl bg-red-50 border-2 border-red-100">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-white rounded-full"><Image src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=80&q=60" alt="Alice" width={32} height={32} className="rounded-full"/></div>
+                                        <p className="font-semibold text-red-700">Alice Owes</p>
+                                    </div>
+                                    <p className="font-bold text-lg text-red-700">৳850.00</p>
                                 </div>
-                                <div className="flex justify-between items-center p-2 rounded-lg bg-green-50 border-green-200">
-                                    <p className="text-sm font-medium text-green-700">Bob Gets Back</p>
-                                    <p className="font-bold text-green-700">৳1,250.00</p>
+                                <div className="flex justify-between items-center p-3 rounded-xl bg-green-50 border-2 border-green-100">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-white rounded-full"><Image src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=80&q=60" alt="Bob" width={32} height={32} className="rounded-full" /></div>
+                                        <p className="font-semibold text-green-700">Bob Gets Back</p>
+                                    </div>
+                                    <p className="font-bold text-lg text-green-700">৳1,250.00</p>
                                 </div>
                             </div>
                         </div>
