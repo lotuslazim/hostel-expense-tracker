@@ -149,27 +149,30 @@ export default function LandingPage() {
             
             {/* Desktop Layout (hidden on mobile) */}
             <div className="hidden md:flex landing-left-section">
-                <Logo className="mb-10" textColor="text-slate-800" secondaryColor="text-secondary" />
-                <div className="flex-grow" />
-                <div className="text-content">
-                     <p className="text-xl text-slate-800 mb-2 font-medium">No notes, no Excel—just one tap, done.</p>
-                     <h1 className="text-7xl font-extrabold tracking-tighter leading-none" style={{ userSelect: 'none' }}>
-                        <span className="text-slate-800">Bachelor</span><span className="text-secondary">Bite.</span>
-                    </h1>
-                    <p className="text-2xl text-slate-600 font-medium mt-6">
-                        Here to make your bachelor life easier — because someone has to.
-                    </p>
+                 <div className="flex-grow-0">
+                    <Logo textColor="text-slate-800" secondaryColor="text-secondary" />
+                </div>
+                <div className="flex-grow flex items-center">
+                    <div className="text-content">
+                         <p className="text-2xl text-slate-800 mb-2 font-medium">No notes, no Excel—just one tap, done.</p>
+                         <h1 className="text-7xl font-extrabold tracking-tighter leading-none" style={{ userSelect: 'none' }}>
+                            <span className="text-slate-800">Bachelor</span><span className="text-secondary">Bite.</span>
+                        </h1>
+                        <p className="text-3xl text-slate-600 font-medium mt-6">
+                            Here to make your bachelor life easier — because someone has to.
+                        </p>
 
-                    <div className="flex gap-4 mt-8">
-                        <Link href="/signup" className="bg-black text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:opacity-90 transition-all shadow-sm">
-                           <span></span> SIGN UP
-                        </Link>
-                         <Link href="/login" className="border border-black text-black px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:bg-black/10 transition-all shadow-sm">
-                           <span>▶</span> LOG IN
-                         </Link>
+                        <div className="flex gap-4 mt-8">
+                            <Link href="/signup" className="bg-black text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:opacity-90 transition-all shadow-sm">
+                               <span></span> SIGN UP
+                            </Link>
+                             <Link href="/login" className="border border-black text-black px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:bg-black/10 transition-all shadow-sm">
+                               <span>▶</span> LOG IN
+                             </Link>
+                        </div>
                     </div>
                 </div>
-                 <div className="flex-grow" />
+                 <div className="flex-grow-0" />
             </div>
             <div className="hidden md:flex landing-right-section">
                 <CardSwap
@@ -197,21 +200,24 @@ export default function LandingPage() {
 
             {/* Mobile Layout (hidden on desktop) */}
             <div className="flex md:hidden flex-col items-center justify-center w-full min-h-screen px-4 text-center z-10">
-                <div className="flex-grow flex flex-col items-center justify-center gap-4">
+                <div className="flex-grow flex flex-col items-center justify-center gap-2">
                     <p className="text-lg font-medium text-slate-800">Meet the</p>
-                    <div className="relative w-48 h-48 my-2">
+                    <div className="relative w-56 h-56 my-1">
                         <Image src="/mascot.png" alt="Mascot" fill sizes="50vw" className="object-contain" />
                     </div>
                     <p className="text-base text-slate-600">No notes, no Excel—just one tap, done.</p>
-                     <h1 className="text-5xl font-extrabold tracking-tighter leading-none" style={{ userSelect: 'none' }}>
+                     <h1 className="text-6xl font-extrabold tracking-tighter leading-none" style={{ userSelect: 'none' }}>
                         <span className="text-slate-800">Bachelor</span><span className="text-secondary">Bite.</span>
                     </h1>
-                    <p className="text-lg text-slate-600 font-medium mt-2 max-w-xs">
+                    <p className="text-lg text-slate-600 font-medium mt-1 max-w-xs">
                         Here to make your bachelor life easier — because someone has to.
                     </p>
                 </div>
                 <div className="w-full pb-8">
-                    <Link href="/about" className="bg-secondary text-white px-8 py-4 rounded-full font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-lg w-full max-w-sm mx-auto">
+                    <Link
+                        href="/about"
+                        className="bg-secondary text-white px-8 py-4 rounded-full font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-lg w-full max-w-sm mx-auto"
+                    >
                        Get Started <ArrowRight className="h-5 w-5" />
                     </Link>
                 </div>
