@@ -15,52 +15,6 @@ import { Logo } from '@/components/icons/logo';
 import { gsap } from "gsap";
 
 
-const FloatingElements = () => {
-    const containerRef = useRef<HTMLDivElement>(null);
-  
-    useLayoutEffect(() => {
-      const ctx = gsap.context(() => {
-        const elements = gsap.utils.toArray(".floating-element-landing");
-        elements.forEach((el: any) => {
-          gsap.to(el, {
-            y: 'random(-20, 20)',
-            x: 'random(-10, 10)',
-            duration: 'random(5, 8)',
-            ease: 'sine.inOut',
-            repeat: -1,
-            yoyo: true,
-          });
-        });
-      }, containerRef);
-  
-      return () => ctx.revert();
-    }, []);
-  
-    const elements = [
-        { Icon: Utensils, size: "w-8 h-8", top: "15%", left: "10%" },
-        { Icon: BarChart2, size: "w-6 h-6", top: "25%", left: "80%" },
-        { Icon: CheckCircle, size: "w-6 h-6", top: "70%", left: "20%" },
-        { Icon: Wallet, size: "w-10 h-10", top: "85%", left: "90%" },
-        { Icon: Leaf, size: "w-7 h-7", top: "50%", left: "5%" },
-        { Icon: Home, size: "w-9 h-9", top: "80%", left: "50%" },
-    ];
-  
-    return (
-      <div ref={containerRef} className="absolute inset-0 z-0 overflow-hidden">
-        {elements.map((el, i) => (
-          <div
-            key={i}
-            className={`floating-element-landing absolute ${el.size} text-white opacity-20 filter drop-shadow-lg`}
-            style={{ top: el.top, left: el.left }}
-          >
-            <el.Icon strokeWidth={1.5}/>
-          </div>
-        ))}
-      </div>
-    );
-};
-
-
 export default function LandingPage() {
     const dashboardImage = PlaceHolderImages.find(p => p.id === 'app-dashboard');
     const reportImage = PlaceHolderImages.find(p => p.id === 'app-report');
@@ -177,7 +131,7 @@ export default function LandingPage() {
     ];
 
     return (
-        <div className="landing-page-container text-slate-800 relative new-landing-style yellow-gradient-bg">
+        <div className="landing-page-container text-slate-800 relative new-landing-style">
             {/* Common background and header for both layouts */}
             <div className="absolute inset-0 z-0">
                 <DotGrid
