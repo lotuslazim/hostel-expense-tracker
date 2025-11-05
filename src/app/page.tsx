@@ -166,8 +166,8 @@ export default function LandingPage() {
             </div>
             <div className="landing-right-section">
                 <CardSwap
-                    width={500}
-                    height={400}
+                    width={550}
+                    height={450}
                     cardDistance={60}
                     verticalDistance={70}
                     delay={5000}
