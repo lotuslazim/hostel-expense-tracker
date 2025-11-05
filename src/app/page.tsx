@@ -30,15 +30,15 @@ export default function LandingPage() {
                         <p className="text-slate-300 text-sm leading-relaxed">Your shared living, simplified. Log meals, track expenses, and split costs with your flatmates — no spreadsheets, no stress.</p>
                     </div>
                      <div className="relative h-full flex items-center justify-center" style={{ perspective: '1000px' }}>
-                         <div className="relative w-40 h-80 transition-transform duration-500 hover:scale-105" style={{ transform: 'rotateY(-20deg) rotateX(10deg) translateY(-1rem)' }}>
+                         <div className="relative w-48 h-[26rem] transition-transform duration-500 hover:scale-105" style={{ transform: 'rotateY(-20deg) rotateX(10deg) translateY(-1rem)' }}>
                             <div className="absolute inset-0 bg-lime-400/20 rounded-full blur-3xl -z-10"></div>
                             <div className="relative w-full h-full bg-black/50 rounded-[2rem] border-2 border-slate-700/50 shadow-2xl backdrop-blur-sm">
                                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-4 bg-slate-900 rounded-b-lg"></div>
                                 <div className="w-full h-full rounded-[1.8rem] overflow-hidden p-1.5">
                                      <div className="w-full h-full bg-[#FFC247] flex flex-col items-center justify-between p-3 rounded-[1.4rem]">
-                                        <div className="mt-2">
+                                        <div className="mt-8">
                                             <p className="text-center text-xs text-slate-800 font-medium">Meet the</p>
-                                            <div className="relative w-32 h-32 mt-1">
+                                            <div className="relative w-36 h-36 mt-2">
                                                  <Image src="/mascot.png" alt="Mascot" fill sizes="10vw" className="object-contain" />
                                             </div>
                                         </div>
