@@ -251,20 +251,24 @@ export default function LandingPage() {
             </div>
 
             {/* Mobile Layout (hidden on desktop) */}
-            <div className="flex md:hidden flex-col items-center justify-between w-full min-h-screen mobile-landing-gradient text-blue-950">
-                 <FloatingElements />
-                <div className="flex-grow flex flex-col items-center justify-center gap-2 text-center px-4 z-10">
-                    <p className="text-xl font-medium">Meet the</p>
-                    <div className="relative w-72 h-72 my-1">
-                        <Image src="/mascot.png" alt="Mascot" fill sizes="50vw" className="object-contain" />
+            <div className="flex md:hidden flex-col w-full min-h-screen mobile-landing-gradient text-blue-950">
+                <FloatingElements />
+                <div className="flex-grow grid grid-cols-2 items-center px-4 gap-4 z-10">
+                    <div className="flex flex-col text-left space-y-2">
+                        <p className="text-xl font-medium">Meet the</p>
+                        <p className="text-base">No notes, no Excel—just one tap, done.</p>
+                        <h1 className="text-6xl font-extrabold tracking-tighter leading-none" style={{ userSelect: 'none' }}>
+                            <span className="text-blue-950">Bachelor</span><span className="text-secondary">Bite.</span>
+                        </h1>
+                        <p className="text-lg font-medium mt-1">
+                            Here to make your bachelor life easier — because someone has to.
+                        </p>
                     </div>
-                    <p className="text-base">No notes, no Excel—just one tap, done.</p>
-                     <h1 className="text-7xl font-extrabold tracking-tighter leading-none" style={{ userSelect: 'none' }}>
-                        <span className="text-blue-950">Bachelor</span><span className="text-secondary">Bite.</span>
-                    </h1>
-                    <p className="text-lg font-medium mt-1 max-w-xs">
-                        Here to make your bachelor life easier — because someone has to.
-                    </p>
+                    <div className="flex items-center justify-center">
+                        <div className="relative w-full" style={{ aspectRatio: '1 / 1' }}>
+                            <Image src="/mascot.png" alt="Mascot" fill sizes="50vw" className="object-contain" />
+                        </div>
+                    </div>
                 </div>
                 <div className="w-full pb-8 px-4 z-10">
                      <Link
