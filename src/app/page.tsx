@@ -41,9 +41,9 @@ export default function LandingPage() {
                                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-4 bg-slate-900 rounded-b-lg"></div>
                                 <div className="w-full h-full rounded-[1.8rem] overflow-hidden p-1.5">
                                      <div className="w-full h-full bg-[#FFC247] flex flex-col items-center justify-between p-3 rounded-[1.4rem]">
-                                        <div>
+                                        <div className="mt-2">
                                             <p className="text-center text-xs text-slate-800 font-medium">Meet the</p>
-                                            <div className="relative w-36 h-36">
+                                            <div className="relative w-40 h-40 mt-1">
                                                  <Image src="/mascot.png" alt="Mascot" fill sizes="10vw" className="object-contain" />
                                             </div>
                                         </div>
