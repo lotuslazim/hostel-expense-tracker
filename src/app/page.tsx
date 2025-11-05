@@ -24,20 +24,20 @@ export default function LandingPage() {
             icon: <Zap />,
             content: (
                 <div className="w-full h-full grid grid-cols-2 items-center bg-gray-50">
-                    <div className="p-8 flex flex-col justify-center h-full">
+                    <div className="p-6 flex flex-col justify-center h-full">
                         <Logo textColor="text-black" secondaryColor="text-green-600" />
-                        <p className="mt-4 text-gray-600 text-sm">Your all-in-one solution for shared living.</p>
-                        <ul className="mt-6 space-y-3 text-gray-700">
+                        <p className="mt-2 text-gray-600 text-xs">Your all-in-one solution for shared living.</p>
+                        <ul className="mt-4 space-y-2 text-gray-700 text-xs">
                             <li className="flex items-start gap-2">
-                                <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 shrink-0" />
+                                <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
                                 <span><span className="font-semibold">Log Meals:</span> Keep track of daily meals effortlessly.</span>
                             </li>
                             <li className="flex items-start gap-2">
-                                <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 shrink-0" />
+                                <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
                                 <span><span className="font-semibold">Track Expenses:</span> Record shared costs for groceries, bills, and more.</span>
                             </li>
                              <li className="flex items-start gap-2">
-                                <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 shrink-0" />
+                                <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
                                 <span><span className="font-semibold">Auto-Settle:</span> Automatically calculate who owes what at the end of the month.</span>
                             </li>
                         </ul>
