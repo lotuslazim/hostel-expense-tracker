@@ -32,12 +32,12 @@ export default function LandingPage() {
                             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-4 bg-black rounded-b-lg"></div>
                             <div className="w-full h-full rounded-[1.5rem] overflow-hidden">
                                  <div className="w-full h-full bg-[#FFC247] flex flex-col items-center justify-between p-3">
-                                    <p className="text-[10px] text-black/80 font-medium mt-2">Meet the</p>
-                                    <div className="relative w-36 h-36">
-                                         <Image src="/mascot.png" alt="Mascot" layout="fill" objectFit="contain" />
+                                    <p className="text-[10px] text-black/80 font-medium mt-1">Meet the</p>
+                                    <div className="relative w-28 h-28">
+                                         <Image src="/mascot.png" alt="Mascot" fill sizes="10vw" className="object-contain" />
                                     </div>
                                     <div className="text-center">
-                                        <h1 className="font-headline text-[13px] font-bold leading-tight">
+                                        <h1 className="font-headline text-[12px] font-bold leading-tight">
                                             <span className="text-black">Bachelor</span>
                                             <span className="text-green-600">Bite.</span>
                                         </h1>
@@ -59,7 +59,7 @@ export default function LandingPage() {
             icon: <Utensils />,
             content: (
                 <div className={cn("card-feature-content", "relative w-full h-full text-white p-6 flex flex-col justify-end")}>
-                     {dashboardImage && <Image src={dashboardImage.imageUrl} alt="Effortless Logging" fill className="object-cover" />}
+                     {dashboardImage && <Image src={dashboardImage.imageUrl} alt="Effortless Logging" fill sizes="33vw" className="object-cover" />}
                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                      <div className="relative z-10">
                         <Utensils className="h-8 w-8 text-primary mb-2" />
@@ -74,7 +74,7 @@ export default function LandingPage() {
             icon: <Calculator />,
             content: (
                 <div className={cn("card-feature-content", "relative w-full h-full text-white p-6 flex flex-col justify-end")}>
-                    {reportImage && <Image src={reportImage.imageUrl} alt="Auto Settlements" fill className="object-cover" />}
+                    {reportImage && <Image src={reportImage.imageUrl} alt="Auto Settlements" fill sizes="33vw" className="object-cover" />}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                     <div className="relative z-10">
                         <Calculator className="h-8 w-8 text-primary mb-2" />
@@ -87,7 +87,20 @@ export default function LandingPage() {
     ];
 
     return (
-        <div className="landing-page-container text-slate-800 relative new-landing-style">
+        <div className="landing-page-container yellow-gradient-bg text-slate-800 relative new-landing-style animated-bg-grid-green">
+            <div className="absolute inset-0 z-0">
+                <DotGrid
+                    dotSize={2}
+                    gap={25}
+                    baseColor="rgba(255,255,255,0.1)"
+                    activeColor="rgba(255,255,255,0.3)"
+                    proximity={100}
+                    shockRadius={200}
+                    shockStrength={2}
+                    resistance={500}
+                    returnDuration={1}
+                />
+            </div>
             <LandingHeader />
             <div className="landing-left-section">
                 {/* Left Text Section */}
@@ -96,15 +109,15 @@ export default function LandingPage() {
                      <h1 className="background-headline">
                         <span className="text-white">Bachelor</span><span className="text-secondary">Bite.</span>
                     </h1>
-                    <p className="headline-main text-slate-300">
+                    <p className="headline-main text-gray-200">
                         Here to make your bachelor life easier — because someone has to.
                     </p>
 
                     <div className="flex gap-4 mt-8">
-                        <Link href="/signup" className="bg-black text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:opacity-90 transition-all shadow-sm">
+                        <Link href="/signup" className="bg-white text-black px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:opacity-90 transition-all shadow-sm">
                            <span></span> SIGN UP
                         </Link>
-                         <Link href="/login" className="border border-white text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:bg-gray-100/10 transition-all shadow-sm">
+                         <Link href="/login" className="border border-white text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:bg-white/10 transition-all shadow-sm">
                            <span>▶</span> LOG IN
                          </Link>
                     </div>

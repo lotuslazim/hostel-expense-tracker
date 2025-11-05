@@ -144,7 +144,7 @@ export default function AboutPage() {
                             const image = PlaceHolderImages.find(p => p.id === feature.imageId);
                             return (
                                 <div key={feature.name} className={`card ${getCardClass(i)}`} onClick={() => updateCarousel(i)}>
-                                     {image && <Image src={image.imageUrl} alt={feature.name} fill className="card-image" />}
+                                     {image && <Image src={image.imageUrl} alt={feature.name} fill sizes="50vw" className="card-image" />}
                                 </div>
                             );
                         })}

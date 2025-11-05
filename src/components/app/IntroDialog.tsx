@@ -92,7 +92,7 @@ export function IntroDialog({ onOpenChange, isOnboardingFlow = false }: { onOpen
 
     const handleBack = () => {
         if (step > 0) {
-            setStep(step - 1);
+            setStep(step + 1);
         }
     };
 
@@ -106,6 +106,7 @@ export function IntroDialog({ onOpenChange, isOnboardingFlow = false }: { onOpen
                             src={currentStep.image}
                             alt={currentStep.title}
                             fill
+                            sizes="(max-width: 768px) 100vw, 50vw"
                             className="object-cover"
                         />
                         <div className="absolute inset-0 bg-black/30"></div>

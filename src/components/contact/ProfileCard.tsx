@@ -88,6 +88,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
                         src={avatarUrl}
                         alt={`${name}'s avatar`}
                         fill
+                        sizes="320px"
                         className="object-cover"
                         priority
                     />
