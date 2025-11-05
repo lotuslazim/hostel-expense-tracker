@@ -251,7 +251,6 @@ export default function LandingPage() {
             <div className="flex md:hidden flex-col items-center justify-center w-full min-h-screen mobile-landing-gradient p-4">
                 <div className="absolute inset-0 z-0">
                     <DotGrid dotSize={2} gap={25} baseColor="rgba(255,255,255,0.1)" activeColor="rgba(255,255,255,0.3)" proximity={100} shockRadius={200} shockStrength={2} resistance={500} returnDuration={1} />
-                    <FloatingElements />
                 </div>
                 <div className="flex flex-col items-center justify-center w-full h-full z-10 text-center">
                     <div className="flex flex-wrap gap-2 justify-center mb-4">
