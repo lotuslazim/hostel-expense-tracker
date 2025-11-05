@@ -22,7 +22,7 @@ export default function LandingPage() {
             name: "Welcome",
             icon: <Zap />,
             content: (
-                <div className="w-full h-full grid grid-cols-1 md:grid-cols-2 items-center bg-slate-900">
+                <div className="w-full h-full grid grid-cols-1 md:grid-cols-2 items-center animated-bg-grid-green">
                     <div className="p-8 flex flex-col justify-center h-full text-white">
                          <h2 className="text-2xl font-bold font-headline mb-4">Welcome to BachelorBite.</h2>
                         <p className="text-slate-300 text-sm">Effortlessly log meals, track expenses, and split costs with your flatmates—no spreadsheets, no hassle, just simple living made easy.</p>
@@ -33,7 +33,7 @@ export default function LandingPage() {
                             <div className="w-full h-full rounded-[1.5rem] overflow-hidden">
                                  <div className="w-full h-full bg-[#FFC247] flex flex-col items-center justify-between p-3">
                                      <p className="text-[10px] text-black/80 font-medium mt-1">Meet the</p>
-                                    <div className="relative w-28 h-28">
+                                    <div className="relative w-36 h-36">
                                          <Image src="/mascot.png" alt="Mascot" fill sizes="10vw" className="object-contain" />
                                     </div>
                                     <div className="text-center">
@@ -114,7 +114,7 @@ export default function LandingPage() {
                     </p>
 
                     <div className="flex gap-4 mt-8">
-                        <Link href="/signup" className="bg-white text-black px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:opacity-90 transition-all shadow-sm">
+                        <Link href="/signup" className="bg-black text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:opacity-90 transition-all shadow-sm">
                            <span></span> SIGN UP
                         </Link>
                          <Link href="/login" className="border border-white text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:bg-white/10 transition-all shadow-sm">
