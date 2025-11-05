@@ -154,19 +154,19 @@ export default function LandingPage() {
                 </div>
                 <div className="flex-grow flex items-center">
                     <div className="text-content">
-                         <p className="text-3xl text-slate-800 mb-2 font-medium">No notes, no Excel—just one tap, done.</p>
-                         <h1 className="text-8xl font-extrabold tracking-tighter leading-none" style={{ userSelect: 'none' }}>
+                         <p className="text-2xl text-slate-800 font-medium">No notes, no Excel—just one tap, done.</p>
+                         <h1 className="text-8xl font-extrabold tracking-tighter leading-none my-4" style={{ userSelect: 'none' }}>
                             <span className="text-slate-800">Bachelor</span><span className="text-secondary">Bite.</span>
                         </h1>
-                        <p className="text-4xl text-slate-600 font-medium mt-6">
-                            Here to make your bachelor life easier — because someone has to.
+                        <p className="text-2xl text-slate-600 font-medium">
+                            Here to make your bachelor life easier — <br/> because someone has to.
                         </p>
 
                         <div className="flex gap-4 mt-8">
-                            <Link href="/signup" className="bg-black text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:opacity-90 transition-all shadow-sm">
+                            <Link href="/signup" className="bg-black text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:opacity-90 transition-all shadow-md">
                                <span></span> SIGN UP
                             </Link>
-                             <Link href="/login" className="border border-black text-black px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:bg-black/10 transition-all shadow-sm">
+                             <Link href="/login" className="border border-black text-black px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:bg-black/10 transition-all shadow-md">
                                <span>▶</span> LOG IN
                              </Link>
                         </div>
@@ -225,7 +225,3 @@ export default function LandingPage() {
         </div>
     );
 }
-
-    
-
-    
