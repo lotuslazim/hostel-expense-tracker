@@ -79,7 +79,7 @@ export default function LandingPage() {
                     </div>
                     <div className="relative z-10">
                         <h4 className="font-bold text-xl mb-1">Effortless Logging</h4>
-                        <p className="text-sm text-slate-500">Quickly log daily meals and shared expenses. No more forgotten payments or confusing notes.</p>
+                        <p className="text-sm text-slate-500">Go beyond notes. One-tap entries are automatically organized for instant tracking and settlement.</p>
                         <Button variant="ghost" className="mt-4 p-0 h-auto text-green-600 hover:text-green-700">
                             Log an Entry <ArrowRight className="ml-2 h-4 w-4" />
                         </Button>
