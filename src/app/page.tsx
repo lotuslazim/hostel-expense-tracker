@@ -30,7 +30,7 @@ export default function LandingPage() {
                         <p className="text-slate-300 text-sm leading-relaxed">Your shared living, simplified. Log meals, track expenses, and split costs with your flatmates — no spreadsheets, no stress.</p>
                     </div>
                      <div className="relative h-full flex items-center justify-center" style={{ perspective: '1000px' }}>
-                         <div className="relative w-24 h-[16rem] transition-transform duration-500 hover:scale-105" style={{ transform: 'rotateY(-20deg) rotateX(10deg)' }}>
+                         <div className="relative w-36 h-[20rem] transition-transform duration-500 hover:scale-105" style={{ transform: 'rotateY(-20deg) rotateX(10deg)' }}>
                             <div className="absolute inset-0 bg-lime-400/20 rounded-full blur-3xl -z-10"></div>
                             <div className="relative w-full h-full bg-black/50 rounded-[2rem] border-2 border-slate-700/50 shadow-2xl backdrop-blur-sm">
                                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-4 bg-slate-900 rounded-b-lg"></div>
