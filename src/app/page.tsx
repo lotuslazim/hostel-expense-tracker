@@ -156,11 +156,11 @@ export default function LandingPage() {
                 </div>
                 <div className="flex-grow flex items-center">
                     <div className="text-content">
-                         <p className="text-2xl text-slate-800 font-medium">No notes, no Excel—just one tap, done.</p>
+                         <p className="text-xl text-slate-800 font-medium">No notes, no Excel—just one tap, done.</p>
                          <h1 className="text-8xl font-extrabold tracking-tighter leading-none my-4" style={{ userSelect: 'none' }}>
                             <span className="text-slate-800">Bachelor</span><span className="text-secondary">Bite.</span>
                         </h1>
-                        <p className="text-2xl text-slate-600 font-medium">
+                        <p className="text-xl text-slate-600 font-medium">
                             Here to make your bachelor life easier — <br/> because someone has to.
                         </p>
 
@@ -176,7 +176,7 @@ export default function LandingPage() {
                 </div>
                  <div className="flex-grow-0" />
             </div>
-            <div className="hidden md:flex landing-right-section">
+            <div className="hidden md:flex landing-right-section mt-16">
                 <CardSwap
                     width={580}
                     height={480}
@@ -203,8 +203,8 @@ export default function LandingPage() {
 {/* Mobile Layout (hidden on desktop) */}
 <div className="flex md:hidden flex-col items-center justify-center w-full min-h-screen px-4 text-center z-10">
     <div className="flex-grow flex flex-col items-center justify-center gap-2">
-        <p className="text-lg font-medium text-slate-800">Meet the</p>
-        <div className="relative w-64 h-64 my-1">
+        <p className="text-xl font-medium text-slate-800">Meet the</p>
+        <div className="relative w-80 h-80 my-1">
             <Image src="/mascot.png" alt="Mascot" fill sizes="50vw" className="object-contain" />
         </div>
         <p className="text-base text-slate-600">No notes, no Excel—just one tap, done.</p>
