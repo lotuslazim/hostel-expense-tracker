@@ -23,7 +23,9 @@ export default function ContactPage() {
 
   return (
     <div className="contact-page-container">
-        <LandingHeader />
+        <div className="hidden md:block">
+            <LandingHeader />
+        </div>
 
         <div className="contact-page-content">
             <div className="profile-cards-wrapper">
