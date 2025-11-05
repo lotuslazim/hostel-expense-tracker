@@ -14,6 +14,21 @@ import { Logo } from '@/components/icons/logo';
 import { Button } from '@/components/ui/button';
 
 
+const FloatingIcon = ({ icon: Icon, top, left, delay, duration }: { icon: React.ComponentType, top: string, left: string, delay: string, duration: string }) => {
+    const style = {
+        top,
+        left,
+        animationDelay: delay,
+        animationDuration: duration
+    };
+    return (
+        <div className="absolute text-white/80 animate-float" style={style}>
+            <Icon />
+        </div>
+    );
+};
+
+
 export default function LandingPage() {
     const dashboardImage = PlaceHolderImages.find(p => p.id === 'app-dashboard');
     const reportImage = PlaceHolderImages.find(p => p.id === 'app-report');
@@ -26,8 +41,8 @@ export default function LandingPage() {
                 <div className="w-full h-full grid grid-cols-2 items-center bg-gray-50">
                     <div className="p-6 flex flex-col justify-center h-full">
                         <Logo textColor="text-black" secondaryColor="text-green-600" />
-                        <p className="mt-2 text-gray-600 text-xs">Your all-in-one solution for shared living.</p>
-                        <ul className="mt-4 space-y-2 text-gray-700 text-xs">
+                        <p className="mt-2 text-gray-600 text-sm">Your all-in-one solution for shared living.</p>
+                        <ul className="mt-4 space-y-2 text-gray-700 text-sm">
                             <li className="flex items-start gap-2">
                                 <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
                                 <span><span className="font-semibold">Log Meals:</span> Keep track of daily meals effortlessly.</span>
