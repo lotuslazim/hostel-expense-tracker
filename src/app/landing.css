@@ -3,6 +3,7 @@
 
 
 
+
 .landing-page-container {
     display: flex;
     min-height: 100vh;
@@ -13,7 +14,6 @@
     flex: 0 0 50%; /* Give left section a fixed 50% width */
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: flex-start;
     padding: 2rem 2rem 2rem 5rem;
     position: relative;
