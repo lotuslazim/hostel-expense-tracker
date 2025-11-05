@@ -70,20 +70,20 @@ export default function LandingPage() {
                             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-10 h-2.5 bg-black rounded-b-md"></div>
                             <div className="w-full h-full rounded-[1.2rem] overflow-hidden">
                                  <div className="w-full h-full bg-[#FFC247] flex flex-col items-center justify-between p-2">
-                                    <div className="text-center mt-4">
-                                        <p className="text-[10px] text-black/80">Meet the</p>
-                                        <h1 className="font-headline text-lg font-bold leading-tight">
+                                    <div className="text-center mt-3">
+                                        <p className="text-[9px] text-black/80">Meet the</p>
+                                        <h1 className="font-headline text-base font-bold leading-tight">
                                             <span className="text-black">Bachelor</span>
                                             <span className="text-green-600">Bite.</span>
                                         </h1>
-                                        <p className="text-[9px] text-black/70 mt-0.5">No notes, no Excel—just one tap, done.</p>
+                                        <p className="text-[8px] text-black/70 mt-0.5">No notes, no Excel—just one tap, done.</p>
                                     </div>
-                                    <div className="relative w-24 h-24">
+                                    <div className="relative w-20 h-20">
                                          <Image src="/mascot.png" alt="Mascot" layout="fill" objectFit="contain" />
                                     </div>
-                                     <Button className="w-full h-7 text-[10px] bg-green-600 hover:bg-green-700 text-white rounded-full">
+                                     <Button className="w-full h-6 text-[9px] bg-green-600 hover:bg-green-700 text-white rounded-full">
                                         Get Started
-                                        <ArrowRight className="ml-1 h-2.5 w-2.5" />
+                                        <ArrowRight className="ml-1 h-2 w-2" />
                                     </Button>
                                  </div>
                             </div>
