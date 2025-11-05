@@ -47,21 +47,30 @@ export default function LandingPage() {
             icon: <Zap />,
             content: (
                 <div className="w-full h-full grid grid-cols-2 items-center bg-gray-50">
-                    <div className="p-4 flex flex-col justify-center h-full">
-                        <Logo textColor="text-black" secondaryColor="text-green-600" />
-                        <p className="mt-1 text-gray-600 text-xs">Your all-in-one solution for shared living.</p>
-                        <ul className="mt-3 space-y-1.5 text-gray-700 text-xs">
-                            <li className="flex items-start gap-2">
-                                <CheckCircle className="h-3.5 w-3.5 text-green-600 mt-0.5 shrink-0" />
-                                <span><span className="font-semibold">Log Meals:</span> Keep track of daily meals effortlessly.</span>
+                    <div className="p-8 flex flex-col justify-center h-full bg-slate-900 text-white">
+                        <h2 className="text-2xl font-bold font-headline mb-4">Simplify Shared Living</h2>
+                        <p className="text-slate-400 text-sm mb-6">BachelorBite is the all-in-one solution for managing meals and expenses with your flatmates.</p>
+                        <ul className="space-y-4 text-slate-300 text-sm">
+                            <li className="flex items-start gap-3">
+                                <CheckCircle className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                                <div>
+                                    <span className="font-semibold text-white">Log Meals & Expenses</span>
+                                    <p className="text-xs text-slate-400">Keep track of daily meals and costs effortlessly.</p>
+                                </div>
                             </li>
-                            <li className="flex items-start gap-2">
-                                <CheckCircle className="h-3.5 w-3.5 text-green-600 mt-0.5 shrink-0" />
-                                <span><span className="font-semibold">Track Expenses:</span> Record shared costs for groceries, bills, and more.</span>
+                            <li className="flex items-start gap-3">
+                                <CheckCircle className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                                <div>
+                                    <span className="font-semibold text-white">Automated Settlements</span>
+                                    <p className="text-xs text-slate-400">Calculate who owes what at the end of the month.</p>
+                                </div>
                             </li>
-                             <li className="flex items-start gap-2">
-                                <CheckCircle className="h-3.5 w-3.5 text-green-600 mt-0.5 shrink-0" />
-                                <span><span className="font-semibold">Auto-Settle:</span> Automatically calculate who owes what at the end of the month.</span>
+                            <li className="flex items-start gap-3">
+                                <CheckCircle className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                                <div>
+                                    <span className="font-semibold text-white">Track Inventory</span>
+                                    <p className="text-xs text-slate-400">Groceries are automatically added to your inventory.</p>
+                                </div>
                             </li>
                         </ul>
                     </div>
@@ -70,18 +79,18 @@ export default function LandingPage() {
                             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-10 h-2.5 bg-black rounded-b-md"></div>
                             <div className="w-full h-full rounded-[1.2rem] overflow-hidden">
                                  <div className="w-full h-full bg-[#FFC247] flex flex-col items-center justify-between p-2">
-                                    <div className="text-center mt-3">
-                                        <p className="text-[9px] text-black/80">Meet the</p>
-                                        <h1 className="font-headline text-base font-bold leading-tight">
+                                    <div className="text-center mt-2">
+                                        <p className="text-[8px] text-black/80">Meet the</p>
+                                        <h1 className="font-headline text-sm font-bold leading-tight">
                                             <span className="text-black">Bachelor</span>
                                             <span className="text-green-600">Bite.</span>
                                         </h1>
-                                        <p className="text-[8px] text-black/70 mt-0.5">No notes, no Excel—just one tap, done.</p>
+                                        <p className="text-[7px] text-black/70 mt-0.5">No notes, no Excel—just one tap, done.</p>
                                     </div>
-                                    <div className="relative w-20 h-20">
+                                    <div className="relative w-16 h-16">
                                          <Image src="/mascot.png" alt="Mascot" layout="fill" objectFit="contain" />
                                     </div>
-                                     <Button className="w-full h-6 text-[9px] bg-green-600 hover:bg-green-700 text-white rounded-full">
+                                     <Button className="w-full h-5 text-[8px] bg-green-600 hover:bg-green-700 text-white rounded-full">
                                         Get Started
                                         <ArrowRight className="ml-1 h-2 w-2" />
                                     </Button>
@@ -185,3 +194,5 @@ export default function LandingPage() {
         </div>
     );
 }
+
+    
