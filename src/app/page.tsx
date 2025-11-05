@@ -103,7 +103,7 @@ export default function LandingPage() {
                                     <p className="text-sm font-medium text-red-700">Alice Owes</p>
                                     <p className="font-bold text-red-700">৳850.00</p>
                                 </div>
-                                <div className="flex justify-between items-center p-2 rounded-lg bg-green-50 border border-green-200">
+                                <div className="flex justify-between items-center p-2 rounded-lg bg-green-50 border-green-200">
                                     <p className="text-sm font-medium text-green-700">Bob Gets Back</p>
                                     <p className="font-bold text-green-700">৳1,250.00</p>
                                 </div>
