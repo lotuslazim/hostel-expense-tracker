@@ -22,15 +22,15 @@ export default function LandingPage() {
             name: "Welcome",
             icon: <Zap />,
             content: (
-                <div className="w-full h-full grid grid-cols-1 md:grid-cols-2">
+                <div className="w-full h-full grid grid-cols-1 md:grid-cols-2 bg-slate-800">
                     <div className="p-8 flex flex-col justify-center h-full text-white">
                          <h2 className="text-2xl font-bold font-headline mb-4">Welcome to BachelorBite.</h2>
                         <p className="text-slate-300 text-sm">Effortlessly log meals, track expenses, and split costs with your flatmates—no spreadsheets, no hassle, just simple living made easy.</p>
                     </div>
                      <div className="h-full flex items-center justify-center p-4" style={{ perspective: '1000px' }}>
-                         <div className="relative w-40 h-80 bg-black rounded-[1.8rem] border-4 border-black shadow-lg" style={{ transform: 'rotateY(-20deg) rotateX(10deg) translateY(0) scale(0.9)' }}>
+                         <div className="relative w-48 h-96 bg-black rounded-[2rem] border-4 border-black shadow-lg" style={{ transform: 'rotateY(-20deg) rotateX(10deg) translateY(0) scale(0.9)' }}>
                             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-4 bg-black rounded-b-lg"></div>
-                            <div className="w-full h-full rounded-[1.5rem] overflow-hidden">
+                            <div className="w-full h-full rounded-[1.8rem] overflow-hidden">
                                  <div className="w-full h-full bg-[#FFC247] flex flex-col items-center justify-between p-3">
                                      <p className="text-[10px] text-black/80 font-medium mt-2">Meet the</p>
                                     <div className="relative w-40 h-40">
