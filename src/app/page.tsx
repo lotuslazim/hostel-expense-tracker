@@ -156,11 +156,11 @@ export default function LandingPage() {
                 </div>
                 <div className="flex-grow flex items-center">
                     <div className="text-content">
-                         <p className="text-xl text-slate-800 font-medium">No notes, no Excel—just one tap, done.</p>
-                         <h1 className="text-8xl font-extrabold tracking-tighter leading-none my-4" style={{ userSelect: 'none' }}>
+                         <p className="text-3xl text-slate-800 font-medium">No notes, no Excel—just one tap, done.</p>
+                         <h1 className="text-9xl font-extrabold tracking-tighter leading-none my-4" style={{ userSelect: 'none' }}>
                             <span className="text-slate-800">Bachelor</span><span className="text-secondary">Bite.</span>
                         </h1>
-                        <p className="text-xl text-slate-600 font-medium">
+                        <p className="text-3xl text-slate-600 font-medium">
                             Here to make your bachelor life easier — <br/> because someone has to.
                         </p>
 
@@ -200,45 +200,44 @@ export default function LandingPage() {
                 </CardSwap>
             </div>
 
-{/* Mobile Layout (hidden on desktop) */}
-<div className="flex md:hidden flex-col items-center justify-center w-full min-h-screen px-4 text-center z-10">
-    <div className="flex-grow flex flex-col items-center justify-center gap-2">
-        <p className="text-xl font-medium text-slate-800">Meet the</p>
-        <div className="relative w-80 h-80 my-1">
-            <Image src="/mascot.png" alt="Mascot" fill sizes="50vw" className="object-contain" />
-        </div>
-        <p className="text-base text-slate-600">No notes, no Excel—just one tap, done.</p>
-         <h1 className="text-6xl font-extrabold tracking-tighter leading-none" style={{ userSelect: 'none' }}>
-            <span className="text-slate-800">Bachelor</span><span className="text-secondary">Bite.</span>
-        </h1>
-        <p className="text-lg text-slate-600 font-medium mt-1 max-w-xs">
-            Here to make your bachelor life easier — because someone has to.
-        </p>
-        <div className="flex flex-wrap gap-2 justify-center mt-4">
-            <div className="flex items-center gap-1.5 bg-white bg-opacity-70 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm text-xs">
-                <Zap className="w-4 h-4 text-slate-700" />
-                <span className="font-semibold text-slate-800">Fast</span>
+            {/* Mobile Layout (hidden on desktop) */}
+            <div className="flex md:hidden flex-col items-center justify-center w-full min-h-screen px-4 text-center z-10">
+                <div className="flex-grow flex flex-col items-center justify-center gap-2">
+                    <p className="text-2xl font-medium text-slate-800">Meet the</p>
+                    <div className="relative w-[22rem] h-[22rem] my-1">
+                        <Image src="/mascot.png" alt="Mascot" fill sizes="80vw" className="object-contain" />
+                    </div>
+                    <p className="text-base text-slate-600">No notes, no Excel—just one tap, done.</p>
+                    <h1 className="text-6xl font-extrabold tracking-tighter leading-none" style={{ userSelect: 'none' }}>
+                        <span className="text-slate-800">Bachelor</span><span className="text-secondary">Bite.</span>
+                    </h1>
+                    <p className="text-lg text-slate-600 font-medium mt-1 max-w-xs">
+                        Here to make your bachelor life easier — because someone has to.
+                    </p>
+                    <div className="flex flex-wrap gap-2 justify-center mt-4">
+                        <div className="flex items-center gap-1.5 bg-white bg-opacity-70 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm text-xs">
+                            <Zap className="w-4 h-4 text-slate-700" />
+                            <span className="font-semibold text-slate-800">Fast</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 bg-white bg-opacity-70 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm text-xs">
+                            <Check className="w-4 h-4 text-slate-700" />
+                            <span className="font-semibold text-slate-800">Simple</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 bg-white bg-opacity-70 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm text-xs">
+                            <Calendar className="w-4 h-4 text-slate-700" />
+                            <span className="font-semibold text-slate-800">Smart</span>
+                        </div>
+                    </div>
+                </div>
+                <div className="w-full pb-8">
+                    <Link
+                        href="/about"
+                        className="bg-secondary text-white px-8 py-4 rounded-full font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-lg w-full max-w-sm mx-auto"
+                    >
+                       Get Started <ArrowRight className="h-5 w-5" />
+                    </Link>
+                </div>
             </div>
-            <div className="flex items-center gap-1.5 bg-white bg-opacity-70 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm text-xs">
-                <Check className="w-4 h-4 text-slate-700" />
-                <span className="font-semibold text-slate-800">Simple</span>
-            </div>
-            <div className="flex items-center gap-1.5 bg-white bg-opacity-70 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm text-xs">
-                <Calendar className="w-4 h-4 text-slate-700" />
-                <span className="font-semibold text-slate-800">Smart</span>
-            </div>
-        </div>
-    </div>
-    <div className="w-full pb-8">
-         <Link
-            href="/about"
-            className="bg-secondary text-white px-8 py-4 rounded-full font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-lg w-full max-w-sm mx-auto"
-        >
-           Get Started <ArrowRight className="h-5 w-5" />
-        </Link>
-    </div>
-</div>
         </div>
     );
 }
-    
