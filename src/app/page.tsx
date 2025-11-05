@@ -131,6 +131,7 @@ export default function LandingPage() {
 
     return (
         <div className="landing-page-container text-slate-800 relative new-landing-style yellow-gradient-bg">
+            {/* Common background and header for both layouts */}
             <div className="absolute inset-0 z-0">
                 <DotGrid
                     dotSize={2}
@@ -145,10 +146,12 @@ export default function LandingPage() {
                 />
             </div>
             <LandingHeader />
-            <div className="landing-left-section">
+            
+            {/* Desktop Layout (hidden on mobile) */}
+            <div className="hidden md:flex landing-left-section">
+                <div className="flex-grow" />
                 <Logo className="mb-10" textColor="text-slate-800" secondaryColor="text-secondary" />
                 <div className="flex-grow" />
-                {/* Left Text Section */}
                 <div className="text-content">
                      <p className="text-xl text-slate-800 mb-2 font-medium">No notes, no Excel—just one tap, done.</p>
                      <h1 className="text-8xl font-extrabold tracking-tighter leading-none" style={{ userSelect: 'none' }}>
@@ -169,7 +172,7 @@ export default function LandingPage() {
                 </div>
                  <div className="flex-grow" />
             </div>
-            <div className="landing-right-section">
+            <div className="hidden md:flex landing-right-section">
                 <CardSwap
                     width={580}
                     height={480}
@@ -191,6 +194,30 @@ export default function LandingPage() {
                         </Card>
                     ))}
                 </CardSwap>
+            </div>
+
+            {/* Mobile Layout (hidden on desktop) */}
+            <div className="flex md:hidden flex-col items-center justify-center w-full min-h-screen px-4 text-center z-10">
+                <div className="flex-grow flex flex-col items-center justify-center gap-4">
+                    <p className="text-lg font-medium text-slate-800">Meet the</p>
+                    <div className="relative w-48 h-48 my-2">
+                        <Image src="/mascot.png" alt="Mascot" fill sizes="50vw" className="object-contain" />
+                    </div>
+                    <p className="text-base text-slate-600">No notes, no Excel—just one tap, done.</p>
+                     <h1 className="text-5xl font-extrabold tracking-tighter leading-none" style={{ userSelect: 'none' }}>
+                        <span className="text-slate-800">Bachelor</span><span className="text-secondary">Bite.</span>
+                    </h1>
+                    <p className="text-lg text-slate-600 font-medium mt-2 max-w-xs">
+                        Here to make your bachelor life easier — because someone has to.
+                    </p>
+                </div>
+                <div className="w-full pb-8">
+                    <Link href="/about" legacyBehavior>
+                        <a className="bg-secondary text-white px-8 py-4 rounded-full font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-lg w-full max-w-sm mx-auto">
+                           Get Started <ArrowRight className="h-5 w-5" />
+                        </a>
+                    </Link>
+                </div>
             </div>
         </div>
     );
