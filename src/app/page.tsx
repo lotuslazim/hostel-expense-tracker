@@ -14,17 +14,25 @@ import { Logo } from '@/components/icons/logo';
 import { Button } from '@/components/ui/button';
 
 
-const FloatingIcon = ({ icon: Icon, top, left, delay, duration }: { icon: React.ComponentType, top: string, left: string, delay: string, duration: string }) => {
+const FloatingIcon = ({ icon: Icon, top, left, delay }: { icon: React.ComponentType, top: string, left: string, delay: string }) => {
+    const [duration, setDuration] = useState('8s');
+  
+    useEffect(() => {
+      // Generate a random duration on the client-side to avoid hydration mismatch
+      setDuration(`${(Math.random() * 5 + 5).toFixed(2)}s`);
+    }, []);
+  
     const style = {
-        top,
-        left,
-        animationDelay: delay,
-        animationDuration: duration
+      top,
+      left,
+      animationDelay: delay,
+      animationDuration: duration,
     };
+  
     return (
-        <div className="absolute text-white/80 animate-float" style={style}>
-            <Icon />
-        </div>
+      <div className="absolute text-white/80 animate-float" style={style}>
+        <Icon />
+      </div>
     );
 };
 
@@ -59,25 +67,25 @@ export default function LandingPage() {
                     </div>
                     <div className="h-full flex items-center justify-center bg-gray-100 p-4">
                         {/* Phone Mockup */}
-                        <div className="relative w-48 h-96 bg-black rounded-[2.5rem] border-[10px] border-black shadow-2xl">
-                             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-4 bg-black rounded-b-lg"></div>
-                            <div className="w-full h-full rounded-[2rem] overflow-hidden">
+                        <div className="relative w-48 h-96 bg-black rounded-[2rem] border-8 border-black shadow-2xl">
+                             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-3 bg-black rounded-b-md"></div>
+                            <div className="w-full h-full rounded-[1.5rem] overflow-hidden">
                                  {/* Phone Screen Content */}
-                                 <div className="w-full h-full bg-[#FFC247] flex flex-col items-center justify-between p-4">
-                                    <div className="text-center mt-8">
-                                        <p className="text-sm text-black/80">Meet the</p>
-                                        <h1 className="font-headline text-2xl font-bold">
+                                 <div className="w-full h-full bg-[#FFC247] flex flex-col items-center justify-between p-3">
+                                    <div className="text-center mt-6">
+                                        <p className="text-xs text-black/80">Meet the</p>
+                                        <h1 className="font-headline text-xl font-bold">
                                             <span className="text-black">Bachelor</span>
                                             <span className="text-green-600">Bite.</span>
                                         </h1>
-                                        <p className="text-xs text-black/70 mt-1">No notes, no Excel—just one tap, done.</p>
+                                        <p className="text-[10px] text-black/70 mt-1">No notes, no Excel—just one tap, done.</p>
                                     </div>
-                                    <div className="relative w-32 h-32">
+                                    <div className="relative w-28 h-28">
                                          <Image src="/mascot.png" alt="Mascot" layout="fill" objectFit="contain" />
                                     </div>
-                                     <Button className="w-full bg-green-600 hover:bg-green-700 text-white rounded-full">
+                                     <Button className="w-full h-8 text-xs bg-green-600 hover:bg-green-700 text-white rounded-full">
                                         Get Started
-                                        <ArrowRight className="ml-2 h-4 w-4" />
+                                        <ArrowRight className="ml-1 h-3 w-3" />
                                     </Button>
                                  </div>
                             </div>
