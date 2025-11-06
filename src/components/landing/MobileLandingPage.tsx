@@ -9,7 +9,7 @@ import DotGrid from '@/components/DotGrid';
 
 export function MobileLandingPage() {
     return (
-        <div className="fixed inset-0 w-full h-full flex flex-col items-center justify-between px-6 pb-6 relative bg-gradient-to-b from-amber-300 via-amber-400 to-amber-500 overflow-y-auto">
+        <div className="fixed inset-0 w-full h-full flex flex-col items-center justify-between px-6 pb-6 relative yellow-gradient-bg overflow-y-auto">
             {/* DotGrid Background */}
             <div className="absolute inset-0 z-0">
                 <DotGrid 
@@ -26,9 +26,9 @@ export function MobileLandingPage() {
             </div>
 
             {/* Content */}
-            <div className="flex flex-col items-center w-full z-10 text-center gap-3 pt-6">
-                {/* Feature Badges */}
-                <div className="flex flex-wrap gap-2 justify-center mb-2">
+            <div className="flex flex-col items-center w-full z-10 text-center gap-3">
+                 {/* Feature Badges */}
+                <div className="flex flex-wrap gap-2 justify-center mt-6 mb-2">
                     <div className="flex items-center gap-1.5 bg-white bg-opacity-70 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm text-xs">
                         <Zap className="w-4 h-4 text-slate-700" />
                         <span className="font-semibold text-slate-800">Fast</span>
