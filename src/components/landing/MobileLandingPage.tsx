@@ -27,11 +27,11 @@ export function MobileLandingPage() {
 
             {/* Content in the middle */}
             <div className="relative flex flex-col items-center justify-center z-10 w-full">
-                <p className="font-semibold text-slate-800 text-[clamp(16px,4vw,20px)] leading-none -mb-2">
+                <p className="font-semibold text-slate-800 text-[clamp(20px,5vw,28px)] leading-none">
                     Meet the
                 </p>
 
-                <div className="relative w-[clamp(180px,55vw,300px)] h-[clamp(180px,55vw,300px)] mt-4">
+                <div className="relative w-[clamp(200px,65vw,350px)] h-[clamp(200px,65vw,350px)]">
                     <Image
                         src="/mascot.png"
                         alt="BachelorBite Mascot"
@@ -42,14 +42,14 @@ export function MobileLandingPage() {
                     <div className="mascot-shadow"></div>
                 </div>
                 
-                <p className="font-medium text-slate-800 px-4 -mt-2" style={{ fontSize: "clamp(12px, 3vw, 16px)" }}>
+                <p className="font-medium text-slate-800 px-4 -mt-4 text-center" style={{ fontSize: "clamp(14px, 3.5vw, 18px)" }}>
                     No notes, no Excel—just one tap, done.
                 </p>
 
                 <h1
-                    className="font-extrabold tracking-tight leading-none"
+                    className="font-extrabold tracking-tight leading-none my-1"
                     style={{
-                        fontSize: "clamp(44px, 12vw, 68px)",
+                        fontSize: "clamp(54px, 15vw, 80px)",
                         userSelect: "none"
                     }}
                 >
@@ -57,9 +57,9 @@ export function MobileLandingPage() {
                     <span className="text-secondary">Bite.</span>
                 </h1>
 
-                <p className="text-slate-800 max-w-xs px-4 text-center"
-                   style={{ fontSize: "clamp(12px, 3vw, 16px)" }}>
-                    Here to make your bachelor life easier — because someone has to.
+                <p className="text-slate-700 max-w-xs px-4 text-center"
+                   style={{ fontSize: "clamp(14px, 3.5vw, 18px)" }}>
+                    Here to make your bachelor life easier — <br/> because someone has to.
                 </p>
             </div>
             
