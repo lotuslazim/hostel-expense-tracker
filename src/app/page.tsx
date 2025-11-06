@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useLayoutEffect, useRef } from 'react';
@@ -131,7 +130,7 @@ export default function LandingPage() {
     ];
 
     return (
-        <div className="landing-page-container text-slate-800 relative new-landing-style">
+        <div className="landing-page-container text-slate-800 relative new-landing-style yellow-gradient-bg">
             {/* Common background and header for both layouts */}
             <div className="absolute inset-0 z-0">
                 <DotGrid
