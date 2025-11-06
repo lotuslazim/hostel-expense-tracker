@@ -127,8 +127,8 @@ export default function LandingPage() {
 
     return (
         <div className="landing-page-container text-slate-800 relative">
-            {/* Common background and header for both layouts */}
-            <div className="absolute inset-0 z-0">
+            {/* Desktop Background */}
+            <div className="absolute inset-0 z-0 hidden md:block yellow-gradient-bg">
                 <DotGrid
                     dotSize={2}
                     gap={25}
@@ -141,12 +141,24 @@ export default function LandingPage() {
                     returnDuration={1}
                 />
             </div>
-            <div className="hidden md:block">
+            
+             {/* Mobile Background */}
+            <div className="absolute inset-0 z-0 block md:hidden bg-gradient-to-b from-amber-300 via-amber-400 to-amber-500">
+                <DotGrid 
+                    dotSize={1} 
+                    gap={20} 
+                    baseColor="rgba(255,255,255,0.2)"
+                    activeColor="rgba(255,255,255,0.5)"
+                    proximity={80}
+                />
+            </div>
+            
+            <div className="hidden md:block z-10">
               <LandingHeader />
             </div>
             
             {/* Desktop Layout (hidden on mobile) */}
-            <div className="hidden md:flex landing-left-section">
+            <div className="hidden md:flex landing-left-section z-10">
                 <div className="flex-grow-0">
                     <Logo textColor="text-slate-800" secondaryColor="text-secondary" />
                 </div>
@@ -172,7 +184,7 @@ export default function LandingPage() {
                 </div>
                  <div className="flex-grow-0" />
             </div>
-            <div className="hidden md:flex landing-right-section mt-16">
+            <div className="hidden md:flex landing-right-section mt-16 z-10">
                 <CardSwap
                     width={580}
                     height={480}
@@ -197,7 +209,7 @@ export default function LandingPage() {
             </div>
 
             {/* Mobile Layout (hidden on desktop) */}
-            <div className="flex md:hidden flex-col items-center justify-center w-full min-h-screen">
+            <div className="flex md:hidden flex-col items-center justify-center w-full min-h-screen z-10">
                 <MobileLandingPage />
             </div>
         </div>
