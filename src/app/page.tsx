@@ -126,9 +126,9 @@ export default function LandingPage() {
     ];
 
     return (
-        <div className="landing-page-container text-slate-800 relative bg-gradient-to-b from-amber-300 via-amber-400 to-amber-500 md:bg-transparent">
+        <div className="landing-page-container text-slate-800 relative md:bg-transparent">
             {/* Desktop Background */}
-            <div className="absolute inset-0 z-0 hidden md:block">
+            <div className="absolute inset-0 z-0 hidden md:block yellow-gradient-bg">
                 <DotGrid
                     dotSize={2}
                     gap={25}
