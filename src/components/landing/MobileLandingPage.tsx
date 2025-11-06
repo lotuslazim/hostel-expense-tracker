@@ -8,8 +8,8 @@ import { ArrowRight, Zap, Check, Calendar } from 'lucide-react';
 
 export function MobileLandingPage() {
     return (
-        <div className="h-screen w-screen overflow-hidden relative flex flex-col items-center justify-between yellow-gradient-bg">
-             <div className="flex flex-wrap gap-2 justify-center z-10 pt-4">
+        <div className="h-screen w-screen overflow-hidden relative flex flex-col items-center justify-start yellow-gradient-bg pt-6">
+             <div className="flex flex-wrap gap-2 justify-center z-10">
                 <div className="flex items-center gap-1.5 bg-white bg-opacity-70 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm text-[clamp(10px,2vw,12px)]">
                     <Zap className="w-4 h-4 text-slate-700" />
                     <span className="font-semibold text-slate-800">Fast</span>
@@ -25,7 +25,7 @@ export function MobileLandingPage() {
             </div>
 
             {/* Content */}
-            <div className="flex flex-col items-center text-center z-10 w-full flex-grow justify-center">
+            <div className="flex flex-col items-center text-center z-10 w-full flex-grow justify-center pb-6">
 
                 {/* Meet the text */}
                 <p className="font-semibold text-slate-800 text-[clamp(20px,5vw,28px)] leading-none">
@@ -69,21 +69,16 @@ export function MobileLandingPage() {
                    style={{ fontSize: "clamp(12px, 3vw, 16px)" }}>
                     Here to make your bachelor life easier — because someone has to.
                 </p>
-            </div>
 
-            {/* ✅ FLOATING CTA BUTTON */}
-            <div className="w-full px-6 pb-6 z-10">
-                <Link
-                    href="/about"
-                    className="bg-slate-800 text-white rounded-full font-bold 
-                    flex items-center justify-center gap-2 shadow-2xl transition-all
-                    w-full 
-                    py-[clamp(14px,4vw,22px)] 
-                    text-[clamp(16px,4.5vw,20px)]
-                    hover:bg-slate-700"
-                >
-                    Get Started <ArrowRight className="h-[clamp(18px,5vw,22px)] w-auto" />
-                </Link>
+                 {/* Call to action buttons */}
+                <div className="flex gap-4 mt-8 px-4 w-full max-w-sm">
+                    <Link href="/signup" className="flex-1 bg-black text-white px-6 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-md">
+                        <span>SIGN UP</span>
+                    </Link>
+                    <Link href="/login" className="flex-1 border border-black text-black px-6 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-black/10 transition-all shadow-md">
+                        <span>LOG IN</span>
+                    </Link>
+                </div>
             </div>
         </div>
     );
