@@ -10,9 +10,24 @@ import DotGrid from '@/components/DotGrid';
 export function MobileLandingPage() {
     return (
         <div className="h-screen w-screen overflow-hidden relative flex flex-col items-center justify-between">
+            {/* Feature Badges */}
+            <div className="flex flex-wrap gap-2 justify-center pt-4 z-10">
+                <div className="flex items-center gap-1.5 bg-white bg-opacity-70 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm text-[clamp(10px,2vw,12px)]">
+                    <Zap className="w-4 h-4 text-slate-700" />
+                    <span className="font-semibold text-slate-800">Fast</span>
+                </div>
+                <div className="flex items-center gap-1.5 bg-white bg-opacity-70 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm text-[clamp(10px,2vw,12px)]">
+                    <Check className="w-4 h-4 text-slate-700" />
+                    <span className="font-semibold text-slate-800">Simple</span>
+                </div>
+                <div className="flex items-center gap-1.5 bg-white bg-opacity-70 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm text-[clamp(10px,2vw,12px)]">
+                    <Calendar className="w-4 h-4 text-slate-700" />
+                    <span className="font-semibold text-slate-800">Smart</span>
+                </div>
+            </div>
 
             {/* Background */}
-            <div className="absolute inset-0 w-full h-full z-0 pointer-events-none">
+            <div className="absolute inset-0 z-0 pointer-events-none">
                 <DotGrid
                     dotSize={2}
                     gap={25}
@@ -27,26 +42,10 @@ export function MobileLandingPage() {
             </div>
 
             {/* Content */}
-            <div className="flex flex-col items-center text-center z-10 w-full flex-grow">
-
-                {/* Feature Badges */}
-                <div className="flex flex-wrap gap-2 justify-center mt-2">
-                    <div className="flex items-center gap-1.5 bg-white bg-opacity-70 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm text-[clamp(10px,2vw,12px)]">
-                        <Zap className="w-4 h-4 text-slate-700" />
-                        <span className="font-semibold text-slate-800">Fast</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 bg-white bg-opacity-70 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm text-[clamp(10px,2vw,12px)]">
-                        <Check className="w-4 h-4 text-slate-700" />
-                        <span className="font-semibold text-slate-800">Simple</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 bg-white bg-opacity-70 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm text-[clamp(10px,2vw,12px)]">
-                        <Calendar className="w-4 h-4 text-slate-700" />
-                        <span className="font-semibold text-slate-800">Smart</span>
-                    </div>
-                </div>
+            <div className="flex flex-col items-center text-center z-10 w-full flex-grow justify-center">
 
                 {/* Meet the text */}
-                <p className="font-semibold text-slate-800 text-[clamp(20px,5vw,28px)] leading-none mt-1">
+                <p className="font-semibold text-slate-800 text-[clamp(20px,5vw,28px)] leading-none">
                     Meet the
                 </p>
 
