@@ -28,7 +28,7 @@ export function MobileLandingPage() {
             <div className="relative flex flex-col items-center justify-center z-10 w-full pb-6">
 
                 {/* Meet the text */}
-                <p className="font-semibold text-slate-800 text-[clamp(16px,4vw,22px)] leading-none mt-4">
+                <p className="font-semibold text-slate-800 text-[clamp(16px,4vw,22px)] leading-none mt-1">
                     Meet the
                 </p>
 
@@ -42,10 +42,16 @@ export function MobileLandingPage() {
                         className="object-contain drop-shadow-2xl"
                     />
                 </div>
+                
+                {/* Tagline */}
+                <p className="font-medium text-slate-800 px-4 text-center"
+                   style={{ fontSize: "clamp(12px, 3vw, 16px)" }}>
+                    No notes, no Excel—just one tap, done.
+                </p>
 
                 {/* Brand Name */}
                 <h1
-                    className="font-extrabold tracking-tight leading-none"
+                    className="font-extrabold tracking-tight leading-none mt-1"
                     style={{
                         fontSize: "clamp(40px, 10vw, 60px)",
                         userSelect: "none"
@@ -54,12 +60,6 @@ export function MobileLandingPage() {
                     <span className="text-slate-800">Bachelor</span>
                     <span className="text-secondary">Bite.</span>
                 </h1>
-
-                {/* Tagline */}
-                <p className="font-medium text-slate-800 px-4"
-                   style={{ fontSize: "clamp(12px, 3vw, 16px)" }}>
-                    No notes, no Excel—just one tap, done.
-                </p>
 
                 {/* Description */}
                 <p className="text-slate-800 max-w-xs mt-1 px-4 text-center"
