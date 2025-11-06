@@ -9,8 +9,8 @@ import { LandingHeader } from '@/components/app/landing-header';
 import DotGrid from '@/components/DotGrid';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/icons/logo';
-import Image from 'next/image';
 import { MobileLandingPage } from '@/components/landing/MobileLandingPage';
+import Image from 'next/image';
 
 
 export default function LandingPage() {
@@ -126,7 +126,7 @@ export default function LandingPage() {
     ];
 
     return (
-        <div className="landing-page-container text-slate-800 relative">
+        <div className="landing-page-container text-slate-800 relative yellow-gradient-bg md:bg-transparent">
             {/* Desktop Background */}
             <div className="absolute inset-0 z-0 hidden md:block yellow-gradient-bg">
                 <DotGrid
@@ -198,7 +198,7 @@ export default function LandingPage() {
             </div>
     
             {/* Mobile Layout (hidden on desktop) */}
-            <div className="md:hidden yellow-gradient-bg">
+            <div className="md:hidden">
                 <MobileLandingPage />
             </div>
         </div>
