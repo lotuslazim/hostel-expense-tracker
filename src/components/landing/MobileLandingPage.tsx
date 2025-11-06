@@ -46,7 +46,7 @@ export function MobileLandingPage() {
                 <p className="text-2xl font-semibold text-slate-800 mb-2">Meet the</p>
 
                 {/* Mascot */}
-                <div className="relative w-80 h-80 my-4">
+                <div className="relative w-80 h-80">
                     <Image 
                         src="/mascot.png" 
                         alt="BachelorBite Mascot" 
