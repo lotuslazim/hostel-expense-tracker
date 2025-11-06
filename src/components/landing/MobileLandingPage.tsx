@@ -4,36 +4,46 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { Badge } from '@/components/ui/badge';
+import { ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export function MobileLandingPage() {
     return (
-        <div className="h-screen w-screen overflow-hidden relative flex flex-col justify-center items-center">
+        <div className="min-h-screen w-screen overflow-hidden relative flex flex-col justify-between items-center bg-white p-4">
             
-            {/* Content in the middle */}
-            <div className="flex flex-col items-center justify-center z-10 w-full px-4">
-                <p className="font-semibold text-slate-800 text-[clamp(20px,5vw,28px)] leading-none">
+            {/* Top Badges */}
+            <div className="flex justify-center gap-2 pt-4">
+                <Badge variant="secondary" className="bg-emerald-100 text-emerald-800">Fast</Badge>
+                <Badge variant="secondary" className="bg-amber-100 text-amber-800">Simple</Badge>
+                <Badge variant="secondary" className="bg-sky-100 text-sky-800">Smart</Badge>
+            </div>
+
+            {/* Main Content Area */}
+            <div className="flex flex-col items-center justify-center text-center -mt-8">
+                <p className="font-semibold text-slate-800" style={{ fontSize: "clamp(16px, 4vw, 20px)" }}>
                     Meet the
                 </p>
 
-                <div className="relative w-[clamp(200px,65vw,350px)] h-[clamp(200px,65vw,350px)]">
+                <div className="relative w-[clamp(220px,70vw,400px)] h-[clamp(220px,70vw,400px)] my-2">
                     <Image
                         src="/mascot.png"
                         alt="BachelorBite Mascot"
                         fill
-                        sizes="60vw"
+                        sizes="70vw"
                         className="object-contain drop-shadow-2xl"
                     />
                     <div className="mascot-shadow"></div>
                 </div>
 
-                <p className="font-medium text-slate-800" style={{ fontSize: "clamp(12px, 3vw, 16px)" }}>
+                <p className="font-medium text-slate-800" style={{ fontSize: "clamp(14px, 3.5vw, 18px)" }}>
                     No notes, no Excel—just one tap, done.
                 </p>
 
                 <h1
                     className="font-extrabold tracking-tight leading-none my-1"
                     style={{
-                        fontSize: "clamp(60px, 16vw, 80px)",
+                        fontSize: "clamp(54px, 15vw, 72px)",
                         userSelect: "none"
                     }}
                 >
@@ -47,13 +57,12 @@ export function MobileLandingPage() {
                 </p>
             </div>
             
-             {/* Call to action buttons at the bottom */}
-            <div className="absolute bottom-8 flex gap-4 w-full max-w-sm px-4 z-10">
-                <Link href="/signup" className="flex-1 bg-black text-white px-6 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-md">
-                    <span>SIGN UP</span>
-                </Link>
-                <Link href="/login" className="flex-1 border border-black text-black px-6 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-black/10 transition-all shadow-md">
-                    <span>LOG IN</span>
+             {/* Call to action button at the bottom */}
+            <div className="w-full max-w-sm pb-4">
+                 <Link href="/signup" passHref>
+                    <Button size="lg" className="w-full bg-black text-white rounded-xl font-semibold shadow-md hover:bg-black/90 transition-all">
+                        Let's Go <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
                 </Link>
             </div>
         </div>
