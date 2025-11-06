@@ -8,7 +8,7 @@ import { ArrowRight, Zap, Check, Calendar } from 'lucide-react';
 
 export function MobileLandingPage() {
     return (
-        <div className="h-screen w-screen overflow-hidden relative flex flex-col items-center justify-center yellow-gradient-bg">
+        <div className="min-h-screen w-screen overflow-hidden relative flex flex-col items-center justify-center yellow-gradient-bg">
              <div className="flex flex-wrap gap-2 justify-center z-10 pt-6">
                 <div className="flex items-center gap-1.5 bg-white bg-opacity-70 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm text-[clamp(10px,2vw,12px)]">
                     <Zap className="w-4 h-4 text-slate-700" />
@@ -25,20 +25,20 @@ export function MobileLandingPage() {
             </div>
 
             {/* Content */}
-            <div className="relative flex-grow flex flex-col items-center justify-center z-10 w-full pb-6">
+            <div className="relative flex flex-col items-center justify-center z-10 w-full pb-6">
 
                 {/* Meet the text */}
-                <p className="font-semibold text-slate-800 text-[clamp(16px,4vw,22px)] leading-none">
+                <p className="font-semibold text-slate-800 text-[clamp(16px,4vw,22px)] leading-none mt-2">
                     Meet the
                 </p>
 
                 {/* Adaptive Mascot Size */}
-                <div className="relative w-[clamp(280px,80vw,450px)] h-[clamp(280px,80vw,450px)] mt-4">
+                <div className="relative w-[clamp(300px,85vw,500px)] h-[clamp(300px,85vw,500px)]">
                     <Image
                         src="/mascot.png"
                         alt="BachelorBite Mascot"
                         fill
-                        sizes="80vw"
+                        sizes="85vw"
                         className="object-contain drop-shadow-2xl"
                     />
                 </div>
