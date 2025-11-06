@@ -8,8 +8,8 @@ import { ArrowRight, Zap, Check, Calendar } from 'lucide-react';
 
 export function MobileLandingPage() {
     return (
-        <div className="min-h-screen w-screen overflow-hidden relative flex flex-col items-center justify-center yellow-gradient-bg">
-             <div className="flex flex-wrap gap-2 justify-center z-10 pt-6">
+        <div className="min-h-screen w-screen overflow-hidden relative flex flex-col items-center justify-center pt-6">
+             <div className="flex flex-wrap gap-2 justify-center z-10">
                 <div className="flex items-center gap-1.5 bg-white bg-opacity-70 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm text-[clamp(10px,2vw,12px)]">
                     <Zap className="w-4 h-4 text-slate-700" />
                     <span className="font-semibold text-slate-800">Fast</span>
@@ -28,32 +28,31 @@ export function MobileLandingPage() {
             <div className="relative flex flex-col items-center justify-center z-10 w-full pb-6">
 
                 {/* Meet the text */}
-                <p className="font-semibold text-slate-800 text-[clamp(16px,4vw,22px)] leading-none mt-1">
+                <p className="font-semibold text-slate-800 text-[clamp(16px,4vw,22px)] leading-none mt-4">
                     Meet the
                 </p>
 
                 {/* Adaptive Mascot Size */}
-                <div className="relative w-[clamp(280px,80vw,450px)] h-[clamp(280px,80vw,450px)]">
+                <div className="relative w-[clamp(300px,85vw,500px)] h-[clamp(300px,85vw,500px)]">
                     <Image
                         src="/mascot.png"
                         alt="BachelorBite Mascot"
                         fill
-                        sizes="80vw"
+                        sizes="85vw"
                         className="object-contain drop-shadow-2xl"
                     />
                 </div>
                 
                 {/* Tagline */}
-                <p className="font-medium text-slate-800 px-4 text-center"
-                   style={{ fontSize: "clamp(12px, 3vw, 16px)" }}>
+                <p className="text-slate-800 px-4 text-center text-sm">
                     No notes, no Excel—just one tap, done.
                 </p>
 
                 {/* Brand Name */}
                 <h1
-                    className="font-extrabold tracking-tight leading-none mt-1"
+                    className="font-extrabold tracking-tight leading-none"
                     style={{
-                        fontSize: "clamp(40px, 10vw, 60px)",
+                        fontSize: "clamp(50px, 12vw, 70px)",
                         userSelect: "none"
                     }}
                 >
@@ -62,7 +61,7 @@ export function MobileLandingPage() {
                 </h1>
 
                 {/* Description */}
-                <p className="text-slate-800 max-w-xs mt-1 px-4 text-center"
+                <p className="text-slate-800 max-w-xs px-4 text-center"
                    style={{ fontSize: "clamp(12px, 3vw, 16px)" }}>
                     Here to make your bachelor life easier — because someone has to.
                 </p>
