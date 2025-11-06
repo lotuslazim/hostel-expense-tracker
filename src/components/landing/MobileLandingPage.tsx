@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from 'react';
@@ -9,12 +8,26 @@ import DotGrid from '@/components/DotGrid';
 
 export function MobileLandingPage() {
     return (
-        <div className="mobile-landing-gradient w-full min-h-screen flex flex-col items-center justify-center p-4 relative">
-             <div className="absolute inset-0 z-0">
-                <DotGrid dotSize={2} gap={25} baseColor="rgba(255,255,255,0.1)" activeColor="rgba(255,255,255,0.3)" proximity={100} shockRadius={200} shockStrength={2} resistance={500} returnDuration={1} />
+        <div className="w-full min-h-screen flex flex-col items-center justify-between px-6 pb-6 relative bg-gradient-to-b from-amber-300 via-amber-400 to-amber-500">
+            {/* DotGrid Background */}
+            <div className="absolute inset-0 z-0">
+                <DotGrid 
+                    dotSize={2} 
+                    gap={25} 
+                    baseColor="rgba(0,0,0,0.05)" 
+                    activeColor="rgba(0,0,0,0.1)" 
+                    proximity={100} 
+                    shockRadius={200} 
+                    shockStrength={2} 
+                    resistance={500} 
+                    returnDuration={1} 
+                />
             </div>
-            <div className="flex flex-col items-center justify-center w-full h-full z-10 text-center">
-                <div className="flex flex-wrap gap-2 justify-center mb-4">
+
+            {/* Content */}
+            <div className="flex flex-col items-center w-full z-10 text-center gap-3">
+                {/* Feature Badges */}
+                <div className="flex flex-wrap gap-2 justify-center mb-2">
                     <div className="flex items-center gap-1.5 bg-white bg-opacity-70 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm text-xs">
                         <Zap className="w-4 h-4 text-slate-700" />
                         <span className="font-semibold text-slate-800">Fast</span>
@@ -28,22 +41,45 @@ export function MobileLandingPage() {
                         <span className="font-semibold text-slate-800">Smart</span>
                     </div>
                 </div>
-                <p className="text-xl font-medium text-slate-800">Meet the</p>
-                <div className="relative w-64 h-64 my-2">
-                    <Image src="/mascot.png" alt="Mascot" fill sizes="50vw" className="object-contain" />
+
+                {/* Meet the text */}
+                <p className="text-2xl font-semibold text-slate-800 mb-2">Meet the</p>
+
+                {/* Mascot */}
+                <div className="relative w-80 h-80 my-4">
+                    <Image 
+                        src="/mascot.png" 
+                        alt="BachelorBite Mascot" 
+                        fill 
+                        sizes="80vw" 
+                        className="object-contain drop-shadow-2xl" 
+                    />
                 </div>
-                <h1 className="text-5xl font-extrabold tracking-tighter leading-none -mt-4" style={{ userSelect: 'none' }}>
-                    <span className="text-slate-800">Bachelor</span><span className="text-secondary">Bite.</span>
+
+                {/* Brand Name */}
+                <h1 className="text-6xl font-extrabold tracking-tight leading-none mb-2" style={{ userSelect: 'none' }}>
+                    <span className="text-slate-800">Bachelor</span>
+                    <span className="text-secondary">Bite.</span>
                 </h1>
-                <p className="text-sm text-slate-600 mt-2">No notes, no Excel—just one tap, done.</p>
-                <p className="text-base text-slate-600 font-medium mt-1">
-                    Here to make your bachelor<br/> life easier.
+
+                {/* Tagline */}
+                <p className="text-base text-slate-800 font-medium px-4 mb-2">
+                    No notes, no Excel—just one tap, done.
                 </p>
+
+                {/* Description */}
+                <p className="text-sm text-slate-800 max-w-xs mb-4 px-2">
+                    Here to make your bachelor life easier — because someone has to.
+                </p>
+            </div>
+
+            {/* CTA Button */}
+            <div className="w-full pb-10 px-4 z-10">
                 <Link
                     href="/about"
-                    className="bg-secondary text-white px-6 py-3 mt-6 rounded-full font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-lg text-sm"
+                    className="bg-slate-800 text-white px-8 py-4 rounded-full font-bold flex items-center justify-center gap-2 shadow-xl w-full hover:bg-slate-700 transition-all text-base"
                 >
-                   Get Started <ArrowRight className="h-4 w-4" />
+                    Get Started <ArrowRight className="h-5 w-5" />
                 </Link>
             </div>
         </div>
