@@ -8,7 +8,7 @@ import DotGrid from '@/components/DotGrid';
 
 export function MobileLandingPage() {
     return (
-        <div className="w-full min-h-screen flex flex-col items-center justify-between px-6 pb-6 relative bg-gradient-to-b from-amber-300 via-amber-400 to-amber-500">
+        <div className="fixed inset-0 w-full h-full flex flex-col items-center justify-between px-6 pb-6 pt-4 relative bg-gradient-to-b from-amber-300 via-amber-400 to-amber-500 overflow-y-auto">
             {/* DotGrid Background */}
             <div className="absolute inset-0 z-0">
                 <DotGrid 
