@@ -4,29 +4,13 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, Zap, Check, Calendar } from 'lucide-react';
 
 export function MobileLandingPage() {
     return (
-        <div className="h-screen w-screen overflow-hidden relative flex flex-col items-center justify-between py-8">
-            {/* Badges at the top */}
-            <div className="flex flex-wrap gap-2 justify-center z-10">
-                <div className="flex items-center gap-1.5 bg-white bg-opacity-70 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm text-[clamp(10px,2vw,12px)]">
-                    <Zap className="w-4 h-4 text-slate-700" />
-                    <span className="font-semibold text-slate-800">Fast</span>
-                </div>
-                <div className="flex items-center gap-1.5 bg-white bg-opacity-70 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm text-[clamp(10px,2vw,12px)]">
-                    <Check className="w-4 h-4 text-slate-700" />
-                    <span className="font-semibold text-slate-800">Simple</span>
-                </div>
-                <div className="flex items-center gap-1.5 bg-white bg-opacity-70 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm text-[clamp(10px,2vw,12px)]">
-                    <Calendar className="w-4 h-4 text-slate-700" />
-                    <span className="font-semibold text-slate-800">Smart</span>
-                </div>
-            </div>
-
+        <div className="h-screen w-screen overflow-hidden relative flex flex-col justify-center items-center">
+            
             {/* Content in the middle */}
-            <div className="relative flex flex-col items-center justify-center z-10 w-full">
+            <div className="flex flex-col items-center justify-center z-10 w-full px-4">
                 <p className="font-semibold text-slate-800 text-[clamp(20px,5vw,28px)] leading-none">
                     Meet the
                 </p>
@@ -41,15 +25,15 @@ export function MobileLandingPage() {
                     />
                     <div className="mascot-shadow"></div>
                 </div>
-                
-                <p className="font-medium text-slate-800 px-4 -mt-4 text-center" style={{ fontSize: "clamp(14px, 3.5vw, 18px)" }}>
+
+                <p className="font-medium text-slate-800" style={{ fontSize: "clamp(12px, 3vw, 16px)" }}>
                     No notes, no Excel—just one tap, done.
                 </p>
 
                 <h1
                     className="font-extrabold tracking-tight leading-none my-1"
                     style={{
-                        fontSize: "clamp(54px, 15vw, 80px)",
+                        fontSize: "clamp(60px, 16vw, 80px)",
                         userSelect: "none"
                     }}
                 >
@@ -57,14 +41,14 @@ export function MobileLandingPage() {
                     <span className="text-secondary">Bite.</span>
                 </h1>
 
-                <p className="text-slate-700 max-w-xs px-4 text-center"
+                <p className="text-slate-700 max-w-xs text-center mt-2"
                    style={{ fontSize: "clamp(14px, 3.5vw, 18px)" }}>
                     Here to make your bachelor life easier — <br/> because someone has to.
                 </p>
             </div>
             
              {/* Call to action buttons at the bottom */}
-            <div className="flex gap-4 w-full max-w-sm px-4 z-10">
+            <div className="absolute bottom-8 flex gap-4 w-full max-w-sm px-4 z-10">
                 <Link href="/signup" className="flex-1 bg-black text-white px-6 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-md">
                     <span>SIGN UP</span>
                 </Link>
