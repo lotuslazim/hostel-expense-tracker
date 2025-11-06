@@ -2,7 +2,6 @@
 "use client";
 
 import React from 'react';
-import Image from 'next/image';
 import CardSwap, { Card } from '@/components/CardSwap';
 import { Utensils, Calculator, Zap, ArrowRight, Wallet, Check, Plus, FileText, BarChart2 } from 'lucide-react';
 import Link from 'next/link';
@@ -11,6 +10,7 @@ import DotGrid from '@/components/DotGrid';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/icons/logo';
 import { MobileLandingPage } from '@/components/landing/MobileLandingPage';
+import Image from 'next/image';
 
 
 export default function LandingPage() {
@@ -126,7 +126,7 @@ export default function LandingPage() {
     ];
 
     return (
-        <div className="landing-page-container text-slate-800 relative new-landing-style">
+        <div className="landing-page-container text-slate-800 relative">
             {/* Common background and header for both layouts */}
             <div className="absolute inset-0 z-0">
                 <DotGrid
