@@ -28,7 +28,7 @@ export function MobileLandingPage() {
             <div className="relative flex flex-col items-center justify-center z-10 w-full pb-6">
 
                 {/* Meet the text */}
-                <p className="font-semibold text-slate-800 text-[clamp(16px,4vw,22px)] leading-none mt-4">
+                <p className="font-semibold text-slate-800 text-[clamp(16px,4vw,22px)] leading-none mt-2">
                     Meet the
                 </p>
 
@@ -41,10 +41,10 @@ export function MobileLandingPage() {
                         sizes="85vw"
                         className="object-contain drop-shadow-2xl"
                     />
+                    <div className="mascot-shadow"></div>
                 </div>
                 
-                {/* Tagline */}
-                <p className="text-slate-800 px-4 text-center text-sm">
+                <p className="font-medium text-slate-800 px-4" style={{ fontSize: "clamp(12px, 3vw, 16px)" }}>
                     No notes, no Excel—just one tap, done.
                 </p>
 
@@ -52,7 +52,7 @@ export function MobileLandingPage() {
                 <h1
                     className="font-extrabold tracking-tight leading-none"
                     style={{
-                        fontSize: "clamp(50px, 12vw, 70px)",
+                        fontSize: "clamp(60px, 15vw, 90px)",
                         userSelect: "none"
                     }}
                 >
@@ -79,3 +79,5 @@ export function MobileLandingPage() {
         </div>
     );
 }
+
+    

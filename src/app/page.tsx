@@ -33,10 +33,11 @@ export default function LandingPage() {
                                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-4 bg-slate-900 rounded-b-lg"></div>
                                 <div className="w-full h-full rounded-[1.8rem] overflow-hidden p-1.5">
                                      <div className="w-full h-full bg-[#FFC247] flex flex-col items-center justify-around p-3 rounded-[1.4rem]">
-                                        <div className="mt-4">
+                                        <div className="mt-4 relative">
                                             <p className="text-center text-xs text-slate-800 font-medium">Meet the</p>
                                             <div className="relative w-44 h-44 mt-1">
                                                  <Image src="/mascot.png" alt="Mascot" fill sizes="10vw" className="object-contain" />
+                                                 <div className="mascot-shadow"></div>
                                             </div>
                                         </div>
                                         <div className="text-center">
@@ -126,7 +127,7 @@ export default function LandingPage() {
     ];
 
     return (
-        <div className="landing-page-container text-slate-800 relative yellow-gradient-bg md:bg-transparent">
+        <div className="landing-page-container text-slate-800 relative md:bg-transparent yellow-gradient-bg">
             {/* Desktop Background */}
             <div className="absolute inset-0 z-0 hidden md:block yellow-gradient-bg">
                 <DotGrid
@@ -154,7 +155,7 @@ export default function LandingPage() {
                 <div className="flex-grow flex items-center">
                     <div className="text-content">
                          <p className="text-2xl text-slate-800 font-medium">No notes, no Excel—just one tap, done.</p>
-                         <h1 className="text-[5.5rem] font-extrabold tracking-tighter leading-none my-4" style={{ userSelect: 'none' }}>
+                         <h1 className="text-[6.5rem] font-extrabold tracking-tighter leading-none my-4" style={{ userSelect: 'none' }}>
                             <span className="text-slate-800">Bachelor</span><span className="text-secondary">Bite.</span>
                         </h1>
                         <p className="text-xl text-slate-600 font-medium">
@@ -204,3 +205,5 @@ export default function LandingPage() {
         </div>
     );
 }
+
+    
