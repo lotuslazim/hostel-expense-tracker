@@ -9,8 +9,8 @@ import DotGrid from '@/components/DotGrid';
 
 export function MobileLandingPage() {
     return (
-        <div className="fixed inset-0 w-full h-full flex flex-col items-center justify-between px-6 pb-6 relative yellow-gradient-bg overflow-y-auto">
-            {/* DotGrid Background */}
+        <div className="min-h-screen w-full flex flex-col ...">
+
             <div className="absolute inset-0 z-0">
                 <DotGrid 
                     dotSize={2} 
