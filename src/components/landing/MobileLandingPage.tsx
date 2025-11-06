@@ -8,8 +8,8 @@ import { ArrowRight, Zap, Check, Calendar } from 'lucide-react';
 
 export function MobileLandingPage() {
     return (
-        <div className="h-screen w-screen overflow-hidden relative flex flex-col items-center yellow-gradient-bg pt-6">
-             <div className="flex flex-wrap gap-2 justify-center z-10">
+        <div className="h-screen w-screen overflow-hidden relative flex flex-col items-center yellow-gradient-bg">
+             <div className="flex flex-wrap gap-2 justify-center z-10 pt-6">
                 <div className="flex items-center gap-1.5 bg-white bg-opacity-70 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm text-[clamp(10px,2vw,12px)]">
                     <Zap className="w-4 h-4 text-slate-700" />
                     <span className="font-semibold text-slate-800">Fast</span>
@@ -33,10 +33,7 @@ export function MobileLandingPage() {
                 </p>
 
                 {/* Adaptive Mascot Size */}
-                <div className="relative 
-                    w-[clamp(220px,60vw,320px)] 
-                    h-[clamp(220px,60vw,320px)]"
-                >
+                <div className="relative w-[clamp(280px,70vw,400px)] h-[clamp(280px,70vw,400px)]">
                     <Image
                         src="/mascot.png"
                         alt="BachelorBite Mascot"
