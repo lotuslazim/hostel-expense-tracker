@@ -28,26 +28,25 @@ export function MobileLandingPage() {
             <div className="relative flex flex-col items-center justify-center z-10 w-full pb-6">
 
                 {/* Meet the text */}
-                <p className="font-semibold text-slate-800 text-[clamp(16px,4vw,22px)] leading-none mt-2">
+                <p className="font-semibold text-slate-800 text-[clamp(16px,4vw,22px)] leading-none mt-1">
                     Meet the
                 </p>
 
                 {/* Adaptive Mascot Size */}
-                <div className="relative w-[clamp(300px,85vw,500px)] h-[clamp(300px,85vw,500px)]">
+                <div className="relative w-[clamp(280px,80vw,450px)] h-[clamp(280px,80vw,450px)]">
                     <Image
                         src="/mascot.png"
                         alt="BachelorBite Mascot"
                         fill
-                        sizes="85vw"
+                        sizes="80vw"
                         className="object-contain drop-shadow-2xl"
                     />
                     <div className="mascot-shadow"></div>
                 </div>
                 
-                <p className="font-medium text-slate-800 px-4" style={{ fontSize: "clamp(12px, 3vw, 16px)" }}>
+                 <p className="font-medium text-slate-800 px-4" style={{ fontSize: "clamp(12px, 3vw, 16px)" }}>
                     No notes, no Excel—just one tap, done.
                 </p>
-
                 {/* Brand Name */}
                 <h1
                     className="font-extrabold tracking-tight leading-none"
