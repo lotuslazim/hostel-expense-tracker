@@ -14,7 +14,11 @@ export function MobileLandingPage() {
         <div className="h-screen w-screen overflow-hidden flex flex-col items-center yellow-gradient-bg text-slate-800 py-8 justify-around">
             
             <div className="flex flex-col items-center text-center">
-                {/* This space is intentionally left to balance the layout */}
+                <div className="flex gap-2">
+                    <Badge variant="secondary" className="bg-white/50 border-white/70 text-slate-700">Fast</Badge>
+                    <Badge variant="secondary" className="bg-white/50 border-white/70 text-slate-700">Simple</Badge>
+                    <Badge variant="secondary" className="bg-white/50 border-white/70 text-slate-700">Smart</Badge>
+                </div>
             </div>
 
             {/* Main Content Area - Centered */}
@@ -31,9 +35,6 @@ export function MobileLandingPage() {
                 </div>
 
                 <div className="mt-4">
-                     <p className="text-slate-500 max-w-xs text-center text-sm mb-2">
-                        No notes, no Excel — just one tap, done.
-                    </p>
                      <h1
                         className="font-extrabold tracking-tight leading-none text-5xl"
                         style={{ userSelect: "none" }}
@@ -41,7 +42,10 @@ export function MobileLandingPage() {
                         <span className="text-slate-800">Bachelor</span>
                         <span className="text-secondary">Bite.</span>
                     </h1>
-                     <p className="text-slate-600 max-w-xs text-center text-sm mt-3 font-medium">
+                     <p className="text-slate-600 max-w-xs text-center text-sm mt-3 font-medium px-4">
+                        No notes, no Excel — just one tap, done.
+                    </p>
+                     <p className="text-slate-500 max-w-xs text-center text-xs mt-2 px-4">
                         Here to make your bachelor life easier because someone has to.
                     </p>
                 </div>
@@ -50,7 +54,7 @@ export function MobileLandingPage() {
              {/* Call to action buttons at the bottom */}
              <div className="w-full max-w-sm space-y-3 px-4">
                  <Link href="/signup" passHref className="star-border-button block">
-                    <Button size="lg" className="button-content w-full bg-black text-white rounded-xl font-bold uppercase tracking-wider text-base py-4 h-14 hover:bg-black/90">
+                    <Button size="lg" className="button-content w-full bg-slate-800 text-white rounded-xl font-bold uppercase tracking-wider text-base py-4 h-14 hover:bg-slate-800/90">
                         Get Started
                     </Button>
                 </Link>
