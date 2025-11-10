@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from 'react';
@@ -54,12 +53,12 @@ export function MobileLandingPage() {
              {/* Call to action buttons at the bottom */}
              <div className="w-full max-w-sm space-y-3 px-4">
                 <Link href="/signup" passHref className="star-border-button block">
-                    <Button size="lg" className="button-content w-full bg-slate-800 text-white rounded-xl font-bold uppercase tracking-wider text-sm py-4 h-14 hover:bg-slate-800/90">
+                    <Button size="lg" className="button-content w-full bg-slate-800 text-white rounded-xl font-bold uppercase tracking-wider text-base py-4 h-14 hover:bg-slate-800/90">
                         Get Started
                     </Button>
                 </Link>
                 <Link href="/login" passHref className="star-border-button block">
-                    <Button size="lg" className="button-content w-full bg-white text-black rounded-xl font-bold uppercase tracking-wider transition-all text-sm py-4 h-14 hover:bg-white/90">
+                    <Button size="lg" className="button-content w-full bg-white text-black rounded-xl font-bold uppercase tracking-wider transition-all text-base py-4 h-14 hover:bg-white/90">
                         I Already Have An Account
                     </Button>
                 </Link>
