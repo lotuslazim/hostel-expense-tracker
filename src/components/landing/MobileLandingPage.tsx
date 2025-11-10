@@ -11,7 +11,7 @@ import { Logo } from '@/components/icons/logo';
 
 export function MobileLandingPage() {
     return (
-        <div className="h-screen w-screen overflow-hidden flex flex-col items-center yellow-gradient-bg text-slate-800 justify-center gap-12 pt-16">
+        <div className="h-screen w-screen overflow-hidden flex flex-col items-center yellow-gradient-bg text-slate-800 justify-start pt-24 gap-12">
             
             <div className="flex flex-col items-center text-center gap-4">
                 <div className="flex gap-2">
@@ -54,12 +54,12 @@ export function MobileLandingPage() {
              {/* Call to action buttons at the bottom */}
              <div className="w-full max-w-sm space-y-3 px-4">
                 <Link href="/signup" passHref className="star-border-button block">
-                    <Button size="lg" className="button-content w-full bg-slate-800 text-white rounded-xl font-bold uppercase tracking-wider text-base py-3 h-12 hover:bg-slate-800/90">
+                    <Button size="lg" className="button-content w-full bg-slate-800 text-white rounded-xl font-bold uppercase tracking-wider text-sm py-3 h-12 hover:bg-slate-800/90">
                         Get Started
                     </Button>
                 </Link>
                 <Link href="/login" passHref className="star-border-button block">
-                    <Button size="lg" className="button-content w-full bg-white text-black rounded-xl font-bold uppercase tracking-wider transition-all text-base py-3 h-12 hover:bg-white/90">
+                    <Button size="lg" className="button-content w-full bg-white text-black rounded-xl font-bold uppercase tracking-wider transition-all text-sm py-3 h-12 hover:bg-white/90">
                         I Already Have An Account
                     </Button>
                 </Link>
