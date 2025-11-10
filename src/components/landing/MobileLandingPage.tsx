@@ -11,7 +11,7 @@ import { Logo } from '@/components/icons/logo';
 
 export function MobileLandingPage() {
     return (
-        <div className="h-screen w-screen overflow-hidden flex flex-col items-center justify-around py-8 yellow-gradient-bg text-slate-800">
+        <div className="h-screen w-screen overflow-hidden flex flex-col items-center yellow-gradient-bg text-slate-800 py-8 justify-around">
             
             <div className="flex flex-col items-center text-center">
                 <div className="flex gap-2">
@@ -52,14 +52,14 @@ export function MobileLandingPage() {
             </div>
             
              {/* Call to action buttons at the bottom */}
-            <div className="w-full max-w-sm space-y-3">
+            <div className="w-full max-w-sm space-y-3 px-4">
                  <Link href="/signup" passHref>
                     <Button size="lg" className="w-full bg-black text-white rounded-xl font-bold uppercase tracking-wider shadow-lg hover:bg-black/90 transition-all text-base py-4 h-14">
                         Get Started
                     </Button>
                 </Link>
                  <Link href="/login" passHref>
-                     <Button variant="outline" size="lg" className="w-full text-black rounded-xl font-bold uppercase tracking-wider hover:bg-black/10 hover:text-black transition-all text-base py-4 h-14 border-black">
+                     <Button variant="outline" size="lg" className="w-full text-black bg-white rounded-xl font-bold uppercase tracking-wider hover:bg-white/90 hover:text-black transition-all text-base py-4 h-14 border-black/10">
                         I Already Have An Account
                     </Button>
                 </Link>
