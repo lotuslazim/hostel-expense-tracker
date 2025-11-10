@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from 'react';
@@ -10,16 +9,10 @@ import { Button } from '@/components/ui/button';
 
 export function MobileLandingPage() {
     return (
-        <div className="h-screen w-screen overflow-hidden flex flex-col items-center justify-center bg-white p-0 py-8">
-            {/* Top Badges */}
-            <div className="flex justify-center gap-2">
-                <Badge variant="secondary" className="bg-emerald-100 text-emerald-800">Fast</Badge>
-                <Badge variant="secondary" className="bg-amber-100 text-amber-800">Simple</Badge>
-                <Badge variant="secondary" className="bg-sky-100 text-sky-800">Smart</Badge>
-            </div>
-
-            {/* Main Content Area */}
-            <div className="flex flex-col items-center justify-center text-center my-auto">
+        <div className="h-screen w-screen overflow-hidden flex flex-col items-center justify-between p-0 py-8 bg-white">
+            
+            {/* Main Content Area - This will be pushed to the center */}
+            <div className="flex flex-col items-center justify-center text-center">
                  <p className="font-semibold text-slate-800" style={{ fontSize: "clamp(16px, 4vw, 20px)" }}>
                     Meet the
                 </p>
