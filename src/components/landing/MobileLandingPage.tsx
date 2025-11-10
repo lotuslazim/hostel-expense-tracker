@@ -11,7 +11,7 @@ import { Logo } from '@/components/icons/logo';
 
 export function MobileLandingPage() {
     return (
-        <div className="min-h-screen h-screen w-screen overflow-hidden flex flex-col items-center justify-around p-6 bg-white text-slate-800">
+        <div className="min-h-screen h-screen w-screen overflow-hidden flex flex-col items-center justify-around p-6 yellow-gradient-bg text-slate-800">
             
             <div className="flex flex-col items-center text-center">
                 {/* Top Tags */}
