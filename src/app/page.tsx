@@ -127,83 +127,84 @@ export default function LandingPage() {
     ];
 
     return (
-        <div className="landing-page-container text-slate-800 relative yellow-gradient-bg md:bg-transparent">
-            {/* Desktop Background */}
-            <div className="absolute inset-0 z-0 hidden md:block yellow-gradient-bg">
-                <DotGrid
-                    dotSize={2}
-                    gap={25}
-                    baseColor="rgba(255,255,255,0.1)"
-                    activeColor="rgba(255,255,255,0.3)"
-                    proximity={100}
-                    shockRadius={200}
-                    shockStrength={2}
-                    resistance={500}
-                    returnDuration={1}
-                />
-            </div>
-            
-            <div className="hidden md:block z-10">
-              <LandingHeader />
-            </div>
-            
-            {/* Desktop Layout (hidden on mobile) */}
-            <div className="hidden md:flex landing-left-section z-10">
-                <div className="flex-grow-0">
-                    <Logo textColor="text-slate-800" secondaryColor="text-secondary" />
-                </div>
-                <div className="flex-grow flex items-center">
-                    <div className="text-content">
-                         <p className="text-2xl text-slate-800 font-medium">No notes, no Excel—just one tap, done.</p>
-                         <h1 className="text-[6.5rem] font-extrabold tracking-tighter leading-none my-4" style={{ userSelect: 'none' }}>
-                            <span className="text-slate-800">Bachelor</span><span className="text-secondary">Bite.</span>
-                        </h1>
-                        <p className="text-xl text-slate-600 font-medium">
-                            Here to make your bachelor life easier — <br/> because someone has to.
-                        </p>
-    
-                        <div className="flex gap-4 mt-8">
-                            <Link href="/signup" className="bg-black text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:opacity-90 transition-all shadow-md">
-                               <span></span> SIGN UP
-                            </Link>
-                             <Link href="/login" className="border border-black text-black px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:bg-black/10 transition-all shadow-md">
-                               <span>▶</span> LOG IN
-                             </Link>
+        <div>
+            {/* Desktop Layout */}
+            <div className="hidden md:block bg-header-yellow min-h-screen">
+                <div className="landing-page-container text-slate-800 relative">
+                    <div className="absolute inset-0 z-0">
+                        <DotGrid
+                            dotSize={2}
+                            gap={25}
+                            baseColor="rgba(255,255,255,0.1)"
+                            activeColor="rgba(255,255,255,0.3)"
+                            proximity={100}
+                            shockRadius={200}
+                            shockStrength={2}
+                            resistance={500}
+                            returnDuration={1}
+                        />
+                    </div>
+                    
+                    <div className="z-10">
+                      <LandingHeader />
+                    </div>
+                    
+                    <div className="flex landing-left-section z-10">
+                        <div className="flex-grow-0">
+                            <Logo textColor="text-slate-800" secondaryColor="text-secondary" />
                         </div>
+                        <div className="flex-grow flex items-center">
+                            <div className="text-content">
+                                 <p className="text-2xl text-slate-800 font-medium">No notes, no Excel—just one tap, done.</p>
+                                 <h1 className="text-[6.5rem] font-extrabold tracking-tighter leading-none my-4" style={{ userSelect: 'none' }}>
+                                    <span className="text-slate-800">Bachelor</span><span className="text-secondary">Bite.</span>
+                                </h1>
+                                <p className="text-xl text-slate-600 font-medium">
+                                    Here to make your bachelor life easier — <br/> because someone has to.
+                                </p>
+            
+                                <div className="flex gap-4 mt-8">
+                                    <Link href="/signup" className="bg-black text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:opacity-90 transition-all shadow-md">
+                                       <span></span> SIGN UP
+                                    </Link>
+                                     <Link href="/login" className="border border-black text-black px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:bg-black/10 transition-all shadow-md">
+                                       <span>▶</span> LOG IN
+                                     </Link>
+                                </div>
+                            </div>
+                        </div>
+                         <div className="flex-grow-0" />
+                    </div>
+                    <div className="flex landing-right-section mt-16 z-10">
+                        <CardSwap
+                            width={580}
+                            height={480}
+                            cardDistance={60}
+                            verticalDistance={70}
+                            delay={5000}
+                            pauseOnHover={true}
+                            onCardClick={() => {}}
+                        >
+                            {appFeatures.map((feature) => (
+                                <Card key={feature.name}>
+                                    <div className="card-header" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', borderBottom: '1px solid rgba(0, 0, 0, 0.1)', color: '#333' }}>
+                                        {feature.icon}
+                                        <h3>{feature.name}</h3>
+                                    </div>
+                                    <div className="card-content-wrapper">
+                                        {feature.content}
+                                    </div>
+                                </Card>
+                            ))}
+                        </CardSwap>
                     </div>
                 </div>
-                 <div className="flex-grow-0" />
-            </div>
-            <div className="hidden md:flex landing-right-section mt-16 z-10">
-                <CardSwap
-                    width={580}
-                    height={480}
-                    cardDistance={60}
-                    verticalDistance={70}
-                    delay={5000}
-                    pauseOnHover={true}
-                    onCardClick={() => {}}
-                >
-                    {appFeatures.map((feature) => (
-                        <Card key={feature.name}>
-                            <div className="card-header" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', borderBottom: '1px solid rgba(0, 0, 0, 0.1)', color: '#333' }}>
-                                {feature.icon}
-                                <h3>{feature.name}</h3>
-                            </div>
-                            <div className="card-content-wrapper">
-                                {feature.content}
-                            </div>
-                        </Card>
-                    ))}
-                </CardSwap>
             </div>
     
-            {/* Mobile Layout (hidden on desktop) */}
-            <div className="md:hidden">
+            {/* Mobile Layout */}
+            <div className="block md:hidden bg-white min-h-screen w-full">
                 <MobileLandingPage />
             </div>
         </div>
     );
 }
-
-    
