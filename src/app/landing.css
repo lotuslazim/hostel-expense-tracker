@@ -5,6 +5,7 @@
 
 
 
+
 .landing-page-container {
     display: flex;
     min-height: 100vh;
@@ -113,5 +114,53 @@
     }
 }
 
+
+/* Star Border Button Style */
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.star-border-button {
+    position: relative;
+    border: 0; /* Remove default border */
+    padding: 2px; /* This creates space for the pseudo-element border */
+    border-radius: 0.8rem; /* Slightly larger to contain the inner part */
+    overflow: hidden;
+    background: transparent;
+}
+
+.star-border-button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200%;
+    height: 400%;
+    background: conic-gradient(
+        from var(--angle),
+        hsl(var(--primary)),
+        hsl(var(--secondary)),
+        #fb7185, /* rose-400 */
+        #38bdf8, /* sky-400 */
+        hsl(var(--primary))
+    );
+    animation: rotate-glow 4s linear infinite;
+    z-index: 1;
+}
+
+.star-border-button .button-content {
+    position: relative;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    border-radius: 0.7rem; /* Inner radius */
+    transition: background-color 0.2s;
+}
 
     

@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React from 'react';
@@ -14,11 +15,7 @@ export function MobileLandingPage() {
         <div className="h-screen w-screen overflow-hidden flex flex-col items-center yellow-gradient-bg text-slate-800 py-8 justify-around">
             
             <div className="flex flex-col items-center text-center">
-                <div className="flex gap-2">
-                    <Badge variant="secondary" className="bg-emerald-100 text-emerald-800 rounded-lg">Fast</Badge>
-                    <Badge variant="secondary" className="bg-amber-100 text-amber-800 rounded-lg">Simple</Badge>
-                    <Badge variant="secondary" className="bg-sky-100 text-sky-800 rounded-lg">Smart</Badge>
-                </div>
+                {/* This space is intentionally left to balance the layout */}
             </div>
 
             {/* Main Content Area - Centered */}
@@ -53,15 +50,19 @@ export function MobileLandingPage() {
             
              {/* Call to action buttons at the bottom */}
             <div className="w-full max-w-sm space-y-3 px-4">
-                 <Link href="/signup" passHref>
-                    <Button size="lg" className="w-full bg-black text-white rounded-xl font-bold uppercase tracking-wider shadow-lg hover:bg-black/90 transition-all text-base py-4 h-14">
-                        Get Started
-                    </Button>
+                 <Link href="/signup" passHref className="star-border-button">
+                    <div className="button-content bg-black hover:bg-black/90">
+                        <Button size="lg" variant="ghost" className="w-full text-white rounded-xl font-bold uppercase tracking-wider text-base py-4 h-14 hover:bg-transparent">
+                            Get Started
+                        </Button>
+                    </div>
                 </Link>
-                 <Link href="/login" passHref>
-                     <Button variant="outline" size="lg" className="w-full text-black bg-white rounded-xl font-bold uppercase tracking-wider hover:bg-white/90 hover:text-black transition-all text-base py-4 h-14 border-black/10">
-                        I Already Have An Account
-                    </Button>
+                 <Link href="/login" passHref className="star-border-button">
+                     <div className="button-content bg-white hover:bg-white/90">
+                        <Button variant="ghost" size="lg" className="w-full text-black rounded-xl font-bold uppercase tracking-wider transition-all text-base py-4 h-14 hover:bg-transparent">
+                            I Already Have An Account
+                        </Button>
+                     </div>
                 </Link>
             </div>
         </div>
