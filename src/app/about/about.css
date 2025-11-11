@@ -26,7 +26,6 @@
     width: 100%;
     max-width: 1200px;
     height: auto;
-    min-height: 50vh;
     border-radius: 2.5rem;
     padding: 3rem;
     display: flex;
@@ -42,7 +41,6 @@
     align-items: center;
     justify-items: center;
     width: 100%;
-    height: 100%;
     gap: 2rem;
 }
 
@@ -148,7 +146,6 @@
     }
     .center-pane {
         order: -1; /* Move image to top on mobile */
-        max-height: 50vh;
         margin: 1rem 0;
     }
      .phone-mockup {
