@@ -118,26 +118,22 @@ export function LandingHeader() {
   }, [activeIndex, initialPositionSet]);
 
   return (
-    <header className="fixed top-4 left-0 right-0 w-full px-4 z-50">
-        <div className="relative mx-auto w-max">
-            <nav ref={navRef} className="landing-nav group">
-                <ul>
-                    {navItems.map((item, index) => (
-                        <li key={item.label} ref={(el) => (itemsRef.current[index] = el)}>
-                            <Link
-                                href={item.href}
-                                className={cn(
-                                    "nav-link",
-                                    activeIndex === index && "active"
-                                )}
-                            >
-                                {item.label}
-                            </Link>
-                        </li>
-                    ))}
-                </ul>
-            </nav>
-        </div>
-    </header>
+    <nav ref={navRef} className="landing-nav group">
+        <ul>
+            {navItems.map((item, index) => (
+                <li key={item.label} ref={(el) => (itemsRef.current[index] = el)}>
+                    <Link
+                        href={item.href}
+                        className={cn(
+                            "nav-link",
+                            activeIndex === index && "active"
+                        )}
+                    >
+                        {item.label}
+                    </Link>
+                </li>
+            ))}
+        </ul>
+    </nav>
   );
 }

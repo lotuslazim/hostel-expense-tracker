@@ -135,9 +135,7 @@ export default function AboutPage() {
         <div className="about-section yellow-gradient-bg text-slate-800">
             <div className="absolute inset-0 z-0 bg-retro-pattern"></div>
             <FloatingElements />
-            <div className="hidden md:block">
-                <LandingHeader />
-            </div>
+            
             <div className="about-container" style={{ position: 'relative', zIndex: 10 }}>
                 <div className="about-carousel" ref={carouselRef}>
                     <button className="nav-arrow up" aria-label="Previous feature" onClick={() => updateCarousel(currentIndex - 1)}><ArrowUp /></button>

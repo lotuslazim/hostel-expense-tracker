@@ -145,14 +145,12 @@ export default function LandingPage() {
                         />
                     </div>
                     
-                    <div className="z-10">
-                      <LandingHeader />
-                    </div>
+                    <header className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between p-8">
+                        <Logo textColor="text-slate-800" secondaryColor="text-secondary" />
+                        <LandingHeader />
+                    </header>
                     
                     <div className="flex landing-left-section z-10">
-                        <div className="flex-grow-0">
-                            <Logo textColor="text-slate-800" secondaryColor="text-secondary" />
-                        </div>
                         <div className="flex-grow flex items-center">
                             <div className="text-content">
                                  <p className="text-2xl text-slate-800 font-medium">No notes, no Excel—just one tap, done.</p>
