@@ -6,6 +6,7 @@
 
 
 
+
 .landing-page-container {
     display: flex;
     min-height: 100vh;
@@ -51,12 +52,12 @@
 }
 
 .landing-right-section {
-    flex: 1.5; /* Allow right section to take remaining space */
+    flex: 1; /* Allow right section to take remaining space */
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center; /* Center the cards horizontally */
-    margin-top: 2rem;
+    margin-top: 4rem;
 }
 
 .card-content-wrapper {
