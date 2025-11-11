@@ -129,8 +129,8 @@ export default function LandingPage() {
     return (
         <div>
             {/* Desktop Layout */}
-            <div className="hidden md:block animated-bg-grid-green min-h-screen">
-                <div className="landing-page-container text-slate-200 relative">
+            <div className="hidden md:block yellow-gradient-bg min-h-screen">
+                <div className="landing-page-container text-slate-800 relative">
                     <div className="absolute inset-0 z-0">
                         <DotGrid
                             dotSize={2}
@@ -151,23 +151,23 @@ export default function LandingPage() {
                     
                     <div className="flex landing-left-section z-10">
                         <div className="flex-grow-0">
-                            <Logo textColor="text-slate-200" secondaryColor="text-secondary" />
+                            <Logo textColor="text-slate-800" secondaryColor="text-secondary" />
                         </div>
                         <div className="flex-grow flex items-center">
                             <div className="text-content">
-                                 <p className="text-2xl text-slate-200 font-medium">No notes, no Excel—just one tap, done.</p>
+                                 <p className="text-2xl text-slate-800 font-medium">No notes, no Excel—just one tap, done.</p>
                                  <h1 className="text-[6.5rem] font-extrabold tracking-tighter leading-none my-4" style={{ userSelect: 'none' }}>
-                                    <span className="text-slate-200">Bachelor</span><span className="text-secondary">Bite.</span>
+                                    <span className="text-slate-800">Bachelor</span><span className="text-secondary">Bite.</span>
                                 </h1>
-                                <p className="text-xl text-slate-400 font-medium">
+                                <p className="text-xl text-slate-600 font-medium">
                                     Here to make your bachelor life easier — <br/> because someone has to.
                                 </p>
             
                                 <div className="flex gap-4 mt-8">
-                                    <Link href="/signup" className="bg-white text-slate-800 px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:opacity-90 transition-all shadow-md">
+                                    <Link href="/signup" className="bg-slate-800 text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:opacity-90 transition-all shadow-md">
                                        <span></span> SIGN UP
                                     </Link>
-                                     <Link href="/login" className="border border-slate-200 text-slate-200 px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:bg-white/10 transition-all shadow-md">
+                                     <Link href="/login" className="border border-slate-800 text-slate-800 px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:bg-white/10 transition-all shadow-md">
                                        <span>▶</span> LOG IN
                                      </Link>
                                 </div>
