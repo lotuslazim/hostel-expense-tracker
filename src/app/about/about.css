@@ -1,14 +1,14 @@
 
 .about-page-container {
     width: 100vw;
-    height: 100vh;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 2rem;
-    background-color: #FFC247; /* Bright Yellow */
-    overflow: hidden;
+    background-color: #111; /* Changed to black */
+    overflow-x: hidden;
     position: relative;
 }
 
@@ -33,6 +33,7 @@
     align-items: center;
     justify-content: center;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    margin-top: 6rem; /* Added margin for header */
 }
 
 .content-grid {
@@ -132,10 +133,13 @@
 
 /* Responsive Styles */
 @media (max-width: 1024px) {
+    .about-page-container {
+        justify-content: flex-start;
+    }
     .main-card {
         height: auto;
         padding: 2rem;
-        margin-top: 4rem; /* Add margin to avoid overlap with header */
+        margin-top: 8rem; /* Adjust margin for mobile */
     }
     .content-grid {
         grid-template-columns: 1fr;
