@@ -12,6 +12,14 @@
     position: relative;
 }
 
+.about-header {
+    position: absolute;
+    top: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+}
+
 .main-card {
     background-color: #111;
     color: white;
@@ -127,6 +135,7 @@
     .main-card {
         height: auto;
         padding: 2rem;
+        margin-top: 4rem; /* Add margin to avoid overlap with header */
     }
     .content-grid {
         grid-template-columns: 1fr;

@@ -5,12 +5,16 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import './about.css';
+import { LandingHeader } from '@/components/app/landing-header';
 
 export default function AboutPage() {
     const appImage = PlaceHolderImages.find(p => p.id === 'app-preview');
 
     return (
         <div className="about-page-container">
+            <header className="about-header">
+                <LandingHeader />
+            </header>
             <div className="main-card">
                 <div className="content-grid">
                     <div className="left-pane">
