@@ -24,10 +24,10 @@
     background-color: #111;
     color: white;
     width: 100%;
-    max-width: 1200px;
+    max-width: 1400px;
     height: auto;
     border-radius: 2.5rem;
-    padding: 3rem;
+    padding: 2rem 3rem;
     display: flex;
     align-items: center;
     justify-content: center;
