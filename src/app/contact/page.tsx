@@ -49,6 +49,9 @@ export default function ContactPage() {
                     <span className="button-text">Log In</span>
                 </Link>
             </div>
+            <Link href="/signup" className="cta-button">
+                NEXT
+            </Link>
         </div>
         <ContactModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>

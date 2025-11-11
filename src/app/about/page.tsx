@@ -44,8 +44,8 @@ export default function AboutPage() {
                     </div>
                 </div>
             </div>
-            <Link href="/signup" className="cta-button">
-                GET STARTED
+            <Link href="/contact" className="cta-button">
+                NEXT
             </Link>
         </div>
     );
