@@ -11,7 +11,7 @@ import { Logo } from '@/components/icons/logo';
 
 export function MobileLandingPage() {
     return (
-        <div className="h-screen w-screen overflow-hidden flex flex-col items-center yellow-gradient-bg text-slate-800 justify-start pt-24 gap-12">
+        <div className="h-screen w-screen overflow-hidden flex flex-col items-center mobile-landing-gradient text-slate-800 justify-start pt-24 gap-12">
             
             <div className="flex flex-col items-center text-center gap-4">
                 <div className="flex gap-2">

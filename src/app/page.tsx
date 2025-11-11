@@ -129,7 +129,7 @@ export default function LandingPage() {
     return (
         <div>
             {/* Desktop Layout */}
-            <div className="hidden md:block yellow-gradient-bg min-h-screen">
+            <div className="hidden md:block mobile-landing-gradient min-h-screen">
                 <div className="landing-page-container text-slate-800 relative">
                     <div className="absolute inset-0 z-0">
                         <DotGrid
