@@ -69,11 +69,38 @@
     height: 100%;
 }
 
+.phone-mockup {
+    position: relative;
+    width: 300px; /* Adjust as needed */
+    height: 615px; /* Adjust as needed */
+    background-color: #000;
+    border: 8px solid #111;
+    border-radius: 2.5rem; /* 40px */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.phone-mockup::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 45%;
+    height: 20px;
+    background-color: #111;
+    border-radius: 0 0 12px 12px;
+    z-index: 2;
+}
+
 .app-image {
-    max-height: 100%;
-    width: auto;
-    object-fit: contain;
-    border-radius: 1.5rem;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 2rem; /* Inner radius */
 }
 
 .cta-button {
@@ -107,10 +134,12 @@
     }
     .center-pane {
         order: -1; /* Move image to top on mobile */
-        max-height: 40vh;
+        max-height: 50vh;
+        margin: 1rem 0;
     }
-    .app-image {
-        max-height: 100%;
+     .phone-mockup {
+        width: 240px;
+        height: 492px;
     }
     .plan-title {
         font-size: 1.75rem;

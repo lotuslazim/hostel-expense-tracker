@@ -18,15 +18,17 @@ export default function AboutPage() {
                         <p className="plan-subtitle">DAILY GAME</p>
                     </div>
                     <div className="center-pane">
-                         {appImage && (
-                            <Image
-                                src={appImage.imageUrl}
-                                alt="App Preview"
-                                width={300}
-                                height={600}
-                                className="app-image"
-                            />
-                        )}
+                         <div className="phone-mockup">
+                            {appImage && (
+                                <Image
+                                    src={appImage.imageUrl}
+                                    alt="App Preview"
+                                    width={300}
+                                    height={600}
+                                    className="app-image"
+                                />
+                            )}
+                        </div>
                     </div>
                     <div className="right-pane">
                         <h2 className="plan-title">$3.99 FOR PRO</h2>
