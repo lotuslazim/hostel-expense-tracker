@@ -145,9 +145,13 @@ export default function LandingPage() {
                         />
                     </div>
                     
-                    <header className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between p-8">
-                        <Logo textColor="text-slate-800" secondaryColor="text-secondary" />
-                        <LandingHeader />
+                    <header className="absolute top-0 left-0 right-0 z-20 grid grid-cols-3 items-center p-8">
+                        <div className="justify-self-start">
+                            <Logo textColor="text-slate-800" secondaryColor="text-secondary" />
+                        </div>
+                        <div className="justify-self-center">
+                            <LandingHeader />
+                        </div>
                     </header>
                     
                     <div className="flex landing-left-section z-10">
