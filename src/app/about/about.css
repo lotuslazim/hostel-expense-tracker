@@ -79,8 +79,8 @@
 
 .phone-mockup {
     position: relative;
-    width: 200px;
-    height: 400px;
+    width: 180px;
+    height: 360px;
     background-color: #f5f5dc; /* Beige/Cream color for the phone body */
     border: 6px solid #FFD1DC; /* Light Pink border */
     border-radius: 2.5rem; /* 40px */
@@ -149,8 +149,8 @@
         margin: 1rem 0;
     }
      .phone-mockup {
-        width: 200px;
-        height: 400px;
+        width: 180px;
+        height: 360px;
     }
     .plan-title {
         font-size: 1.75rem;
