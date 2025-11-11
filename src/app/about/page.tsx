@@ -1,14 +1,15 @@
 
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
-import './about.css';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { useState, useLayoutEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { wrap } from '@popmotion/popcorn';
 import Link from 'next/link';
-import { ArrowUp, ArrowDown, Utensils, Wheat, CheckCircle, Leaf, Home, ChevronsRight } from 'lucide-react';
 import Image from 'next/image';
-import { LandingHeader } from '@/components/app/landing-header';
+import { ArrowLeft, ArrowRight, Utensils, Wheat, CheckCircle, Leaf, Home, ChevronsRight } from 'lucide-react';
 import { gsap } from "gsap";
+import { PlaceHolderImages } from '@/lib/placeholder-images';
+import './about.css';
 
 const appFeatures = [
     { name: "Log Meals & Expenses", description: "Quickly log your daily meals and any shared expenses. It’s that simple.", imageId: "app-dashboard" },
@@ -16,6 +17,32 @@ const appFeatures = [
     { name: "Track Your Inventory", description: "Groceries are automatically added to a monthly inventory list from your expenses.", imageId: "app-inventory" },
     { name: "Community Chat", description: "Connect with your flatmates, share updates, and coordinate easily.", imageId: "landing-hero" }
 ];
+
+const variants = {
+    enter: (direction: number) => ({
+        x: direction > 0 ? 300 : -300,
+        opacity: 0,
+        scale: 0.8,
+    }),
+    center: {
+        zIndex: 1,
+        x: 0,
+        opacity: 1,
+        scale: 1,
+    },
+    exit: (direction: number) => ({
+        zIndex: 0,
+        x: direction < 0 ? 300 : -300,
+        opacity: 0,
+        scale: 0.8,
+    }),
+};
+
+const textVariants = {
+    enter: { opacity: 0, y: 10 },
+    center: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -10 },
+};
 
 const FloatingElements = () => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -52,7 +79,7 @@ const FloatingElements = () => {
         {elements.map((el, i) => (
           <div
             key={i}
-            className={`floating-element-about absolute ${el.size} text-white opacity-80 filter drop-shadow-lg`}
+            className={`floating-element-about absolute ${el.size}`}
             style={{ top: el.top, left: el.left }}
           >
             <el.Icon strokeWidth={1.5}/>
@@ -62,111 +89,91 @@ const FloatingElements = () => {
     );
 };
 
-
 export default function AboutPage() {
-    const [currentIndex, setCurrentIndex] = useState(0);
-    const [isAnimating, setIsAnimating] = useState(false);
-    const carouselRef = useRef<HTMLDivElement>(null);
+    const [[page, direction], setPage] = useState([0, 0]);
 
-    const updateCarousel = useCallback((newIndex: number) => {
-        if (isAnimating) return;
+    const featureIndex = wrap(0, appFeatures.length, page);
 
-        const clampedIndex = (newIndex + appFeatures.length) % appFeatures.length;
-        
-        setIsAnimating(true);
-        setCurrentIndex(clampedIndex);
-
-        setTimeout(() => {
-            setIsAnimating(false);
-        }, 600); // Animation duration
-    }, [isAnimating]);
-
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "ArrowUp") updateCarousel(currentIndex - 1);
-            if (e.key === "ArrowDown") updateCarousel(currentIndex + 1);
-        };
-
-        let touchStartY = 0;
-        let touchEndY = 0;
-
-        const handleTouchStart = (e: TouchEvent) => {
-            touchStartY = e.changedTouches[0].screenY;
-        };
-
-        const handleTouchEnd = (e: TouchEvent) => {
-            touchEndY = e.changedTouches[0].screenY;
-            handleSwipe();
-        };
-
-        const handleSwipe = () => {
-            const swipeThreshold = 50;
-            const diff = touchStartY - touchEndY;
-            if (Math.abs(diff) > swipeThreshold) {
-                diff > 0 ? updateCarousel(currentIndex + 1) : updateCarousel(currentIndex - 1);
-            }
-        };
-
-        window.addEventListener("keydown", handleKeyDown);
-        const carouselElement = carouselRef.current;
-        carouselElement?.addEventListener("touchstart", handleTouchStart);
-        carouselElement?.addEventListener("touchend", handleTouchEnd);
-
-        return () => {
-            window.removeEventListener("keydown", handleKeyDown);
-            carouselElement?.removeEventListener("touchstart", handleTouchStart);
-            carouselElement?.removeEventListener("touchend", handleTouchEnd);
-        };
-    }, [currentIndex, updateCarousel]);
-    
-    const getCardClass = (index: number) => {
-        const offset = (index - currentIndex + appFeatures.length) % appFeatures.length;
-        if (offset === 0) return "center";
-        if (offset === 1) return "down-1";
-        if (offset === 2) return "down-2";
-        if (offset === appFeatures.length - 1) return "up-1";
-        if (offset === appFeatures.length - 2) return "up-2";
-        return "hidden";
+    const paginate = (newDirection: number) => {
+        setPage([page + newDirection, newDirection]);
     };
 
-    const currentFeature = appFeatures[currentIndex];
+    const currentFeature = appFeatures[featureIndex];
+    const image = PlaceHolderImages.find(p => p.id === currentFeature.imageId);
 
     return (
         <div className="about-section yellow-gradient-bg text-slate-800">
-            <div className="absolute inset-0 z-0 bg-retro-pattern"></div>
+            <div className="absolute inset-0 z-0 bg-retro-pattern opacity-10"></div>
             <FloatingElements />
             
-            <div className="about-container" style={{ position: 'relative', zIndex: 10 }}>
-                <div className="about-carousel" ref={carouselRef}>
-                    <button className="nav-arrow up" aria-label="Previous feature" onClick={() => updateCarousel(currentIndex - 1)}><ArrowUp /></button>
-                    <div className="carousel-cards">
-                        {appFeatures.map((feature, i) => {
-                            const image = PlaceHolderImages.find(p => p.id === feature.imageId);
-                            return (
-                                <div key={feature.name} className={`card ${getCardClass(i)}`} onClick={() => updateCarousel(i)}>
-                                     {image && <Image src={image.imageUrl} alt={feature.name} fill sizes="50vw" className="card-image" />}
-                                </div>
-                            );
-                        })}
-                    </div>
-                    <button className="nav-arrow down" aria-label="Next feature" onClick={() => updateCarousel(currentIndex + 1)}><ArrowDown /></button>
+            <div className="about-container">
+                <div className="about-carousel-wrapper">
+                    <AnimatePresence initial={false} custom={direction}>
+                        <motion.div
+                            key={page}
+                            className="carousel-card"
+                            custom={direction}
+                            variants={variants}
+                            initial="enter"
+                            animate="center"
+                            exit="exit"
+                            transition={{
+                                x: { type: "spring", stiffness: 300, damping: 30 },
+                                opacity: { duration: 0.2 },
+                            }}
+                            drag="x"
+                            dragConstraints={{ left: 0, right: 0 }}
+                            dragElastic={1}
+                            onDragEnd={(e, { offset, velocity }) => {
+                                const swipe = Math.abs(offset.x);
+                                if (swipe > 50) {
+                                    paginate(offset.x > 0 ? -1 : 1);
+                                }
+                            }}
+                        >
+                            {image && <Image src={image.imageUrl} alt={currentFeature.name} fill sizes="50vw" className="card-image" />}
+                        </motion.div>
+                    </AnimatePresence>
                 </div>
 
-                <div className="feature-info">
-                     <div className="carousel-dots">
-                        {appFeatures.map((_, i) => (
-                            <div key={i} className={`dot ${i === currentIndex ? 'active' : ''}`} onClick={() => updateCarousel(i)}></div>
-                        ))}
-                    </div>
-                    <div className="feature-info-box">
-                        <h2 className="feature-name">{currentFeature.name}</h2>
-                        <p className="feature-description">{currentFeature.description}</p>
+                <div className="feature-info-container">
+                     <AnimatePresence mode="wait">
+                        <motion.div
+                            key={currentFeature.name}
+                            variants={textVariants}
+                            initial="enter"
+                            animate="center"
+                            exit="exit"
+                            transition={{ duration: 0.3 }}
+                            className="feature-info-box"
+                        >
+                            <h2 className="feature-name">{currentFeature.name}</h2>
+                            <p className="feature-description">{currentFeature.description}</p>
+                        </motion.div>
+                    </AnimatePresence>
+
+                    <div className="carousel-navigation">
+                        <button className="nav-arrow" onClick={() => paginate(-1)} aria-label="Previous feature" disabled={page === 0}>
+                            <ArrowLeft />
+                        </button>
+                        <div className="progress-indicator">
+                            {appFeatures.map((_, i) => (
+                                <div
+                                    key={i}
+                                    className={`progress-dot ${i === featureIndex ? 'active' : ''}`}
+                                />
+                            ))}
+                        </div>
+                        <button className="nav-arrow" onClick={() => paginate(1)} aria-label="Next feature" disabled={page === appFeatures.length - 1}>
+                            <ArrowRight />
+                        </button>
                     </div>
                 </div>
             </div>
+
             <Link href="/contact" className="next-page-btn">
                 <span>Next</span>
-                <ChevronsRight />
+                <ChevronsRight size={20} />
             </Link>
         </div>
     );

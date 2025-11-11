@@ -15,39 +15,32 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 1rem;
+    gap: 2rem;
     width: 100%;
-    max-width: 1200px;
+    max-width: 1100px;
+    z-index: 2;
 }
 
-.about-carousel {
+.about-carousel-wrapper {
+    width: 100%;
+    max-width: 500px;
+    height: 350px; /* Adjust height for the new design */
     position: relative;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 100%;
-    height: 300px; /* Reduced for mobile */
-    flex-shrink: 0; /* Prevents the carousel from shrinking */
 }
 
-.carousel-cards {
-    position: relative;
-    width: 200px; /* Reduced for mobile */
-    height: 280px; /* Reduced for mobile */
-    perspective: 1000px;
-}
-
-.card {
+.carousel-card {
     position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: 1rem;
+    width: 280px;
+    height: 350px;
+    border-radius: 1.5rem;
     overflow: hidden;
-    transition: all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
     cursor: pointer;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    border: 2px solid hsl(var(--border));
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    transition: transform 0.4s ease, opacity 0.4s ease;
 }
 
 .card-image {
@@ -56,62 +49,56 @@
     object-fit: cover;
 }
 
-.card.center {
-    transform: translateY(0) translateZ(0) scale(1);
-    filter: grayscale(0);
-    opacity: 1;
-    z-index: 10;
+.feature-info-container {
+    text-align: center;
+    width: 100%;
+    max-width: 450px;
 }
 
-.card.up-1 {
-    transform: translateY(-60px) translateZ(-80px) scale(0.85); /* Adjusted */
-    filter: grayscale(0.8);
-    opacity: 0.7;
-    z-index: 9;
+.feature-info-box {
+    background-color: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(10px);
+    border-radius: 1.5rem;
+    padding: 2rem;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-.card.down-1 {
-    transform: translateY(60px) translateZ(-80px) scale(0.85); /* Adjusted */
-    filter: grayscale(0.8);
-    opacity: 0.7;
-    z-index: 9;
+.feature-name {
+    font-size: 1.75rem;
+    font-weight: 700;
+    font-family: var(--font-headline);
+    margin-bottom: 0.75rem;
+    color: #374151; /* gray-700 */
 }
 
-.card.up-2 {
-    transform: translateY(-120px) translateZ(-160px) scale(0.7); /* Adjusted */
-    filter: grayscale(1);
-    opacity: 0.4;
-    z-index: 8;
+.feature-description {
+    font-size: 1rem;
+    color: #4b5563; /* gray-600 */
+    line-height: 1.6;
 }
 
-.card.down-2 {
-    transform: translateY(120px) translateZ(-160px) scale(0.7); /* Adjusted */
-    filter: grayscale(1);
-    opacity: 0.4;
-    z-index: 8;
-}
-
-.card.hidden {
-    transform: scale(0.5);
-    opacity: 0;
-    pointer-events: none;
+.carousel-navigation {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
 }
 
 .nav-arrow {
-    position: absolute;
-    width: 40px;
-    height: 40px;
-    background: rgba(255, 255, 255, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    backdrop-filter: blur(5px);
+    width: 44px;
+    height: 44px;
+    background: white;
+    border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: all 0.3s ease;
-    z-index: 20;
-    color: white;
+    color: #374151;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
 .nav-arrow:hover {
@@ -120,65 +107,30 @@
     transform: scale(1.1);
 }
 
-.nav-arrow.up {
-    top: 0;
+.nav-arrow:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: scale(1);
+    background: rgba(255, 255, 255, 0.7);
 }
 
-.nav-arrow.down {
-    bottom: 0;
-}
-
-.carousel-dots {
+.progress-indicator {
     display: flex;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
-    justify-content: center;
+    gap: 0.5rem;
 }
 
-.dot {
+.progress-dot {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background: hsla(0, 0%, 20%, 0.5);
-    cursor: pointer;
+    background: rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
 }
 
-.dot.active {
+.progress-dot.active {
     background: hsl(var(--primary));
     transform: scale(1.2);
-}
-
-.feature-info {
-    text-align: center;
-    transition: opacity 0.4s ease;
-    width: 100%;
-}
-
-.feature-info-box {
-    background-color: white;
-    border-radius: 1.5rem;
-    padding: 1.5rem;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
-    margin-top: 2.5rem;
-    border: 1px solid hsl(var(--border));
-}
-
-.feature-name {
-    font-size: 1.25rem;
-    font-weight: 700;
-    font-family: var(--font-headline);
-    margin-bottom: 0.5rem;
-    color: #1e293b; /* slate-800 */
-    transition: opacity 0.4s ease;
-}
-
-.feature-description {
-    font-size: 0.8rem;
-    color: #475569; /* slate-600 */
-    max-width: 400px;
-    margin: 0 auto;
-    transition: opacity 0.4s ease;
+    box-shadow: 0 0 10px hsl(var(--primary));
 }
 
 .next-page-btn {
@@ -189,8 +141,8 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.75rem 1.5rem;
-    background-color: hsl(var(--primary));
-    color: hsl(var(--primary-foreground));
+    background-color: hsl(var(--secondary));
+    color: hsl(var(--secondary-foreground));
     border-radius: 9999px;
     font-weight: 600;
     text-decoration: none;
@@ -200,61 +152,33 @@
 }
 
 .next-page-btn:hover {
-    transform: scale(1.05);
+    transform: translateY(-2px) scale(1.05);
     box-shadow: 0 6px 20px rgba(0,0,0,0.25);
 }
 
+
+/* Floating icons */
+.floating-element-about {
+    color: white;
+    opacity: 0.6;
+    filter: drop-shadow(0 2px 5px rgba(0,0,0,0.2));
+}
+
+
 /* Responsive Styles */
 @media (min-width: 768px) {
-    .about-section {
-        padding: 2rem;
-    }
     .about-container {
         flex-direction: row;
-        justify-content: space-around;
+        justify-content: space-between;
         gap: 4rem;
     }
 
-    .about-carousel {
-        width: 300px;
-        height: 450px;
+    .about-carousel-wrapper {
+        order: 1;
     }
 
-    .carousel-cards {
-        width: 100%;
-        height: 100%;
-    }
-
-    .feature-info {
+    .feature-info-container {
+        order: 2;
         text-align: left;
-        max-width: 40%;
-    }
-
-    .feature-info-box {
-        background-color: transparent;
-        border-radius: 0;
-        padding: 0;
-        box-shadow: none;
-        margin-top: 0;
-        border: none;
-    }
-    
-    .feature-name {
-        font-size: 2.5rem;
-    }
-    
-    .feature-description {
-        font-size: 1.1rem;
-        margin: 0;
-        max-width: 100%;
-    }
-    
-    .carousel-dots {
-        position: absolute;
-        right: 0;
-        top: 50%;
-        transform: translateY(-50%);
-        flex-direction: column;
-        margin: 0;
     }
 }
