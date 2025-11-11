@@ -7,7 +7,7 @@
     align-items: center;
     justify-content: center;
     padding: 2rem;
-    background-color: #111; /* Changed to black */
+    background-color: #FFC247; /* Reverted to yellow */
     overflow-x: hidden;
     position: relative;
 }
