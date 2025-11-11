@@ -2,7 +2,6 @@
 "use client";
 
 import React from 'react';
-import CardSwap, { Card } from '@/components/CardSwap';
 import { Utensils, Calculator, Zap, ArrowRight, Wallet, Check, Plus, FileText, BarChart2 } from 'lucide-react';
 import Link from 'next/link';
 import { LandingHeader } from '@/components/app/landing-header';
@@ -178,27 +177,7 @@ export default function LandingPage() {
                          <div className="flex-grow-0" />
                     </div>
                     <div className="flex landing-right-section mt-16 z-10">
-                        <CardSwap
-                            width={580}
-                            height={480}
-                            cardDistance={60}
-                            verticalDistance={70}
-                            delay={5000}
-                            pauseOnHover={true}
-                            onCardClick={() => {}}
-                        >
-                            {appFeatures.map((feature) => (
-                                <Card key={feature.name}>
-                                    <div className="card-header" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', borderBottom: '1px solid rgba(0, 0, 0, 0.1)', color: '#333' }}>
-                                        {feature.icon}
-                                        <h3>{feature.name}</h3>
-                                    </div>
-                                    <div className="card-content-wrapper">
-                                        {feature.content}
-                                    </div>
-                                </Card>
-                            ))}
-                        </CardSwap>
+                       
                     </div>
                 </div>
             </div>
@@ -210,4 +189,3 @@ export default function LandingPage() {
         </div>
     );
 }
-
