@@ -72,12 +72,12 @@
 
 .phone-mockup {
     position: relative;
-    width: 280px; /* Adjust as needed */
-    height: 574px; /* Adjust as needed */
-    background-color: #000;
-    border: 8px solid #4a4a4a;
-    border-radius: 2.5rem; /* 40px */
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    width: 280px;
+    height: 574px;
+    background-color: #f5f5dc; /* Beige/Cream color for the phone body */
+    border: 6px solid #e0e0e0; /* Lighter border color */
+    border-radius: 2.75rem; /* 44px */
+    box-shadow: 0 15px 40px rgba(0,0,0,0.4);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -87,13 +87,13 @@
 .phone-mockup::before {
     content: '';
     position: absolute;
-    top: 0;
+    top: 1rem; /* Adjust position */
     left: 50%;
     transform: translateX(-50%);
-    width: 45%;
-    height: 20px;
-    background-color: #4a4a4a;
-    border-radius: 0 0 12px 12px;
+    width: 35%; /* Width of the dynamic island */
+    height: 1rem; /* Height of the dynamic island */
+    background-color: #111; /* Black for the island */
+    border-radius: 0.5rem; /* Pill shape */
     z-index: 2;
 }
 
@@ -101,7 +101,7 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: 2rem; /* Inner radius */
+    border-radius: 2.25rem; /* Inner radius to match frame */
 }
 
 .cta-button {
