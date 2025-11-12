@@ -163,21 +163,17 @@ export default function AboutPage() {
                     <span id="bg-text-1" className="how-it-works-bg-text">01</span>
                     <span id="bg-text-2" className="how-it-works-bg-text">02</span>
                     <span id="bg-text-3" className="how-it-works-bg-text">03</span>
-                    <div className="how-it-works-card-new">
-                        <div className="how-it-works-steps-list">
-                            {howItWorksSteps.map(step => (
-                                <div key={step.step} className="how-it-works-step">
-                                    {step.title}
-                                </div>
-                            ))}
-                        </div>
-                        <div className="how-it-works-text">
-                            <p className="subtitle">THAT'S BACHELORBITE</p>
-                            <h3>Complete it as quickly as you can.</h3>
-                            <p>
-                                A simple, intuitive process designed to get you from chaos to clarity in minutes. No more arguments, no more lost receipts—just effortless harmony.
-                            </p>
-                        </div>
+                    <div className="how-it-works-grid">
+                        {howItWorksSteps.map((step, index) => (
+                            <div
+                                key={step.step}
+                                className={`how-it-works-card ${index === 1 ? 'is-white' : ''}`}
+                            >
+                                <p className="step-number">Step {step.step}</p>
+                                <h3 className="step-title">{step.title}</h3>
+                                <p className="step-description">{step.description}</p>
+                            </div>
+                        ))}
                     </div>
                 </section>
 
