@@ -183,8 +183,8 @@ export function SettlementHistory() {
             const [mealsSnapshot, expensesSnapshot, membersSnapshot, usersSnapshot, settlementsSnapshot] = await Promise.all([
                 getDocs(mealsQuery),
                 getDocs(expensesQuery),
-                getDocs(membersSnapshot),
-                getDocs(usersSnapshot),
+                getDocs(membersQuery),
+                getDocs(usersQuery),
                 getDocs(settlementsQuery)
             ]);
 
@@ -339,3 +339,5 @@ export function SettlementHistory() {
     </div>
   );
 }
+
+    
