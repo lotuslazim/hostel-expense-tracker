@@ -158,17 +158,26 @@ export default function AboutPage() {
                 {/* How It Works Section */}
                 <section
                     ref={el => sectionsRef.current[2] = el}
-                    className="about-section"
+                    className="about-section how-it-works-section"
                 >
-                    <h2 className="section-title">How It Works</h2>
-                    <div className="how-it-works-grid">
-                        {howItWorksSteps.map(step => (
-                            <div key={step.step} className="how-it-works-card">
-                                <div className="how-it-works-step-number">{`0${step.step}`}</div>
-                                <h3 className="how-it-works-title">{step.title}</h3>
-                                <p className="how-it-works-description">{step.description}</p>
-                            </div>
-                        ))}
+                    <span id="bg-text-1" className="how-it-works-bg-text">01</span>
+                    <span id="bg-text-2" className="how-it-works-bg-text">02</span>
+                    <span id="bg-text-3" className="how-it-works-bg-text">03</span>
+                    <div className="how-it-works-card-new">
+                        <div className="how-it-works-steps-list">
+                            {howItWorksSteps.map(step => (
+                                <div key={step.step} className="how-it-works-step">
+                                    {step.title}
+                                </div>
+                            ))}
+                        </div>
+                        <div className="how-it-works-text">
+                            <p className="subtitle">THAT'S BACHELORBITE</p>
+                            <h3>Complete it as quickly as you can.</h3>
+                            <p>
+                                A simple, intuitive process designed to get you from chaos to clarity in minutes. No more arguments, no more lost receipts—just effortless harmony.
+                            </p>
+                        </div>
                     </div>
                 </section>
 
@@ -182,8 +191,8 @@ export default function AboutPage() {
                         {values.map(value => (
                             <div key={value.title} className="value-item">
                                 <value.icon className="value-icon"/>
-                                <h3 className="how-it-works-title">{value.title}</h3>
-                                <p className="how-it-works-description">{value.description}</p>
+                                <h3 className="feature-card-title">{value.title}</h3>
+                                <p className="feature-card-description">{value.description}</p>
                             </div>
                         ))}
                     </div>
