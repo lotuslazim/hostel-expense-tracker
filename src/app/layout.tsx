@@ -34,7 +34,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={cn("font-body", poppins.variable, playfairDisplay.variable)} suppressHydrationWarning>
+      <body className={cn("font-body pb-24", poppins.variable, playfairDisplay.variable)} suppressHydrationWarning>
         <Suspense fallback={null}>
           <ProgressBar />
         </Suspense>
