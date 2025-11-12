@@ -142,7 +142,7 @@
       "required": ["id", "groupId", "itemId", "itemName", "quantity", "cost", "unitPrice", "date", "userId", "userName"]
     }
   },
-  "auth": { "providers": ["password", "google"] },
+  "auth": { "providers": ["password", "google", "phone"] },
   "storage": {
     "rules": {
       "profilePictures/{userId}": {
@@ -261,5 +261,3 @@
     "reasoning": "This structure is updated to enforce an 'active' status check for all group-related data access. Instead of checking for simple existence with exists(), the rules now use get().data.status == 'active'. This closes a security hole where inactive members could still access group data. It also solves the data inconsistency problem by ensuring that the security rules and application logic are aligned. This is a more secure and robust pattern for managing group membership. The user read rule was changed to allow any authenticated user to read user profiles to support fetching user data for reports. The meal log read rule was restricted so users can only see their own meals, improving privacy."
   }
 }
-
-    

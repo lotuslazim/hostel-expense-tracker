@@ -24,19 +24,30 @@ import {
   signInWithEmailAndPassword, 
   sendPasswordResetEmail, 
   sendEmailVerification, 
-  signOut, 
+  signOut,
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
+  type ConfirmationResult,
   type User 
 } from "firebase/auth";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { Loader2, AlertCircle, Eye, EyeOff, Phone, MessageSquare } from "lucide-react";
 import { GoogleIcon } from "../icons/google";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const formSchema = z.object({
+const emailSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email." }),
   password: z.string().min(1, { message: "Password is required." }),
 });
+
+const phoneSchema = z.object({
+    phone: z.string().min(10, "Please enter a valid phone number."),
+    otp: z.string().optional(),
+});
+
+const formSchema = z.union([emailSchema, phoneSchema]);
 
 export function LoginForm() {
   const router = useRouter();
@@ -46,13 +57,28 @@ export function LoginForm() {
   const [userForVerification, setUserForVerification] = useState<User | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
+  
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const [isOtpSent, setIsOtpSent] = useState(false);
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: { email: "", password: "", phone: "", otp: "" },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            'size': 'invisible',
+            'callback': (response: any) => {
+              // reCAPTCHA solved, allow signInWithPhoneNumber.
+            }
+        });
+    }
+  }, []);
+
+  async function onEmailSubmit(values: z.infer<typeof emailSchema>) {
     setIsLoading(true);
     setNeedsVerification(false);
     setUserForVerification(null);
@@ -83,6 +109,49 @@ export function LoginForm() {
         setIsLoading(false);
     }
   }
+
+  const handleSendOtp = async () => {
+      const phone = form.getValues("phone");
+      if (!phone) {
+          form.setError("phone", { message: "Phone number is required." });
+          return;
+      }
+
+      setIsLoading(true);
+      try {
+          const verifier = window.recaptchaVerifier;
+          const result = await signInWithPhoneNumber(auth, `+${phone}`, verifier);
+          setConfirmationResult(result);
+          setIsOtpSent(true);
+          toast({ title: "OTP Sent!", description: "Check your phone for the verification code." });
+      } catch (error) {
+          console.error(error);
+          toast({ variant: "destructive", title: "Failed to send OTP", description: "Please check the phone number and try again." });
+      } finally {
+          setIsLoading(false);
+      }
+  };
+
+  const handleVerifyOtp = async () => {
+      const otp = form.getValues("otp");
+      if (!otp) {
+          form.setError("otp", { message: "OTP is required." });
+          return;
+      }
+      if (!confirmationResult) return;
+
+      setIsLoading(true);
+      try {
+          await confirmationResult.confirm(otp);
+          toast({ title: "Success!", description: "You have been logged in." });
+          router.push('/dashboard');
+      } catch (error) {
+          toast({ variant: "destructive", title: "Invalid OTP", description: "The code you entered is incorrect." });
+      } finally {
+          setIsLoading(false);
+      }
+  };
+
 
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
@@ -176,6 +245,7 @@ export function LoginForm() {
       footerLinkText="Sign Up"
       footerLinkHref="/signup"
     >
+      <div id="recaptcha-container"></div>
       <div className="space-y-4">
         {needsVerification && (
             <Alert variant="destructive">
@@ -189,7 +259,7 @@ export function LoginForm() {
                 </AlertDescription>
             </Alert>
         )}
-        <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading || isGoogleLoading}>
+         <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading || isGoogleLoading}>
            {isGoogleLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
            {!isGoogleLoading && <GoogleIcon className="mr-2 h-4 w-4" />}
           Sign in with Google
@@ -204,68 +274,130 @@ export function LoginForm() {
             </span>
           </div>
         </div>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input placeholder="name@example.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                   <div className="flex items-center justify-between">
-                    <FormLabel>Password</FormLabel>
-                    <Button
-                      type="button"
-                      variant="link"
-                      className="px-0 h-auto text-xs"
-                      onClick={handlePasswordReset}
-                    >
-                      Forgot password?
+
+        <Tabs defaultValue="email" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="email">Email</TabsTrigger>
+                <TabsTrigger value="phone">Phone</TabsTrigger>
+            </TabsList>
+            <TabsContent value="email">
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onEmailSubmit)} className="space-y-4 pt-4">
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email</FormLabel>
+                          <FormControl>
+                            <Input placeholder="name@example.com" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                           <div className="flex items-center justify-between">
+                            <FormLabel>Password</FormLabel>
+                            <Button
+                              type="button"
+                              variant="link"
+                              className="px-0 h-auto text-xs"
+                              onClick={handlePasswordReset}
+                            >
+                              Forgot password?
+                            </Button>
+                          </div>
+                          <FormControl>
+                            <div className="relative">
+                                <Input
+                                  type={showPassword ? "text" : "password"}
+                                  placeholder="••••••••"
+                                  {...field}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => setShowPassword(!showPassword)}
+                                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground"
+                                  aria-label={showPassword ? "Hide password" : "Show password"}
+                                >
+                                  {showPassword ? (
+                                    <EyeOff className="h-5 w-5" />
+                                  ) : (
+                                    <Eye className="h-5 w-5" />
+                                  )}
+                                </button>
+                              </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button type="submit" className="w-full" disabled={isLoading || isGoogleLoading}>
+                       {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Log In
                     </Button>
-                  </div>
-                  <FormControl>
-                    <div className="relative">
-                        <Input
-                          type={showPassword ? "text" : "password"}
-                          placeholder="••••••••"
-                          {...field}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground"
-                          aria-label={showPassword ? "Hide password" : "Show password"}
+                  </form>
+                </Form>
+            </TabsContent>
+            <TabsContent value="phone">
+                 <Form {...form}>
+                    <div className="space-y-4 pt-4">
+                        {!isOtpSent ? (
+                            <FormField
+                                control={form.control}
+                                name="phone"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Phone Number</FormLabel>
+                                        <FormControl>
+                                            <div className="flex items-center gap-2">
+                                                <span className="h-10 flex items-center rounded-l-md border border-r-0 bg-muted px-3 text-sm">+</span>
+                                                <Input placeholder="1234567890" {...field} className="rounded-l-none" />
+                                            </div>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        ) : (
+                             <FormField
+                                control={form.control}
+                                name="otp"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Verification Code</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="Enter 6-digit code" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        )}
+
+                        <Button 
+                            onClick={isOtpSent ? handleVerifyOtp : handleSendOtp}
+                            className="w-full" 
+                            disabled={isLoading}
                         >
-                          {showPassword ? (
-                            <EyeOff className="h-5 w-5" />
-                          ) : (
-                            <Eye className="h-5 w-5" />
-                          )}
-                        </button>
-                      </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit" className="w-full" disabled={isLoading || isGoogleLoading}>
-               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Log In
-            </Button>
-          </form>
-        </Form>
+                            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            {isOtpSent ? 'Verify OTP' : 'Send OTP'}
+                        </Button>
+
+                         {isOtpSent && (
+                            <Button variant="link" className="text-xs" onClick={() => setIsOtpSent(false)}>
+                                Back to phone number
+                            </Button>
+                        )}
+                    </div>
+                </Form>
+            </TabsContent>
+        </Tabs>
       </div>
     </AuthCard>
   );
