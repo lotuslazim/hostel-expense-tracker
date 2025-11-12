@@ -587,12 +587,12 @@ export function MonthlySummary() {
                                                             </Button>
                                                         </DialogTrigger>
                                                         <DialogContent className="max-w-3xl">
-                                                            <DialogHeader>
-                                                                <DialogTitle>Receipt for {expense.expenseItem}</DialogTitle>
-                                                            </DialogHeader>
-                                                            <div className="py-4">
-                                                                <img src={expense.receiptPhotoUrl} alt="Receipt" className="w-full h-auto rounded-md" />
-                                                            </div>
+                                                          <DialogHeader>
+                                                              <DialogTitle>Receipt for {expense.expenseItem}</DialogTitle>
+                                                          </DialogHeader>
+                                                          <div className="py-4">
+                                                              <img src={expense.receiptPhotoUrl} alt="Receipt" className="w-full h-auto rounded-md" />
+                                                          </div>
                                                         </DialogContent>
                                                     </Dialog>
                                                   </Suspense>
@@ -736,4 +736,3 @@ export function MonthlySummary() {
   );
 }
 
-    
