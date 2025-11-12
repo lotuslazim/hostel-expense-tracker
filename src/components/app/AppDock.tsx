@@ -1,6 +1,8 @@
+
 'use client';
 
-import { VscGraph, VscCalendar, VscPackage, VscComment, VscScale } from 'react-icons/vsc';
+import { VscGraph, VscCalendar, VscPackage, VscComment } from 'react-icons/vsc';
+import { Scale } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Dock from './Dock';
 import { usePathname } from 'next/navigation';
@@ -10,7 +12,6 @@ import { useState, useEffect, useMemo } from 'react';
 import { doc } from 'firebase/firestore';
 import { firestore } from '@/firebase/config';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -75,7 +76,7 @@ export default function AppDock() {
     { href: '/dashboard', icon: <VscGraph size={28} />, label: 'Dashboard', onClick: () => router.push('/dashboard') },
     { href: '/report', icon: <VscCalendar size={28} />, label: 'Report', onClick: () => router.push('/report') },
     { href: '/inventory', icon: <VscPackage size={28} />, label: 'Inventory', onClick: () => router.push('/inventory') },
-    { href: '/settlements', icon: <VscScale size={28} />, label: 'Settlements', onClick: () => router.push('/settlements') },
+    { href: '/settlements', icon: <Scale size={28} />, label: 'Settlements', onClick: () => router.push('/settlements') },
     { 
       href: '/chat',
       icon: (
