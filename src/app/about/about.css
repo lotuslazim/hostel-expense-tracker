@@ -2,8 +2,8 @@
 
 /* --- Base Page Styles --- */
 .about-page-wrapper {
-    background-color: hsl(var(--primary));
-    color: #333; /* Dark text for yellow background */
+    background-color: #111;
+    color: #eee;
     min-height: 100vh;
     overflow-x: hidden;
 }
@@ -27,7 +27,7 @@
     padding: 6rem 2rem;
     max-width: 1200px;
     margin: 0 auto;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     opacity: 0;
     transform: translateY(20px);
     transition: opacity 0.6s ease-out, transform 0.6s ease-out;
@@ -44,7 +44,7 @@
     font-family: var(--font-headline);
     text-align: center;
     margin-bottom: 4rem; /* 64px */
-    color: #222;
+    color: #fff;
 }
 
 /* --- Hero Section --- */
@@ -53,24 +53,24 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    min-height: 50vh; /* Reduced from 100vh */
-    padding: 0 2rem; /* Horizontal padding */
-    border-bottom: none; /* Remove bottom border for hero */
-    margin-top: 8rem; /* Pushes the hero section down */
+    min-height: 100vh;
+    padding: 0 2rem;
+    border-bottom: none;
+    margin-top: 0;
 }
 
 .hero-box {
-    background-color: #1a1a1a;
+    background-color: transparent;
     color: white;
     padding: 1rem 2rem;
-    border-radius: 2rem;
+    border-radius: 0;
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
     gap: 2rem;
     width: 100%;
     max-width: 1200px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    box-shadow: none;
 }
 
 .hero-text-left,
@@ -79,7 +79,7 @@
 }
 
 .about-hero-headline {
-    font-size: 3rem; /* 56px */
+    font-size: 4rem;
     font-weight: 800;
     font-family: var(--font-headline);
     line-height: 1.1;
@@ -87,8 +87,8 @@
 }
 
 .about-hero-subheading {
-    font-size: 1.1rem; /* 20px */
-    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.7);
     max-width: 350px;
     margin: 0 auto;
     line-height: 1.6;
@@ -100,8 +100,8 @@
 
 .iphone-mockup {
     position: relative;
-    width: 301px; /* Increased to fit card width + padding */
-    height: 601px; /* Increased to fit card height + padding */
+    width: 301px; 
+    height: 601px;
     transform-style: preserve-3d;
     transform: rotateY(-15deg) rotateX(5deg) scale(0.9);
     transition: transform 0.5s ease-out;
@@ -127,8 +127,7 @@
     background: #000;
     border-radius: 30px; /* Slightly smaller radius */
     overflow: hidden;
-    /* Add a transform to scale the content to fit */
-    transform: scale(calc(285 / 360)); /* (inner width / component width) */
+    transform: scale(calc(281 / 360));
     transform-origin: top left;
 }
 
@@ -152,17 +151,17 @@
 }
 
 .feature-card {
-    background-color: #ffffff;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    background-color: #222;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 1rem; /* 16px */
     overflow: hidden;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .feature-card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .feature-card-image {
@@ -179,12 +178,12 @@
     font-size: 1.5rem; /* 24px */
     font-weight: 600;
     margin-bottom: 0.75rem; /* 12px */
-    color: #222;
+    color: #fff;
 }
 
 .feature-card-description {
     font-size: 1rem; /* 16px */
-    color: #666;
+    color: #aaa;
     line-height: 1.6;
 }
 
@@ -317,17 +316,17 @@
 }
 
 #bg-text-1 {
-    top: 8rem;
+    top: 10rem;
     right: 2rem;
 }
 
 #bg-text-2 {
-    top: 22rem;
+    top: 25rem;
     left: 2rem;
 }
 
 #bg-text-3 {
-    top: 50rem;
+    top: 55rem;
     right: 2rem;
 }
 
@@ -347,30 +346,30 @@
 .value-icon {
     width: 3rem;
     height: 3rem;
-    color: hsl(var(--secondary));
+    color: hsl(var(--primary));
     margin: 0 auto 1.5rem;
     stroke-width: 1.5;
 }
 
 /* --- CTA Section --- */
 .about-cta-section {
-    background-color: rgba(255, 255, 255, 0.5);
+    background-color: #222;
     border-radius: 1.5rem;
     padding: 4rem;
     text-align: center;
-    border: 1px solid rgba(0,0,0,0.1);
+    border: 1px solid rgba(255,255,255,0.1);
 }
 
 .cta-title {
     font-size: 2.5rem;
     font-weight: 700;
     margin-bottom: 1rem;
-    color: #222;
+    color: #fff;
 }
 
 .cta-description {
     font-size: 1.125rem;
-    color: #555;
+    color: #aaa;
     margin-bottom: 2.5rem;
 }
 
@@ -379,8 +378,8 @@
     align-items: center;
     justify-content: center;
     padding: 1rem 2.5rem;
-    background-color: hsl(var(--secondary));
-    color: white;
+    background-color: hsl(var(--primary));
+    color: #111;
     border-radius: 9999px;
     font-weight: 700;
     text-decoration: none;
@@ -389,7 +388,7 @@
 
 .cta-button-main:hover {
     transform: scale(1.05);
-    box-shadow: 0 0 20px hsla(var(--secondary), 0.5);
+    box-shadow: 0 0 20px hsla(var(--primary), 0.5);
 }
 
 /* --- Responsive Styles --- */
@@ -399,7 +398,7 @@
     }
     .hero-box {
         grid-template-columns: 1fr;
-        gap: 1rem;
+        gap: 2rem;
         padding: 2rem;
     }
     .hero-phone-container {
