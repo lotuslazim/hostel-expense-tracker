@@ -83,8 +83,8 @@ export default function AboutPage() {
             <div className="main-card">
                 <div className="content-grid">
                     <div className="arrow-nav left-arrow">
-                        <button onClick={() => paginate(-1)}>
-                            <ChevronLeft size={36} />
+                        <button onClick={() => paginate(-1)} className="arrow-btn">
+                            <ChevronLeft size={24} />
                         </button>
                     </div>
 
@@ -154,8 +154,8 @@ export default function AboutPage() {
                     </div>
                     
                     <div className="arrow-nav right-arrow">
-                         <button onClick={() => paginate(1)}>
-                            <ChevronRight size={36} />
+                         <button onClick={() => paginate(1)} className="arrow-btn">
+                            <ChevronRight size={24} />
                         </button>
                     </div>
                 </div>
