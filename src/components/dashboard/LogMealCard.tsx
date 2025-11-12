@@ -100,7 +100,7 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
         mealType: z.enum(safeMealTypes as [string, ...string[]], {
             required_error: "You need to select a meal type.",
         }),
-        mealCount: z.coerce.number().min(1, "Meal count must be at least 1.").max(5, "Meal count cannot exceed 5."),
+        mealCount: z.coerce.number().min(0.5, "Meal count must be at least 0.5.").max(5, "Meal count cannot exceed 5."),
         itemName: isMealItemNameRequired 
             ? z.string().min(1, "Item name is required.") 
             : z.string().optional(),
@@ -290,7 +290,7 @@ export function LogMealCard({ selectedDate }: LogMealCardProps) {
                 <FormItem>
                   <FormLabel>Meal Count</FormLabel>
                   <FormControl>
-                    <Input type="number" min="1" max="5" {...field} />
+                    <Input type="number" min="0.5" max="5" step="0.5" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
