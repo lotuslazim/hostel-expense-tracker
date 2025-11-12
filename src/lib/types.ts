@@ -1,4 +1,5 @@
 
+
 import type { Timestamp } from 'firebase/firestore';
 
 export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
@@ -13,6 +14,7 @@ export interface MealLog {
   groupId: string;
   userName?: string;
   itemName?: string | null;
+  createdAt: Timestamp;
 }
 
 export type ExpenseCategory = 'Food & Groceries' | 'Electricity' | 'Gas' | 'Other';
@@ -111,3 +113,16 @@ export interface Member {
   joinedAt: Timestamp;
   leftAt?: Timestamp | null;
 }
+
+export interface Settlement {
+    id: string;
+    groupId: string;
+    userId: string;
+    month: number;
+    year: number;
+    settledAt: Timestamp;
+    settlementMethod: string;
+    settledTo: string;
+}
+
+    

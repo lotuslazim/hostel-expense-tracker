@@ -1,3 +1,4 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -9,7 +10,6 @@ service cloud.firestore {
      * @allow (create) User creating their own profile.
      * @deny (get, update) User trying to access another user's profile.
      * @deny (create) User attempting to create a profile with a mismatched ID.
-     * @principle Enforces user-ownership for profile data.
      */
     match /users/{userId} {
       function isOwner(userId) {
@@ -105,6 +105,26 @@ service cloud.firestore {
           allow update: if isSignedIn() && (isOwner(groupId, itemId) || isAdmin(groupId));
           allow delete: if isSignedIn() && (isOwner(groupId, itemId) || isAdmin(groupId));
         }
+
+        match /settlements/{settlementId} {
+            function isSignedIn() {
+                return request.auth != null;
+            }
+             function isGroupMember(groupId) {
+                return exists(/databases/$(database)/documents/groups/$(groupId));
+            }
+             function isAdmin(groupId) {
+                return get(/databases/$(database)/documents/groups/$(groupId)).data.adminId == request.auth.uid;
+            }
+             function isOwner(settlementId) {
+                return request.auth.uid == request.resource.data.userId;
+            }
+            allow get, list: if isSignedIn() && isGroupMember(groupId);
+            allow create: if isSignedIn() && isGroupMember(groupId) && isOwner(settlementId);
+            allow update, delete: if isSignedIn() && isAdmin(groupId);
+        }
     }
   }
 }
+
+    
