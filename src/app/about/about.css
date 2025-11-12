@@ -61,7 +61,7 @@
 .hero-box {
     background-color: #1a1a1a;
     color: white;
-    padding: 2rem;
+    padding: 1rem 2rem;
     border-radius: 2rem;
     display: grid;
     grid-template-columns: 1fr auto 1fr;
