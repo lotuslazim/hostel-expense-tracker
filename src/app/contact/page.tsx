@@ -23,6 +23,9 @@ export default function ContactPage() {
 
   return (
     <div className="contact-page-container">
+        <header className="fixed top-6 left-1/2 -translate-x-1/2 z-20">
+          <LandingHeader />
+        </header>
         
         <div className="contact-page-content">
             <div className="profile-cards-wrapper">
