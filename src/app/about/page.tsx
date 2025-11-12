@@ -163,6 +163,7 @@ export default function AboutPage() {
                     ref={el => sectionsRef.current[2] = el}
                     className="about-section how-it-works-section"
                 >
+                    <h2 className="section-title">How does it work?</h2>
                     <div className="how-it-works-grid">
                         {howItWorksSteps.map((step, index) => (
                             <div key={step.step} className={`how-it-works-card ${index === 1 ? 'is-light' : ''}`}>
