@@ -53,7 +53,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    min-height: 100vh; /* Full viewport height */
+    min-height: 80vh; /* Reduced from 100vh */
     padding: 0 2rem; /* Horizontal padding */
     border-bottom: none; /* Remove bottom border for hero */
 }
