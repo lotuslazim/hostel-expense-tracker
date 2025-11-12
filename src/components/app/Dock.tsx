@@ -5,7 +5,6 @@ import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import React, { useRef, ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 type DockItemData = {
   href: string;
@@ -19,6 +18,7 @@ type DockProps = {
   magnification?: number;
   className?: string;
   activeHref?: string;
+  isMobile: boolean;
 };
 
 function DockItem({
@@ -90,9 +90,9 @@ export default function Dock({
   magnification = 24,
   className,
   activeHref,
+  isMobile,
 }: DockProps) {
   const mouseX = useMotionValue(Infinity);
-  const isMobile = useIsMobile();
 
   return (
     <motion.div

@@ -109,6 +109,7 @@ export default function AppDock() {
               magnification={isMobile ? 0 : 24}
               className="bg-card text-card-foreground border"
               activeHref={activeItem?.href}
+              isMobile={isMobile}
             />
           </motion.div>
         )}
