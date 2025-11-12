@@ -74,6 +74,12 @@ export default function AboutPage() {
             <header className="about-header">
                 <LandingHeader />
             </header>
+
+            <div className="about-title-section">
+                <h1 className="about-main-heading">Explore What BachelorBite Offers</h1>
+                <p className="about-subtext">From meal tracking to shared expenses, see how BachelorBite makes roommate life easy.</p>
+            </div>
+
             <div className="main-card">
                 <div className="content-grid">
                     <div className="arrow-nav left-arrow">
