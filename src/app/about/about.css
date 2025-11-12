@@ -1,14 +1,16 @@
+/* about.css */
 
-/* General Page Wrapper */
+/* --- Base Page Styles --- */
 .about-page-wrapper {
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
+    background-color: #1a1a1a;
+    color: #f0f0f0;
     min-height: 100vh;
+    overflow-x: hidden;
 }
 
 .about-header-fixed {
     position: fixed;
-    top: 1.5rem;
+    top: 1.5rem; /* 24px */
     left: 50%;
     transform: translateX(-50%);
     z-index: 50;
@@ -18,66 +20,73 @@
 }
 
 .about-main-content {
-    padding: 8rem 2rem 4rem;
+    padding-top: 8rem; /* Make space for the header */
+}
+
+.about-section {
+    padding: 6rem 2rem;
     max-width: 1200px;
     margin: 0 auto;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.about-section.is-visible {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .section-title {
-    font-size: 2.5rem;
+    font-size: 2.5rem; /* 40px */
     font-weight: 700;
-    text-align: center;
-    margin-bottom: 4rem;
     font-family: var(--font-headline);
+    text-align: center;
+    margin-bottom: 4rem; /* 64px */
 }
 
-
-/* Hero Section */
+/* --- Hero Section --- */
 .about-hero-section {
     text-align: center;
-    padding: 4rem 0;
-    border-bottom: 1px solid hsl(var(--border));
-    margin-bottom: 6rem;
+    padding-top: 10rem;
+    padding-bottom: 8rem;
 }
 
 .about-hero-headline {
-    font-size: 3.5rem;
-    font-weight: 700;
+    font-size: 3.5rem; /* 56px */
+    font-weight: 800;
     font-family: var(--font-headline);
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.5rem; /* 24px */
+    line-height: 1.1;
 }
 
 .about-hero-subheading {
-    font-size: 1.25rem;
-    color: hsl(var(--muted-foreground));
+    font-size: 1.25rem; /* 20px */
+    color: #a0a0a0;
     max-width: 600px;
     margin: 0 auto;
     line-height: 1.6;
 }
 
-
-/* Features Section */
-.about-features-section {
-    margin-bottom: 6rem;
-}
-
+/* --- Features Section --- */
 .features-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem; /* 32px */
 }
 
 .feature-card {
-    background-color: hsl(var(--card));
-    border: 1px solid hsl(var(--border));
-    border-radius: 1rem;
+    background-color: #222;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem; /* 16px */
     overflow: hidden;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .feature-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    transform: translateY(-8px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
 .feature-card-image {
@@ -87,71 +96,63 @@
 }
 
 .feature-card-content {
-    padding: 1.5rem;
+    padding: 1.5rem; /* 24px */
 }
 
 .feature-card-title {
-    font-size: 1.25rem;
+    font-size: 1.5rem; /* 24px */
     font-weight: 600;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem; /* 12px */
 }
 
 .feature-card-description {
-    font-size: 1rem;
-    color: hsl(var(--muted-foreground));
+    font-size: 1rem; /* 16px */
+    color: #b0b0b0;
     line-height: 1.6;
 }
 
-/* How It Works Section */
-.about-how-it-works-section {
-    margin-bottom: 6rem;
-    padding: 4rem 0;
-    background-color: hsl(var(--muted));
-    border-radius: 1.5rem;
-}
-
+/* --- How It Works Section --- */
 .how-it-works-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 2rem;
-    padding: 0 2rem;
+    gap: 3rem; /* 48px */
+    text-align: center;
 }
 
 .how-it-works-card {
-    text-align: center;
+    position: relative;
+    padding-left: 2rem; /* 32px */
 }
 
 .how-it-works-step-number {
-    font-size: 1rem;
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-size: 1.5rem;
     font-weight: 700;
     color: hsl(var(--primary));
-    margin-bottom: 1rem;
 }
 
 .how-it-works-title {
-    font-size: 1.25rem;
+    font-size: 1.25rem; /* 20px */
     font-weight: 600;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.5rem; /* 8px */
+    text-align: left;
 }
 
 .how-it-works-description {
-    font-size: 1rem;
-    color: hsl(var(--muted-foreground));
+    font-size: 1rem; /* 16px */
+    color: #b0b0b0;
     line-height: 1.6;
+    text-align: left;
 }
 
-/* Values Section */
-.about-values-section {
-    text-align: center;
-    max-width: 800px;
-    margin: 0 auto 6rem;
-}
-
+/* --- Values Section --- */
 .values-grid {
     display: flex;
     justify-content: center;
-    gap: 4rem;
-    margin-top: 3rem;
+    gap: 4rem; /* 64px */
+    text-align: center;
 }
 
 .value-item {
@@ -159,91 +160,87 @@
 }
 
 .value-icon {
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 3rem;
+    height: 3rem;
     color: hsl(var(--primary));
     margin: 0 auto 1.5rem;
+    stroke-width: 1.5;
 }
 
-/* CTA Section */
+/* --- CTA Section --- */
 .about-cta-section {
-    padding: 4rem 0;
-}
-
-.cta-card {
-    background-color: hsl(var(--secondary));
-    color: hsl(var(--secondary-foreground));
-    padding: 3rem;
+    background-color: #222;
     border-radius: 1.5rem;
+    padding: 4rem;
     text-align: center;
 }
 
 .cta-title {
-    font-size: 2rem;
+    font-size: 2.5rem;
     font-weight: 700;
     margin-bottom: 1rem;
 }
 
 .cta-description {
     font-size: 1.125rem;
-    margin-bottom: 2rem;
-    opacity: 0.9;
+    color: #b0b0b0;
+    margin-bottom: 2.5rem;
 }
 
 .cta-button-main {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0.75rem 2rem;
+    padding: 1rem 2.5rem;
     background-color: hsl(var(--primary));
-    color: hsl(var(--primary-foreground));
+    color: #1a1a1a;
     border-radius: 9999px;
-    font-weight: 600;
+    font-weight: 700;
     text-decoration: none;
-    transition: transform 0.2s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .cta-button-main:hover {
     transform: scale(1.05);
+    box-shadow: 0 0 20px hsla(var(--primary), 0.5);
 }
 
-/* Responsive Styles */
+/* --- Responsive Styles --- */
 @media (max-width: 1024px) {
     .section-title {
         font-size: 2rem;
-        margin-bottom: 3rem;
     }
     .about-hero-headline {
-        font-size: 2.5rem;
+        font-size: 2.75rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .about-section {
+        padding: 4rem 1rem;
+    }
+    .about-hero-headline {
+        font-size: 2.25rem;
+    }
+    .about-hero-subheading {
+        font-size: 1rem;
     }
     .features-grid {
         grid-template-columns: 1fr;
     }
     .how-it-works-grid {
         grid-template-columns: 1fr;
-        gap: 3rem;
+        gap: 2.5rem;
     }
     .values-grid {
         flex-direction: column;
         align-items: center;
         gap: 3rem;
     }
-}
-
-@media (max-width: 768px) {
-    .about-main-content {
-        padding: 6rem 1rem 2rem;
-    }
-    .about-hero-headline {
-        font-size: 2rem;
-    }
-    .about-hero-subheading {
-        font-size: 1rem;
+    .about-cta-section {
+        padding: 3rem 2rem;
     }
     .cta-title {
-        font-size: 1.5rem;
-    }
-    .cta-card {
-        padding: 2rem;
+        font-size: 2rem;
     }
 }

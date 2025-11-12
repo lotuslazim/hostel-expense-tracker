@@ -1,13 +1,12 @@
-
 "use client";
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import './about.css';
 import { LandingHeader } from '@/components/app/landing-header';
-import { CheckCircle, Users, ArrowRight } from 'lucide-react';
+import { CheckCircle, Users, ArrowRight, HeartHandshake, Bot, ShieldCheck } from 'lucide-react';
 
 const features = [
     {
@@ -34,21 +33,63 @@ const howItWorksSteps = [
     {
         step: 1,
         title: 'Create or Join a Group',
-        description: 'Start a group with your roommates or join an existing one with an invite code.',
+        description: 'Start a group with your roommates or join an existing one with a unique invite code.',
     },
     {
         step: 2,
         title: 'Log Daily Activity',
-        description: 'Log your meals and any shared expenses as they happen throughout the month.',
+        description: 'Simply log your meals and any shared expenses as they happen throughout the month.',
     },
     {
         step: 3,
         title: 'Settle Up Automatically',
-        description: 'At the end of the month, view the auto-generated report and settle the balances.',
+        description: 'At the end of the month, view the auto-generated report and settle balances in a single click.',
     },
 ];
 
+const values = [
+    {
+        icon: HeartHandshake,
+        title: "Community First",
+        description: "We believe technology should bring people together, not create distance. BachelorBite is designed to foster harmony and reduce friction in shared living spaces."
+    },
+    {
+        icon: Bot,
+        title: "Smart Automation",
+        description: "From calculating meal rates to settling monthly balances, we automate the tedious tasks so you can focus on what matters—enjoying your time with your flatmates."
+    },
+    {
+        icon: ShieldCheck,
+        title: "Trust & Privacy",
+        description: "Your data is yours. We are committed to ensuring your financial and personal information is secure, private, and never shared."
+    }
+];
+
 export default function AboutPage() {
+    const sectionsRef = useRef<Array<HTMLElement | null>>([]);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            },
+            { threshold: 0.1 }
+        );
+
+        sectionsRef.current.forEach((section) => {
+            if (section) {
+                observer.observe(section);
+            }
+        });
+
+        return () => observer.disconnect();
+    }, []);
+
     return (
         <div className="about-page-wrapper">
             <header className="about-header-fixed">
@@ -57,17 +98,21 @@ export default function AboutPage() {
 
             <main className="about-main-content">
                 {/* Hero Section */}
-                <section className="about-hero-section">
-                    <div className="about-hero-content">
-                        <h1 className="about-hero-headline">Our Story</h1>
-                        <p className="about-hero-subheading">
-                            BachelorBite was born from the chaos of shared living. We got tired of messy spreadsheets and endless group chat debates about who bought the milk. So, we built a simple, smart solution to make roommate life easier for everyone.
-                        </p>
-                    </div>
+                <section
+                    ref={el => sectionsRef.current[0] = el}
+                    className="about-section about-hero-section"
+                >
+                    <h1 className="about-hero-headline">Our Story</h1>
+                    <p className="about-hero-subheading">
+                        BachelorBite was born from the chaos of shared living. We got tired of messy spreadsheets and endless group chat debates about who bought the milk. So, we built a simple, smart solution to make roommate life easier for everyone.
+                    </p>
                 </section>
 
                 {/* Features Section */}
-                <section className="about-features-section">
+                <section
+                    ref={el => sectionsRef.current[1] = el}
+                    className="about-section"
+                >
                     <h2 className="section-title">Everything You Need, Nothing You Don’t</h2>
                     <div className="features-grid">
                         {features.map(feature => (
@@ -91,45 +136,51 @@ export default function AboutPage() {
                         ))}
                     </div>
                 </section>
-                
+
                 {/* How It Works Section */}
-                <section className="about-how-it-works-section">
-                     <h2 className="section-title">How It Works</h2>
-                     <div className="how-it-works-grid">
+                <section
+                    ref={el => sectionsRef.current[2] = el}
+                    className="about-section"
+                >
+                    <h2 className="section-title">How It Works</h2>
+                    <div className="how-it-works-grid">
                         {howItWorksSteps.map(step => (
                             <div key={step.step} className="how-it-works-card">
-                                <div className="how-it-works-step-number">0{step.step}</div>
+                                <div className="how-it-works-step-number">{`0${step.step}`}</div>
                                 <h3 className="how-it-works-title">{step.title}</h3>
                                 <p className="how-it-works-description">{step.description}</p>
                             </div>
                         ))}
-                     </div>
-                </section>
-
-                {/* Values/Trust Section */}
-                <section className="about-values-section">
-                     <h2 className="section-title">Built on Trust & Simplicity</h2>
-                     <div className="values-grid">
-                        <div className="value-item">
-                            <Users className="value-icon"/>
-                            <p>Focus on what matters—community and harmony.</p>
-                        </div>
-                         <div className="value-item">
-                            <CheckCircle className="value-icon"/>
-                            <p>An intuitive interface that anyone can master in minutes.</p>
-                        </div>
-                     </div>
-                </section>
-
-                 {/* CTA Section */}
-                <section className="about-cta-section">
-                    <div className="cta-card">
-                        <h2 className="cta-title">Ready to Simplify Your Shared Living?</h2>
-                        <p className="cta-description">Get started for free. No credit card required.</p>
-                        <Link href="/signup" className="cta-button-main">
-                            Get Started Free <ArrowRight className="ml-2 h-4 w-4" />
-                        </Link>
                     </div>
+                </section>
+
+                {/* Values Section */}
+                <section
+                    ref={el => sectionsRef.current[3] = el}
+                    className="about-section"
+                >
+                    <h2 className="section-title">Our Core Values</h2>
+                    <div className="values-grid">
+                        {values.map(value => (
+                            <div key={value.title} className="value-item">
+                                <value.icon className="value-icon"/>
+                                <h3 className="how-it-works-title">{value.title}</h3>
+                                <p className="how-it-works-description">{value.description}</p>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
+                {/* CTA Section */}
+                <section
+                    ref={el => sectionsRef.current[4] = el}
+                    className="about-section about-cta-section"
+                >
+                    <h2 className="cta-title">Ready to Simplify Your Shared Living?</h2>
+                    <p className="cta-description">Get started for free. No credit card required.</p>
+                    <Link href="/signup" className="cta-button-main">
+                        Get Started Free <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
                 </section>
             </main>
         </div>
