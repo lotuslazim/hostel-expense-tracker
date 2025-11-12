@@ -31,6 +31,30 @@
       "imageHint": "person avatar"
     },
     {
+      "id": "app-chat-screen",
+      "description": "A screenshot of the application's chat feature.",
+      "imageUrl": "https://images.unsplash.com/photo-1633354998322-415842c7ee11?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhcHAlMjBjaGF0fGVufDB8fHx8MTc2Mjk1NDY1NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "app chat"
+    },
+    {
+      "id": "app-meal-planner-screen",
+      "description": "A screenshot of the application's meal planner feature.",
+      "imageUrl": "https://images.unsplash.com/photo-1664531565122-89b0b0b066cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhcHAlMjBwbGFubmVyfGVufDB8fHx8MTc2Mjk1NDY1NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "app planner"
+    },
+    {
+      "id": "app-expense-tracker-screen",
+      "description": "A screenshot of the application's expense tracker feature.",
+      "imageUrl": "https://images.unsplash.com/photo-1650821414390-276561abd95a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhcHAlMjBleHBlbnNlc3xlbnwwfHx8fDE3NjI5NTQ2NTR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "app expenses"
+    },
+    {
+      "id": "app-leaderboard-screen",
+      "description": "A screenshot of the application's leaderboard feature.",
+      "imageUrl": "https://images.unsplash.com/photo-1705490471153-d5fd3829aa32?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxhcHAlMjBsZWFkZXJib2FyZHxlbnwwfHx8fDE3NjI5NTQ2NTR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "app leaderboard"
+    },
+    {
       "id": "app-preview",
       "description": "A screenshot of the application dashboard.",
       "imageUrl": "/a1.jpg",
