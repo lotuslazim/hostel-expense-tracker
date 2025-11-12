@@ -94,12 +94,58 @@
     line-height: 1.6;
 }
 
-.hero-phone-mockup {
-    position: relative;
-    width: 280px;
-    height: 350px;
+.hero-phone-container {
+    perspective: 1000px;
 }
 
+.iphone-mockup {
+    position: relative;
+    width: 280px;
+    height: 560px;
+    transform-style: preserve-3d;
+    transform: rotateY(-15deg) rotateX(5deg) scale(0.9);
+    transition: transform 0.5s ease-out;
+}
+
+.iphone-mockup:hover {
+    transform: rotateY(0deg) rotateX(0deg) scale(1);
+}
+
+.iphone-frame {
+    position: absolute;
+    inset: 0;
+    border-radius: 40px;
+    background: #111;
+    border: 8px solid #222;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 0 0 2px #333;
+    transform-style: preserve-3d;
+}
+
+.iphone-screen {
+    position: absolute;
+    inset: 2px;
+    background: #000;
+    border-radius: 32px;
+    overflow: hidden;
+}
+
+.iphone-screen img {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+}
+
+.iphone-notch {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 28px;
+    background: #111;
+    border-radius: 14px;
+    z-index: 2;
+}
 
 /* --- Features Section --- */
 .features-grid {
@@ -252,11 +298,13 @@
         gap: 1rem;
         padding: 2rem;
     }
-    .hero-phone-mockup {
+    .hero-phone-container {
         order: -1; /* Move phone to top on mobile */
-        width: 200px;
-        height: 400px;
         margin: 0 auto 1rem;
+    }
+    .iphone-mockup {
+        width: 240px;
+        height: 480px;
     }
     .about-hero-headline {
         font-size: 2.75rem;

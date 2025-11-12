@@ -106,14 +106,21 @@ export default function AboutPage() {
                         <div className="hero-text-left">
                             <h1 className="about-hero-headline">Our Story</h1>
                         </div>
-                        <div className="hero-phone-mockup">
-                            <Image
-                                src={PlaceHolderImages.find(p => p.id === 'app-preview')?.imageUrl || ''}
-                                alt="BachelorBite App Preview"
-                                fill
-                                sizes="(max-width: 768px) 50vw, 33vw"
-                                className="object-contain"
-                            />
+                        <div className="hero-phone-container">
+                            <div className="iphone-mockup">
+                                <div className="iphone-frame">
+                                    <div className="iphone-screen">
+                                        <Image
+                                            src={PlaceHolderImages.find(p => p.id === 'app-preview')?.imageUrl || ''}
+                                            alt="BachelorBite App Preview"
+                                            fill
+                                            sizes="(max-width: 768px) 50vw, 33vw"
+                                            className="object-cover"
+                                        />
+                                    </div>
+                                    <div className="iphone-notch"></div>
+                                </div>
+                            </div>
                         </div>
                         <div className="hero-text-right">
                              <p className="about-hero-subheading">
