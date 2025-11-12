@@ -208,9 +208,9 @@
     z-index: 1;
 }
 
-#bg-text-1 { top: -5rem; left: -2rem; }
+#bg-text-1 { top: -5rem; left: 5rem; }
 #bg-text-2 { top: 5rem; left: 15rem; }
-#bg-text-3 { bottom: -8rem; right: -2rem; }
+#bg-text-3 { top: 15rem; left: 5rem; }
 
 .how-it-works-grid {
     position: relative;
