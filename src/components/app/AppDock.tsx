@@ -32,6 +32,7 @@ export default function AppDock() {
   const { data: userData } = useDoc(userDocRef);
   const groupId = userData?.groupId;
   
+  // Moved this hook before the early return to fix the conditional hook call error.
   const { unreadCount } = useUnreadMessages(groupId, user?.uid);
 
   useEffect(() => {
