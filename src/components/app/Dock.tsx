@@ -27,15 +27,16 @@ function DockItem({
   baseItemSize,
   magnification,
   isActive,
+  isMobile,
 }: {
   item: DockItemData;
   mouseX: any;
   baseItemSize: number;
   magnification: number;
   isActive: boolean;
+  isMobile: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const isMobile = useIsMobile();
 
   const distance = useTransform(mouseX, (val) => {
     const bounds = ref.current?.getBoundingClientRect();
@@ -110,6 +111,7 @@ export default function Dock({
           baseItemSize={isMobile ? 0 : 120} // Disable magnification on mobile
           magnification={magnification}
           isActive={activeHref === item.href}
+          isMobile={isMobile}
         />
       ))}
     </motion.div>
