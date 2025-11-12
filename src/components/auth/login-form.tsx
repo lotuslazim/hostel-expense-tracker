@@ -51,7 +51,7 @@ const formSchema = z.union([emailSchema, phoneSchema]);
 
 export function LoginForm() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [needsVerification, setNeedsVerification] = useState(false);
   const [userForVerification, setUserForVerification] = useState<User | null>(null);
@@ -89,12 +89,14 @@ export function LoginForm() {
       if (!userCredential.user.emailVerified) {
         setUserForVerification(userCredential.user);
         setNeedsVerification(true);
-        setIsLoading(false);
+        setIsLoading(false); // Stop loading here as we need user interaction
         return;
       }
       
-      router.push('/dashboard');
-
+      // The redirection is now handled by the FirebaseProvider,
+      // so we don't need router.push here. The successful login
+      // will trigger the onAuthStateChanged listener which handles the redirect.
+      
     } catch (error: any) {
       let description = "An unexpected error occurred. Please try again.";
       if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
@@ -144,7 +146,7 @@ export function LoginForm() {
       try {
           await confirmationResult.confirm(otp);
           toast({ title: "Success!", description: "You have been logged in." });
-          router.push('/dashboard');
+          // Redirect is handled by the auth provider
       } catch (error) {
           toast({ variant: "destructive", title: "Invalid OTP", description: "The code you entered is incorrect." });
       } finally {
@@ -168,6 +170,7 @@ export function LoginForm() {
     } catch (error: any) {
       if (error.code === 'auth/popup-closed-by-user') {
         // User intentionally closed the popup, do nothing.
+        setIsGoogleLoading(false);
         return;
       }
       
@@ -259,7 +262,7 @@ export function LoginForm() {
                 </AlertDescription>
             </Alert>
         )}
-         <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading || isGoogleLoading}>
+         <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isSubmitting || isGoogleLoading}>
            {isGoogleLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
            {!isGoogleLoading && <GoogleIcon className="mr-2 h-4 w-4" />}
           Sign in with Google
@@ -337,8 +340,8 @@ export function LoginForm() {
                         </FormItem>
                       )}
                     />
-                    <Button type="submit" className="w-full" disabled={isLoading || isGoogleLoading}>
-                       {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    <Button type="submit" className="w-full" disabled={isSubmitting || isGoogleLoading}>
+                       {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                       Log In
                     </Button>
                   </form>
@@ -383,9 +386,9 @@ export function LoginForm() {
                         <Button 
                             onClick={isOtpSent ? handleVerifyOtp : handleSendOtp}
                             className="w-full" 
-                            disabled={isLoading}
+                            disabled={isSubmitting}
                         >
-                            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             {isOtpSent ? 'Verify OTP' : 'Send OTP'}
                         </Button>
 
@@ -402,3 +405,5 @@ export function LoginForm() {
     </AuthCard>
   );
 }
+
+    
