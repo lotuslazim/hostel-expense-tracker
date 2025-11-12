@@ -163,22 +163,22 @@ export default function AboutPage() {
                     ref={el => sectionsRef.current[2] = el}
                     className="about-section how-it-works-section"
                 >
-                    <div className="how-it-works-card-new">
-                        <div className="how-it-works-visual">
-                             {howItWorksSteps.map((step) => (
-                                <div key={step.step} className="step-row">
-                                    <span className="step-letter">{step.letter}</span>
-                                    <span>- - - -</span>
+                    <div className="how-it-works-grid">
+                        {howItWorksSteps.map((step, index) => (
+                            <div key={step.step} className={`how-it-works-card ${index === 1 ? 'is-light' : ''}`}>
+                                <div className="how-it-works-visual">
+                                    <div className="step-row">
+                                        <span className="step-letter">{step.letter}</span>
+                                        <span>- - - -</span>
+                                    </div>
                                 </div>
-                            ))}
-                        </div>
-                        <div className="how-it-works-text">
-                            <p className="how-to-play">How It Works</p>
-                            <h3 className="main-desc">A simple, three-step process to financial harmony.</h3>
-                            <p className="sub-desc">
-                                We’ve streamlined shared living. Create your group, log your daily activities, and let BachelorBite handle the rest. It’s that easy.
-                            </p>
-                        </div>
+                                <div className="how-it-works-text">
+                                    <p className="how-to-play">Step {step.step}</p>
+                                    <h3 className="main-desc">{step.title}</h3>
+                                    <p className="sub-desc">{step.description}</p>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </section>
 
