@@ -163,6 +163,9 @@ export default function AboutPage() {
                     ref={el => sectionsRef.current[2] = el}
                     className="about-section how-it-works-section"
                 >
+                    <span id="bg-text-1" className="bg-text">01</span>
+                    <span id="bg-text-2" className="bg-text">02</span>
+                    <span id="bg-text-3" className="bg-text">03</span>
                     <h2 className="section-title">How does it work?</h2>
                     <div className="how-it-works-grid">
                         {howItWorksSteps.map((step, index) => (
