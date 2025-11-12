@@ -1,168 +1,137 @@
+
 "use client";
 
-import { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import './about.css';
 import { LandingHeader } from '@/components/app/landing-header';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { CheckCircle, Users, ArrowRight } from 'lucide-react';
 
 const features = [
     {
-        id: 'chat',
-        title: 'Group Chat',
-        description: 'Chat and coordinate with your roommates in real time.',
-        image: PlaceHolderImages.find(p => p.id === 'app-chat-screen'),
-    },
-    {
         id: 'planner',
-        title: 'Meal Planner',
-        description: 'Log who’s eating and reduce food waste.',
-        image: PlaceHolderImages.find(p => p.id === 'app-meal-planner-screen'),
+        title: 'Effortless Meal & Expense Logging',
+        description: 'Log daily meals and shared expenses in just a few taps. We handle the math, so you don’t have to.',
+        image: PlaceHolderImages.find(p => p.id === 'app-dashboard'),
     },
     {
         id: 'tracker',
-        title: 'Expense Tracker',
-        description: 'Split and manage all your bills easily.',
-        image: PlaceHolderImages.find(p => p.id === 'app-expense-tracker-screen'),
+        title: 'Automated Monthly Settlements',
+        description: 'Receive a clear, automated report at the end of each month. See who owes what and who gets paid back instantly.',
+        image: PlaceHolderImages.find(p => p.id === 'app-report'),
     },
     {
-        id: 'leaderboard',
-        title: 'Leaderboard',
-        description: 'Earn badges and see who’s most active.',
-        image: PlaceHolderImages.find(p => p.id === 'app-leaderboard-screen'),
+        id: 'inventory',
+        title: 'Shared Inventory Tracking',
+        description: 'Groceries and food items are automatically added to a shared inventory, so everyone knows what’s in stock.',
+        image: PlaceHolderImages.find(p => p.id === 'app-inventory'),
     },
 ];
 
-const textVariants = {
-  enter: (direction: number) => ({
-    x: direction > 0 ? 50 : -50,
-    opacity: 0,
-  }),
-  center: {
-    zIndex: 1,
-    x: 0,
-    opacity: 1,
-  },
-  exit: (direction: number) => ({
-    zIndex: 0,
-    x: direction < 0 ? 50 : -50,
-    opacity: 0,
-  }),
-};
-
-const imageVariants = {
-  enter: { opacity: 0, scale: 0.95 },
-  center: { opacity: 1, scale: 1 },
-  exit: { opacity: 0, scale: 0.95 },
-};
-
+const howItWorksSteps = [
+    {
+        step: 1,
+        title: 'Create or Join a Group',
+        description: 'Start a group with your roommates or join an existing one with an invite code.',
+    },
+    {
+        step: 2,
+        title: 'Log Daily Activity',
+        description: 'Log your meals and any shared expenses as they happen throughout the month.',
+    },
+    {
+        step: 3,
+        title: 'Settle Up Automatically',
+        description: 'At the end of the month, view the auto-generated report and settle the balances.',
+    },
+];
 
 export default function AboutPage() {
-    const [[page, direction], setPage] = useState([0, 0]);
-
-    const paginate = (newDirection: number) => {
-        setPage([(page + newDirection + features.length) % features.length, newDirection]);
-    };
-    
-    const currentFeature = features[page];
-    
     return (
-        <div className="about-page-container">
-            <header className="about-header">
+        <div className="about-page-wrapper">
+            <header className="about-header-fixed">
                 <LandingHeader />
             </header>
 
-            <div className="about-title-section">
-                <h1 className="about-main-heading">Explore What BachelorBite Offers</h1>
-                <p className="about-subtext">From meal tracking to shared expenses, see how BachelorBite makes roommate life easy.</p>
-            </div>
-
-            <div className="main-card">
-                <div className="content-grid">
-                    <div className="arrow-nav left-arrow">
-                        <button onClick={() => paginate(-1)} className="arrow-btn">
-                            <ChevronLeft size={24} />
-                        </button>
+            <main className="about-main-content">
+                {/* Hero Section */}
+                <section className="about-hero-section">
+                    <div className="about-hero-content">
+                        <h1 className="about-hero-headline">Our Story</h1>
+                        <p className="about-hero-subheading">
+                            BachelorBite was born from the chaos of shared living. We got tired of messy spreadsheets and endless group chat debates about who bought the milk. So, we built a simple, smart solution to make roommate life easier for everyone.
+                        </p>
                     </div>
+                </section>
 
-                    <div className="feature-pane">
-                         <AnimatePresence initial={false} custom={direction}>
-                            <motion.div
-                                key={page}
-                                className="feature-text"
-                                custom={direction}
-                                variants={textVariants}
-                                initial="enter"
-                                animate="center"
-                                exit="exit"
-                                transition={{
-                                    x: { type: 'spring', stiffness: 300, damping: 30 },
-                                    opacity: { duration: 0.2 },
-                                }}
-                            >
-                                <h2 className="plan-title">{currentFeature.title}</h2>
-                            </motion.div>
-                        </AnimatePresence>
-                    </div>
-
-                    <div className="center-pane">
-                         <div className="phone-mockup">
-                             <AnimatePresence initial={false}>
-                                <motion.div
-                                    key={page}
-                                    className="app-image-container"
-                                    variants={imageVariants}
-                                    initial="enter"
-                                    animate="center"
-                                    exit="exit"
-                                    transition={{ duration: 0.3 }}
-                                >
-                                    {currentFeature.image && (
+                {/* Features Section */}
+                <section className="about-features-section">
+                    <h2 className="section-title">Everything You Need, Nothing You Don’t</h2>
+                    <div className="features-grid">
+                        {features.map(feature => (
+                            <div key={feature.id} className="feature-card">
+                                {feature.image && (
+                                    <div className="feature-card-image">
                                         <Image
-                                            src={currentFeature.image.imageUrl}
-                                            alt={currentFeature.title}
-                                            width={300}
-                                            height={600}
-                                            className="app-image"
+                                            src={feature.image.imageUrl}
+                                            alt={feature.title}
+                                            fill
+                                            sizes="(max-width: 768px) 100vw, 33vw"
+                                            className="object-cover"
                                         />
-                                    )}
-                                </motion.div>
-                             </AnimatePresence>
+                                    </div>
+                                )}
+                                <div className="feature-card-content">
+                                    <h3 className="feature-card-title">{feature.title}</h3>
+                                    <p className="feature-card-description">{feature.description}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+                
+                {/* How It Works Section */}
+                <section className="about-how-it-works-section">
+                     <h2 className="section-title">How It Works</h2>
+                     <div className="how-it-works-grid">
+                        {howItWorksSteps.map(step => (
+                            <div key={step.step} className="how-it-works-card">
+                                <div className="how-it-works-step-number">0{step.step}</div>
+                                <h3 className="how-it-works-title">{step.title}</h3>
+                                <p className="how-it-works-description">{step.description}</p>
+                            </div>
+                        ))}
+                     </div>
+                </section>
+
+                {/* Values/Trust Section */}
+                <section className="about-values-section">
+                     <h2 className="section-title">Built on Trust & Simplicity</h2>
+                     <div className="values-grid">
+                        <div className="value-item">
+                            <Users className="value-icon"/>
+                            <p>Focus on what matters—community and harmony.</p>
                         </div>
+                         <div className="value-item">
+                            <CheckCircle className="value-icon"/>
+                            <p>An intuitive interface that anyone can master in minutes.</p>
+                        </div>
+                     </div>
+                </section>
+
+                 {/* CTA Section */}
+                <section className="about-cta-section">
+                    <div className="cta-card">
+                        <h2 className="cta-title">Ready to Simplify Your Shared Living?</h2>
+                        <p className="cta-description">Get started for free. No credit card required.</p>
+                        <Link href="/signup" className="cta-button-main">
+                            Get Started Free <ArrowRight className="ml-2 h-4 w-4" />
+                        </Link>
                     </div>
-                    <div className="feature-pane">
-                        <AnimatePresence initial={false} custom={direction}>
-                             <motion.div
-                                key={page}
-                                className="feature-text"
-                                custom={direction}
-                                variants={textVariants}
-                                initial="enter"
-                                animate="center"
-                                exit="exit"
-                                transition={{
-                                    x: { type: 'spring', stiffness: 300, damping: 30 },
-                                    opacity: { duration: 0.2 },
-                                }}
-                            >
-                                <p className="feature-description">{currentFeature.description}</p>
-                             </motion.div>
-                        </AnimatePresence>
-                    </div>
-                    
-                    <div className="arrow-nav right-arrow">
-                         <button onClick={() => paginate(1)} className="arrow-btn">
-                            <ChevronRight size={24} />
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <Link href="/contact" className="cta-button">
-                NEXT
-            </Link>
+                </section>
+            </main>
         </div>
     );
 }
