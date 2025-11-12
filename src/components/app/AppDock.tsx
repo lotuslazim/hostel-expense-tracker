@@ -7,16 +7,22 @@ import Dock from './Dock';
 import { usePathname } from 'next/navigation';
 import { useUser, useDoc } from '@/firebase';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
-import { useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { doc } from 'firebase/firestore';
 import { firestore } from '@/firebase/config';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export default function AppDock() {
   const router = useRouter();
   const pathname = usePathname();
   const { user, isUserLoading } = useUser();
+  const isMobile = useIsMobile();
+
+  const [isVisible, setIsVisible] = useState(true);
+  const [scrollTimeout, setScrollTimeout] = useState<NodeJS.Timeout | null>(null);
   
   const userDocRef = useMemo(() => {
     if (!user) return null;
@@ -27,6 +33,38 @@ export default function AppDock() {
   const groupId = userData?.groupId;
   
   const { unreadCount } = useUnreadMessages(groupId, user?.uid);
+
+  useEffect(() => {
+    if (!isMobile) {
+      setIsVisible(true);
+      return;
+    }
+
+    const handleScroll = () => {
+      setIsVisible(true);
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+      setScrollTimeout(
+        setTimeout(() => {
+          setIsVisible(false);
+        }, 3000)
+      );
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    // Initial hide timer
+    handleScroll();
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+    };
+  }, [isMobile, scrollTimeout]);
+
 
   const publicRoutes = ['/login', '/signup', '/', '/about', '/contact'];
   const isPublicRoute = publicRoutes.includes(pathname);
@@ -60,12 +98,24 @@ export default function AppDock() {
 
   return (
     <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 block">
-      <Dock 
-        items={items}
-        magnification={24}
-        className="bg-primary text-primary-foreground border border-primary-foreground/20"
-        activeHref={activeItem?.href}
-      />
+       <AnimatePresence>
+        {isVisible && (
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+          >
+            <Dock 
+              items={items}
+              magnification={24}
+              className="bg-primary text-primary-foreground border border-primary-foreground/20"
+              activeHref={activeItem?.href}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
+
