@@ -3,7 +3,7 @@
 
 import { useMemo, useState, useEffect } from "react";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
-import { doc, collection, query, where, Timestamp, setDoc, serverTimestamp, getDocs, orderBy } from "firebase/firestore";
+import { doc, collection, query, where, Timestamp, setDoc, serverTimestamp, getDocs, orderBy, limit } from "firebase/firestore";
 import { format, getMonth, getYear, startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns";
 import type { MealLog, Expense, Settlement, Member } from "@/lib/types";
 import { WelcomeCard } from "@/components/app/welcome-card";
@@ -184,7 +184,7 @@ export function SettlementHistory() {
                 getDocs(mealsQuery),
                 getDocs(expensesQuery),
                 getDocs(membersSnapshot),
-                getDocs(usersQuery),
+                getDocs(usersSnapshot),
                 getDocs(settlementsQuery)
             ]);
 
