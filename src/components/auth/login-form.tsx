@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { AuthCard } from "./auth-card";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
-import { auth } from "@/firebase/config";
+import { auth, firestore } from "@/firebase/config";
 import { 
   GoogleAuthProvider, 
   signInWithPopup,
@@ -36,6 +36,7 @@ import { Loader2, AlertCircle, Eye, EyeOff, Phone, MessageSquare } from "lucide-
 import { GoogleIcon } from "../icons/google";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 const emailSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email." }),
@@ -48,6 +49,22 @@ const phoneSchema = z.object({
 });
 
 const formSchema = z.union([emailSchema, phoneSchema]);
+
+const createUserDocument = async (firestore: typeof import('firebase/firestore').Firestore, user: User) => {
+    const userDocRef = doc(firestore, "users", user.uid);
+    const userDoc = await getDoc(userDocRef);
+
+    if (!userDoc.exists()) {
+      await setDoc(userDocRef, {
+        id: user.uid,
+        email: user.email,
+        displayName: user.displayName || user.email?.split('@')[0],
+        photoURL: user.photoURL,
+        groupId: null,
+        isAdmin: false,
+      });
+    }
+};
 
 export function LoginForm() {
   const router = useRouter();
@@ -68,7 +85,7 @@ export function LoginForm() {
   });
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && !window.recaptchaVerifier) {
         window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
             'size': 'invisible',
             'callback': (response: any) => {
@@ -89,13 +106,9 @@ export function LoginForm() {
       if (!userCredential.user.emailVerified) {
         setUserForVerification(userCredential.user);
         setNeedsVerification(true);
-        setIsLoading(false); // Stop loading here as we need user interaction
+        setIsLoading(false); 
         return;
       }
-      
-      // The redirection is now handled by the FirebaseProvider,
-      // so we don't need router.push here. The successful login
-      // will trigger the onAuthStateChanged listener which handles the redirect.
       
     } catch (error: any) {
       let description = "An unexpected error occurred. Please try again.";
@@ -107,9 +120,8 @@ export function LoginForm() {
         title: "Login Failed",
         description: description,
       });
-    } finally {
-        setIsLoading(false);
-    }
+      setIsLoading(false);
+    } 
   }
 
   const handleSendOtp = async () => {
@@ -146,7 +158,6 @@ export function LoginForm() {
       try {
           await confirmationResult.confirm(otp);
           toast({ title: "Success!", description: "You have been logged in." });
-          // Redirect is handled by the auth provider
       } catch (error) {
           toast({ variant: "destructive", title: "Invalid OTP", description: "The code you entered is incorrect." });
       } finally {
@@ -160,16 +171,14 @@ export function LoginForm() {
     const provider = new GoogleAuthProvider();
     
     try {
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      await createUserDocument(firestore, result.user);
       toast({
         title: "Success!",
         description: "Signed in with Google successfully.",
       });
-      // The redirect is now handled by the onAuthStateChanged listener
-      // in the FirebaseProvider, which prevents race conditions.
     } catch (error: any) {
       if (error.code === 'auth/popup-closed-by-user') {
-        // User intentionally closed the popup, do nothing.
         setIsGoogleLoading(false);
         return;
       }
@@ -349,7 +358,7 @@ export function LoginForm() {
             </TabsContent>
             <TabsContent value="phone">
                  <Form {...form}>
-                    <div className="space-y-4 pt-4">
+                    <form className="space-y-4 pt-4">
                         {!isOtpSent ? (
                             <FormField
                                 control={form.control}
@@ -384,6 +393,7 @@ export function LoginForm() {
                         )}
 
                         <Button 
+                            type="button"
                             onClick={isOtpSent ? handleVerifyOtp : handleSendOtp}
                             className="w-full" 
                             disabled={isSubmitting}
@@ -397,7 +407,7 @@ export function LoginForm() {
                                 Back to phone number
                             </Button>
                         )}
-                    </div>
+                    </form>
                 </Form>
             </TabsContent>
         </Tabs>
@@ -405,5 +415,3 @@ export function LoginForm() {
     </AuthCard>
   );
 }
-
-    

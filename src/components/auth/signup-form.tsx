@@ -17,13 +17,14 @@ import { Input } from "@/components/ui/input";
 import { AuthCard } from "./auth-card";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
-import { auth } from "@/firebase/config";
-import { GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, RecaptchaVerifier, signInWithPhoneNumber, type ConfirmationResult } from "firebase/auth";
+import { auth, firestore } from "@/firebase/config";
+import { GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, RecaptchaVerifier, signInWithPhoneNumber, type ConfirmationResult, type User } from "firebase/auth";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { GoogleIcon } from "../icons/google";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 
 
 const emailSignupSchema = z.object({
@@ -38,6 +39,21 @@ const phoneSignupSchema = z.object({
     otp: z.string().optional(),
 });
 
+const createUserDocument = async (firestore: typeof import('firebase/firestore').Firestore, user: User) => {
+    const userDocRef = doc(firestore, "users", user.uid);
+    const userDoc = await getDoc(userDocRef);
+
+    if (!userDoc.exists()) {
+      await setDoc(userDocRef, {
+        id: user.uid,
+        email: user.email,
+        displayName: user.displayName || user.email?.split('@')[0],
+        photoURL: user.photoURL,
+        groupId: null,
+        isAdmin: false,
+      });
+    }
+};
 
 export function SignupForm() {
   const router = useRouter();
@@ -49,11 +65,12 @@ export function SignupForm() {
   const [isOtpSent, setIsOtpSent] = useState(false);
 
   const form = useForm({
+    resolver: zodResolver(z.union([emailSignupSchema, phoneSignupSchema])),
     defaultValues: { name: "", email: "", password: "", phone: "", otp: "" },
   });
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && !window.recaptchaVerifier) {
         window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container-signup', {
             'size': 'invisible',
             'callback': (response: any) => { }
@@ -68,6 +85,7 @@ export function SignupForm() {
       const user = userCredential.user;
       
       await updateProfile(user, { displayName: values.name });
+      await createUserDocument(firestore, user);
       await sendEmailVerification(user);
       
       toast({
@@ -128,7 +146,9 @@ export function SignupForm() {
       setIsLoading(true);
       try {
           const userCredential = await confirmationResult.confirm(otp);
-          await updateProfile(userCredential.user, { displayName: name });
+          const user = userCredential.user;
+          await updateProfile(user, { displayName: name });
+          await createUserDocument(firestore, user);
           toast({ title: "Success!", description: "You have been signed up." });
           router.push('/dashboard');
       } catch (error) {
@@ -142,7 +162,8 @@ export function SignupForm() {
     setIsGoogleLoading(true);
     const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      await createUserDocument(firestore, result.user);
       
       toast({
         title: "Account Created!",
@@ -151,6 +172,7 @@ export function SignupForm() {
       
     } catch (error: any) {
       if (error.code === 'auth/popup-closed-by-user') {
+        setIsGoogleLoading(false);
         return;
       }
       
@@ -264,7 +286,7 @@ export function SignupForm() {
             </TabsContent>
              <TabsContent value="phone">
                  <Form {...form}>
-                    <div className="space-y-4 pt-4">
+                    <form className="space-y-4 pt-4">
                        <FormField
                           control={form.control}
                           name="name"
@@ -312,6 +334,7 @@ export function SignupForm() {
                         )}
 
                         <Button 
+                            type="button"
                             onClick={isOtpSent ? handleVerifyOtpAndSignup : handleSendOtp}
                             className="w-full" 
                             disabled={isLoading}
@@ -324,7 +347,7 @@ export function SignupForm() {
                                 Back to phone number
                             </Button>
                         )}
-                    </div>
+                    </form>
                 </Form>
             </TabsContent>
         </Tabs>
