@@ -5,11 +5,12 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
     padding: 2rem;
     background-color: #FFC247;
     overflow: hidden;
     position: relative;
+    justify-content: flex-start; /* Changed from center */
+    padding-top: 8rem; /* Added padding */
 }
 
 .about-header {
@@ -23,7 +24,7 @@
 .about-title-section {
     text-align: center;
     margin-bottom: 2rem;
-    margin-top: 8rem;
+    margin-top: 0; /* Changed from 8rem */
     z-index: 5;
 }
 
@@ -49,12 +50,13 @@
     max-width: 1000px;
     height: auto;
     border-radius: 2.5rem;
-    padding: 2rem;
+    padding: 1.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 1rem;
 }
 
 .content-grid {
