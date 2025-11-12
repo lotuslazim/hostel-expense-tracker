@@ -2,8 +2,8 @@
 
 /* --- Base Page Styles --- */
 .about-page-wrapper {
-    background-color: #1a1a1a;
-    color: #f0f0f0;
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(44, 100%, 75%));
+    color: #333; /* Dark text for yellow background */
     min-height: 100vh;
     overflow-x: hidden;
 }
@@ -27,7 +27,7 @@
     padding: 6rem 2rem;
     max-width: 1200px;
     margin: 0 auto;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     opacity: 0;
     transform: translateY(20px);
     transition: opacity 0.6s ease-out, transform 0.6s ease-out;
@@ -44,6 +44,7 @@
     font-family: var(--font-headline);
     text-align: center;
     margin-bottom: 4rem; /* 64px */
+    color: #222;
 }
 
 /* --- Hero Section --- */
@@ -64,11 +65,12 @@
     font-family: var(--font-headline);
     margin-bottom: 1.5rem; /* 24px */
     line-height: 1.1;
+    color: #222;
 }
 
 .about-hero-subheading {
     font-size: 1.25rem; /* 20px */
-    color: #a0a0a0;
+    color: #555;
     max-width: 600px;
     margin: 0 auto;
     line-height: 1.6;
@@ -82,16 +84,17 @@
 }
 
 .feature-card {
-    background-color: #222;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 1rem; /* 16px */
     overflow: hidden;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
 .feature-card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
 .feature-card-image {
@@ -108,11 +111,12 @@
     font-size: 1.5rem; /* 24px */
     font-weight: 600;
     margin-bottom: 0.75rem; /* 12px */
+    color: #222;
 }
 
 .feature-card-description {
     font-size: 1rem; /* 16px */
-    color: #b0b0b0;
+    color: #666;
     line-height: 1.6;
 }
 
@@ -135,7 +139,7 @@
     top: 0;
     font-size: 1.5rem;
     font-weight: 700;
-    color: hsl(var(--primary));
+    color: hsl(var(--secondary));
 }
 
 .how-it-works-title {
@@ -143,11 +147,12 @@
     font-weight: 600;
     margin-bottom: 0.5rem; /* 8px */
     text-align: left;
+    color: #333;
 }
 
 .how-it-works-description {
     font-size: 1rem; /* 16px */
-    color: #b0b0b0;
+    color: #666;
     line-height: 1.6;
     text-align: left;
 }
@@ -167,28 +172,30 @@
 .value-icon {
     width: 3rem;
     height: 3rem;
-    color: hsl(var(--primary));
+    color: hsl(var(--secondary));
     margin: 0 auto 1.5rem;
     stroke-width: 1.5;
 }
 
 /* --- CTA Section --- */
 .about-cta-section {
-    background-color: #222;
+    background-color: rgba(255, 255, 255, 0.5);
     border-radius: 1.5rem;
     padding: 4rem;
     text-align: center;
+    border: 1px solid rgba(0,0,0,0.1);
 }
 
 .cta-title {
     font-size: 2.5rem;
     font-weight: 700;
     margin-bottom: 1rem;
+    color: #222;
 }
 
 .cta-description {
     font-size: 1.125rem;
-    color: #b0b0b0;
+    color: #555;
     margin-bottom: 2.5rem;
 }
 
@@ -197,8 +204,8 @@
     align-items: center;
     justify-content: center;
     padding: 1rem 2.5rem;
-    background-color: hsl(var(--primary));
-    color: #1a1a1a;
+    background-color: hsl(var(--secondary));
+    color: white;
     border-radius: 9999px;
     font-weight: 700;
     text-decoration: none;
@@ -207,7 +214,7 @@
 
 .cta-button-main:hover {
     transform: scale(1.05);
-    box-shadow: 0 0 20px hsla(var(--primary), 0.5);
+    box-shadow: 0 0 20px hsla(var(--secondary), 0.5);
 }
 
 /* --- Responsive Styles --- */
