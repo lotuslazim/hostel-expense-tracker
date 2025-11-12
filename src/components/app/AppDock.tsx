@@ -1,7 +1,6 @@
-
 'use client';
 
-import { VscGraph, VscCalendar, VscPackage, VscComment } from 'react-icons/vsc';
+import { VscGraph, VscCalendar, VscPackage, VscComment, VscScale } from 'react-icons/vsc';
 import { useRouter } from 'next/navigation';
 import Dock from './Dock';
 import { usePathname } from 'next/navigation';
@@ -33,36 +32,35 @@ export default function AppDock() {
   const { unreadCount } = useUnreadMessages(groupId, user?.uid);
 
   useEffect(() => {
-    // On desktop, the dock is always visible
-    if (!isMobile) {
-      setIsVisible(true);
-      return;
-    }
-
     // On mobile, hide the dock after a delay, and show on scroll
-    let scrollTimeout: NodeJS.Timeout | null = null;
-
-    const handleScroll = () => {
-      setIsVisible(true);
-      if (scrollTimeout) {
-        clearTimeout(scrollTimeout);
-      }
-      scrollTimeout = setTimeout(() => {
-          setIsVisible(false);
-        }, 3000);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    if (isMobile) {
+        let scrollTimeout: NodeJS.Timeout | null = null;
+        
+        const handleScroll = () => {
+          setIsVisible(true);
+          if (scrollTimeout) {
+            clearTimeout(scrollTimeout);
+          }
+          scrollTimeout = setTimeout(() => {
+              setIsVisible(false);
+            }, 3000);
+        };
     
-    // Initial hide timer
-    handleScroll();
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      if (scrollTimeout) {
-        clearTimeout(scrollTimeout);
-      }
-    };
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        
+        // Initial hide timer
+        handleScroll();
+    
+        return () => {
+          window.removeEventListener('scroll', handleScroll);
+          if (scrollTimeout) {
+            clearTimeout(scrollTimeout);
+          }
+        };
+    } else {
+        // On desktop, the dock is always visible
+        setIsVisible(true);
+    }
   }, [isMobile]);
 
 
@@ -77,6 +75,7 @@ export default function AppDock() {
     { href: '/dashboard', icon: <VscGraph size={28} />, label: 'Dashboard', onClick: () => router.push('/dashboard') },
     { href: '/report', icon: <VscCalendar size={28} />, label: 'Report', onClick: () => router.push('/report') },
     { href: '/inventory', icon: <VscPackage size={28} />, label: 'Inventory', onClick: () => router.push('/inventory') },
+    { href: '/settlements', icon: <VscScale size={28} />, label: 'Settlements', onClick: () => router.push('/settlements') },
     { 
       href: '/chat',
       icon: (
@@ -109,7 +108,7 @@ export default function AppDock() {
             <Dock 
               items={items}
               magnification={isMobile ? 0 : 24}
-              className="yellow-gradient-bg text-primary-foreground border-none"
+              className="yellow-gradient-bg text-primary-foreground"
               activeHref={activeItem?.href}
             />
           </motion.div>
