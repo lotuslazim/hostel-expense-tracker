@@ -3,7 +3,7 @@
 
 import { useMemo, useState, useEffect } from "react";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
-import { doc, collection, query, where, Timestamp, setDoc, serverTimestamp, getDocs, orderBy } from "firebase/firestore";
+import { doc, collection, query, where, Timestamp, setDoc, serverTimestamp, getDocs, orderBy, limit } from "firebase/firestore";
 import { format, getMonth, getYear, startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns";
 import type { MealLog, Expense, Settlement, Member } from "@/lib/types";
 import { WelcomeCard } from "@/components/app/welcome-card";
@@ -52,7 +52,7 @@ function HistorySkeleton() {
   );
 }
 
-function SettleUpDialog({ member, month, year, groupId, currentUserId, members }: { member: ProcessedMember; month: number; year: number; groupId: string, currentUserId: string, members: ProcessedMember[] }) {
+function SettleUpDialog({ member, month, year, groupId, currentUserId, members, currentUserIsAdmin }: { member: ProcessedMember; month: number; year: number; groupId: string, currentUserId: string, members: ProcessedMember[], currentUserIsAdmin: boolean }) {
     const { firestore } = useFirebase();
     const { toast } = useToast();
     const [settlementMethod, setSettlementMethod] = useState("");
@@ -60,7 +60,7 @@ function SettleUpDialog({ member, month, year, groupId, currentUserId, members }
     const [isSaving, setIsSaving] = useState(false);
     const [open, setOpen] = useState(false);
 
-    const membersToPay = members.filter(m => m.id !== currentUserId);
+    const membersToPay = members.filter(m => m.id !== member.id);
 
     const handleSettleUp = async () => {
         if (!settlementMethod || !settledTo) {
@@ -69,20 +69,20 @@ function SettleUpDialog({ member, month, year, groupId, currentUserId, members }
         }
 
         setIsSaving(true);
-        const settlementId = `${currentUserId}-${month}-${year}`;
+        const settlementId = `${member.id}-${month}-${year}`;
         const settlementRef = doc(firestore, `groups/${groupId}/settlements/${settlementId}`);
         
         try {
             await setDoc(settlementRef, {
                 groupId,
-                userId: currentUserId,
+                userId: member.id,
                 month,
                 year,
                 settledAt: serverTimestamp(),
                 settlementMethod,
                 settledTo,
             });
-            toast({ title: "Balance Settled!", description: "Your settlement has been recorded." });
+            toast({ title: "Balance Settled!", description: `Settlement for ${member.name} has been recorded.` });
             setOpen(false);
         } catch (error) {
             console.error("Error settling up:", error);
@@ -91,22 +91,24 @@ function SettleUpDialog({ member, month, year, groupId, currentUserId, members }
             setIsSaving(false);
         }
     };
+    
+    const canSettle = currentUserIsAdmin || currentUserId === member.id;
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button size="sm">Settle Up</Button>
+                <Button size="sm" disabled={!canSettle}>Settle Up</Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Settle Your Balance</DialogTitle>
+                    <DialogTitle>Settle Balance for {member.name}</DialogTitle>
                     <DialogDescription>
-                        Confirm how you paid your balance for this month.
+                        Confirm how this member paid their balance for the month.
                     </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                      <div className="space-y-2">
-                        <label htmlFor="settledTo">Who did you pay?</label>
+                        <label htmlFor="settledTo">Who was paid?</label>
                          <select
                             id="settledTo"
                             value={settledTo}
@@ -120,7 +122,7 @@ function SettleUpDialog({ member, month, year, groupId, currentUserId, members }
                         </select>
                     </div>
                     <div className="space-y-2">
-                        <label htmlFor="paymentMethod">How did you pay?</label>
+                        <label htmlFor="paymentMethod">How was it paid?</label>
                         <Textarea
                             id="paymentMethod"
                             placeholder="e.g., Paid in cash, Sent via bKash"
@@ -152,6 +154,7 @@ export function SettlementHistory() {
   const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
   const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
   const groupId = currentUserData?.groupId;
+  const currentUserIsAdmin = currentUserData?.isAdmin ?? false;
 
   useEffect(() => {
     if (!groupId) {
@@ -163,7 +166,7 @@ export function SettlementHistory() {
         setIsLoadingHistory(true);
         const monthlyRecords: MonthlyRecord[] = [];
         
-        const groupCreationQuery = query(collection(firestore, `groups/${groupId}/members`), orderBy("joinedAt", "asc"));
+        const groupCreationQuery = query(collection(firestore, `groups/${groupId}/members`), orderBy("joinedAt", "asc"), limit(1));
         const groupCreationSnapshot = await getDocs(groupCreationQuery);
         const firstJoinDate = groupCreationSnapshot.docs[0]?.data().joinedAt.toDate() || new Date();
         
@@ -259,7 +262,9 @@ export function SettlementHistory() {
         setIsLoadingHistory(false);
     };
 
-    fetchHistory();
+    if (groupId) {
+        fetchHistory();
+    }
   }, [groupId, firestore]);
 
   const isLoading = isUserLoading || isCurrentUserDataLoading || isLoadingHistory;
@@ -326,13 +331,8 @@ export function SettlementHistory() {
                                         Paid to {member.settlementDetails?.settledTo} via {member.settlementDetails?.settlementMethod}.
                                     </AlertDescription>
                                 </Alert>
-                            ) : member.id === currentUser?.uid && member.balance < 0 ? (
-                               <SettleUpDialog member={member} month={monthForSettlement} year={yearForSettlement} groupId={groupId} currentUserId={currentUser.uid} members={processedMembers} />
                             ) : (
-                                <Badge variant="outline" className="flex items-center gap-2">
-                                    <AlertTriangle className="h-4 w-4 text-orange-500"/>
-                                    Pending
-                                </Badge>
+                               <SettleUpDialog member={member} month={monthForSettlement} year={yearForSettlement} groupId={groupId} currentUserId={currentUser!.uid} members={processedMembers} currentUserIsAdmin={currentUserIsAdmin} />
                             )}
                            </div>
                          </div>
@@ -346,5 +346,3 @@ export function SettlementHistory() {
     </div>
   );
 }
-
-    

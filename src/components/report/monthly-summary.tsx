@@ -203,7 +203,7 @@ function CollapsibleUtilityItem({
   );
 }
 
-function SettleUpDialog({ member, month, year, groupId, currentUserId, members }: { member: ProcessedMember; month: number; year: number; groupId: string, currentUserId: string, members: ProcessedMember[] }) {
+function SettleUpDialog({ member, month, year, groupId, currentUserId, members, currentUserIsAdmin }: { member: ProcessedMember; month: number; year: number; groupId: string, currentUserId: string, members: ProcessedMember[], currentUserIsAdmin: boolean }) {
     const { firestore } = useFirebase();
     const { toast } = useToast();
     const [settlementMethod, setSettlementMethod] = useState("");
@@ -211,7 +211,7 @@ function SettleUpDialog({ member, month, year, groupId, currentUserId, members }
     const [isSaving, setIsSaving] = useState(false);
     const [open, setOpen] = useState(false);
 
-    const membersToPay = members.filter(m => m.id !== currentUserId);
+    const membersToPay = members.filter(m => m.id !== member.id);
 
     const handleSettleUp = async () => {
         if (!settlementMethod || !settledTo) {
@@ -220,20 +220,20 @@ function SettleUpDialog({ member, month, year, groupId, currentUserId, members }
         }
 
         setIsSaving(true);
-        const settlementId = `${currentUserId}-${month}-${year}`;
+        const settlementId = `${member.id}-${month}-${year}`;
         const settlementRef = doc(firestore, `groups/${groupId}/settlements/${settlementId}`);
         
         try {
             await setDoc(settlementRef, {
                 groupId,
-                userId: currentUserId,
+                userId: member.id,
                 month,
                 year,
                 settledAt: serverTimestamp(),
                 settlementMethod,
                 settledTo,
             });
-            toast({ title: "Balance Settled!", description: "Your settlement has been recorded." });
+            toast({ title: "Balance Settled!", description: `Settlement for ${member.name} has been recorded.` });
             setOpen(false);
         } catch (error) {
             console.error("Error settling up:", error);
@@ -242,22 +242,25 @@ function SettleUpDialog({ member, month, year, groupId, currentUserId, members }
             setIsSaving(false);
         }
     };
+    
+    // The button is only enabled if the current user is an admin OR they are settling their own balance.
+    const canSettle = currentUserIsAdmin || currentUserId === member.id;
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button size="sm">Settle Up</Button>
+                <Button size="sm" disabled={!canSettle}>Settle Up</Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Settle Your Balance</DialogTitle>
+                    <DialogTitle>Settle Balance for {member.name}</DialogTitle>
                     <DialogDescription>
-                        Confirm how you paid your balance for this month.
+                        Confirm how this member paid their balance for the month.
                     </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                      <div className="space-y-2">
-                        <label htmlFor="settledTo">Who did you pay?</label>
+                        <label htmlFor="settledTo">Who was paid?</label>
                          <select
                             id="settledTo"
                             value={settledTo}
@@ -271,7 +274,7 @@ function SettleUpDialog({ member, month, year, groupId, currentUserId, members }
                         </select>
                     </div>
                     <div className="space-y-2">
-                        <label htmlFor="paymentMethod">How did you pay?</label>
+                        <label htmlFor="paymentMethod">How was it paid?</label>
                         <Textarea
                             id="paymentMethod"
                             placeholder="e.g., Paid in cash, Sent via bKash"
@@ -303,6 +306,8 @@ export function MonthlySummary() {
   const { data: currentUserData, isLoading: isCurrentUserDataLoading, error: currentUserDataError } = useDoc(currentUserRef);
 
   const groupId = currentUserData?.groupId;
+  const currentUserIsAdmin = currentUserData?.isAdmin ?? false;
+
 
   const monthDateRange = useMemo(() => {
     return {
@@ -653,14 +658,13 @@ export function MonthlySummary() {
                           <p className="font-medium">৳{memberShare.toFixed(2)}</p>
                         </div>
                         
-                        {member.id === currentUser?.uid && balance < 0 && !member.isSettled && (
-                           <SettleUpDialog member={member} month={monthForSettlement} year={yearForSettlement} groupId={groupId!} currentUserId={currentUser.uid} members={processedMembers} />
-                        )}
-                        {member.isSettled && (
+                        {member.isSettled ? (
                             <Badge variant="secondary" className="flex items-center gap-2 h-9">
                                 <CheckCircle className="h-4 w-4"/>
                                 Settled
                             </Badge>
+                        ) : (
+                           <SettleUpDialog member={member} month={monthForSettlement} year={yearForSettlement} groupId={groupId!} currentUserId={currentUser!.uid} members={processedMembers} currentUserIsAdmin={currentUserIsAdmin}/>
                         )}
 
                         <CollapsibleTrigger asChild className="col-span-2 md:col-span-1">
@@ -731,5 +735,3 @@ export function MonthlySummary() {
     </div>
   );
 }
-
-    
