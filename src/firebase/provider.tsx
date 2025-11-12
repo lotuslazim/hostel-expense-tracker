@@ -89,16 +89,22 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
 
   // This effect handles redirection after authentication state is confirmed.
   useEffect(() => {
+    const nonRedirectPublicRoutes = ['/about', '/contact'];
+    
     // Wait until auth state is determined
-    if (!userAuthState.isUserLoading) {
-      if (userAuthState.user && publicRoutes.includes(pathname) && pathname !== '/about' && pathname !== '/' && pathname !== '/contact') {
-        // If user is logged in and on a public page (but not the landing, about or contact page), redirect to dashboard.
-        router.push('/dashboard');
-      } else if (!userAuthState.user && !isPublicRoute) {
-        // If user is not logged in and on a protected page, redirect to login.
-        router.push('/login');
-      }
+    if (userAuthState.isUserLoading) {
+      return;
     }
+  
+    // If user is logged in and on a public page that should redirect (e.g., login, signup, landing)
+    if (userAuthState.user && publicRoutes.includes(pathname) && !nonRedirectPublicRoutes.includes(pathname)) {
+      router.push('/dashboard');
+    }
+    // If user is not logged in and on a protected page
+    else if (!userAuthState.user && !isPublicRoute) {
+      router.push('/login');
+    }
+  
   }, [userAuthState.user, userAuthState.isUserLoading, pathname, router]);
 
   const contextValue = useMemo((): FirebaseContextState => ({
