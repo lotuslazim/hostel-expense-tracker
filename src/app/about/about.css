@@ -69,7 +69,7 @@
     align-items: center;
     gap: 2rem;
     width: 100%;
-    max-width: 1400px;
+    max-width: 1200px;
     box-shadow: 0 20px 50px rgba(0,0,0,0.3);
 }
 
@@ -100,8 +100,8 @@
 
 .iphone-mockup {
     position: relative;
-    width: 376px; /* Increased to fit card width + padding */
-    height: 676px; /* Increased to fit card height + padding */
+    width: 301px; /* Increased to fit card width + padding */
+    height: 601px; /* Increased to fit card height + padding */
     transform-style: preserve-3d;
     transform: rotateY(-15deg) rotateX(5deg) scale(0.9);
     transition: transform 0.5s ease-out;
@@ -128,7 +128,7 @@
     border-radius: 30px; /* Slightly smaller radius */
     overflow: hidden;
     /* Add a transform to scale the content to fit */
-    transform: scale(calc(360 / 360)); /* (inner width / component width) */
+    transform: scale(calc(285 / 360)); /* (inner width / component width) */
     transform-origin: top left;
 }
 
@@ -407,8 +407,8 @@
         margin: 0 auto 1rem;
     }
     .iphone-mockup {
-        width: 376px;
-        height: 676px;
+        width: 301px;
+        height: 601px;
         transform: rotateY(0deg) rotateX(0deg) scale(0.8);
     }
     .about-hero-headline {
