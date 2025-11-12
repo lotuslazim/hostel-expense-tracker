@@ -20,9 +20,7 @@ export default function AppDock() {
   const pathname = usePathname();
   const { user, isUserLoading } = useUser();
   const isMobile = useIsMobile();
-
   const [isVisible, setIsVisible] = useState(true);
-  const [scrollTimeout, setScrollTimeout] = useState<NodeJS.Timeout | null>(null);
   
   const userDocRef = useMemo(() => {
     if (!user) return null;
@@ -40,16 +38,16 @@ export default function AppDock() {
       return;
     }
 
+    let scrollTimeout: NodeJS.Timeout | null = null;
+
     const handleScroll = () => {
       setIsVisible(true);
       if (scrollTimeout) {
         clearTimeout(scrollTimeout);
       }
-      setScrollTimeout(
-        setTimeout(() => {
+      scrollTimeout = setTimeout(() => {
           setIsVisible(false);
-        }, 3000)
-      );
+        }, 3000);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -63,8 +61,7 @@ export default function AppDock() {
         clearTimeout(scrollTimeout);
       }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isMobile]);
 
 
   const publicRoutes = ['/login', '/signup', '/', '/about', '/contact'];
