@@ -102,10 +102,25 @@ export default function AboutPage() {
                     ref={el => sectionsRef.current[0] = el}
                     className="about-section about-hero-section is-visible"
                 >
-                    <h1 className="about-hero-headline">Our Story</h1>
-                    <p className="about-hero-subheading">
-                        BachelorBite was born from the chaos of shared living. We got tired of messy spreadsheets and endless group chat debates about who bought the milk. So, we built a simple, smart solution to make roommate life easier for everyone.
-                    </p>
+                    <div className="hero-box">
+                        <div className="hero-text-left">
+                            <h1 className="about-hero-headline">Our Story</h1>
+                        </div>
+                        <div className="hero-phone-mockup">
+                            <Image
+                                src={PlaceHolderImages.find(p => p.id === 'app-preview')?.imageUrl || ''}
+                                alt="BachelorBite App Preview"
+                                fill
+                                sizes="(max-width: 768px) 50vw, 33vw"
+                                className="object-contain"
+                            />
+                        </div>
+                        <div className="hero-text-right">
+                             <p className="about-hero-subheading">
+                                BachelorBite was born from the chaos of shared living. We got tired of messy spreadsheets and endless group chat debates about who bought the milk.
+                            </p>
+                        </div>
+                    </div>
                 </section>
 
                 {/* Features Section */}
