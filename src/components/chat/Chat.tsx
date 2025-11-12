@@ -32,6 +32,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
@@ -254,6 +255,7 @@ export function Chat({ groupId, currentUser }: ChatProps) {
                      <DialogContent className="max-w-4xl h-[90vh]">
                         <DialogHeader>
                             <DialogTitle>All Media</DialogTitle>
+                            <DialogDescription>A gallery of all images shared in this chat.</DialogDescription>
                         </DialogHeader>
                         <ScrollArea className="h-full">
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4">

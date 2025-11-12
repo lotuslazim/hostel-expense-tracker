@@ -30,14 +30,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 
-const Dialog = dynamic(() => import('../ui/dialog').then(module => ({ default: module.Dialog })), { ssr: false });
-const DialogContent = dynamic(() => import('../ui/dialog').then(module => ({ default: module.DialogContent })), { ssr: false });
-const DialogHeader = dynamic(() => import('../ui/dialog').then(module => ({ default: module.DialogHeader })), { ssr: false });
-const DialogTitle = dynamic(() => import('../ui/dialog').then(module => ({ default: module.DialogTitle })), { ssr: false });
-const DialogDescription = dynamic(() => import('../ui/dialog').then(module => ({ default: module.DialogDescription })), { ssr: false });
-const DialogFooter = dynamic(() => import('../ui/dialog').then(module => ({ default: module.DialogFooter })), { ssr: false });
-const DialogClose = dynamic(() => import('../ui/dialog').then(module => ({ default: module.DialogClose })), { ssr: false });
-const DialogTrigger = dynamic(() => import('../ui/dialog').then(module => ({ default: module.DialogTrigger })), { ssr: false });
+const Dialog = dynamic(() => import('../ui/dialog').then(module => module.Dialog), { ssr: false });
+const DialogContent = dynamic(() => import('../ui/dialog').then(module => module.DialogContent), { ssr: false });
+const DialogHeader = dynamic(() => import('../ui/dialog').then(module => module.DialogHeader), { ssr: false });
+const DialogTitle = dynamic(() => import('../ui/dialog').then(module => module.DialogTitle), { ssr: false });
+const DialogDescription = dynamic(() => import('../ui/dialog').then(module => module.DialogDescription), { ssr: false });
+const DialogFooter = dynamic(() => import('../ui/dialog').then(module => module.DialogFooter), { ssr: false });
+const DialogClose = dynamic(() => import('../ui/dialog').then(module => module.DialogClose), { ssr: false });
+const DialogTrigger = dynamic(() => import('../ui/dialog').then(module => module.DialogTrigger), { ssr: false });
 
 
 // Type definitions for processed data
@@ -735,3 +735,5 @@ export function MonthlySummary() {
     </div>
   );
 }
+
+    
