@@ -55,6 +55,12 @@
       "imageHint": "app leaderboard"
     },
     {
+      "id": "mobile-landing-page",
+      "description": "A screenshot of the application's mobile landing page with the mascot.",
+      "imageUrl": "https://storage.googleapis.com/project-spark-345314-web-assets/bachelor-bite-app/56ab75ac-b7d1-4b13-8178-199a38f38c7f.png",
+      "imageHint": "app mascot"
+    },
+    {
       "id": "app-preview",
       "description": "A screenshot of the application dashboard.",
       "imageUrl": "/a1.jpg",

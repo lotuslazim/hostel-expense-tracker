@@ -111,7 +111,7 @@ export default function AboutPage() {
                                 <div className="iphone-frame">
                                     <div className="iphone-screen">
                                         <Image
-                                            src={PlaceHolderImages.find(p => p.id === 'landing-hero-2')?.imageUrl || ''}
+                                            src={PlaceHolderImages.find(p => p.id === 'mobile-landing-page')?.imageUrl || ''}
                                             alt="BachelorBite App Preview"
                                             fill
                                             sizes="(max-width: 768px) 50vw, 33vw"
