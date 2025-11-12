@@ -33,11 +33,13 @@ export default function AppDock() {
   const { unreadCount } = useUnreadMessages(groupId, user?.uid);
 
   useEffect(() => {
+    // On desktop, the dock is always visible
     if (!isMobile) {
       setIsVisible(true);
       return;
     }
 
+    // On mobile, hide the dock after a delay, and show on scroll
     let scrollTimeout: NodeJS.Timeout | null = null;
 
     const handleScroll = () => {
@@ -107,9 +109,8 @@ export default function AppDock() {
             <Dock 
               items={items}
               magnification={isMobile ? 0 : 24}
-              className="bg-card text-card-foreground border"
+              className="yellow-gradient-bg text-primary-foreground border-none"
               activeHref={activeItem?.href}
-              isMobile={isMobile}
             />
           </motion.div>
         )}
