@@ -36,16 +36,19 @@ const howItWorksSteps = [
         step: 1,
         title: 'Create or Join a Group',
         description: 'Start a group with your roommates or join an existing one with a unique invite code.',
+        letter: 'C',
     },
     {
         step: 2,
         title: 'Log Daily Activity',
         description: 'Simply log your meals and any shared expenses as they happen throughout the month.',
+        letter: 'L',
     },
     {
         step: 3,
         title: 'Settle Up Automatically',
         description: 'At the end of the month, view the auto-generated report and settle balances in a single click.',
+        letter: 'S',
     },
 ];
 
@@ -160,20 +163,22 @@ export default function AboutPage() {
                     ref={el => sectionsRef.current[2] = el}
                     className="about-section how-it-works-section"
                 >
-                    <span id="bg-text-1" className="how-it-works-bg-text">01</span>
-                    <span id="bg-text-2" className="how-it-works-bg-text">02</span>
-                    <span id="bg-text-3" className="how-it-works-bg-text">03</span>
-                    <div className="how-it-works-grid">
-                        {howItWorksSteps.map((step, index) => (
-                            <div
-                                key={step.step}
-                                className={`how-it-works-card ${index === 1 ? 'is-white' : ''}`}
-                            >
-                                <p className="step-number">Step {step.step}</p>
-                                <h3 className="step-title">{step.title}</h3>
-                                <p className="step-description">{step.description}</p>
-                            </div>
-                        ))}
+                    <div className="how-it-works-card-new">
+                        <div className="how-it-works-visual">
+                             {howItWorksSteps.map((step) => (
+                                <div key={step.step} className="step-row">
+                                    <span className="step-letter">{step.letter}</span>
+                                    <span>- - - -</span>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="how-it-works-text">
+                            <p className="how-to-play">How It Works</p>
+                            <h3 className="main-desc">A simple, three-step process to financial harmony.</h3>
+                            <p className="sub-desc">
+                                We’ve streamlined shared living. Create your group, log your daily activities, and let BachelorBite handle the rest. It’s that easy.
+                            </p>
+                        </div>
                     </div>
                 </section>
 
