@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useEffect, useRef } from 'react';
@@ -7,6 +8,7 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import './about.css';
 import { LandingHeader } from '@/components/app/landing-header';
 import { CheckCircle, Users, ArrowRight, HeartHandshake, Bot, ShieldCheck } from 'lucide-react';
+import { MobilePreviewCard } from '@/components/landing/MobilePreviewCard';
 
 const features = [
     {
@@ -110,13 +112,7 @@ export default function AboutPage() {
                             <div className="iphone-mockup">
                                 <div className="iphone-frame">
                                     <div className="iphone-screen">
-                                        <Image
-                                            src={PlaceHolderImages.find(p => p.id === 'mobile-landing-page')?.imageUrl || ''}
-                                            alt="BachelorBite App Preview"
-                                            fill
-                                            sizes="(max-width: 768px) 50vw, 33vw"
-                                            className="object-cover"
-                                        />
+                                        <MobilePreviewCard />
                                     </div>
                                     <div className="iphone-notch"></div>
                                 </div>

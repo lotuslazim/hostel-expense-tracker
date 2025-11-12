@@ -100,8 +100,8 @@
 
 .iphone-mockup {
     position: relative;
-    width: 280px;
-    height: 560px;
+    width: 376px; /* Increased to fit card width + padding */
+    height: 676px; /* Increased to fit card height + padding */
     transform-style: preserve-3d;
     transform: rotateY(-15deg) rotateX(5deg) scale(0.9);
     transition: transform 0.5s ease-out;
@@ -123,16 +123,13 @@
 
 .iphone-screen {
     position: absolute;
-    inset: 2px;
+    inset: 10px; /* Padding for the screen */
     background: #000;
-    border-radius: 32px;
+    border-radius: 30px; /* Slightly smaller radius */
     overflow: hidden;
-}
-
-.iphone-screen img {
-    object-fit: cover;
-    width: 100%;
-    height: 100%;
+    /* Add a transform to scale the content to fit */
+    transform: scale(calc(360 / 360)); /* (inner width / component width) */
+    transform-origin: top left;
 }
 
 .iphone-notch {
@@ -303,8 +300,9 @@
         margin: 0 auto 1rem;
     }
     .iphone-mockup {
-        width: 240px;
-        height: 480px;
+        width: 376px;
+        height: 676px;
+        transform: rotateY(0deg) rotateX(0deg) scale(0.8);
     }
     .about-hero-headline {
         font-size: 2.75rem;
