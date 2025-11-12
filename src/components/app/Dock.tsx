@@ -5,6 +5,7 @@ import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import React, { useRef, ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 type DockItemData = {
   href: string;
@@ -34,34 +35,50 @@ function DockItem({
   isActive: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
 
   const distance = useTransform(mouseX, (val) => {
     const bounds = ref.current?.getBoundingClientRect();
-    return bounds ? val - bounds.x - bounds.width / 2 : 0;
+    return bounds ? val - bounds.x - bounds.width / 2 : Infinity;
   });
 
-  // Apply a subtle scale effect on hover instead of width change
-  const scaleSync = useTransform(distance, [-100, 0, 100], [1, 1.15, 1]);
-  const scale = useSpring(scaleSync, { mass: 0.1, stiffness: 150, damping: 12 });
+  const widthSync = useTransform(
+    distance,
+    [-baseItemSize, 0, baseItemSize],
+    [40, 40 + magnification, 40]
+  );
+  const width = useSpring(widthSync, {
+    mass: 0.1,
+    stiffness: 150,
+    damping: 12,
+  });
+
+  const showLabel = isMobile ? isActive : true;
 
   return (
     <motion.div
       ref={ref}
-      style={{ scale }}
+      style={isMobile ? {} : { width }}
       onClick={item.onClick}
       className={cn(
-        "flex items-center justify-center gap-2 px-4 py-2 cursor-pointer group rounded-full transition-colors duration-200 ease-out",
-        isActive ? 'bg-primary-foreground/20' : 'hover:bg-primary-foreground/10'
+        "flex items-center justify-center gap-2 px-3 py-2 cursor-pointer rounded-full transition-colors duration-200 ease-out",
+        isActive ? 'bg-muted text-foreground' : 'hover:bg-muted/50'
       )}
       whileTap={{ scale: 0.95 }}
     >
-      <div className="flex items-center justify-center w-6 h-6">
+      <motion.div 
+        className="flex items-center justify-center w-7 h-7"
+        style={!isMobile ? { scale: useSpring(useTransform(width, [40, 80], [1, 1.25])) } : {}}
+      >
         {item.icon}
-      </div>
-      {item.label && (
-          <span className="text-sm font-medium whitespace-nowrap">
+      </motion.div>
+      {showLabel && (
+          <motion.span 
+            layout="position"
+            className="text-sm font-medium whitespace-nowrap"
+          >
             {item.label}
-          </span>
+          </motion.span>
         )}
     </motion.div>
   );
@@ -74,13 +91,14 @@ export default function Dock({
   activeHref,
 }: DockProps) {
   const mouseX = useMotionValue(Infinity);
+  const isMobile = useIsMobile();
 
   return (
     <motion.div
       onMouseMove={(e) => mouseX.set(e.pageX)}
       onMouseLeave={() => mouseX.set(Infinity)}
       className={cn(
-        "flex items-end justify-center gap-2 p-2 rounded-full",
+        "flex items-end h-14 gap-2 p-2 rounded-full",
         className
       )}
     >
@@ -89,7 +107,7 @@ export default function Dock({
           key={item.href}
           item={item}
           mouseX={mouseX}
-          baseItemSize={120} // Increased base size to accommodate text
+          baseItemSize={isMobile ? 0 : 120} // Disable magnification on mobile
           magnification={magnification}
           isActive={activeHref === item.href}
         />
