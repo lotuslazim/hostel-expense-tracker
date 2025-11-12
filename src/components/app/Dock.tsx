@@ -5,6 +5,7 @@ import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import React, { useRef, ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 type DockItemData = {
   href: string;
@@ -18,7 +19,6 @@ type DockProps = {
   magnification?: number;
   className?: string;
   activeHref?: string;
-  isMobile: boolean;
 };
 
 function DockItem({
@@ -63,7 +63,7 @@ function DockItem({
       onClick={item.onClick}
       className={cn(
         "flex items-center justify-center gap-2 px-3 py-2 cursor-pointer rounded-full transition-colors duration-200 ease-out",
-        isActive ? 'bg-muted text-foreground' : 'hover:bg-muted/50'
+        isActive ? 'bg-black/10' : 'hover:bg-black/5'
       )}
       whileTap={{ scale: 0.95 }}
     >
@@ -90,9 +90,9 @@ export default function Dock({
   magnification = 24,
   className,
   activeHref,
-  isMobile,
 }: DockProps) {
   const mouseX = useMotionValue(Infinity);
+  const isMobile = useIsMobile();
 
   return (
     <motion.div
