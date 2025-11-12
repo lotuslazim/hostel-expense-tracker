@@ -20,7 +20,7 @@
 }
 
 .about-main-content {
-    padding-top: 8rem; /* Make space for the header */
+    /* No longer needed, sections will control their own spacing */
 }
 
 .about-section {
@@ -48,9 +48,14 @@
 
 /* --- Hero Section --- */
 .about-hero-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* Full viewport height */
     text-align: center;
-    padding-top: 10rem;
-    padding-bottom: 8rem;
+    padding: 0 2rem; /* Horizontal padding */
+    border-bottom: none; /* Remove bottom border for hero */
 }
 
 .about-hero-headline {

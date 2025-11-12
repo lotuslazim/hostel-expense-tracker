@@ -100,7 +100,7 @@ export default function AboutPage() {
                 {/* Hero Section */}
                 <section
                     ref={el => sectionsRef.current[0] = el}
-                    className="about-section about-hero-section"
+                    className="about-section about-hero-section is-visible"
                 >
                     <h1 className="about-hero-headline">Our Story</h1>
                     <p className="about-hero-subheading">
