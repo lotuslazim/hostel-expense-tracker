@@ -3,7 +3,7 @@
 
 import { useMemo, useState, useEffect } from "react";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
-import { doc, collection, query, where, Timestamp, setDoc, serverTimestamp, getDocs, orderBy, limit } from "firebase/firestore";
+import { doc, collection, query, where, Timestamp, setDoc, serverTimestamp, getDocs, orderBy } from "firebase/firestore";
 import { format, getMonth, getYear, startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns";
 import type { MealLog, Expense, Settlement, Member } from "@/lib/types";
 import { WelcomeCard } from "@/components/app/welcome-card";
@@ -163,8 +163,7 @@ export function SettlementHistory() {
         setIsLoadingHistory(true);
         const monthlyRecords: MonthlyRecord[] = [];
         
-        // Determine the range of months to fetch
-        const groupCreationQuery = query(collection(firestore, `groups/${groupId}/members`), orderBy("joinedAt", "asc"), limit(1));
+        const groupCreationQuery = query(collection(firestore, `groups/${groupId}/members`), orderBy("joinedAt", "asc"));
         const groupCreationSnapshot = await getDocs(groupCreationQuery);
         const firstJoinDate = groupCreationSnapshot.docs[0]?.data().joinedAt.toDate() || new Date();
         
@@ -199,6 +198,15 @@ export function SettlementHistory() {
               return acc;
             }, {} as Record<string, any>);
 
+            // Filter members who were active during the loopMonth
+            const activeMembersInMonth = membersData.filter(m => {
+                const joinedAt = m.joinedAt.toDate();
+                const leftAt = m.leftAt?.toDate();
+                const wasActive = joinedAt <= monthEnd && (!leftAt || leftAt >= monthStart);
+                return wasActive;
+            });
+            const memberCount = activeMembersInMonth.length || 1;
+
             const mealsByUser = mealsData.reduce((acc, meal) => { (acc[meal.userId] = acc[meal.userId] || []).push(meal); return acc; }, {} as Record<string, MealLog[]>);
             const expensesByUser = expensesData.reduce((acc, expense) => { (acc[expense.userId] = acc[expense.userId] || []).push(expense); return acc; }, {} as Record<string, Expense[]>);
             const settlementsByUser = settlementsData.reduce((acc, settlement) => { acc[settlement.userId] = settlement; return acc; }, {} as Record<string, Settlement>);
@@ -208,11 +216,10 @@ export function SettlementHistory() {
             const totalUtilityExpenses = expensesData.filter(e => ['Electricity', 'Gas'].includes(e.category)).reduce((sum, e) => sum + e.amount, 0);
             const totalGroupMeals = mealsData.reduce((sum, meal) => sum + meal.mealNumber, 0);
             const mealRate = totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
-            const memberCount = membersData.filter(m => m.status === 'active').length || 1;
             const perMemberUtilityShare = totalUtilityExpenses / memberCount;
             const perMemberOtherShare = totalGroupOtherExpenses / memberCount;
 
-            const processedMembers = membersData.map(member => {
+            const processedMembers = activeMembersInMonth.map(member => {
                 const userDetails = userMap[member.id];
                 const memberMeals = mealsByUser[member.id] || [];
                 const totalMealCount = memberMeals.reduce((sum, meal) => sum + meal.mealNumber, 0);
