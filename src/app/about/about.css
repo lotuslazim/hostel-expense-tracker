@@ -20,7 +20,7 @@
 }
 
 .about-main-content {
-    /* No longer needed, sections will control their own spacing */
+    padding-top: 0;
 }
 
 .about-section {
@@ -56,6 +56,7 @@
     min-height: 50vh; /* Reduced from 100vh */
     padding: 0 2rem; /* Horizontal padding */
     border-bottom: none; /* Remove bottom border for hero */
+    margin-top: 8rem; /* Pushes the hero section down */
 }
 
 .hero-box {
