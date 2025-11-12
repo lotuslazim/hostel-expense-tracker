@@ -199,7 +199,7 @@
 
 .how-it-works-bg-text {
     position: absolute;
-    font-family: var(--font-headline);
+    font-family: var(--font-body);
     font-weight: 800;
     font-size: 18rem;
     color: #000;
@@ -229,17 +229,19 @@
     border-radius: 1.5rem;
     padding: 2.5rem 2rem;
     box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-    text-align: center;
+    text-align: left;
     transition: transform 0.3s ease;
+    border: 1px solid rgba(255,255,255,0.1);
 }
 
 .how-it-works-card:hover {
-    transform: translateY(-10px);
+    transform: translateY(0);
 }
 
 .how-it-works-card.is-white {
     background: #fff;
     color: #111;
+    border-color: rgba(0,0,0,0.1);
 }
 
 .how-it-works-card .step-number {
@@ -254,7 +256,7 @@
 }
 
 .how-it-works-card .step-title {
-    font-family: var(--font-headline);
+    font-family: var(--font-body);
     font-size: 1.75rem;
     font-weight: 700;
     line-height: 1.2;
