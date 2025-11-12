@@ -63,7 +63,8 @@ export default function AppDock() {
         clearTimeout(scrollTimeout);
       }
     };
-  }, [isMobile, scrollTimeout]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMobile]);
 
 
   const publicRoutes = ['/login', '/signup', '/', '/about', '/contact'];
@@ -118,4 +119,3 @@ export default function AppDock() {
     </div>
   );
 }
-
