@@ -74,9 +74,10 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
 
   // This effect listens for all authentication state changes (login, logout).
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        await createUserDocument(firestore, user);
+        // Don't block the auth state update on this
+        createUserDocument(firestore, user);
       }
       setUserAuthState({ user, isUserLoading: false, userError: null });
     }, (error) => {
@@ -89,14 +90,14 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
 
   // This effect handles redirection after authentication state is confirmed.
   useEffect(() => {
-    const nonRedirectPublicRoutes = ['/about', '/contact'];
+    const nonRedirectPublicRoutes = ['/', '/about', '/contact'];
     
     // Wait until auth state is determined
     if (userAuthState.isUserLoading) {
       return;
     }
   
-    // If user is logged in and on a public page that should redirect (e.g., login, signup, landing)
+    // If user is logged in and on a public page that should redirect (e.g., login, signup)
     if (userAuthState.user && publicRoutes.includes(pathname) && !nonRedirectPublicRoutes.includes(pathname)) {
       router.push('/dashboard');
     }
@@ -105,7 +106,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       router.push('/login');
     }
   
-  }, [userAuthState.user, userAuthState.isUserLoading, pathname, router]);
+  }, [userAuthState.user, userAuthState.isUserLoading, pathname, router, isPublicRoute, publicRoutes]);
 
   const contextValue = useMemo((): FirebaseContextState => ({
     firebaseApp,
