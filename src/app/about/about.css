@@ -310,24 +310,24 @@
     position: absolute;
     font-size: 16rem;
     font-weight: 800;
-    color: rgba(0, 0, 0, 0.05);
+    color: rgba(0, 0, 0, 0.1);
     z-index: 1;
     user-select: none;
     line-height: 1;
 }
 
 #bg-text-1 {
-    top: 4rem;
+    top: 8rem;
     right: 2rem;
 }
 
 #bg-text-2 {
-    top: 18rem;
+    top: 22rem;
     left: 2rem;
 }
 
 #bg-text-3 {
-    top: 32rem;
+    top: 36rem;
     right: 2rem;
 }
 
