@@ -79,7 +79,7 @@ export function AppHeader() {
               <span className="sr-only">Open Menu</span>
             </Button>
         </SheetTrigger>
-        <SheetContent side="left">
+        <SheetContent side="left" className="light:yellow-gradient-bg">
           <SheetHeader>
               <SheetTitle>
                   <Logo />
