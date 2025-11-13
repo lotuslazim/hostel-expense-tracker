@@ -54,12 +54,12 @@ export function MobilePreviewCard() {
             
              <div className="w-full max-w-sm space-y-3 px-4">
                 <Link href="/signup" passHref className="star-border-button block">
-                    <Button size="lg" className="button-content w-full bg-slate-800 text-white rounded-xl font-bold uppercase tracking-wider text-sm py-3 h-12 hover:bg-slate-800/90">
+                    <Button size="lg" className="button-content w-full bg-slate-800 text-white rounded-xl font-bold uppercase tracking-wider text-sm py-3 h-12 hover:bg-slate-800/90 active:bg-slate-800/80">
                         Get Started
                     </Button>
                 </Link>
                 <Link href="/login" passHref className="star-border-button block">
-                    <Button size="lg" variant="outline" className="button-content w-full bg-white text-slate-800 border-slate-800 rounded-xl font-bold uppercase tracking-wider transition-all text-sm py-3 h-12 hover:bg-white/90">
+                    <Button size="lg" variant="outline" className="button-content w-full bg-white text-slate-800 border-slate-800 rounded-xl font-bold uppercase tracking-wider transition-all text-sm py-3 h-12 hover:bg-white/90 active:bg-white/80">
                         I Already Have An Account
                     </Button>
                 </Link>
