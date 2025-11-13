@@ -127,8 +127,14 @@
     background: #000;
     border-radius: 30px; /* Slightly smaller radius */
     overflow: hidden;
-    transform: scale(calc(281 / 360));
-    transform-origin: top left;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.iphone-screen > * {
+    transform: scale(0.85); /* Adjust scale to fit content */
+    transform-origin: center;
 }
 
 .iphone-notch {
