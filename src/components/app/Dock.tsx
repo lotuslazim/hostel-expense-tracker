@@ -18,7 +18,6 @@ type DockProps = {
   magnification?: number;
   className?: string;
   activeHref?: string;
-  isMobile: boolean; // Prop passed from parent
 };
 
 function DockItem({
@@ -27,14 +26,12 @@ function DockItem({
   baseItemSize,
   magnification,
   isActive,
-  isMobile,
 }: {
   item: DockItemData;
   mouseX: any;
   baseItemSize: number;
   magnification: number;
   isActive: boolean;
-  isMobile: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -46,7 +43,7 @@ function DockItem({
   const widthSync = useTransform(
     distance,
     [-baseItemSize, 0, baseItemSize],
-    [40, 40 + magnification, 40]
+    [60, 60 + magnification, 60] // Adjusted base width
   );
   const width = useSpring(widthSync, {
     mass: 0.1,
@@ -54,33 +51,30 @@ function DockItem({
     damping: 12,
   });
 
-  const showLabel = isMobile && isActive;
-
   return (
     <motion.div
       ref={ref}
-      style={isMobile ? {} : { width }}
+      style={{ width }}
       onClick={item.onClick}
       className={cn(
-        "flex items-center justify-center gap-2 px-3 py-2 cursor-pointer rounded-full transition-colors duration-200 ease-out",
+        "flex flex-col items-center justify-center gap-1 pt-2 pb-1 cursor-pointer rounded-xl transition-colors duration-200 ease-out",
         isActive ? 'bg-black/10' : 'hover:bg-black/5'
       )}
       whileTap={{ scale: 0.95 }}
     >
       <motion.div 
         className="flex items-center justify-center w-7 h-7"
-        style={!isMobile ? { scale: useSpring(useTransform(width, [40, 80], [1, 1.25])) } : {}}
+        style={{ scale: useSpring(useTransform(width, [60, 100], [1, 1.25])) }}
       >
         {item.icon}
       </motion.div>
-      {showLabel && (
-          <motion.span 
-            layout="position"
-            className="text-sm font-medium whitespace-nowrap"
-          >
-            {item.label}
-          </motion.span>
+      <span className={cn(
+          "text-[10px] font-medium whitespace-nowrap transition-colors",
+          isActive ? "text-white" : ""
         )}
+      >
+        {item.label}
+      </span>
     </motion.div>
   );
 }
@@ -90,7 +84,6 @@ export default function Dock({
   magnification = 24,
   className,
   activeHref,
-  isMobile,
 }: DockProps) {
   const mouseX = useMotionValue(Infinity);
 
@@ -99,7 +92,7 @@ export default function Dock({
       onMouseMove={(e) => mouseX.set(e.pageX)}
       onMouseLeave={() => mouseX.set(Infinity)}
       className={cn(
-        "flex items-end h-14 gap-2 p-2 rounded-full",
+        "flex items-end h-16 gap-2 p-2 rounded-2xl",
         className
       )}
     >
@@ -108,10 +101,9 @@ export default function Dock({
           key={item.href}
           item={item}
           mouseX={mouseX}
-          baseItemSize={isMobile ? 0 : 120} // Disable magnification on mobile
+          baseItemSize={120}
           magnification={magnification}
           isActive={activeHref === item.href}
-          isMobile={isMobile}
         />
       ))}
     </motion.div>
