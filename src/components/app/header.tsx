@@ -6,7 +6,7 @@ import { Logo } from "@/components/icons/logo";
 import { UserNav } from "@/components/app/user-nav";
 import { Button } from "../ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, MessageCircle, LayoutDashboard, BarChart3, Package, LogOut } from "lucide-react";
+import { Menu, MessageCircle, LayoutDashboard, BarChart3, Package, LogOut, Scale } from "lucide-react";
 import { useUser, useDoc } from "@/firebase";
 import { Skeleton } from "../ui/skeleton";
 import { useState, useEffect, useMemo } from "react";
@@ -44,6 +44,7 @@ export function AppHeader() {
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/report", label: "Monthly Report", icon: BarChart3 },
     { href: "/inventory", label: "Inventory", icon: Package },
+    { href: "/settlements", label: "Settlements", icon: Scale },
     { href: "/chat", label: "Chat", icon: MessageCircle, notificationCount: unreadCount },
   ];
 
