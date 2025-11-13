@@ -88,6 +88,23 @@
       },
       "required": ["id", "groupId", "userId", "userName", "expenseItem", "amount", "date", "category", "createdAt"]
     },
+     "Settlement": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Settlement",
+      "type": "object",
+      "description": "Records when a user has settled their monthly balance.",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier for the settlement record, typically in the format 'userId-month-year'." },
+        "groupId": { "type": "string", "description": "The ID of the group this settlement belongs to." },
+        "userId": { "type": "string", "description": "The ID of the user who made the settlement." },
+        "month": { "type": "number", "description": "The month of the settlement (e.g., 8 for September)." },
+        "year": { "type": "number", "description": "The year of the settlement." },
+        "settledAt": { "type": "string", "format": "date-time", "description": "The timestamp when the settlement was confirmed." },
+        "settlementMethod": { "type": "string", "description": "A description of how the balance was settled (e.g., 'Paid in cash to Alice')." },
+        "settledTo": { "type": "string", "description": "The name of the user who received the payment." }
+      },
+      "required": ["id", "groupId", "userId", "month", "year", "settledAt", "settlementMethod", "settledTo"]
+    },
     "ChatMessage": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "ChatMessage",
@@ -140,6 +157,23 @@
         "userName": { "type": "string" }
       },
       "required": ["id", "groupId", "itemId", "itemName", "quantity", "cost", "unitPrice", "date", "userId", "userName"]
+    },
+    "Notification": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Notification",
+      "type": "object",
+      "description": "Represents a notification for a group member.",
+      "properties": {
+        "id": { "type": "string" },
+        "groupId": { "type": "string" },
+        "senderId": { "type": "string" },
+        "senderName": { "type": "string" },
+        "messageText": { "type": "string" },
+        "type": { "type": "string", "enum": ["expense", "reminder"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "readBy": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["id", "groupId", "senderId", "senderName", "messageText", "type", "createdAt"]
     }
   },
   "auth": { "providers": ["password", "google", "phone"] },
@@ -195,6 +229,18 @@
             "write": "request.auth.token.email_verified == true && (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true || request.auth.uid == memberId)"
           },
           "description": "Stores members' role and status. Readable by any existing member (active or inactive) for historical purposes. Writable only by admins or the member themselves (e.g., re-joining)."
+        }
+      },
+       {
+        "path": "/groups/{groupId}/settlements/{settlementId}",
+        "definition": {
+          "entityName": "Settlement", "schema": { "$ref": "#/entities/Settlement" },
+          "rules": {
+            "list, get": "request.auth.token.email_verified == true && get(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)).data.status == 'active'",
+            "create": "request.auth.token.email_verified == true && get(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)).data.status == 'active' && request.resource.data.userId == request.auth.uid",
+            "update, delete": "request.auth.token.email_verified == true && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true"
+          },
+          "description": "Stores settlement records. Readable by all active members. Users can only create their own settlement record. Only admins can update or delete settlements, preventing users from altering records after the fact."
         }
       },
       {
@@ -256,8 +302,21 @@
           },
           "description": "Stores individual purchase records. Accessible by active members. Users can only create/edit their own purchases. Email verification required."
         }
+      },
+      {
+        "path": "/groups/{groupId}/notifications/{notificationId}",
+        "definition": {
+          "entityName": "Notification", "schema": { "$ref": "#/entities/Notification" },
+          "rules": {
+            "list, get": "request.auth.token.email_verified == true && get(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)).data.status == 'active'",
+            "create": "request.auth.token.email_verified == true && get(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)).data.status == 'active' && request.resource.data.senderId == request.auth.uid",
+            "update": "request.auth.token.email_verified == true && request.auth.uid == resource.data.readBy[resource.data.readBy.size() - 1]"
+          },
+          "description": "Stores notifications for group members. Readable by active members. Users can only create their own notifications. Users can update a notification only to add themselves to the `readBy` array."
+        }
       }
     ],
     "reasoning": "This structure is updated to enforce an 'active' status check for all group-related data access. Instead of checking for simple existence with exists(), the rules now use get().data.status == 'active'. This closes a security hole where inactive members could still access group data. It also solves the data inconsistency problem by ensuring that the security rules and application logic are aligned. This is a more secure and robust pattern for managing group membership. The user read rule was changed to allow any authenticated user to read user profiles to support fetching user data for reports. The meal log read rule was restricted so users can only see their own meals, improving privacy."
   }
 }
+

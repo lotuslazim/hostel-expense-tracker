@@ -260,23 +260,26 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     return undefined;
   };
 
-  const handleUndo = async (expenseId: string, purchaseIds: string[] = []) => {
+  const handleUndo = async (expenseId: string, purchaseIds: string[] = [], notificationId?: string) => {
     if (!groupId) return;
     const batch = writeBatch(firestore);
 
-    // Delete the main expense document
     const expenseRef = doc(firestore, `groups/${groupId}/expenses`, expenseId);
     batch.delete(expenseRef);
 
-    // Delete associated purchase documents
     purchaseIds.forEach(purchaseId => {
         const purchaseRef = doc(firestore, `groups/${groupId}/purchases`, purchaseId);
         batch.delete(purchaseRef);
     });
 
+    if (notificationId) {
+        const notificationRef = doc(firestore, `groups/${groupId}/notifications`, notificationId);
+        batch.delete(notificationRef);
+    }
+
     try {
         await batch.commit();
-        toast({ title: "Action Undone", description: "The expense and related purchases have been removed." });
+        toast({ title: "Action Undone", description: "The expense and related records have been removed." });
         if (purchaseIds.length > 0) {
             triggerUpdate();
         }
@@ -295,8 +298,6 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
         toast({ variant: "destructive", title: "Receipt Required", description: "A receipt image is required for utility bills." });
         return;
     }
-
-    // form.control.register('root', { disabled: true }); // This line causes errors and is not needed
 
     try {
         let receiptUrl: string | null = null;
@@ -329,12 +330,11 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
         const expenseRef = await addDoc(collection(firestore, `groups/${groupId}/expenses`), expenseData);
         
         const purchaseIds: string[] = [];
-        // Handle purchased items if they exist
         if (values.category === 'Food & Groceries' && values.purchasedItems) {
             const batch = writeBatch(firestore);
             for (const item of values.purchasedItems) {
                 const masterItemId = await findMasterItemId(item.name);
-                const purchaseRef = doc(collection(firestore, `groups/${groupId}/purchases`)); // Auto-generate ID
+                const purchaseRef = doc(collection(firestore, `groups/${groupId}/purchases`));
                 const purchaseData = sanitizeFirestoreData({
                     itemId: masterItemId,
                     itemName: item.name,
@@ -352,11 +352,23 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
             }
             await batch.commit();
         }
+
+        // Create notification
+        const notificationMessage = `added a new expense: ${finalExpenseItem} – ৳${values.amount}`;
+        const notificationRef = await addDoc(collection(firestore, `groups/${groupId}/notifications`), {
+            groupId,
+            senderId: currentUser.uid,
+            senderName: currentUser.displayName || currentUser.email?.split('@')[0],
+            messageText: notificationMessage,
+            type: "expense",
+            createdAt: serverTimestamp(),
+            readBy: [currentUser.uid], // The sender has "read" it
+        });
         
         toast({
             title: "Expense Added",
             description: `Your ${values.category.toLowerCase()} expense of ৳${values.amount} has been logged.`,
-            action: <ToastAction altText="Undo" onClick={() => handleUndo(expenseRef.id, purchaseIds)}>Undo</ToastAction>
+            action: <ToastAction altText="Undo" onClick={() => handleUndo(expenseRef.id, purchaseIds, notificationRef.id)}>Undo</ToastAction>
         });
 
         if (values.category === 'Food & Groceries') {
@@ -369,8 +381,6 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
     } catch (error) {
         console.error("Error adding expense:", error);
         toast({ variant: "destructive", title: "Error", description: "Could not log expense. Please check permissions and try again." });
-    } finally {
-        // form.control.register('root', { disabled: false }); // This line causes errors and is not needed
     }
   }
   
@@ -618,4 +628,3 @@ export function AddExpenseCard({ selectedDate }: AddExpenseCardProps) {
   );
 }
 
-    

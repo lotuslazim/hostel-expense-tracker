@@ -64,6 +64,17 @@ export interface Reminder {
     read?: string[];
 }
 
+export interface Notification {
+    id: string;
+    groupId: string;
+    senderId: string;
+    senderName: string;
+    messageText: string;
+    type: 'expense' | 'reminder';
+    createdAt: Timestamp;
+    readBy?: string[];
+}
+
 export interface FoodItem {
     id: string;
     name: string;
@@ -125,4 +136,3 @@ export interface Settlement {
     settledTo: string;
 }
 
-    
