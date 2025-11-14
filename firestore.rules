@@ -35,19 +35,19 @@ service cloud.firestore {
      * @principle Enforces admin-ownership for group management.
      */
     match /groups/{groupId} {
-      function isAdmin(groupId) {
+      function isAdmin() {
         return request.auth.uid == resource.data.adminId;
       }
-       function isExistingAdmin(groupId) {
-        return isAdmin(groupId) && resource != null;
+       function isExistingAdmin() {
+        return isAdmin() && resource != null;
       }
       function isSignedIn() {
         return request.auth != null;
       }
       allow get, list: if isSignedIn();
       allow create: if isSignedIn() && request.resource.data.adminId == request.auth.uid && request.resource.data.id == groupId;
-      allow update: if isExistingAdmin(groupId);
-      allow delete: if isExistingAdmin(groupId);
+      allow update: if isExistingAdmin();
+      allow delete: if isExistingAdmin();
 
         match /meals/{mealId} {
           function isSignedIn() {
@@ -101,7 +101,7 @@ service cloud.firestore {
             function isSignedIn() {
                 return request.auth != null;
             }
-             function isGroupMember(groupId) {
+             function isGroupMember() {
                 return exists(/databases/$(database)/documents/groups/$(groupId));
             }
              function isAdmin(groupId) {
@@ -110,8 +110,8 @@ service cloud.firestore {
              function isOwner() {
                 return request.auth.uid == request.resource.data.userId;
             }
-            allow get, list: if isSignedIn() && isGroupMember(groupId);
-            allow create: if isSignedIn() && isGroupMember(groupId) && isOwner();
+            allow get, list: if isSignedIn() && isGroupMember();
+            allow create: if isSignedIn() && isGroupMember() && isOwner();
             allow update, delete: if isSignedIn() && isAdmin(groupId);
         }
     }
