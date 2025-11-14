@@ -304,6 +304,11 @@
         transform: translateY(100%);
     }
 }
+html.no-scroll, body.no-scroll {
+  overflow: hidden !important;
+  touch-action: none;
+}
+
 html, body {
   margin: 0 !important;
   padding: 0 !important;
@@ -312,5 +317,3 @@ html, body {
   max-width: 100% !important;
   background-color: transparent !important;
 }
-
-    

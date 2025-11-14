@@ -1,7 +1,7 @@
 
 "use client";
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { LandingHeader } from '@/components/app/landing-header';
 import DotGrid from '@/components/DotGrid';
@@ -10,9 +10,26 @@ import { Logo } from '@/components/icons/logo';
 import { MobileLandingPage } from '@/components/landing/MobileLandingPage';
 import { MobilePreviewCard } from '@/components/landing/MobilePreviewCard';
 import Image from 'next/image';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 
 export default function LandingPage() {
+    const isMobile = useIsMobile();
+
+    useEffect(() => {
+        if (isMobile) {
+            document.documentElement.classList.add('no-scroll');
+            document.body.classList.add('no-scroll');
+        } else {
+            document.documentElement.classList.remove('no-scroll');
+            document.body.classList.remove('no-scroll');
+        }
+
+        return () => {
+            document.documentElement.classList.remove('no-scroll');
+            document.body.classList.remove('no-scroll');
+        }
+    }, [isMobile]);
 
     return (
         <div>
