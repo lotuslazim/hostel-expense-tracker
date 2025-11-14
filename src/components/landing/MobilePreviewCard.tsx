@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
  */
 export function MobilePreviewCard() {
     return (
-        <div className="w-[360px] h-[640px] flex flex-col items-center justify-between mobile-landing-gradient text-slate-800 p-8 overflow-hidden relative">
+        <div className="w-[380px] h-[675px] flex flex-col items-center justify-between mobile-landing-gradient text-slate-800 p-8 overflow-hidden relative">
             
             <div className="flex flex-col items-center text-center gap-8">
                 <div className="flex gap-2">
