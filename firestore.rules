@@ -53,9 +53,6 @@ service cloud.firestore {
           function isSignedIn() {
             return request.auth != null;
           }
-          function isGroupMember(groupId) {
-            return exists(/databases/$(database)/documents/groups/$(groupId));
-          }
           function isAdmin(groupId) {
             return get(/databases/$(database)/documents/groups/$(groupId)).data.adminId == request.auth.uid;
           }
@@ -72,9 +69,6 @@ service cloud.firestore {
           function isSignedIn() {
             return request.auth != null;
           }
-          function isGroupMember(groupId) {
-            return exists(/databases/$(database)/documents/groups/$(groupId));
-          }
           function isAdmin(groupId) {
             return get(/databases/$(database)/documents/groups/$(groupId)).data.adminId == request.auth.uid;
           }
@@ -90,9 +84,6 @@ service cloud.firestore {
          match /purchasedItems/{itemId} {
           function isSignedIn() {
             return request.auth != null;
-          }
-          function isGroupMember(groupId) {
-            return exists(/databases/$(database)/documents/groups/$(groupId));
           }
           function isAdmin(groupId) {
             return get(/databases/$(database)/documents/groups/$(groupId)).data.adminId == request.auth.uid;
@@ -116,15 +107,13 @@ service cloud.firestore {
              function isAdmin(groupId) {
                 return get(/databases/$(database)/documents/groups/$(groupId)).data.adminId == request.auth.uid;
             }
-             function isOwner(settlementId) {
+             function isOwner() {
                 return request.auth.uid == request.resource.data.userId;
             }
             allow get, list: if isSignedIn() && isGroupMember(groupId);
-            allow create: if isSignedIn() && isGroupMember(groupId) && isOwner(settlementId);
+            allow create: if isSignedIn() && isGroupMember(groupId) && isOwner();
             allow update, delete: if isSignedIn() && isAdmin(groupId);
         }
     }
   }
 }
-
-    
