@@ -7,6 +7,7 @@ import { InventoryProvider } from "@/contexts/InventoryContext";
 import { I18nProvider } from "@/i18n/client-provider";
 import { ReminderListener } from "@/components/app/ReminderListener";
 import { FirebaseClientProvider } from "@/firebase/client-provider";
+import AppDock from "@/components/app/AppDock";
 
 export function ClientProviders({ children }: { children: React.ReactNode }) {
   return (
@@ -22,6 +23,7 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
             {children}
             <Toaster />
             <ReminderListener />
+            <AppDock />
           </InventoryProvider>
         </ThemeProvider>
       </I18nProvider>

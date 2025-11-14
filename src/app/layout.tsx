@@ -6,8 +6,6 @@ import { cn } from "@/lib/utils";
 import { ClientProviders } from "./client-providers";
 import { Suspense } from "react";
 import { ProgressBar } from "@/components/app/progress-bar";
-import AppDock from "@/components/app/AppDock";
-import { headers } from 'next/headers';
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -33,15 +31,10 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = headers().get('x-next-pathname') || '/';
-  const publicRoutes = ['/', '/about', '/contact', '/login', '/signup'];
-  const isPublicRoute = publicRoutes.includes(pathname);
-
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn(
-          "font-body", 
-          !isPublicRoute && "pb-24", 
+          "font-body",
           poppins.variable, 
           playfairDisplay.variable
         )} suppressHydrationWarning>
@@ -50,7 +43,6 @@ export default function RootLayout({
         </Suspense>
         <ClientProviders>
           {children}
-          <AppDock />
         </ClientProviders>
       </body>
     </html>

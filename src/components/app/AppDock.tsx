@@ -14,6 +14,7 @@ import { firestore } from '@/firebase/config';
 import { Badge } from '@/components/ui/badge';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 
 export default function AppDock() {
   const router = useRouter();
@@ -33,7 +34,6 @@ export default function AppDock() {
   const { unreadCount } = useUnreadMessages(groupId, user?.uid);
 
   useEffect(() => {
-    // On mobile, hide the dock after a delay, and show on scroll
     if (isMobile) {
         let scrollTimeout: NodeJS.Timeout | null = null;
         
@@ -49,7 +49,6 @@ export default function AppDock() {
     
         window.addEventListener('scroll', handleScroll, { passive: true });
         
-        // Initial hide timer
         handleScroll();
     
         return () => {
@@ -59,7 +58,6 @@ export default function AppDock() {
           }
         };
     } else {
-        // On desktop, the dock is always visible
         setIsVisible(true);
     }
   }, [isMobile]);
@@ -68,6 +66,18 @@ export default function AppDock() {
   const publicRoutes = ['/login', '/signup', '/', '/about', '/contact'];
   const isPublicRoute = publicRoutes.includes(pathname);
   
+  useEffect(() => {
+    if (!isPublicRoute) {
+      document.body.classList.add('pb-24');
+    } else {
+      document.body.classList.remove('pb-24');
+    }
+    // Cleanup on component unmount or path change
+    return () => {
+      document.body.classList.remove('pb-24');
+    };
+  }, [isPublicRoute]);
+
   if (isPublicRoute || !user || isUserLoading || pathname === '/chat') {
     return null;
   }
