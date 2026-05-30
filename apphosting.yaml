@@ -1,5 +1,16 @@
-# Settings to manage and configure a Firebase App Hosting backend.
+{# Settings to manage and configure a Firebase App Hosting backend.
 # https://firebase.google.com/docs/app-hosting/configure
+
+# The following is a sample for a Next.js app.
+# The `npm run build` command is the default and can be omitted.
+# The `start` command is automatically discovered.
+# If you need to customize the build or start command, you can specify them
+# with the `build` and `start` fields.
+# For example:
+# build:
+#   command: npm run custom-build
+# start:
+#   command: npm run custom-start
 
 runConfig:
   # Increase this value if you'd like to automatically spin up

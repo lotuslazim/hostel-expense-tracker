@@ -56,13 +56,13 @@ service cloud.firestore {
           function isAdmin(groupId) {
             return get(/databases/$(database)/documents/groups/$(groupId)).data.adminId == request.auth.uid;
           }
-          function isOwner(groupId, mealId) {
+          function isOwner(mealId) {
             return get(/databases/$(database)/documents/groups/$(groupId)/meals/$(mealId)).data.userId == request.auth.uid;
           }
           allow get, list: if isSignedIn();
           allow create: if isSignedIn() && request.resource.data.groupId == groupId && request.resource.data.userId == request.auth.uid;
-          allow update: if isSignedIn() && (isOwner(groupId, mealId) || isAdmin(groupId));
-          allow delete: if isSignedIn() && (isOwner(groupId, mealId) || isAdmin(groupId));
+          allow update: if isSignedIn() && (isOwner(mealId) || isAdmin(groupId));
+          allow delete: if isSignedIn() && (isOwner(mealId) || isAdmin(groupId));
         }
 
        match /expenses/{expenseId} {
@@ -72,13 +72,13 @@ service cloud.firestore {
           function isAdmin(groupId) {
             return get(/databases/$(database)/documents/groups/$(groupId)).data.adminId == request.auth.uid;
           }
-          function isOwner(groupId, expenseId) {
+          function isOwner(expenseId) {
             return get(/databases/$(database)/documents/groups/$(groupId)/expenses/$(expenseId)).data.userId == request.auth.uid;
           }
           allow get, list: if isSignedIn();
           allow create: if isSignedIn() && request.resource.data.groupId == groupId && request.resource.data.userId == request.auth.uid;
-          allow update: if isSignedIn() && (isOwner(groupId, expenseId) || isAdmin(groupId));
-          allow delete: if isSignedIn() && (isOwner(groupId, expenseId) || isAdmin(groupId));
+          allow update: if isSignedIn() && (isOwner(expenseId) || isAdmin(groupId));
+          allow delete: if isSignedIn() && (isOwner(expenseId) || isAdmin(groupId));
         }
 
          match /purchasedItems/{itemId} {
@@ -88,13 +88,13 @@ service cloud.firestore {
           function isAdmin(groupId) {
             return get(/databases/$(database)/documents/groups/$(groupId)).data.adminId == request.auth.uid;
           }
-          function isOwner(groupId, itemId) {
+          function isOwner(itemId) {
             return get(/databases/$(database)/documents/groups/$(groupId)/purchasedItems/$(itemId)).data.userId == request.auth.uid;
           }
           allow get, list: if isSignedIn();
           allow create: if isSignedIn() && request.resource.data.groupId == groupId && request.resource.data.userId == request.auth.uid;
-          allow update: if isSignedIn() && (isOwner(groupId, itemId) || isAdmin(groupId));
-          allow delete: if isSignedIn() && (isOwner(groupId, itemId) || isAdmin(groupId));
+          allow update: if isSignedIn() && (isOwner(itemId) || isAdmin(groupId));
+          allow delete: if isSignedIn() && (isOwner(itemId) || isAdmin(groupId));
         }
 
         match /settlements/{settlementId} {
