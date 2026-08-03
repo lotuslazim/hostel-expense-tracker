@@ -6,7 +6,7 @@ import { LogMealCard } from "@/components/dashboard/LogMealCard";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { DateCard } from "@/components/dashboard/DateCard";
 import { AppHeader } from "@/components/app/header";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, } from "react";
 import { Welcome } from "@/components/app/welcome";
 import { useUser, useDoc, useFirebase, useCollection } from "@/firebase";
 import { doc, collection, query, where, Timestamp, orderBy } from "firebase/firestore";
@@ -17,15 +17,15 @@ import { subMonths } from 'date-fns/subMonths';
 import { startOfMonth } from 'date-fns/startOfMonth';
 import { endOfMonth } from 'date-fns/endOfMonth';
 import { SendReminderCard } from "@/components/dashboard/SendReminderCard";
-import { IntroDialog } from "@/components/app/IntroDialog";
+
 import { LayoutDashboard } from "lucide-react";
 
 function DashboardSkeleton() {
   return (
     <div className="space-y-6">
       <div>
-          <Skeleton className="h-9 w-48" />
-          <Skeleton className="h-4 w-72 mt-2" />
+        <Skeleton className="h-9 w-48" />
+        <Skeleton className="h-4 w-72 mt-2" />
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
         <div className="lg:col-span-2 space-y-6">
@@ -35,7 +35,7 @@ function DashboardSkeleton() {
           <Skeleton className="h-48 w-full rounded-lg" />
         </div>
         <div className="lg:col-span-3">
-           <Skeleton className="h-[calc(100vh-10rem)] w-full rounded-lg" />
+          <Skeleton className="h-[calc(100vh-10rem)] w-full rounded-lg" />
         </div>
       </div>
     </div>
@@ -54,7 +54,7 @@ function DashboardContent({ groupId, userId }: { groupId: string, userId: string
     start: startOfMonth(currentMonth),
     end: endOfMonth(currentMonth),
   }), [currentMonth]);
-  
+
   const expensesQuery = useMemo(() => {
     return query(
       collection(firestore, `groups/${groupId}/expenses`),
@@ -90,8 +90,8 @@ function DashboardContent({ groupId, userId }: { groupId: string, userId: string
             <SendReminderCard />
           </div>
           <div className="lg:col-span-3">
-            <ActivityFeed 
-              expenses={expenses || []} 
+            <ActivityFeed
+              expenses={expenses || []}
               isLoading={areExpensesLoading}
               currentMonth={currentMonth}
               onMonthChange={handleMonthChange}
@@ -106,46 +106,51 @@ function DashboardContent({ groupId, userId }: { groupId: string, userId: string
 export default function DashboardPage() {
   const { firestore } = useFirebase();
   const { user: currentUser, isUserLoading } = useUser();
-  const [showOnboarding, setShowOnboarding] = useState(false);
 
+  const currentUserRef = useMemo(
+    () =>
+      currentUser
+        ? doc(firestore, "users", currentUser.uid)
+        : null,
+    [firestore, currentUser]
+  );
 
-  const currentUserRef = useMemo(() => currentUser ? doc(firestore, "users", currentUser.uid) : null, [firestore, currentUser]);
-  const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
-  
-  const isLoading = isUserLoading || isCurrentUserDataLoading;
+  const {
+    data: currentUserData,
+    isLoading: isCurrentUserDataLoading,
+  } = useDoc(currentUserRef);
 
-  useEffect(() => {
-    const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
-    if (!hasSeenOnboarding && !isLoading && currentUser) {
-        setShowOnboarding(true);
-    }
-  }, [isLoading, currentUser]);
-
-  const handleOnboardingComplete = () => {
-    localStorage.setItem('hasSeenOnboarding', 'true');
-    setShowOnboarding(false);
-  }
+  const isLoading =
+    isUserLoading || isCurrentUserDataLoading;
 
   if (isLoading) {
     return (
-      <div className="flex flex-col min-h-screen">
+      <div className="flex min-h-screen flex-col">
         <AppHeader />
-        <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <DashboardSkeleton />
+
+        <main className="container mx-auto flex-grow px-4 py-8 sm:px-6 lg:px-8">
+          <DashboardSkeleton />
         </main>
       </div>
-    )
+    );
   }
 
   const groupId = currentUserData?.groupId;
   const userId = currentUser?.uid;
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex min-h-screen flex-col">
       <AppHeader />
-      <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {showOnboarding && <IntroDialog onOpenChange={handleOnboardingComplete} isOnboardingFlow={true} />}
-        {groupId && userId ? <DashboardContent groupId={groupId} userId={userId} /> : <Welcome />}
+
+      <main className="container mx-auto flex-grow px-4 py-8 sm:px-6 lg:px-8">
+        {groupId && userId ? (
+          <DashboardContent
+            groupId={groupId}
+            userId={userId}
+          />
+        ) : (
+          <Welcome />
+        )}
       </main>
     </div>
   );
