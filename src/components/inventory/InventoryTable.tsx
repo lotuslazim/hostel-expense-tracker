@@ -139,7 +139,7 @@ export function InventoryTable({ purchases, isLoading, onLoadMore, hasMore, isMo
                                                     </TableRow>
                                                 </TableHeader>
                                                 <TableBody>
-                                                    {item.contributions.sort((a, b) => (a.date instanceof Timestamp ? a.date.toMillis() : a.date) - (b.date instanceof Timestamp ? b.date.toMillis() : b.date)).map(contrib => (
+                                                    {item.contributions.sort((a, b) => (a.date instanceof Timestamp ? a.date.toMillis() : a.date.getTime()) - (b.date instanceof Timestamp ? b.date.toMillis() : b.date.getTime())).map(contrib => (
                                                         <TableRow key={contrib.id}>
                                                             <TableCell>{contrib.userName}</TableCell>
                                                             <TableCell>{format(contrib.date instanceof Timestamp ? contrib.date.toDate() : toDate(contrib.date), 'MMM dd')}</TableCell>

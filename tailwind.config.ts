@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 const config = {
@@ -8,7 +7,7 @@ const config = {
     './components/**/*.{ts,tsx}',
     './app/**/*.{ts,tsx}',
     './src/**/*.{ts,tsx}',
-	],
+  ],
   prefix: "",
   theme: {
     container: {
@@ -78,30 +77,30 @@ const config = {
           to: { height: "0" },
         },
         "border-anim-y": {
-            "from": { transform: "translateY(-100%)" },
-            "to": { transform: "translateY(100vh)" },
+          from: { transform: "translateY(-100%)" },
+          to: { transform: "translateY(100vh)" },
         },
         "slide-up": {
-            "0%": { transform: "translateY(100%)", opacity: "0" },
-            "100%": { transform: "translateY(0)", opacity: "1" },
+          "0%": { transform: "translateY(100%)", opacity: "0" },
+          "100%": { transform: "translateY(0)", opacity: "1" },
         },
         "shadow-fade-in": {
-            "0%": { opacity: "0", transform: "translateX(-50%) scale(0.8)" },
-            "100%": { opacity: "1", transform: "translateX(-50%) scale(1.2)" },
+          "0%": { opacity: "0", transform: "translateX(-50%) scale(0.8)" },
+          "100%": { opacity: "1", transform: "translateX(-50%) scale(1.2)" },
         },
         "text-pop-in": {
-            "0%": { opacity: "0", transform: "scale(0.9)" },
-            "100%": { opacity: "1", transform: "scale(1)" },
+          "0%": { opacity: "0", transform: "scale(0.9)" },
+          "100%": { opacity: "1", transform: "scale(1)" },
         },
         "text-slide-in": {
-            "0%": { opacity: "0", transform: "translateX(20px)" },
-            "100%": { opacity: "1", transform: "translateX(0)" },
+          "0%": { opacity: "0", transform: "translateX(20px)" },
+          "100%": { opacity: "1", transform: "translateX(0)" },
         },
         "glow-pulse": {
-            "0%, 100%": { opacity: "0.5", transform: "scale(1)" },
-            "50%": { opacity: "1", transform: "scale(1.1)" },
+          "0%, 100%": { opacity: "0.5", transform: "scale(1)" },
+          "50%": { opacity: "1", transform: "scale(1.1)" },
         },
-        "float": {
+        float: {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-20px)" },
         },
@@ -113,7 +112,7 @@ const config = {
           "0%, 100%": { transform: "translateY(0) rotate(0deg) scale(1)" },
           "25%": { transform: "translateY(-2px) rotate(-1deg) scale(1.01)" },
           "50%": { transform: "translateY(0) rotate(0deg) scale(1)" },
-          "75%": { transform: "translateY(-2px) rotate(1deg) scale(1.01)" }
+          "75%": { transform: "translateY(-2px) rotate(1deg) scale(1.01)" },
         },
         "loading-dot": {
           "0%, 100%": { transform: "translateY(0)", opacity: "0.5" },
@@ -124,36 +123,36 @@ const config = {
           "100%": { opacity: "1", transform: "scale(1)" },
         },
         "bounce-once": {
-            "0%, 100%": { transform: "translateY(0)" },
-            "50%": { transform: "translateY(-15px)" },
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-15px)" },
         },
-        "draw": {
-            "0%": { "stroke-dashoffset": "3000" },
-            "50%": { "stroke-dashoffset": "0" },
-            "100%": { "stroke-dashoffset": "3000" },
+        draw: {
+          "0%": { "stroke-dashoffset": "3000" },
+          "50%": { "stroke-dashoffset": "0" },
+          "100%": { "stroke-dashoffset": "3000" },
         },
-        "typing": {
-            "from": { width: "0" },
+        typing: {
+          from: { width: "0" },
         },
         "blink-caret": {
-            "0%, 49%": { borderColor: "white" },
-            "50%, 100%": { borderColor: "transparent" },
+          "0%, 49%": { borderColor: "white" },
+          "50%, 100%": { borderColor: "transparent" },
         },
         "move-bg": {
-            "0%": { backgroundPosition: "0 0" },
-            "100%": { backgroundPosition: "40px 40px" },
+          "0%": { backgroundPosition: "0 0" },
+          "100%": { backgroundPosition: "40px 40px" },
         },
         "slide-up-fade": {
           "0%": { opacity: "0", transform: "translateY(20px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
         "slide-in-right": {
-            "0%": { opacity: "0", transform: "translateX(-20px)" },
-            "100%": { opacity: "1", transform: "translateX(0)" },
+          "0%": { opacity: "0", transform: "translateX(-20px)" },
+          "100%": { opacity: "1", transform: "translateX(0)" },
         },
         "pop-in": {
-            "0%": { opacity: "0", transform: "scale(0.8)" },
-            "100%": { opacity: "1", transform: "scale(1)" },
+          "0%": { opacity: "0", transform: "scale(0.8)" },
+          "100%": { opacity: "1", transform: "scale(1)" },
         },
         moveInLeft: {
           "0%": { opacity: "0", transform: "translateX(-10rem)" },
@@ -177,14 +176,14 @@ const config = {
         "text-pop-in": "pop-in 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards",
         "text-slide-in": "slide-in-right 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards",
         "glow-pulse": "glow-pulse 2s ease-in-out infinite",
-        "float": "float 6s ease-in-out infinite",
+        float: "float 6s ease-in-out infinite",
         "pulse-slow": "pulse-slow 3s ease-in-out infinite",
         "mascot-idle": "mascot-idle 5s ease-in-out infinite",
         "loading-dot": "loading-dot 1.4s cubic-bezier(0.45, 0, 0.55, 1) infinite",
         "fade-in-scale": "fade-in-scale 0.8s ease-out forwards",
         "bounce-once": "bounce-once 1s ease-in-out forwards",
-        "draw": "draw 3s ease-in-out infinite",
-        "typing": "typing 2.5s steps(14, end), blink-caret .5s step-end infinite alternate",
+        draw: "draw 3s ease-in-out infinite",
+        typing: "typing 2.5s steps(14, end), blink-caret .5s step-end infinite alternate",
         "move-bg": "move-bg 4s linear infinite",
         "slide-up-fade": "slide-up-fade 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards",
         "slide-in-right": "slide-in-right 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards",
@@ -193,6 +192,6 @@ const config = {
     },
   },
   plugins: [require("tailwindcss-animate")],
-} satisfies Config
+} satisfies Config;
 
 export default config;

@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 const navItems = [
     { label: "Home", href: "/" },
     { label: "About", href: "/about" },
-    { label: "Contact", href: "/contact" }
+    { label: "Feedback", href: "/contact" }
 ];
 
 export function LandingHeader() {
@@ -121,7 +121,12 @@ export function LandingHeader() {
     <nav ref={navRef} className="landing-nav group">
         <ul>
             {navItems.map((item, index) => (
-                <li key={item.label} ref={(el) => (itemsRef.current[index] = el)}>
+                <li
+                    key={item.label}
+                    ref={(el) => {
+                        itemsRef.current[index] = el;
+                    }}
+                >
                     <Link
                         href={item.href}
                         className={cn(

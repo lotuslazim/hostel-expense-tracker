@@ -1,10 +1,10 @@
 
 "use client";
 
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useUser, useDoc, useCollection } from "@/firebase";
 import { auth, firestore } from "@/firebase/config";
-import { doc, updateDoc, deleteDoc, getDocs, collection, query, where, writeBatch, serverTimestamp, Timestamp } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, getDocs, query, serverTimestamp, setDoc, Timestamp, updateDoc, where, writeBatch } from "firebase/firestore";
 import { signOut, sendPasswordResetEmail, deleteUser } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
@@ -25,13 +25,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
-import { ThemeSwitcher } from "./theme-switcher";
+import { Switch } from "@/components/ui/switch";
 import {
   Settings as SettingsIcon,
   Shield,
+  ClipboardList,
   User,
-  Palette,
-  Bell,
   Languages,
   LogOut,
   Trash2,
@@ -42,12 +41,38 @@ import {
   Loader2,
 } from "lucide-react";
 import { Label } from "../ui/label";
-import { Switch } from "../ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { startOfMonth } from 'date-fns/startOfMonth';
 import { endOfMonth } from 'date-fns/endOfMonth';
 import { format } from 'date-fns/format';
+
+const INVITE_CODE_LENGTH = 6;
+
+const normalizeInviteCode = (value: string) =>
+  value.trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+
+const generateInviteCode = () =>
+  Math.random()
+    .toString(36)
+    .slice(2, 2 + INVITE_CODE_LENGTH)
+    .toUpperCase()
+    .padEnd(INVITE_CODE_LENGTH, "X");
+
+const createUniqueInviteCode = async () => {
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const invitationCode = generateInviteCode();
+    const inviteSnapshot = await getDoc(
+      doc(firestore, "groupInvites", invitationCode)
+    );
+
+    if (!inviteSnapshot.exists()) {
+      return invitationCode;
+    }
+  }
+
+  throw new Error("Could not generate a unique invitation code.");
+};
 
 
 function SettingsSkeleton() {
@@ -77,18 +102,76 @@ function SettingsSkeleton() {
 }
 
 function AdminControls({ groupData, members, groupId }: { groupData: any, members: any[], groupId: string }) {
+  const { user } = useUser();
   const { t } = useI18n();
   const { toast } = useToast();
   const [isExporting, setIsExporting] = useState(false);
+  const [isUpdatingNoticeBoard, setIsUpdatingNoticeBoard] = useState(false);
 
   const handleResetInviteCode = async () => {
-    const newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-    const groupRef = doc(firestore, "groups", groupId);
+    if (!user) {
+      return;
+    }
+
     try {
-      await updateDoc(groupRef, { invitationCode: newCode });
+      const newCode = await createUniqueInviteCode();
+      const currentCode = normalizeInviteCode(groupData?.invitationCode || "");
+      const groupRef = doc(firestore, "groups", groupId);
+      const newInviteRef = doc(firestore, "groupInvites", newCode);
+      const batch = writeBatch(firestore);
+
+      batch.set(newInviteRef, {
+        groupId,
+        groupName: groupData?.groupName || "Group",
+        createdBy: user.uid,
+        createdAt: serverTimestamp(),
+      });
+      batch.update(groupRef, { invitationCode: newCode });
+
+      if (currentCode && currentCode !== newCode) {
+        const currentInviteRef = doc(firestore, "groupInvites", currentCode);
+        const currentInviteSnapshot = await getDoc(currentInviteRef);
+
+        if (
+          currentInviteSnapshot.exists() &&
+          currentInviteSnapshot.data().groupId === groupId
+        ) {
+          batch.delete(currentInviteRef);
+        }
+      }
+
+      await batch.commit();
       toast({ title: "Invite Code Reset", description: "A new invite code has been generated." });
     } catch (error) {
       toast({ variant: "destructive", title: "Error", description: "Could not reset invite code." });
+    }
+  };
+
+  const handleNoticeBoardAccessChange = async (enabled: boolean) => {
+    const groupRef = doc(firestore, "groups", groupId);
+    setIsUpdatingNoticeBoard(true);
+
+    try {
+      await updateDoc(groupRef, {
+        noticeBoardMemberAccess: enabled,
+        noticeBoardUpdatedAt: serverTimestamp(),
+      });
+
+      toast({
+        title: enabled ? "Member posting enabled" : "Notice Board locked",
+        description: enabled
+          ? "Members can post notices and manage only notices they created."
+          : "Only admins can now post, edit, unpin or delete notices.",
+      });
+    } catch (error) {
+      console.error("Could not update Notice Board permission:", error);
+      toast({
+        variant: "destructive",
+        title: "Permission update failed",
+        description: "The Notice Board setting was not changed.",
+      });
+    } finally {
+      setIsUpdatingNoticeBoard(false);
     }
   };
   
@@ -215,6 +298,37 @@ function AdminControls({ groupData, members, groupId }: { groupData: any, member
                     </div>
                 </CardContent>
             </Card>
+
+            <Card className="border-[#f6cf58]/20">
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <ClipboardList className="h-5 w-5 text-[#f6cf58]" />
+                        Notice Board permissions
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="flex items-start justify-between gap-5 rounded-xl border border-border/70 bg-muted/20 p-4">
+                        <div className="space-y-1">
+                            <Label htmlFor="notice-board-member-access" className="text-base font-semibold">
+                                Allow members to post notices
+                            </Label>
+                            <p className="max-w-xl text-sm leading-6 text-muted-foreground">
+                                When enabled, a member can post and can unpin or delete only their own notice. Admins can manage every notice. When disabled, the board is admin-managed.
+                            </p>
+                            <p className="text-xs font-medium text-[#f6cf58]">
+                                Current mode: {groupData?.noticeBoardMemberAccess === true ? "Member-owned notices allowed" : "Admin only"}
+                            </p>
+                        </div>
+                        <Switch
+                            id="notice-board-member-access"
+                            checked={groupData?.noticeBoardMemberAccess === true}
+                            onCheckedChange={(enabled) => void handleNoticeBoardAccessChange(enabled)}
+                            disabled={isUpdatingNoticeBoard}
+                            aria-label="Allow members to post and manage their own notices"
+                        />
+                    </div>
+                </CardContent>
+            </Card>
             
             <Card>
                 <CardHeader>
@@ -315,7 +429,7 @@ function AccountSettings({ user, userData, groupData, groupId }: { user: any, us
         const userRef = doc(firestore, "users", user.uid);
         const memberRef = doc(firestore, `groups/${groupId}/members`, user.uid);
 
-        batch.update(userRef, { groupId: null });
+        batch.update(userRef, { groupId: null, isAdmin: false });
         batch.update(memberRef, { status: 'inactive', leftAt: serverTimestamp() });
 
         try {
@@ -442,23 +556,10 @@ function AppSettings() {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3 items-start">
           <div className="md:col-span-1">
             <h2 className="text-xl font-bold flex items-center gap-2"><SettingsIcon /> {t('settings.app_settings.title')}</h2>
-            <p className="text-sm text-muted-foreground">Customize the application's look and feel.</p>
+            <p className="text-sm text-muted-foreground">Manage your language preference.</p>
           </div>
           <div className="md:col-span-2 space-y-6">
-             <Card>
-                <CardHeader>
-                    <CardTitle>{t('settings.app_settings.appearance.title')}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex items-center justify-between">
-                        <Label htmlFor="dark-mode" className="flex items-center gap-2">
-                           <Palette /> {t('settings.app_settings.appearance.dark_mode')}
-                        </Label>
-                        <ThemeSwitcher />
-                    </div>
-                </CardContent>
-            </Card>
-             <Card>
+            <Card>
                 <CardHeader>
                     <CardTitle>{t('settings.app_settings.language.title')}</CardTitle>
                 </CardHeader>
@@ -479,21 +580,6 @@ function AppSettings() {
                     </div>
                 </CardContent>
             </Card>
-             <Card>
-                <CardHeader>
-                    <CardTitle>{t('settings.app_settings.notifications.title')}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between">
-                        <Label htmlFor="meal-reminders">{t('settings.app_settings.notifications.meal_reminders')}</Label>
-                        <Switch id="meal-reminders" />
-                    </div>
-                    <div className="flex items-center justify-between">
-                        <Label htmlFor="expense-alerts">{t('settings.app_settings.notifications.expense_alerts')}</Label>
-                        <Switch id="expense-alerts" defaultChecked/>
-                    </div>
-                </CardContent>
-            </Card>
           </div>
         </div>
     );
@@ -510,6 +596,34 @@ export function Settings() {
   const groupRef = useMemo(() => (groupId ? doc(firestore, `groups`, groupId) : null), [groupId]);
   const { data: groupData, isLoading: isGroupDataLoading } = useDoc(groupRef);
 
+  useEffect(() => {
+    const invitationCode = normalizeInviteCode(groupData?.invitationCode || "");
+
+    if (!user || !groupId || !invitationCode) {
+      return;
+    }
+
+    const ensureInviteLookup = async () => {
+      const inviteRef = doc(firestore, "groupInvites", invitationCode);
+      const inviteSnapshot = await getDoc(inviteRef);
+
+      if (inviteSnapshot.exists()) {
+        return;
+      }
+
+      await setDoc(inviteRef, {
+        groupId,
+        groupName: groupData?.groupName || "Group",
+        createdBy: user.uid,
+        createdAt: serverTimestamp(),
+      });
+    };
+
+    void ensureInviteLookup().catch((error) => {
+      console.error("Could not prepare the secure invite code:", error);
+    });
+  }, [groupData?.groupName, groupData?.invitationCode, groupId, user]);
+
   const membersQuery = useMemo(() => (groupId ? query(collection(firestore, `groups/${groupId}/members`), where('status', '==', 'active')) : null), [groupId]);
   const { data: members, isLoading: areMembersLoading } = useCollection(membersQuery);
 
@@ -520,7 +634,9 @@ export function Settings() {
     return <SettingsSkeleton />;
   }
 
-  const isUserAdmin = userData?.isAdmin ?? false;
+  // Use the same admin authority as Firestore rules. A client-editable
+  // users/{uid}.isAdmin flag must not unlock group-level controls.
+  const isUserAdmin = Boolean(user && groupData?.adminId === user.uid);
 
   return (
     <>

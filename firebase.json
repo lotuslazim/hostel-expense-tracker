@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "target": "bachelor-bite-web-app",
     "public": "out",
     "ignore": [
       "firebase.json",

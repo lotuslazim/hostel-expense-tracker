@@ -1,0 +1,88 @@
+{
+  "placeholderImages": [
+    {
+      "id": "landing-hero",
+      "description": "Friends cooking together in a bright, modern kitchen.",
+      "imageUrl": "https://images.unsplash.com/photo-1556911220-bff31c812dba?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxmbGF0bWF0ZXMlMjBjb29raW5nfGVufDB8fHx8MTc1OTQ2MzU4OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "friends cooking"
+    },
+    {
+      "id": "landing-hero-2",
+      "description": "A group of friends laughing and sharing a meal at a rustic wooden table.",
+      "imageUrl": "https://images.unsplash.com/photo-1517048676732-d65bc937f952?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wzNDE5ODJ8MHwxfHNlYXJjaHwzfHxmcmllbmRzJTIwZWF0aW5nfGVufDB8fHx8MTc2MDM3OTc0MXww&ixlib=rb-4.0.3&q=80&w=1920",
+      "imageHint": "friends eating"
+    },
+    {
+      "id": "user-avatar",
+      "description": "Portrait of a smiling man with glasses.",
+      "imageUrl": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
+      "imageHint": "man portrait"
+    },
+    {
+      "id": "user-avatar-2",
+      "description": "Portrait of a woman smiling.",
+      "imageUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
+      "imageHint": "woman portrait"
+    },
+    {
+      "id": "user-avatar-3",
+      "description": "Small avatar of a person.",
+      "imageUrl": "https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80",
+      "imageHint": "person avatar"
+    },
+    {
+      "id": "app-chat-screen",
+      "description": "A screenshot of the application's chat feature.",
+      "imageUrl": "https://images.unsplash.com/photo-1633354998322-415842c7ee11?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhcHAlMjBjaGF0fGVufDB8fHx8MTc2Mjk1NDY1NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "app chat"
+    },
+    {
+      "id": "app-meal-planner-screen",
+      "description": "A screenshot of the application's meal planner feature.",
+      "imageUrl": "https://images.unsplash.com/photo-1664531565122-89b0b0b066cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhcHAlMjBwbGFubmVyfGVufDB8fHx8MTc2Mjk1NDY1NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "app planner"
+    },
+    {
+      "id": "app-expense-tracker-screen",
+      "description": "A screenshot of the application's expense tracker feature.",
+      "imageUrl": "https://images.unsplash.com/photo-1650821414390-276561abd95a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhcHAlMjBleHBlbnNlc3xlbnwwfHx8fDE3NjI5NTQ2NTR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "app expenses"
+    },
+    {
+      "id": "app-leaderboard-screen",
+      "description": "A screenshot of the application's leaderboard feature.",
+      "imageUrl": "https://images.unsplash.com/photo-1705490471153-d5fd3829aa32?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxhcHAlMjBsZWFkZXJib2FyZHxlbnwwfHx8fDE3NjI5NTQ2NTR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "app leaderboard"
+    },
+    {
+      "id": "mobile-landing-page",
+      "description": "A screenshot of the application's mobile landing page with the mascot.",
+      "imageUrl": "https://storage.googleapis.com/project-spark-345314-web-assets/bachelor-bite-app/56ab75ac-b7d1-4b13-8178-199a38f38c7f.png",
+      "imageHint": "app mascot"
+    },
+    {
+      "id": "app-preview",
+      "description": "A screenshot of the application dashboard.",
+      "imageUrl": "/a1.jpg",
+      "imageHint": "app dashboard"
+    },
+    {
+      "id": "app-dashboard",
+      "description": "An image representing the app's main dashboard view.",
+      "imageUrl": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1920&q=80",
+      "imageHint": "dashboard ui"
+    },
+    {
+      "id": "app-report",
+      "description": "An image representing the app's monthly report feature.",
+      "imageUrl": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1920&q=80",
+      "imageHint": "report chart"
+    },
+    {
+      "id": "app-inventory",
+      "description": "An image representing the app's inventory management feature.",
+      "imageUrl": "https://images.unsplash.com/photo-1583258292688-d0213dc5a3a8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1920&q=80",
+      "imageHint": "inventory list"
+    }
+  ]
+}

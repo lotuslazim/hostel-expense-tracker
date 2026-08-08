@@ -104,7 +104,9 @@ export default function AboutPage() {
             <main className="about-main-content">
                 {/* Hero Section */}
                 <section
-                    ref={el => sectionsRef.current[0] = el}
+                    ref={(el) => {
+                        sectionsRef.current[0] = el;
+                    }}
                     className="about-section about-hero-section is-visible"
                 >
                     <div className="hero-box">
@@ -131,7 +133,9 @@ export default function AboutPage() {
 
                 {/* Features Section */}
                 <section
-                    ref={el => sectionsRef.current[1] = el}
+                    ref={(el) => {
+                        sectionsRef.current[1] = el;
+                    }}
                     className="about-section"
                 >
                     <h2 className="section-title">Everything You Need, Nothing You Don’t</h2>
@@ -160,7 +164,9 @@ export default function AboutPage() {
 
                 {/* How It Works Section */}
                 <section
-                    ref={el => sectionsRef.current[2] = el}
+                    ref={(el) => {
+                        sectionsRef.current[2] = el;
+                    }}
                     className="about-section how-it-works-section"
                 >
                     <span id="bg-text-1" className="bg-text">01</span>
@@ -188,7 +194,9 @@ export default function AboutPage() {
 
                 {/* Values Section */}
                 <section
-                    ref={el => sectionsRef.current[3] = el}
+                    ref={(el) => {
+                        sectionsRef.current[3] = el;
+                    }}
                     className="about-section"
                 >
                     <h2 className="section-title">Our Core Values</h2>
@@ -205,7 +213,9 @@ export default function AboutPage() {
 
                 {/* CTA Section */}
                 <section
-                    ref={el => sectionsRef.current[4] = el}
+                    ref={(el) => {
+                        sectionsRef.current[4] = el;
+                    }}
                     className="about-section about-cta-section"
                 >
                     <h2 className="cta-title">Ready to Simplify Your Shared Living?</h2>

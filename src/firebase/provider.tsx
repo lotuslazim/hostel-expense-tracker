@@ -1,154 +1,245 @@
+"use client";
 
-'use client';
+import React, {
+    createContext,
+    useContext,
+    type ReactNode,
+    useEffect,
+    useMemo,
+    useState,
+} from "react";
+import type { FirebaseApp } from "firebase/app";
+import {
+    type Auth,
+    type User,
+    onAuthStateChanged,
+} from "firebase/auth";
+import {
+    type Firestore,
+    doc,
+    getDoc,
+    setDoc,
+} from "firebase/firestore";
+import {
+    usePathname,
+    useRouter,
+} from "next/navigation";
 
-import React, { createContext, useContext, ReactNode, useMemo, useState, useEffect } from 'react';
-import { FirebaseApp } from 'firebase/app';
-import { Firestore, doc, getDoc, setDoc } from 'firebase/firestore';
-import { Auth, User, onAuthStateChanged } from 'firebase/auth';
-import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
-import { usePathname, useRouter } from 'next/navigation';
+import { FirebaseErrorListener } from "@/components/FirebaseErrorListener";
 
 interface FirebaseProviderProps {
-  children: ReactNode;
-  firebaseApp: FirebaseApp;
-  firestore: Firestore;
-  auth: Auth;
+    children: ReactNode;
+    firebaseApp: FirebaseApp;
+    firestore: Firestore;
+    auth: Auth;
 }
 
-// User authentication state
 interface UserAuthState {
-  user: User | null;
-  isUserLoading: boolean;
-  userError: Error | null;
+    user: User | null;
+    isUserLoading: boolean;
+    userError: Error | null;
 }
 
-// Combined context state
-export interface FirebaseContextState extends UserAuthState {
-  firebaseApp: FirebaseApp;
-  firestore: Firestore;
-  auth: Auth;
+export interface FirebaseContextState
+    extends UserAuthState {
+    firebaseApp: FirebaseApp;
+    firestore: Firestore;
+    auth: Auth;
 }
 
-// Return type for useUser()
-export interface UserHookResult extends UserAuthState {}
+export interface UserHookResult
+    extends UserAuthState {}
 
-// React Context
-export const FirebaseContext = createContext<FirebaseContextState | undefined>(undefined);
+export const FirebaseContext =
+    createContext<FirebaseContextState | undefined>(
+        undefined
+    );
 
-const createUserDocument = async (firestore: Firestore, user: User) => {
-    const userDocRef = doc(firestore, "users", user.uid);
+const PUBLIC_ROUTES = new Set([
+    "/",
+    "/login",
+    "/signup",
+    "/about",
+    "/contact",
+    "/onboarding-preview",
+]);
+
+function normalizePathname(pathname: string) {
+    if (pathname === "/") {
+        return "/";
+    }
+
+    return pathname.replace(/\/+$/, "");
+}
+
+async function createUserDocument(
+    firestore: Firestore,
+    user: User
+) {
+    const userDocRef = doc(
+        firestore,
+        "users",
+        user.uid
+    );
+
     const userDoc = await getDoc(userDocRef);
 
     if (!userDoc.exists()) {
-      await setDoc(userDocRef, {
-        id: user.uid,
-        email: user.email,
-        displayName: user.displayName || user.email?.split('@')[0],
-        photoURL: user.photoURL,
-        groupId: null,
-        isAdmin: false,
-      });
+        await setDoc(userDocRef, {
+            id: user.uid,
+            email: user.email,
+            displayName:
+                user.displayName ||
+                user.email?.split("@")[0],
+            photoURL: user.photoURL,
+            groupId: null,
+            isAdmin: false,
+        });
     }
-};
+}
 
-/**
- * FirebaseProvider manages and provides user authentication state.
- */
-export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
-  children,
-  firebaseApp,
-  firestore,
-  auth,
-}) => {
-  const router = useRouter();
-  const pathname = usePathname();
-  const [userAuthState, setUserAuthState] = useState<UserAuthState>({
-    user: null,
-    isUserLoading: true, // Start loading until first auth event
-    userError: null,
-  });
-  
-  // Define public routes
-  const publicRoutes = ['/login', '/signup', '/', '/about', '/contact'];
-  const isPublicRoute = publicRoutes.includes(pathname);
-
-  // This effect listens for all authentication state changes (login, logout).
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // Don't block the auth state update on this
-        createUserDocument(firestore, user);
-      }
-      setUserAuthState({ user, isUserLoading: false, userError: null });
-    }, (error) => {
-      console.error("FirebaseProvider: onAuthStateChanged error:", error);
-      setUserAuthState({ user: null, isUserLoading: false, userError: error });
-    });
-
-    return () => unsubscribe();
-  }, [auth, firestore]);
-
-  // This effect handles redirection after authentication state is confirmed.
-  useEffect(() => {
-    const nonRedirectPublicRoutes = ['/', '/about', '/contact'];
-    
-    // Wait until auth state is determined
-    if (userAuthState.isUserLoading) {
-      return;
-    }
-  
-    // If user is logged in and on a public page that should redirect (e.g., login, signup)
-    if (userAuthState.user && publicRoutes.includes(pathname) && !nonRedirectPublicRoutes.includes(pathname)) {
-      router.push('/dashboard');
-    }
-    // If user is not logged in and on a protected page
-    else if (!userAuthState.user && !isPublicRoute) {
-      router.push('/login');
-    }
-  
-  }, [userAuthState.user, userAuthState.isUserLoading, pathname, router, isPublicRoute, publicRoutes]);
-
-  const contextValue = useMemo((): FirebaseContextState => ({
+export const FirebaseProvider: React.FC<
+    FirebaseProviderProps
+> = ({
+    children,
     firebaseApp,
     firestore,
     auth,
-    ...userAuthState,
-  }), [firebaseApp, firestore, auth, userAuthState]);
+}) => {
+    const router = useRouter();
+    const pathname = usePathname();
 
-  return (
-    <FirebaseContext.Provider value={contextValue}>
-      <FirebaseErrorListener />
-      {children}
-    </FirebaseContext.Provider>
-  );
+    const [userAuthState, setUserAuthState] =
+        useState<UserAuthState>({
+            user: null,
+            isUserLoading: true,
+            userError: null,
+        });
+
+    const normalizedPathname = useMemo(
+        () => normalizePathname(pathname),
+        [pathname]
+    );
+
+    const isPublicRoute =
+        PUBLIC_ROUTES.has(normalizedPathname);
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(
+            auth,
+            (user) => {
+                if (user) {
+                    void createUserDocument(
+                        firestore,
+                        user
+                    ).catch((error) => {
+                        console.error(
+                            "Failed to create user document:",
+                            error
+                        );
+                    });
+                }
+
+                setUserAuthState({
+                    user,
+                    isUserLoading: false,
+                    userError: null,
+                });
+            },
+            (error) => {
+                console.error(
+                    "FirebaseProvider: onAuthStateChanged error:",
+                    error
+                );
+
+                setUserAuthState({
+                    user: null,
+                    isUserLoading: false,
+                    userError: error,
+                });
+            }
+        );
+
+        return unsubscribe;
+    }, [auth, firestore]);
+
+    useEffect(() => {
+        if (userAuthState.isUserLoading) {
+            return;
+        }
+
+        /*
+         * Login and signup are intentionally allowed even when
+         * another Firebase account is still signed in. This lets
+         * the user switch account or create a new account instead
+         * of being forced back to /dashboard.
+         */
+        if (
+            !userAuthState.user &&
+            !isPublicRoute
+        ) {
+            router.replace("/login");
+        }
+    }, [
+        userAuthState.user,
+        userAuthState.isUserLoading,
+        isPublicRoute,
+        router,
+    ]);
+
+    const contextValue =
+        useMemo<FirebaseContextState>(
+            () => ({
+                firebaseApp,
+                firestore,
+                auth,
+                ...userAuthState,
+            }),
+            [
+                firebaseApp,
+                firestore,
+                auth,
+                userAuthState,
+            ]
+        );
+
+    return (
+        <FirebaseContext.Provider
+            value={contextValue}
+        >
+            <FirebaseErrorListener />
+            {children}
+        </FirebaseContext.Provider>
+    );
 };
 
-/**
- * Hook to access the full Firebase context, including services and user state.
- * Use this if you need direct access to service instances like `auth` or `firestore`.
- * Throws an error if used outside a FirebaseProvider.
- */
-export const useFirebase = (): FirebaseContextState => {
-  const context = useContext(FirebaseContext);
-  if (context === undefined) {
-    throw new Error('useFirebase must be used within a FirebaseProvider.');
-  }
-  return context;
-};
+export const useFirebase =
+    (): FirebaseContextState => {
+        const context = useContext(FirebaseContext);
 
-/**
- * Hook specifically for accessing the authenticated user's state.
- * This is the preferred hook for most components that only need to know about the user.
- * @returns {UserHookResult} Object with user, isUserLoading, userError.
- */
-export const useUser = (): UserHookResult => {
-  const context = useContext(FirebaseContext);
-  if (context === undefined) {
-    throw new Error('useUser must be used within a FirebaseProvider.');
-  }
-  return {
-    user: context.user,
-    isUserLoading: context.isUserLoading,
-    userError: context.userError,
-  };
-};
+        if (context === undefined) {
+            throw new Error(
+                "useFirebase must be used within a FirebaseProvider."
+            );
+        }
+
+        return context;
+    };
+
+export const useUser =
+    (): UserHookResult => {
+        const context = useContext(FirebaseContext);
+
+        if (context === undefined) {
+            throw new Error(
+                "useUser must be used within a FirebaseProvider."
+            );
+        }
+
+        return {
+            user: context.user,
+            isUserLoading:
+                context.isUserLoading,
+            userError: context.userError,
+        };
+    };

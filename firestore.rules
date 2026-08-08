@@ -1,119 +1,1049 @@
-
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    /**
-     * @description Allows users to read and update their own profile data. Creation is allowed with matching user ID.
-     * @path /users/{userId}
-     * @allow (get, update) User with matching {userId}
-     * @allow (create) User creating their own profile.
-     * @deny (get, update) User trying to access another user's profile.
-     * @deny (create) User attempting to create a profile with a mismatched ID.
-     */
+    // --------------------------------------------------
+    // Shared helper functions
+    // --------------------------------------------------
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isActiveMemberData(memberData) {
+      return !("status" in memberData)
+        || memberData.status == "active";
+    }
+
+    function isGroupMember(groupId) {
+      return isSignedIn()
+        && exists(
+          /databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)
+        )
+        && isActiveMemberData(
+          get(
+            /databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)
+          ).data
+        );
+    }
+
+    function isGroupMemberAfter(groupId, userId) {
+      return existsAfter(
+          /databases/$(database)/documents/groups/$(groupId)/members/$(userId)
+        )
+        && isActiveMemberData(
+          getAfter(
+            /databases/$(database)/documents/groups/$(groupId)/members/$(userId)
+          ).data
+        );
+    }
+
+    function isGroupAdmin(groupId) {
+      return isSignedIn()
+        && exists(
+          /databases/$(database)/documents/groups/$(groupId)
+        )
+        && get(
+          /databases/$(database)/documents/groups/$(groupId)
+        ).data.adminId == request.auth.uid;
+    }
+
+    function hasValidInvite(groupId, inviteCode) {
+      return inviteCode is string
+        && exists(
+          /databases/$(database)/documents/groupInvites/$(inviteCode)
+        )
+        && get(
+          /databases/$(database)/documents/groupInvites/$(inviteCode)
+        ).data.groupId == groupId;
+    }
+
+    function memberNoticeAccessEnabled(groupId) {
+      return exists(
+        /databases/$(database)/documents/groups/$(groupId)
+      )
+        && get(
+          /databases/$(database)/documents/groups/$(groupId)
+        ).data.noticeBoardMemberAccess == true;
+    }
+
+    function membershipFieldsAreUnchanged() {
+      return request.resource.data.groupId == resource.data.groupId
+        && request.resource.data.isAdmin == resource.data.isAdmin;
+    }
+
+    function selfJoinsGroup(userId) {
+      return resource.data.groupId == null
+        && request.resource.data.groupId is string
+        && isGroupMemberAfter(request.resource.data.groupId, userId)
+        && request.resource.data.isAdmin
+          == (
+            getAfter(
+              /databases/$(database)/documents/groups/$(request.resource.data.groupId)/members/$(userId)
+            ).data.role == "admin"
+          )
+        && (
+          getAfter(
+            /databases/$(database)/documents/groups/$(request.resource.data.groupId)/members/$(userId)
+          ).data.role != "admin"
+          || getAfter(
+            /databases/$(database)/documents/groups/$(request.resource.data.groupId)
+          ).data.adminId == userId
+        );
+    }
+
+    function selfLeavesGroup(userId) {
+      return resource.data.groupId is string
+        && request.resource.data.groupId == null
+        && request.resource.data.isAdmin == false
+        && existsAfter(
+          /databases/$(database)/documents/groups/$(resource.data.groupId)/members/$(userId)
+        )
+        && getAfter(
+          /databases/$(database)/documents/groups/$(resource.data.groupId)/members/$(userId)
+        ).data.status == "inactive";
+    }
+
+    function adminManagesUserMembership(userId) {
+      return resource.data.groupId is string
+        && isGroupAdmin(resource.data.groupId)
+        && request.auth.uid != userId
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(["groupId", "isAdmin"])
+        && existsAfter(
+          /databases/$(database)/documents/groups/$(resource.data.groupId)/members/$(userId)
+        )
+        && (
+          (
+            request.resource.data.groupId == resource.data.groupId
+            && isGroupMemberAfter(resource.data.groupId, userId)
+            && request.resource.data.isAdmin
+              == (
+                getAfter(
+                  /databases/$(database)/documents/groups/$(resource.data.groupId)/members/$(userId)
+                ).data.role == "admin"
+              )
+          )
+          || (
+            request.resource.data.groupId == null
+            && request.resource.data.isAdmin == false
+            && getAfter(
+              /databases/$(database)/documents/groups/$(resource.data.groupId)/members/$(userId)
+            ).data.status == "inactive"
+          )
+        );
+    }
+
+    // --------------------------------------------------
+    // Users
+    // --------------------------------------------------
+
     match /users/{userId} {
-      function isOwner(userId) {
-        return request.auth.uid == userId;
-      }
-      function isExistingOwner(userId) {
-        return isOwner(userId) && resource != null;
-      }
-      allow get: if isOwner(userId);
-      allow list: if false; // User listing is disallowed for privacy.
-      allow create: if isOwner(userId) && request.resource.data.id == request.auth.uid;
-      allow update: if isExistingOwner(userId);
+      allow get: if isSignedIn()
+        && (
+          request.auth.uid == userId
+          || (
+            resource.data.groupId is string
+            && isGroupMember(resource.data.groupId)
+          )
+        );
+
+      allow list: if false;
+
+      allow create: if isSignedIn()
+        && request.auth.uid == userId
+        && request.resource.data.id == userId
+        && request.resource.data.groupId == null
+        && request.resource.data.isAdmin == false;
+
+      allow update: if isSignedIn()
+        && resource.data.id == userId
+        && request.resource.data.id == resource.data.id
+        && (
+          (
+            request.auth.uid == userId
+            && (
+              membershipFieldsAreUnchanged()
+              || selfJoinsGroup(userId)
+              || selfLeavesGroup(userId)
+            )
+          )
+          || adminManagesUserMembership(userId)
+        );
+
       allow delete: if false;
     }
 
-    /**
-     * @description Allows group admins to read and manage group data, and members to read group data.
-     * @path /groups/{groupId}
-     * @allow (get, list) Any authenticated user.
-     * @allow (create) Only if the adminId matches the authenticated user's UID.
-     * @allow (update, delete) Only the group admin.
-     * @deny (create) If the adminId does not match the authenticated user's UID.
-     * @principle Enforces admin-ownership for group management.
-     */
+    // --------------------------------------------------
+    // Secure invite-code lookup. A caller must know the exact document ID;
+    // listing every invite is never allowed.
+    // --------------------------------------------------
+
+    match /groupInvites/{inviteCode} {
+      allow get: if isSignedIn();
+      allow list: if false;
+
+      allow create: if isSignedIn()
+        && request.resource.data.keys().hasOnly([
+          "groupId",
+          "groupName",
+          "createdBy",
+          "createdAt"
+        ])
+        && request.resource.data.groupId is string
+        && request.resource.data.groupName is string
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.createdAt == request.time
+        && getAfter(
+          /databases/$(database)/documents/groups/$(request.resource.data.groupId)
+        ).data.invitationCode == inviteCode
+        && isGroupMemberAfter(
+          request.resource.data.groupId,
+          request.auth.uid
+        );
+
+      allow update: if false;
+
+      allow delete: if isGroupAdmin(resource.data.groupId);
+    }
+
+    // --------------------------------------------------
+    // Groups
+    // --------------------------------------------------
+
     match /groups/{groupId} {
-      function isAdmin() {
-        return request.auth.uid == resource.data.adminId;
+      allow get: if isGroupMember(groupId);
+      allow list: if false;
+
+      allow create: if isSignedIn()
+        && request.resource.data.adminId == request.auth.uid
+        && request.resource.data.id == groupId
+        && request.resource.data.invitationCode is string
+        && existsAfter(
+          /databases/$(database)/documents/groupInvites/$(request.resource.data.invitationCode)
+        )
+        && getAfter(
+          /databases/$(database)/documents/groupInvites/$(request.resource.data.invitationCode)
+        ).data.groupId == groupId;
+
+      // This also protects the Notice Board permission toggle: only the
+      // active group admins can change noticeBoardMemberAccess.
+      allow update: if isGroupAdmin(groupId)
+        && !request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(["id", "adminId"])
+        && request.resource.data.invitationCode is string
+        && (
+          request.resource.data.invitationCode
+            == resource.data.invitationCode
+          || (
+            existsAfter(
+              /databases/$(database)/documents/groupInvites/$(request.resource.data.invitationCode)
+            )
+            && getAfter(
+              /databases/$(database)/documents/groupInvites/$(request.resource.data.invitationCode)
+            ).data.groupId == groupId
+          )
+        );
+
+      allow delete: if isGroupAdmin(groupId);
+
+      // Activity documents are the shared, append-only audit trail used by
+      // meals, expenses, undo actions, and admin corrections.
+      function hasValidActivityBase(activityData) {
+        return activityData.keys().hasAll([
+            "groupId",
+            "senderId",
+            "senderName",
+            "type",
+            "messageText",
+            "createdAt",
+            "readBy"
+          ])
+          && activityData.keys().hasOnly([
+            "groupId",
+            "recordId",
+            "senderId",
+            "senderName",
+            "targetUserId",
+            "type",
+            "messageText",
+            "reason",
+            "beforeMealNumber",
+            "afterMealNumber",
+            "createdAt",
+            "readBy"
+          ])
+          && activityData.groupId == groupId
+          && activityData.senderId == request.auth.uid
+          && activityData.senderName is string
+          && activityData.senderName.size() > 0
+          && activityData.senderName.size() <= 80
+          && activityData.type is string
+          && activityData.type.size() > 0
+          && activityData.type.size() <= 40
+          && activityData.messageText is string
+          && activityData.messageText.size() > 0
+          && activityData.messageText.size() <= 500
+          && activityData.createdAt == request.time
+          && activityData.readBy is list
+          && activityData.readBy.size() == 1
+          && activityData.readBy[0] == request.auth.uid;
       }
-       function isExistingAdmin() {
-        return isAdmin() && resource != null;
+
+      function hasValidMealDateKey(mealData) {
+        let dateParts = mealData.dateKey.split("-");
+        return mealData.dateKey is string
+          && mealData.dateKey.matches("[0-9]{4}-[0-9]{2}-[0-9]{2}")
+          && dateParts.size() == 3
+          && int(dateParts[0]) >= 2000
+          && int(dateParts[0]) <= 2100
+          && int(dateParts[1]) >= 1
+          && int(dateParts[1]) <= 12
+          && int(dateParts[2]) >= 1
+          && int(dateParts[2]) <= 31;
       }
-      function isSignedIn() {
-        return request.auth != null;
+
+      function hasValidNewMeal(mealId) {
+        let mealData = request.resource.data;
+        return mealData.keys().hasAll([
+            "mealType",
+            "mealNumber",
+            "description",
+            "date",
+            "dateKey",
+            "createdAt",
+            "userId",
+            "userName",
+            "itemName",
+            "groupId",
+            "createdActivityId",
+            "undoActivityId"
+          ])
+          && mealData.keys().hasOnly([
+            "mealType",
+            "mealNumber",
+            "description",
+            "date",
+            "dateKey",
+            "createdAt",
+            "userId",
+            "userName",
+            "itemName",
+            "groupId",
+            "createdActivityId",
+            "undoActivityId"
+          ])
+          && mealData.groupId == groupId
+          && mealData.userId == request.auth.uid
+          && mealData.mealType is string
+          && mealData.mealType == mealData.mealType.trim().lower()
+          && mealData.mealType.matches("[^/]{1,40}")
+          && !mealData.mealType.matches(".*__.*")
+          && mealData.mealNumber is number
+          && mealData.mealNumber > 0
+          && mealData.mealNumber <= 100
+          && mealData.description is string
+          && mealData.description.size() <= 500
+          && mealData.date is timestamp
+          && hasValidMealDateKey(mealData)
+          && mealData.createdAt == request.time
+          && mealData.userName is string
+          && mealData.userName.size() > 0
+          && mealData.userName.size() <= 80
+          && (
+            mealData.itemName == null
+            || (
+              mealData.itemName is string
+              && mealData.itemName.size() <= 200
+            )
+          )
+          && mealData.createdActivityId is string
+          && mealData.undoActivityId is string
+          && mealData.createdActivityId != mealData.undoActivityId
+          && mealId
+            == mealData.userId
+              + "__"
+              + mealData.dateKey
+              + "__"
+              + mealData.mealType
+          && existsAfter(
+            /databases/$(database)/documents/groups/$(groupId)/notifications/$(mealData.createdActivityId)
+          )
+          && getAfter(
+            /databases/$(database)/documents/groups/$(groupId)/notifications/$(mealData.createdActivityId)
+          ).data.type == "meal"
+          && getAfter(
+            /databases/$(database)/documents/groups/$(groupId)/notifications/$(mealData.createdActivityId)
+          ).data.recordId == mealId;
       }
-      allow get, list: if isSignedIn();
-      allow create: if isSignedIn() && request.resource.data.adminId == request.auth.uid && request.resource.data.id == groupId;
-      allow update: if isExistingAdmin();
-      allow delete: if isExistingAdmin();
 
-        match /meals/{mealId} {
-          function isSignedIn() {
-            return request.auth != null;
-          }
-          function isAdmin(groupId) {
-            return get(/databases/$(database)/documents/groups/$(groupId)).data.adminId == request.auth.uid;
-          }
-          function isOwner(mealId) {
-            return get(/databases/$(database)/documents/groups/$(groupId)/meals/$(mealId)).data.userId == request.auth.uid;
-          }
-          allow get, list: if isSignedIn();
-          allow create: if isSignedIn() && request.resource.data.groupId == groupId && request.resource.data.userId == request.auth.uid;
-          allow update: if isSignedIn() && (isOwner(mealId) || isAdmin(groupId));
-          allow delete: if isSignedIn() && (isOwner(mealId) || isAdmin(groupId));
-        }
+      function isLinkedMealCreateActivity(notificationId, activityData) {
+        return activityData.type == "meal"
+          && activityData.recordId is string
+          && activityData.targetUserId == request.auth.uid
+          && existsAfter(
+            /databases/$(database)/documents/groups/$(groupId)/meals/$(activityData.recordId)
+          )
+          && getAfter(
+            /databases/$(database)/documents/groups/$(groupId)/meals/$(activityData.recordId)
+          ).data.userId == request.auth.uid
+          && getAfter(
+            /databases/$(database)/documents/groups/$(groupId)/meals/$(activityData.recordId)
+          ).data.createdActivityId == notificationId;
+      }
 
-       match /expenses/{expenseId} {
-          function isSignedIn() {
-            return request.auth != null;
-          }
-          function isAdmin(groupId) {
-            return get(/databases/$(database)/documents/groups/$(groupId)).data.adminId == request.auth.uid;
-          }
-          function isOwner(expenseId) {
-            return get(/databases/$(database)/documents/groups/$(groupId)/expenses/$(expenseId)).data.userId == request.auth.uid;
-          }
-          allow get, list: if isSignedIn();
-          allow create: if isSignedIn() && request.resource.data.groupId == groupId && request.resource.data.userId == request.auth.uid;
-          allow update: if isSignedIn() && (isOwner(expenseId) || isAdmin(groupId));
-          allow delete: if isSignedIn() && (isOwner(expenseId) || isAdmin(groupId));
-        }
+      function isLinkedMealUndoActivity(notificationId, activityData) {
+        return activityData.type == "meal_undo"
+          && activityData.recordId is string
+          && activityData.targetUserId == request.auth.uid
+          && exists(
+            /databases/$(database)/documents/groups/$(groupId)/meals/$(activityData.recordId)
+          )
+          && get(
+            /databases/$(database)/documents/groups/$(groupId)/meals/$(activityData.recordId)
+          ).data.userId == request.auth.uid
+          && get(
+            /databases/$(database)/documents/groups/$(groupId)/meals/$(activityData.recordId)
+          ).data.undoActivityId == notificationId
+          && request.time
+            <= get(
+              /databases/$(database)/documents/groups/$(groupId)/meals/$(activityData.recordId)
+            ).data.createdAt + duration.value(15, "s")
+          && !existsAfter(
+            /databases/$(database)/documents/groups/$(groupId)/meals/$(activityData.recordId)
+          );
+      }
 
-         match /purchasedItems/{itemId} {
-          function isSignedIn() {
-            return request.auth != null;
-          }
-          function isAdmin(groupId) {
-            return get(/databases/$(database)/documents/groups/$(groupId)).data.adminId == request.auth.uid;
-          }
-          function isOwner(itemId) {
-            return get(/databases/$(database)/documents/groups/$(groupId)/purchasedItems/$(itemId)).data.userId == request.auth.uid;
-          }
-          allow get, list: if isSignedIn();
-          allow create: if isSignedIn() && request.resource.data.groupId == groupId && request.resource.data.userId == request.auth.uid;
-          allow update: if isSignedIn() && (isOwner(itemId) || isAdmin(groupId));
-          allow delete: if isSignedIn() && (isOwner(itemId) || isAdmin(groupId));
-        }
+      function isLinkedExpenseCreateActivity(notificationId, activityData) {
+        return activityData.type == "expense"
+          && activityData.recordId is string
+          && activityData.targetUserId == request.auth.uid
+          && existsAfter(
+            /databases/$(database)/documents/groups/$(groupId)/expenses/$(activityData.recordId)
+          )
+          && getAfter(
+            /databases/$(database)/documents/groups/$(groupId)/expenses/$(activityData.recordId)
+          ).data.userId == request.auth.uid
+          && getAfter(
+            /databases/$(database)/documents/groups/$(groupId)/expenses/$(activityData.recordId)
+          ).data.createdActivityId == notificationId;
+      }
 
-        match /settlements/{settlementId} {
-            function isSignedIn() {
-                return request.auth != null;
-            }
-             function isGroupMember() {
-                return exists(/databases/$(database)/documents/groups/$(groupId));
-            }
-             function isAdmin(groupId) {
-                return get(/databases/$(database)/documents/groups/$(groupId)).data.adminId == request.auth.uid;
-            }
-             function isOwner() {
-                return request.auth.uid == request.resource.data.userId;
-            }
-            allow get, list: if isSignedIn() && isGroupMember();
-            allow create: if isSignedIn() && isGroupMember() && isOwner();
-            allow update, delete: if isSignedIn() && isAdmin(groupId);
-        }
+      function isLinkedExpenseUndoActivity(notificationId, activityData) {
+        return activityData.type == "expense_undo"
+          && activityData.recordId is string
+          && activityData.targetUserId == request.auth.uid
+          && exists(
+            /databases/$(database)/documents/groups/$(groupId)/expenses/$(activityData.recordId)
+          )
+          && get(
+            /databases/$(database)/documents/groups/$(groupId)/expenses/$(activityData.recordId)
+          ).data.userId == request.auth.uid
+          && get(
+            /databases/$(database)/documents/groups/$(groupId)/expenses/$(activityData.recordId)
+          ).data.undoActivityId == notificationId
+          && request.time
+            <= get(
+              /databases/$(database)/documents/groups/$(groupId)/expenses/$(activityData.recordId)
+            ).data.createdAt + duration.value(15, "s")
+          && !existsAfter(
+            /databases/$(database)/documents/groups/$(groupId)/expenses/$(activityData.recordId)
+          );
+      }
+
+      function isLinkedMealCorrectionActivity(notificationId, activityData) {
+        return activityData.type == "meal_adjustment"
+          && isGroupAdmin(groupId)
+          && activityData.recordId is string
+          && activityData.targetUserId is string
+          && activityData.reason is string
+          && activityData.reason.size() >= 5
+          && activityData.reason.size() <= 200
+          && activityData.beforeMealNumber is number
+          && activityData.afterMealNumber is number
+          && exists(
+            /databases/$(database)/documents/groups/$(groupId)/meals/$(activityData.recordId)
+          )
+          && existsAfter(
+            /databases/$(database)/documents/groups/$(groupId)/meals/$(activityData.recordId)
+          )
+          && get(
+            /databases/$(database)/documents/groups/$(groupId)/meals/$(activityData.recordId)
+          ).data.userId == activityData.targetUserId
+          && get(
+            /databases/$(database)/documents/groups/$(groupId)/meals/$(activityData.recordId)
+          ).data.mealNumber == activityData.beforeMealNumber
+          && getAfter(
+            /databases/$(database)/documents/groups/$(groupId)/meals/$(activityData.recordId)
+          ).data.mealNumber == activityData.afterMealNumber
+          && getAfter(
+            /databases/$(database)/documents/groups/$(groupId)/meals/$(activityData.recordId)
+          ).data.editReason == activityData.reason
+          && getAfter(
+            /databases/$(database)/documents/groups/$(groupId)/meals/$(activityData.recordId)
+          ).data.lastActivityId == notificationId;
+      }
+
+      function hasValidAdminMealCorrection(mealId) {
+        let changedFields = request.resource.data.diff(resource.data).affectedKeys();
+        let nextItemName = request.resource.data.get("itemName", null);
+        let activityId = request.resource.data.lastActivityId;
+        return isGroupAdmin(groupId)
+          && changedFields.hasOnly([
+            "mealNumber",
+            "itemName",
+            "description",
+            "updatedAt",
+            "lastEditedBy",
+            "lastEditedByName",
+            "lastEditedAt",
+            "editReason",
+            "lastActivityId"
+          ])
+          && changedFields.hasAny(["mealNumber", "itemName"])
+          && request.resource.data.mealNumber is number
+          && request.resource.data.mealNumber > 0
+          && request.resource.data.mealNumber <= 100
+          && (
+            nextItemName == null
+            || (
+              nextItemName is string
+              && nextItemName.size() <= 200
+            )
+          )
+          && request.resource.data.description is string
+          && request.resource.data.description.size() <= 500
+          && request.resource.data.updatedAt == request.time
+          && request.resource.data.lastEditedBy == request.auth.uid
+          && request.resource.data.lastEditedByName is string
+          && request.resource.data.lastEditedByName.size() > 0
+          && request.resource.data.lastEditedByName.size() <= 80
+          && request.resource.data.lastEditedAt == request.time
+          && request.resource.data.editReason is string
+          && request.resource.data.editReason.size() >= 5
+          && request.resource.data.editReason.size() <= 200
+          && activityId is string
+          && existsAfter(
+            /databases/$(database)/documents/groups/$(groupId)/notifications/$(activityId)
+          )
+          && getAfter(
+            /databases/$(database)/documents/groups/$(groupId)/notifications/$(activityId)
+          ).data.type == "meal_adjustment"
+          && getAfter(
+            /databases/$(database)/documents/groups/$(groupId)/notifications/$(activityId)
+          ).data.recordId == mealId
+          && getAfter(
+            /databases/$(database)/documents/groups/$(groupId)/notifications/$(activityId)
+          ).data.reason == request.resource.data.editReason;
+      }
+
+      function hasLinkedMealUndo(mealId) {
+        let activityId = resource.data.get("undoActivityId", "");
+        return resource.data.userId == request.auth.uid
+          && resource.data.createdAt is timestamp
+          && activityId is string
+          && activityId.size() > 0
+          && request.time
+            <= resource.data.createdAt + duration.value(15, "s")
+          && existsAfter(
+            /databases/$(database)/documents/groups/$(groupId)/notifications/$(activityId)
+          )
+          && getAfter(
+            /databases/$(database)/documents/groups/$(groupId)/notifications/$(activityId)
+          ).data.type == "meal_undo"
+          && getAfter(
+            /databases/$(database)/documents/groups/$(groupId)/notifications/$(activityId)
+          ).data.recordId == mealId;
+      }
+
+      function hasValidNewExpense(expenseId) {
+        let expenseData = request.resource.data;
+        return expenseData.keys().hasAll([
+            "amount",
+            "expenseItem",
+            "category",
+            "userId",
+            "userName",
+            "date",
+            "createdAt",
+            "groupId",
+            "createdActivityId",
+            "undoActivityId"
+          ])
+          && expenseData.groupId == groupId
+          && expenseData.userId == request.auth.uid
+          && expenseData.amount is number
+          && expenseData.amount > 0
+          && expenseData.expenseItem is string
+          && expenseData.expenseItem.size() > 0
+          && expenseData.expenseItem.size() <= 500
+          && expenseData.category in [
+            "Food & Groceries",
+            "Electricity",
+            "Gas",
+            "Other"
+          ]
+          && expenseData.userName is string
+          && expenseData.userName.size() > 0
+          && expenseData.userName.size() <= 80
+          && expenseData.date is timestamp
+          && expenseData.createdAt == request.time
+          && expenseData.createdActivityId is string
+          && expenseData.undoActivityId is string
+          && expenseData.createdActivityId != expenseData.undoActivityId
+          && existsAfter(
+            /databases/$(database)/documents/groups/$(groupId)/notifications/$(expenseData.createdActivityId)
+          )
+          && getAfter(
+            /databases/$(database)/documents/groups/$(groupId)/notifications/$(expenseData.createdActivityId)
+          ).data.type == "expense"
+          && getAfter(
+            /databases/$(database)/documents/groups/$(groupId)/notifications/$(expenseData.createdActivityId)
+          ).data.recordId == expenseId;
+      }
+
+      function hasLinkedExpenseUndo(expenseId) {
+        let activityId = resource.data.get("undoActivityId", "");
+        return resource.data.userId == request.auth.uid
+          && resource.data.createdAt is timestamp
+          && activityId is string
+          && activityId.size() > 0
+          && request.time
+            <= resource.data.createdAt + duration.value(15, "s")
+          && existsAfter(
+            /databases/$(database)/documents/groups/$(groupId)/notifications/$(activityId)
+          )
+          && getAfter(
+            /databases/$(database)/documents/groups/$(groupId)/notifications/$(activityId)
+          ).data.type == "expense_undo"
+          && getAfter(
+            /databases/$(database)/documents/groups/$(groupId)/notifications/$(activityId)
+          ).data.recordId == expenseId;
+      }
+
+      // The member document is the authoritative source for authorization.
+      match /members/{memberId} {
+        allow get, list: if isGroupMember(groupId);
+
+        allow create: if isSignedIn()
+          && request.auth.uid == memberId
+          && request.resource.data.keys().hasOnly([
+            "role",
+            "status",
+            "joinedAt",
+            "leftAt",
+            "exitType",
+            "removedAt",
+            "removedBy",
+            "removedByName",
+            "removalReason",
+            "displayName",
+            "email",
+            "photoURL",
+            "inviteCode"
+          ])
+          && request.resource.data.status == "active"
+          && request.resource.data.joinedAt == request.time
+          && getAfter(
+            /databases/$(database)/documents/users/$(memberId)
+          ).data.groupId == groupId
+          && (
+            (
+              request.resource.data.role == "admin"
+              && request.resource.data.keys().hasOnly([
+                "role",
+                "status",
+                "joinedAt",
+                "leftAt",
+                "exitType",
+                "removedAt",
+                "removedBy",
+                "removedByName",
+                "removalReason",
+                "displayName",
+                "email",
+                "photoURL"
+              ])
+              && getAfter(
+                /databases/$(database)/documents/groups/$(groupId)
+              ).data.adminId == request.auth.uid
+              && getAfter(
+                /databases/$(database)/documents/users/$(memberId)
+              ).data.isAdmin == true
+            )
+            || (
+              request.resource.data.role == "member"
+              && getAfter(
+                /databases/$(database)/documents/users/$(memberId)
+              ).data.isAdmin == false
+              && hasValidInvite(
+                groupId,
+                request.resource.data.inviteCode
+              )
+            )
+          );
+
+        allow update: if isSignedIn()
+          && (
+            (
+              request.auth.uid == memberId
+              && request.resource.data.role == "member"
+              && request.resource.data.status == "active"
+              && request.resource.data.joinedAt == request.time
+              && request.resource.data.diff(resource.data).affectedKeys()
+                .hasOnly([
+                  "role",
+                  "status",
+                  "joinedAt",
+                  "leftAt",
+                  "exitType",
+                  "removedAt",
+                  "removedBy",
+                  "removedByName",
+                  "removalReason",
+                  "displayName",
+                  "email",
+                  "photoURL",
+                  "inviteCode"
+                ])
+              && getAfter(
+                /databases/$(database)/documents/users/$(memberId)
+              ).data.groupId == groupId
+              && getAfter(
+                /databases/$(database)/documents/users/$(memberId)
+              ).data.isAdmin == false
+              && hasValidInvite(
+                groupId,
+                request.resource.data.inviteCode
+              )
+            )
+            || (
+              request.auth.uid == memberId
+              && request.resource.data.status == "inactive"
+              && request.resource.data.leftAt == request.time
+              && request.resource.data.diff(resource.data).affectedKeys()
+                .hasOnly(["status", "leftAt", "exitType"])
+              && getAfter(
+                /databases/$(database)/documents/users/$(memberId)
+              ).data.groupId == null
+              && getAfter(
+                /databases/$(database)/documents/users/$(memberId)
+              ).data.isAdmin == false
+            )
+            || (
+              request.auth.uid != memberId
+              && isGroupAdmin(groupId)
+              && (
+                (
+                  isActiveMemberData(request.resource.data)
+                  && request.resource.data.role in ["admin", "member"]
+                  && request.resource.data.diff(resource.data).affectedKeys()
+                    .hasOnly(["role"])
+                  && getAfter(
+                    /databases/$(database)/documents/users/$(memberId)
+                  ).data.groupId == groupId
+                  && getAfter(
+                    /databases/$(database)/documents/users/$(memberId)
+                  ).data.isAdmin
+                    == (request.resource.data.role == "admin")
+                )
+                || (
+                  request.resource.data.status == "inactive"
+                  && request.resource.data.diff(resource.data).affectedKeys()
+                    .hasOnly([
+                      "status",
+                      "leftAt",
+                      "exitType",
+                      "removedAt",
+                      "removedBy",
+                      "removedByName",
+                      "removalReason",
+                      "displayName",
+                      "email",
+                      "photoURL"
+                    ])
+                  && getAfter(
+                    /databases/$(database)/documents/users/$(memberId)
+                  ).data.groupId == null
+                  && getAfter(
+                    /databases/$(database)/documents/users/$(memberId)
+                  ).data.isAdmin == false
+                )
+              )
+            )
+          );
+
+        allow delete: if false;
+      }
+
+      // Immutable audit entry for an admin-initiated member removal.
+      match /memberHistory/{historyId} {
+        allow get, list: if isGroupAdmin(groupId);
+
+        allow create: if isGroupAdmin(groupId)
+          && request.resource.data.groupId == groupId
+          && request.resource.data.performedBy == request.auth.uid
+          && request.resource.data.createdAt == request.time;
+
+        allow update, delete: if false;
+      }
+
+      // Shared Activity Log. Action details are immutable; the optional readBy
+      // compatibility field is the only field that can be updated.
+      match /notifications/{notificationId} {
+        allow get, list: if isGroupMember(groupId);
+
+        allow create: if isGroupMember(groupId)
+          && hasValidActivityBase(request.resource.data)
+          && (
+            isLinkedMealCreateActivity(
+              notificationId,
+              request.resource.data
+            )
+            || isLinkedMealUndoActivity(
+              notificationId,
+              request.resource.data
+            )
+            || isLinkedExpenseCreateActivity(
+              notificationId,
+              request.resource.data
+            )
+            || isLinkedExpenseUndoActivity(
+              notificationId,
+              request.resource.data
+            )
+            || isLinkedMealCorrectionActivity(
+              notificationId,
+              request.resource.data
+            )
+            || (
+              isGroupAdmin(groupId)
+              && !(request.resource.data.type in [
+                "meal",
+                "meal_undo",
+                "expense",
+                "expense_undo",
+                "meal_adjustment"
+              ])
+            )
+          );
+
+        allow update: if isGroupMember(groupId)
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(["readBy"])
+          && request.resource.data.readBy is list
+          && request.auth.uid in request.resource.data.readBy;
+
+        allow delete: if false;
+      }
+
+      // ------------------------------------------------
+      // Meals
+      // ------------------------------------------------
+
+      match /meals/{mealId} {
+        allow get, list: if isGroupMember(groupId);
+
+        allow create: if isGroupMember(groupId)
+          && hasValidNewMeal(mealId);
+
+        allow update: if isGroupMember(groupId)
+          && hasValidAdminMealCorrection(mealId);
+
+        allow delete: if isGroupMember(groupId)
+          && hasLinkedMealUndo(mealId);
+      }
+
+      // ------------------------------------------------
+      // Expenses
+      // ------------------------------------------------
+
+      match /expenses/{expenseId} {
+        allow get, list: if isGroupMember(groupId);
+
+        allow create: if isGroupMember(groupId)
+          && hasValidNewExpense(expenseId);
+
+        allow update: if false;
+
+        allow delete: if isGroupMember(groupId)
+          && hasLinkedExpenseUndo(expenseId);
+      }
+
+      // ------------------------------------------------
+      // Purchased inventory items (the app uses the `purchases` path).
+      // ------------------------------------------------
+
+      match /purchases/{itemId} {
+        allow get, list: if isGroupMember(groupId);
+
+        allow create: if isGroupMember(groupId)
+          && request.resource.data.groupId == groupId
+          && request.resource.data.userId == request.auth.uid;
+
+        allow update, delete: if isGroupMember(groupId)
+          && (
+            resource.data.userId == request.auth.uid
+            || isGroupAdmin(groupId)
+          );
+      }
+
+      // Legacy alias retained for any older deployed client.
+      match /purchasedItems/{itemId} {
+        allow get, list: if isGroupMember(groupId);
+
+        allow create: if isGroupMember(groupId)
+          && request.resource.data.groupId == groupId
+          && request.resource.data.userId == request.auth.uid;
+
+        allow update, delete: if isGroupMember(groupId)
+          && (
+            resource.data.userId == request.auth.uid
+            || isGroupAdmin(groupId)
+          );
+      }
+
+      // ------------------------------------------------
+      // Shopping List
+      // ------------------------------------------------
+
+      match /shoppingItems/{shoppingItemId} {
+        allow get, list: if isGroupMember(groupId);
+
+        allow create: if isGroupMember(groupId)
+          && request.resource.data.groupId == groupId
+          && request.resource.data.addedBy == request.auth.uid
+          && request.resource.data.status == "needed"
+          && request.resource.data.priority in [
+            "normal",
+            "urgent"
+          ];
+
+        allow update: if isGroupMember(groupId)
+          && resource.data.groupId == groupId
+          && request.resource.data.groupId
+            == resource.data.groupId
+          && request.resource.data.addedBy
+            == resource.data.addedBy
+          && request.resource.data.createdAt
+            == resource.data.createdAt
+          && request.resource.data.status in [
+            "needed",
+            "claimed",
+            "completed"
+          ]
+          && request.resource.data.priority in [
+            "normal",
+            "urgent"
+          ];
+
+        allow delete: if isGroupMember(groupId)
+          && (
+            resource.data.addedBy == request.auth.uid
+            || isGroupAdmin(groupId)
+          );
+      }
+
+      // ------------------------------------------------
+      // Settlements
+      // ------------------------------------------------
+
+      match /settlements/{settlementId} {
+        allow get, list: if isGroupMember(groupId);
+
+        allow create: if isGroupMember(groupId)
+          && request.resource.data.groupId == groupId
+          && request.resource.data.userId == request.auth.uid;
+
+        allow update, delete: if isGroupAdmin(groupId);
+      }
+
+      // ------------------------------------------------
+      // Notice Board
+      // App path: groups/{groupId}/reminders/{noticeId}
+      // ------------------------------------------------
+
+      match /reminders/{noticeId} {
+        allow get, list: if isGroupMember(groupId);
+
+        allow create: if isGroupMember(groupId)
+          && (
+            isGroupAdmin(groupId)
+            || memberNoticeAccessEnabled(groupId)
+          )
+          && request.resource.data.keys().hasOnly([
+            "messageText",
+            "senderId",
+            "senderName",
+            "createdAt",
+            "updatedAt",
+            "groupId",
+            "isPinned"
+          ])
+          && request.resource.data.groupId == groupId
+          && request.resource.data.senderId == request.auth.uid
+          && request.resource.data.senderName is string
+          && request.resource.data.senderName.size() > 0
+          && request.resource.data.senderName.size() <= 80
+          && request.resource.data.messageText is string
+          && request.resource.data.messageText.size() > 0
+          && request.resource.data.messageText.size() <= 150
+          && request.resource.data.createdAt == request.time
+          && request.resource.data.updatedAt == request.time
+          && request.resource.data.isPinned == true;
+
+        // Only the group admin can edit the notice text. Ownership and the
+        // original author metadata cannot be changed.
+        allow update: if isGroupAdmin(groupId)
+          && resource.data.groupId == groupId
+          && request.resource.data.groupId == resource.data.groupId
+          && request.resource.data.senderId == resource.data.senderId
+          && request.resource.data.senderName == resource.data.senderName
+          && request.resource.data.createdAt == resource.data.createdAt
+          && request.resource.data.messageText is string
+          && request.resource.data.messageText.size() > 0
+          && request.resource.data.messageText.size() <= 150
+          && request.resource.data.updatedAt == request.time
+          && request.resource.data.updatedBy == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly([
+              "messageText",
+              "updatedAt",
+              "updatedBy"
+            ]);
+
+        // Admins can unpin any notice. A member can unpin only their own
+        // notice, and only while the admin has enabled member access.
+        allow update: if (
+            isGroupAdmin(groupId)
+            || (
+              isGroupMember(groupId)
+              && memberNoticeAccessEnabled(groupId)
+              && resource.data.senderId == request.auth.uid
+            )
+          )
+          && resource.data.groupId == groupId
+          && request.resource.data.isPinned == false
+          && request.resource.data.unpinnedAt == request.time
+          && request.resource.data.unpinnedBy == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly([
+              "isPinned",
+              "unpinnedAt",
+              "unpinnedBy"
+            ]);
+
+        allow delete: if resource.data.groupId == groupId
+          && (
+            isGroupAdmin(groupId)
+            || (
+              isGroupMember(groupId)
+              && memberNoticeAccessEnabled(groupId)
+              && resource.data.senderId == request.auth.uid
+            )
+          );
+      }
     }
   }
 }

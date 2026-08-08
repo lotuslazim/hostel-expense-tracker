@@ -8,8 +8,35 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, PlusCircle, LogIn, Group } from "lucide-react";
-import { doc, addDoc, collection, serverTimestamp, writeBatch, query, where, getDocs, getDoc } from "firebase/firestore";
+import { collection, doc, getDoc, serverTimestamp, writeBatch } from "firebase/firestore";
 import { firestore } from "@/firebase/config";
+
+const INVITE_CODE_LENGTH = 6;
+
+const normalizeInviteCode = (value: string) =>
+    value.trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+
+const generateInviteCode = () =>
+    Math.random()
+        .toString(36)
+        .slice(2, 2 + INVITE_CODE_LENGTH)
+        .toUpperCase()
+        .padEnd(INVITE_CODE_LENGTH, "X");
+
+const createUniqueInviteCode = async () => {
+    for (let attempt = 0; attempt < 8; attempt += 1) {
+        const invitationCode = generateInviteCode();
+        const inviteSnapshot = await getDoc(
+            doc(firestore, "groupInvites", invitationCode)
+        );
+
+        if (!inviteSnapshot.exists()) {
+            return invitationCode;
+        }
+    }
+
+    throw new Error("Could not generate a unique invitation code.");
+};
 
 export function Welcome() {
     const { user } = useUser();
@@ -29,10 +56,19 @@ export function Welcome() {
         setIsCreating(true);
 
         try {
-            const invitationCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-            const groupRef = await addDoc(collection(firestore, "groups"), {
-                groupName: groupName,
-                invitationCode: invitationCode,
+            const cleanedGroupName = groupName.trim();
+            const invitationCode = await createUniqueInviteCode();
+            const groupRef = doc(collection(firestore, "groups"));
+            const groupId = groupRef.id;
+            const inviteRef = doc(firestore, "groupInvites", invitationCode);
+            const userRef = doc(firestore, "users", user.uid);
+            const memberRef = doc(firestore, `groups/${groupId}/members`, user.uid);
+
+            const batch = writeBatch(firestore);
+            batch.set(groupRef, {
+                id: groupId,
+                groupName: cleanedGroupName,
+                invitationCode,
                 adminId: user.uid,
                 createdAt: serverTimestamp(),
                 settings: {
@@ -42,13 +78,13 @@ export function Welcome() {
                     isUtilityReceiptRequired: false,
                 }
             });
-
-            const groupId = groupRef.id;
-            const userRef = doc(firestore, "users", user.uid);
-            const memberRef = doc(firestore, `groups/${groupId}/members`, user.uid);
-
-            const batch = writeBatch(firestore);
-            batch.update(userRef, { groupId: groupId, isAdmin: true });
+            batch.set(inviteRef, {
+                groupId,
+                groupName: cleanedGroupName,
+                createdBy: user.uid,
+                createdAt: serverTimestamp(),
+            });
+            batch.update(userRef, { groupId, isAdmin: true });
             batch.set(memberRef, {
                 role: "admin",
                 status: "active",
@@ -74,34 +110,38 @@ export function Welcome() {
         setIsJoining(true);
 
         try {
-            const groupsRef = collection(firestore, "groups");
-            const q = query(groupsRef, where("invitationCode", "==", inviteCode.trim()));
-            const querySnapshot = await getDocs(q);
+            const normalizedCode = normalizeInviteCode(inviteCode);
+            const inviteSnapshot = await getDoc(
+                doc(firestore, "groupInvites", normalizedCode)
+            );
 
-            if (querySnapshot.empty) {
+            if (!inviteSnapshot.exists()) {
                 toast({ variant: "destructive", title: "Invalid Code", description: "No group found with that invite code." });
-                setIsJoining(false);
                 return;
             }
 
-            const groupDoc = querySnapshot.docs[0];
-            const groupId = groupDoc.id;
+            const inviteData = inviteSnapshot.data();
+            const groupId = inviteData.groupId;
+
+            if (typeof groupId !== "string" || !groupId) {
+                throw new Error("The invite code is not linked to a valid group.");
+            }
             
             const userRef = doc(firestore, "users", user.uid);
             const memberRef = doc(firestore, `groups/${groupId}/members`, user.uid);
-            const memberDoc = await getDoc(memberRef);
 
             const batch = writeBatch(firestore);
-            batch.update(userRef, { groupId: groupId, isAdmin: false });
-
-            if (memberDoc.exists()) {
-                batch.update(memberRef, { status: 'active', leftAt: null, role: 'member' });
-            } else {
-                batch.set(memberRef, { role: "member", status: "active", joinedAt: serverTimestamp() });
-            }
+            batch.update(userRef, { groupId, isAdmin: false });
+            batch.set(memberRef, {
+                role: "member",
+                status: "active",
+                joinedAt: serverTimestamp(),
+                leftAt: null,
+                inviteCode: normalizedCode,
+            }, { merge: true });
             await batch.commit();
             
-            toast({ title: "Welcome to the Group!", description: `You have successfully joined "${groupDoc.data().groupName}".` });
+            toast({ title: "Welcome to the Group!", description: `You have successfully joined "${inviteData.groupName || "the group"}".` });
         } catch (error) {
             console.error("Error joining group: ", error);
             toast({ variant: "destructive", title: "Error", description: "Could not join the group." });

@@ -22,7 +22,7 @@ function ChatPageSkeleton() {
                     <Skeleton className="h-24 w-1/2 rounded-lg" />
                     <Skeleton className="h-8 w-8 rounded-full" />
                 </div>
-                 <div className="flex items-end gap-2">
+                <div className="flex items-end gap-2">
                     <Skeleton className="h-8 w-8 rounded-full" />
                     <Skeleton className="h-12 w-2/5 rounded-lg" />
                 </div>
@@ -67,16 +67,16 @@ export default function ChatPage() {
     }, [unreadMessages, groupId, userId, firestore]);
 
     return (
-    <div className="flex flex-col h-screen">
-      <main className="flex flex-col flex-grow bg-background overflow-hidden">
-        {isLoading ? <ChatPageSkeleton /> : 
-         !groupId ? (
-            <div className="container mx-auto py-8">
-                <WelcomeCard />
-            </div>
-         ) :
-         <Chat groupId={groupId} currentUser={currentUser} />}
-      </main>
-    </div>
-  );
+        <div className="bb-chat-page bb-chat-shell flex h-[100dvh] w-screen max-w-none flex-col overflow-hidden bg-[#09130f]">
+            <main className="flex min-h-0 w-full max-w-none flex-grow flex-col overflow-hidden bg-[#09130f]">
+                {isLoading ? <ChatPageSkeleton /> :
+                    !groupId ? (
+                        <div className="container mx-auto py-8">
+                            <WelcomeCard />
+                        </div>
+                    ) :
+                        <Chat groupId={groupId} currentUser={currentUser} />}
+            </main>
+        </div>
+    );
 }

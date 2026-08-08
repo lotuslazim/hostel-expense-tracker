@@ -7,8 +7,12 @@
       "hosting": {
         "bachelor-bite-app": [
           "bachelor-bite-app"
+        ],
+        "bachelor-bite-web-app": [
+          "bachelor-bite-web-app"
         ]
       }
     }
-  }
+  },
+  "etags": {}
 }

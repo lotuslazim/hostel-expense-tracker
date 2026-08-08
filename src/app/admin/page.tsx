@@ -1,355 +1,1417 @@
-
 "use client";
 
-import { useUser, useDoc, useCollection } from "@/firebase";
+import {
+    memo,
+    useMemo,
+    useState,
+} from "react";
+import { useRouter } from "next/navigation";
+import type { User as FirebaseUser } from "firebase/auth";
+import {
+    collection,
+    doc,
+    getDoc,
+    serverTimestamp,
+    Timestamp,
+    writeBatch,
+} from "firebase/firestore";
+import {
+    Copy,
+    Group,
+    History,
+    Loader2,
+    LogIn,
+    PlusCircle,
+    Shield,
+    Users,
+} from "lucide-react";
+import { format } from "date-fns";
+
+import {
+    useCollection,
+    useDoc,
+    useUser,
+} from "@/firebase";
 import { firestore } from "@/firebase/config";
-import { doc, collection, query, addDoc, serverTimestamp, updateDoc, where, getDocs, writeBatch, getDoc, setDoc } from "firebase/firestore";
-import React, { useMemo, useState } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Users, DollarSign, Home, Building, PlusCircle, LogIn, Loader2, Group, Copy, History } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AppHeader } from "@/components/app/header";
-import type { Member, User as UserType } from "@/lib/types";
-import { User } from "firebase/auth";
+import { useToast } from "@/hooks/use-toast";
 
-function AdminPageSkeleton() {
-  return (
-    <div className="space-y-8">
-      <div>
-        <Skeleton className="h-9 w-48" />
-        <Skeleton className="h-4 w-72 mt-2" />
-      </div>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Skeleton className="h-36 rounded-lg" />
-        <Skeleton className="h-36 rounded-lg" />
-        <Skeleton className="h-36 rounded-lg" />
-      </div>
-      <Card>
-          <CardHeader>
-              <Skeleton className="h-7 w-1/3" />
-          </CardHeader>
-          <CardContent>
-              <Table>
-                  <TableHeader>
-                      <TableRow>
-                          <TableHead><Skeleton className="h-5 w-24"/></TableHead>
-                          <TableHead><Skeleton className="h-5 w-32"/></TableHead>
-                          <TableHead><Skeleton className="h-5 w-16"/></TableHead>
-                      </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                      {[...Array(3)].map((_, i) => (
-                           <TableRow key={i}>
-                               <TableCell>
-                                   <div className="flex items-center gap-3">
-                                       <Skeleton className="h-8 w-8 rounded-full" />
-                                       <Skeleton className="h-5 w-28" />
-                                   </div>
-                               </TableCell>
-                               <TableCell><Skeleton className="h-5 w-40" /></TableCell>
-                               <TableCell><Skeleton className="h-6 w-20" /></TableCell>
-                           </TableRow>
-                      ))}
-                  </TableBody>
-              </Table>
-          </CardContent>
-      </Card>
-    </div>
-  );
-}
+import {
+    Alert,
+    AlertDescription,
+    AlertTitle,
+} from "@/components/ui/alert";
+import {
+    Avatar,
+    AvatarFallback,
+    AvatarImage,
+} from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
+import {
+    Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
+} from "@/components/ui/tabs";
 
-function NewUserAdminPanel({ user }: { user: User }) {
-  const { toast } = useToast();
-  const [isCreating, setIsCreating] = useState(false);
-  const [isJoining, setIsJoining] = useState(false);
-  const [groupName, setGroupName] = useState("");
-  const [inviteCode, setInviteCode] = useState("");
-
-  const handleCreateGroup = async () => {
-    if (!groupName.trim()) {
-      toast({ variant: "destructive", title: "Group name is required." });
-      return;
-    }
-    if (!user) return;
-    setIsCreating(true);
-    try {
-      const invitationCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-
-      const groupRef = await addDoc(collection(firestore, "groups"), {
-        groupName: groupName,
-        invitationCode: invitationCode,
-        adminId: user.uid,
-        createdAt: serverTimestamp(),
-        settings: {
-            mealTypes: ["Lunch", "Dinner"],
-            isMealItemNameRequired: false,
-            isExpenseDescriptionRequired: false,
-            isUtilityReceiptRequired: false,
-        }
-      });
-      
-      const groupId = groupRef.id;
-
-      const userRef = doc(firestore, "users", user.uid);
-      const memberRef = doc(firestore, `groups/${groupId}/members`, user.uid);
-
-      const batch = writeBatch(firestore);
-      batch.update(userRef, { groupId: groupId, isAdmin: true });
-      batch.set(memberRef, {
-        role: "admin",
-        status: "active",
-        joinedAt: serverTimestamp(),
-      });
-
-      await batch.commit();
-
-      toast({ title: "Group Created!", description: `The group "${groupName}" has been successfully created.` });
-    } catch (error) {
-      console.error("Error creating group:", error);
-      toast({ variant: "destructive", title: "Error", description: "Could not create group." });
-    } finally {
-      setIsCreating(false);
-    }
-  };
-
-  const handleJoinGroup = async () => {
-    if (!inviteCode.trim()) {
-        toast({ variant: "destructive", title: "Invite code is required." });
-        return;
-    }
-    if (!user) return;
-    setIsJoining(true);
-
-    try {
-        const groupsRef = collection(firestore, "groups");
-        const q = query(groupsRef, where("invitationCode", "==", inviteCode.trim()));
-        const querySnapshot = await getDocs(q);
-
-        if (querySnapshot.empty) {
-            toast({ variant: "destructive", title: "Invalid Code", description: "No group found with that invite code." });
-            setIsJoining(false);
-            return;
-        }
-
-        const groupDoc = querySnapshot.docs[0];
-        const groupId = groupDoc.id;
-        
-        const userRef = doc(firestore, "users", user.uid);
-        const memberRef = doc(firestore, `groups/${groupId}/members`, user.uid);
-        const memberDoc = await getDoc(memberRef);
-
-        const batch = writeBatch(firestore);
-        
-        batch.update(userRef, { groupId: groupId, isAdmin: false });
-
-        if (memberDoc.exists()) {
-            batch.update(memberRef, {
-                status: 'active',
-                leftAt: null,
-                role: 'member'
-            });
-        } else {
-            batch.set(memberRef, {
-                role: "member",
-                status: "active",
-                joinedAt: serverTimestamp(),
-            });
-        }
-
-        await batch.commit();
-        
-        toast({ title: "Welcome to the Group!", description: `You have successfully joined "${groupDoc.data().groupName}".` });
-
-    } catch (error) {
-        console.error("Error joining group: ", error);
-        toast({ variant: "destructive", title: "Error", description: "Could not join the group." });
-    } finally {
-        setIsJoining(false);
-    }
+type UserProfileRecord = {
+    id?: string;
+    email?: string;
+    displayName?: string;
+    photoURL?: string;
+    groupId?: string | null;
+    isAdmin?: boolean;
 };
 
+type GroupRecord = {
+    id?: string;
+    groupId?: string;
+    groupName?: string;
+    invitationCode?: string;
+    adminId?: string;
+};
 
-  return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
-      <div className="text-center mb-8">
-        <Group className="h-12 w-12 mx-auto text-primary mb-4" />
-        <h1 className="text-2xl md:text-3xl font-bold font-headline">Get Started with Your Group</h1>
-        <p className="text-sm md:text-base text-muted-foreground mt-2 max-w-md">
-          A group allows you and your roommates to track meals and manage shared expenses together.
-        </p>
-      </div>
+type GroupMemberData = {
+    role?: "admin" | "member" | string;
 
-      <Tabs defaultValue="create" className="w-full max-w-md">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="create">
-            <PlusCircle className="mr-2 h-4 w-4" /> Create Group
-          </TabsTrigger>
-          <TabsTrigger value="join">
-            <LogIn className="mr-2 h-4 w-4" /> Join Group
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="create">
-          <Card>
-            <CardHeader>
-              <CardTitle>Create a New Group</CardTitle>
-              <CardDescription>Start a new hostel group and invite your roommates.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Input
-                placeholder="Enter Hostel or Group Name"
-                value={groupName}
-                onChange={(e) => setGroupName(e.target.value)}
-              />
-              <Button onClick={handleCreateGroup} className="w-full" disabled={isCreating}>
-                {isCreating && <Loader2 className="mr-2 animate-spin" />}
-                Create & Become Admin
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="join">
-          <Card>
-            <CardHeader>
-              <CardTitle>Join an Existing Group</CardTitle>
-              <CardDescription>Use an invite code from a roommate to join their group.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Input
-                placeholder="Enter Invite Code"
-                value={inviteCode}
-                onChange={(e) => setInviteCode(e.target.value)}
-                className="font-mono tracking-widest text-center"
-              />
-              <Button onClick={handleJoinGroup} variant="secondary" className="w-full" disabled={isJoining}>
-                {isJoining && <Loader2 className="mr-2 animate-spin" />}
-                Join Group
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
+    /*
+     * পুরোনো member document-এ status field নাও থাকতে পারে।
+     * Missing status-কে active হিসেবে ধরা হবে।
+     */
+    status?: "active" | "inactive" | string;
+
+    joinedAt?: Timestamp;
+    leftAt?: Timestamp | null;
+
+    exitType?: "left" | "removed" | string | null;
+    removedAt?: Timestamp | null;
+    removedBy?: string | null;
+    removedByName?: string | null;
+    removalReason?: string | null;
+
+    displayName?: string;
+    userName?: string;
+    email?: string;
+    photoURL?: string;
+};
+
+type GroupMemberRecord =
+    GroupMemberData & {
+        id: string;
+    };
+
+const INVITE_CODE_LENGTH = 6;
+
+const toDate = (
+    value:
+        | Date
+        | Timestamp
+        | null
+        | undefined
+): Date | null => {
+    if (!value) {
+        return null;
+    }
+
+    if (value instanceof Date) {
+        return value;
+    }
+
+    if (
+        typeof value.toDate ===
+        "function"
+    ) {
+        return value.toDate();
+    }
+
+    return null;
+};
+
+const getInitial = (
+    displayName?: string,
+    email?: string
+): string => {
+    const source =
+        displayName?.trim() ||
+        email?.trim() ||
+        "M";
+
+    return source
+        .charAt(0)
+        .toUpperCase();
+};
+
+const getErrorMessage = (
+    error: unknown
+): string => {
+    if (
+        error instanceof Error &&
+        error.message
+    ) {
+        return error.message;
+    }
+
+    return "Something went wrong. Please refresh the page and try again.";
+};
+
+const normalizeInviteCode = (
+    value: string
+): string => {
+    return value
+        .trim()
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, "");
+};
+
+const generateInviteCode =
+    (): string => {
+        return Math.random()
+            .toString(36)
+            .slice(
+                2,
+                2 + INVITE_CODE_LENGTH
+            )
+            .toUpperCase()
+            .padEnd(
+                INVITE_CODE_LENGTH,
+                "X"
+            );
+    };
+
+const createUniqueInviteCode =
+    async (): Promise<string> => {
+        for (
+            let attempt = 0;
+            attempt < 8;
+            attempt += 1
+        ) {
+            const invitationCode =
+                generateInviteCode();
+
+            const inviteSnapshot =
+                await getDoc(
+                    doc(
+                        firestore,
+                        "groupInvites",
+                        invitationCode
+                    )
+                );
+
+            if (!inviteSnapshot.exists()) {
+                return invitationCode;
+            }
+        }
+
+        throw new Error(
+            "Could not generate a unique invitation code."
+        );
+    };
+
+function AdminPageSkeleton() {
+    return (
+        <div className="space-y-8">
+            <div>
+                <Skeleton className="h-9 w-48" />
+                <Skeleton className="mt-2 h-4 w-72 max-w-full" />
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                <Skeleton className="h-36 rounded-lg" />
+                <Skeleton className="h-36 rounded-lg" />
+                <Skeleton className="h-36 rounded-lg" />
+            </div>
+
+            <Card>
+                <CardHeader>
+                    <Skeleton className="h-7 w-1/3" />
+                </CardHeader>
+
+                <CardContent>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>
+                                    <Skeleton className="h-5 w-24" />
+                                </TableHead>
+
+                                <TableHead>
+                                    <Skeleton className="h-5 w-32" />
+                                </TableHead>
+
+                                <TableHead>
+                                    <Skeleton className="h-5 w-16" />
+                                </TableHead>
+                            </TableRow>
+                        </TableHeader>
+
+                        <TableBody>
+                            {Array.from({
+                                length: 3,
+                            }).map((_, index) => (
+                                <TableRow key={index}>
+                                    <TableCell>
+                                        <div className="flex items-center gap-3">
+                                            <Skeleton className="h-8 w-8 rounded-full" />
+                                            <Skeleton className="h-5 w-28" />
+                                        </div>
+                                    </TableCell>
+
+                                    <TableCell>
+                                        <Skeleton className="h-5 w-40" />
+                                    </TableCell>
+
+                                    <TableCell>
+                                        <Skeleton className="h-6 w-20" />
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+        </div>
+    );
 }
 
-// A new component to render member rows, fetching user data individually.
-const MemberRow = React.memo(function MemberRow({ member }: { member: Member }) {
-    const userRef = useMemo(() => doc(firestore, 'users', member.id), [member.id]);
-    const { data: userData, isLoading } = useDoc<UserType>(userRef);
+function NewUserAdminPanel({
+    user,
+}: {
+    user: FirebaseUser;
+}) {
+    const router = useRouter();
+    const { toast } = useToast();
 
-    if (isLoading) {
+    const [
+        isCreating,
+        setIsCreating,
+    ] = useState(false);
+
+    const [
+        isJoining,
+        setIsJoining,
+    ] = useState(false);
+
+    const [
+        groupName,
+        setGroupName,
+    ] = useState("");
+
+    const [
+        inviteCode,
+        setInviteCode,
+    ] = useState("");
+
+    const handleCreateGroup =
+        async () => {
+            const cleanedGroupName =
+                groupName.trim();
+
+            if (!cleanedGroupName) {
+                toast({
+                    variant: "destructive",
+                    title:
+                        "Group name is required.",
+                });
+
+                return;
+            }
+
+            if (isCreating) {
+                return;
+            }
+
+            setIsCreating(true);
+
+            try {
+                const invitationCode =
+                    await createUniqueInviteCode();
+
+                /*
+                 * addDoc ব্যবহার না করে আগে group document ID তৈরি করছি।
+                 * Group, user ও member—তিনটি write একই batch-এ হবে।
+                 */
+                const groupRef =
+                    doc(
+                        collection(
+                            firestore,
+                            "groups"
+                        )
+                    );
+
+                const groupId =
+                    groupRef.id;
+
+                const userRef =
+                    doc(
+                        firestore,
+                        "users",
+                        user.uid
+                    );
+
+                const inviteRef =
+                    doc(
+                        firestore,
+                        "groupInvites",
+                        invitationCode
+                    );
+
+                const memberRef =
+                    doc(
+                        firestore,
+                        "groups",
+                        groupId,
+                        "members",
+                        user.uid
+                    );
+
+                const displayName =
+                    user.displayName ||
+                    user.email?.split(
+                        "@"
+                    )[0] ||
+                    "Admin";
+
+                const batch =
+                    writeBatch(
+                        firestore
+                    );
+
+                batch.set(
+                    groupRef,
+                    {
+                        id: groupId,
+
+                        groupName:
+                            cleanedGroupName,
+
+                        invitationCode,
+
+                        adminId:
+                            user.uid,
+
+                        createdAt:
+                            serverTimestamp(),
+
+                        settings: {
+                            mealTypes: [
+                                "Lunch",
+                                "Dinner",
+                            ],
+
+                            isMealItemNameRequired:
+                                false,
+
+                            isExpenseDescriptionRequired:
+                                false,
+
+                            isUtilityReceiptRequired:
+                                false,
+                        },
+                    }
+                );
+
+                batch.set(
+                    inviteRef,
+                    {
+                        groupId,
+
+                        groupName:
+                            cleanedGroupName,
+
+                        createdBy:
+                            user.uid,
+
+                        createdAt:
+                            serverTimestamp(),
+                    }
+                );
+
+                batch.set(
+                    userRef,
+                    {
+                        id: user.uid,
+
+                        email:
+                            user.email ||
+                            "",
+
+                        displayName,
+
+                        photoURL:
+                            user.photoURL ||
+                            null,
+
+                        groupId,
+
+                        isAdmin: true,
+                    },
+                    {
+                        merge: true,
+                    }
+                );
+
+                batch.set(
+                    memberRef,
+                    {
+                        role:
+                            "admin",
+
+                        status:
+                            "active",
+
+                        joinedAt:
+                            serverTimestamp(),
+
+                        leftAt: null,
+
+                        exitType: null,
+
+                        displayName,
+
+                        email:
+                            user.email ||
+                            null,
+
+                        photoURL:
+                            user.photoURL ||
+                            null,
+                    },
+                    {
+                        merge: true,
+                    }
+                );
+
+                await batch.commit();
+
+                setGroupName("");
+
+                toast({
+                    title:
+                        "Group Created!",
+
+                    description: `The group "${cleanedGroupName}" was created successfully.`,
+                });
+
+                router.refresh();
+            } catch (error) {
+                console.error(
+                    "Error creating group:",
+                    error
+                );
+
+                toast({
+                    variant:
+                        "destructive",
+
+                    title:
+                        "Group Could Not Be Created",
+
+                    description:
+                        getErrorMessage(
+                            error
+                        ),
+                });
+            } finally {
+                setIsCreating(
+                    false
+                );
+            }
+        };
+
+    const handleJoinGroup =
+        async () => {
+            const normalizedCode =
+                normalizeInviteCode(
+                    inviteCode
+                );
+
+            if (!normalizedCode) {
+                toast({
+                    variant:
+                        "destructive",
+
+                    title:
+                        "Invite code is required.",
+                });
+
+                return;
+            }
+
+            if (isJoining) {
+                return;
+            }
+
+            setIsJoining(true);
+
+            try {
+                const inviteSnapshot =
+                    await getDoc(
+                        doc(
+                            firestore,
+                            "groupInvites",
+                            normalizedCode
+                        )
+                    );
+
+                if (
+                    !inviteSnapshot.exists()
+                ) {
+                    toast({
+                        variant:
+                            "destructive",
+
+                        title:
+                            "Invalid Invite Code",
+
+                        description:
+                            "No group was found with that invite code.",
+                    });
+
+                    return;
+                }
+
+                const groupData =
+                    inviteSnapshot.data() as GroupRecord;
+
+                const groupId =
+                    groupData.groupId;
+
+                if (!groupId) {
+                    throw new Error(
+                        "The invite code is not linked to a valid group."
+                    );
+                }
+
+                const userRef =
+                    doc(
+                        firestore,
+                        "users",
+                        user.uid
+                    );
+
+                const memberRef =
+                    doc(
+                        firestore,
+                        "groups",
+                        groupId,
+                        "members",
+                        user.uid
+                    );
+
+                const displayName =
+                    user.displayName ||
+                    user.email?.split(
+                        "@"
+                    )[0] ||
+                    "Member";
+
+                const batch =
+                    writeBatch(
+                        firestore
+                    );
+
+                batch.set(
+                    userRef,
+                    {
+                        id: user.uid,
+
+                        email:
+                            user.email ||
+                            "",
+
+                        displayName,
+
+                        photoURL:
+                            user.photoURL ||
+                            null,
+
+                        groupId,
+
+                        isAdmin: false,
+                    },
+                    {
+                        merge: true,
+                    }
+                );
+
+                /*
+                 * getDoc দিয়ে আগের member document পড়া হচ্ছে না।
+                 * set + merge নতুন ও পুরোনো—দুই ধরনের member-এর জন্য কাজ করবে।
+                 */
+                batch.set(
+                    memberRef,
+                    {
+                        role:
+                            "member",
+
+                        status:
+                            "active",
+
+                        joinedAt:
+                            serverTimestamp(),
+
+                        leftAt: null,
+
+                        exitType: null,
+
+                        removedAt: null,
+
+                        removedBy: null,
+
+                        removedByName:
+                            null,
+
+                        removalReason:
+                            null,
+
+                        inviteCode:
+                            normalizedCode,
+
+                        displayName,
+
+                        email:
+                            user.email ||
+                            null,
+
+                        photoURL:
+                            user.photoURL ||
+                            null,
+                    },
+                    {
+                        merge: true,
+                    }
+                );
+
+                await batch.commit();
+
+                setInviteCode("");
+
+                toast({
+                    title:
+                        "Welcome to the Group!",
+
+                    description: `You joined "${groupData.groupName ||
+                        "the group"
+                        }" successfully.`,
+                });
+
+                router.refresh();
+            } catch (error) {
+                console.error(
+                    "Error joining group:",
+                    error
+                );
+
+                toast({
+                    variant:
+                        "destructive",
+
+                    title:
+                        "Group Could Not Be Joined",
+
+                    description:
+                        getErrorMessage(
+                            error
+                        ),
+                });
+            } finally {
+                setIsJoining(
+                    false
+                );
+            }
+        };
+
+    return (
+        <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center">
+            <div className="mb-8 text-center">
+                <Group className="mx-auto mb-4 h-12 w-12 text-primary" />
+
+                <h1 className="font-headline text-2xl font-bold md:text-3xl">
+                    Get Started with Your Group
+                </h1>
+
+                <p className="mt-2 max-w-md text-sm text-muted-foreground md:text-base">
+                    Create a group or join your roommates to manage meals and shared expenses together.
+                </p>
+            </div>
+
+            <Tabs
+                defaultValue="create"
+                className="w-full max-w-md"
+            >
+                <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="create">
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Create Group
+                    </TabsTrigger>
+
+                    <TabsTrigger value="join">
+                        <LogIn className="mr-2 h-4 w-4" />
+                        Join Group
+                    </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="create">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>
+                                Create a New Group
+                            </CardTitle>
+
+                            <CardDescription>
+                                Start a new hostel group and invite your roommates.
+                            </CardDescription>
+                        </CardHeader>
+
+                        <CardContent className="space-y-4">
+                            <Input
+                                placeholder="Enter Hostel or Group Name"
+                                value={
+                                    groupName
+                                }
+                                onChange={(
+                                    event
+                                ) => {
+                                    setGroupName(
+                                        event.target.value
+                                    );
+                                }}
+                                disabled={
+                                    isCreating
+                                }
+                                maxLength={80}
+                            />
+
+                            <Button
+                                type="button"
+                                onClick={() => {
+                                    void handleCreateGroup();
+                                }}
+                                className="w-full"
+                                disabled={
+                                    isCreating ||
+                                    !groupName.trim()
+                                }
+                            >
+                                {isCreating && (
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                )}
+
+                                Create & Become Admin
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="join">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>
+                                Join an Existing Group
+                            </CardTitle>
+
+                            <CardDescription>
+                                Enter an invitation code shared by a group administrator.
+                            </CardDescription>
+                        </CardHeader>
+
+                        <CardContent className="space-y-4">
+                            <Input
+                                placeholder="Enter Invite Code"
+                                value={
+                                    inviteCode
+                                }
+                                onChange={(
+                                    event
+                                ) => {
+                                    setInviteCode(
+                                        normalizeInviteCode(
+                                            event.target.value
+                                        )
+                                    );
+                                }}
+                                className="text-center font-mono uppercase tracking-widest"
+                                disabled={
+                                    isJoining
+                                }
+                                maxLength={
+                                    INVITE_CODE_LENGTH
+                                }
+                            />
+
+                            <Button
+                                type="button"
+                                onClick={() => {
+                                    void handleJoinGroup();
+                                }}
+                                variant="secondary"
+                                className="w-full"
+                                disabled={
+                                    isJoining ||
+                                    !inviteCode.trim()
+                                }
+                            >
+                                {isJoining && (
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                )}
+
+                                Join Group
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+            </Tabs>
+        </div>
+    );
+}
+
+const ActiveMemberRow = memo(
+    function ActiveMemberRow({
+        member,
+        groupOwnerId,
+    }: {
+        member: GroupMemberRecord;
+        groupOwnerId?: string;
+    }) {
+        /*
+         * Active member হলে users document থেকে latest profile নেওয়া হবে।
+         * Permission fail করলেও member document-এর snapshot দিয়ে row থাকবে।
+         */
+        const userRef =
+            useMemo(() => {
+                return doc(
+                    firestore,
+                    "users",
+                    member.id
+                );
+            }, [member.id]);
+
+        const {
+            data: userData,
+            isLoading,
+        } =
+            useDoc<UserProfileRecord>(
+                userRef
+            );
+
+        const fallbackName =
+            member.displayName ||
+            member.userName ||
+            member.email;
+
+        if (
+            isLoading &&
+            !fallbackName
+        ) {
+            return (
+                <TableRow>
+                    <TableCell>
+                        <div className="flex items-center gap-3">
+                            <Skeleton className="h-9 w-9 rounded-full" />
+                            <Skeleton className="h-5 w-28" />
+                        </div>
+                    </TableCell>
+
+                    <TableCell>
+                        <Skeleton className="h-5 w-40" />
+                    </TableCell>
+
+                    <TableCell>
+                        <Skeleton className="h-6 w-20" />
+                    </TableCell>
+                </TableRow>
+            );
+        }
+
+        const displayName =
+            userData?.displayName ||
+            fallbackName ||
+            `Member ${member.id.slice(
+                0,
+                5
+            )}`;
+
+        const email =
+            userData?.email ||
+            member.email ||
+            "Email unavailable";
+
+        const photoURL =
+            userData?.photoURL ||
+            member.photoURL;
+
+        const role =
+            member.id ===
+                groupOwnerId
+                ? "admin"
+                : member.role ||
+                "member";
+
         return (
             <TableRow>
                 <TableCell>
-                    <div className="flex items-center gap-3">
-                        <Skeleton className="h-8 w-8 rounded-full" />
-                        <Skeleton className="h-5 w-28" />
+                    <div className="flex min-w-[160px] items-center gap-3">
+                        <Avatar className="h-9 w-9">
+                            {photoURL && (
+                                <AvatarImage
+                                    src={photoURL}
+                                    alt={displayName}
+                                />
+                            )}
+
+                            <AvatarFallback>
+                                {getInitial(
+                                    displayName,
+                                    email
+                                )}
+                            </AvatarFallback>
+                        </Avatar>
+
+                        <span className="truncate font-medium">
+                            {displayName}
+                        </span>
                     </div>
                 </TableCell>
-                <TableCell><Skeleton className="h-5 w-40" /></TableCell>
-                <TableCell><Skeleton className="h-6 w-20" /></TableCell>
+
+                <TableCell>
+                    <span className="break-all">
+                        {email}
+                    </span>
+                </TableCell>
+
+                <TableCell>
+                    <Badge
+                        variant={
+                            role === "admin"
+                                ? "default"
+                                : "secondary"
+                        }
+                        className="capitalize"
+                    >
+                        {role}
+                    </Badge>
+                </TableCell>
             </TableRow>
         );
     }
-    
-    if (!userData) return null; // Or some fallback UI
+);
+
+function PastMemberRow({
+    member,
+}: {
+    member: GroupMemberRecord;
+}) {
+    /*
+     * Removed member-এর users document groupId=null হয়ে যাবে।
+     * তাই history-তে member document-এর saved snapshot ব্যবহার করা হচ্ছে।
+     */
+    const displayName =
+        member.displayName ||
+        member.userName ||
+        member.email ||
+        `Member ${member.id.slice(
+            0,
+            5
+        )}`;
+
+    const exitDate =
+        toDate(
+            member.removedAt ||
+            member.leftAt
+        );
+
+    const exitLabel =
+        member.exitType ===
+            "removed"
+            ? "Removed"
+            : "Left";
 
     return (
         <TableRow>
             <TableCell>
-                <div className="flex items-center gap-3">
-                    <Avatar className="h-8 w-8">
-                        <AvatarImage src={userData.photoURL} />
-                        <AvatarFallback>{userData.displayName?.charAt(0)}</AvatarFallback>
+                <div className="flex min-w-[160px] items-center gap-3">
+                    <Avatar className="h-9 w-9">
+                        {member.photoURL && (
+                            <AvatarImage
+                                src={
+                                    member.photoURL
+                                }
+                                alt={
+                                    displayName
+                                }
+                            />
+                        )}
+
+                        <AvatarFallback>
+                            {getInitial(
+                                displayName,
+                                member.email
+                            )}
+                        </AvatarFallback>
                     </Avatar>
-                    <span>{userData.displayName}</span>
+
+                    <div className="min-w-0">
+                        <p className="truncate font-medium">
+                            {displayName}
+                        </p>
+
+                        {member.email && (
+                            <p className="truncate text-xs text-muted-foreground">
+                                {member.email}
+                            </p>
+                        )}
+                    </div>
                 </div>
             </TableCell>
-            <TableCell>{userData.email}</TableCell>
+
             <TableCell>
-                <Badge variant={member.role === 'admin' ? 'default' : 'secondary'}>
-                    {member.role === 'admin' ? 'Admin' : 'Member'}
+                <Badge
+                    variant={
+                        member.exitType ===
+                            "removed"
+                            ? "destructive"
+                            : "secondary"
+                    }
+                >
+                    {exitLabel}
                 </Badge>
+            </TableCell>
+
+            <TableCell className="whitespace-nowrap">
+                {exitDate
+                    ? format(
+                        exitDate,
+                        "MMM dd, yyyy"
+                    )
+                    : "—"}
+            </TableCell>
+
+            <TableCell>
+                {member.removalReason ||
+                    (exitLabel === "Left"
+                        ? "Left the group"
+                        : "No reason recorded")}
             </TableCell>
         </TableRow>
     );
-});
+}
 
-
-function GroupDetailsPanel({ groupId }: { groupId: string }) {
+function GroupDetailsPanel({
+    groupId,
+    currentUserId,
+    userIsAdmin,
+}: {
+    groupId: string;
+    currentUserId: string;
+    userIsAdmin: boolean;
+}) {
+    const router = useRouter();
     const { toast } = useToast();
 
-    const groupRef = useMemo(() => doc(firestore, "groups", groupId), [groupId]);
-    const { data: groupData, isLoading: isGroupDataLoading } = useDoc(groupRef);
+    const groupRef =
+        useMemo(() => {
+            return doc(
+                firestore,
+                "groups",
+                groupId
+            );
+        }, [groupId]);
 
-    const membersQuery = useMemo(() => query(collection(firestore, `groups/${groupId}/members`)), [groupId]);
-    const { data: members, isLoading: areMembersLoading } = useCollection<Member>(membersQuery);
+    const {
+        data: groupData,
+        isLoading:
+        isGroupDataLoading,
+        error:
+        groupDataError,
+    } =
+        useDoc<GroupRecord>(
+            groupRef
+        );
 
-    const activeMembers = useMemo(() => members?.filter(m => m.status === 'active'), [members]);
-    const pastMembers = useMemo(() => members?.filter(m => m.status === 'inactive'), [members]);
+    const membersQuery =
+        useMemo(() => {
+            return collection(
+                firestore,
+                "groups",
+                groupId,
+                "members"
+            );
+        }, [groupId]);
 
-    const handleCopyInviteCode = () => {
-        if (groupData?.invitationCode) {
-            navigator.clipboard.writeText(groupData.invitationCode);
-            toast({ title: "Copied!", description: "Invite code copied to clipboard." });
-        }
-    };
+    const {
+        data: members,
+        isLoading:
+        areMembersLoading,
+        error:
+        membersError,
+    } =
+        useCollection<GroupMemberData>(
+            membersQuery
+        );
 
-    if (isGroupDataLoading || areMembersLoading) {
-        return <AdminPageSkeleton />;
+    /*
+     * গুরুত্বপূর্ণ fix:
+     * শুধুমাত্র explicit inactive member বাদ যাবে।
+     * status field না থাকা পুরোনো member active হিসেবে থাকবে।
+     */
+    const activeMembers =
+        useMemo(() => {
+            return (
+                members ?? []
+            ).filter(
+                (member) =>
+                    member.status !==
+                    "inactive"
+            );
+        }, [members]);
+
+    const pastMembers =
+        useMemo(() => {
+            return (
+                members ?? []
+            )
+                .filter(
+                    (member) =>
+                        member.status ===
+                        "inactive"
+                )
+                .sort(
+                    (
+                        firstMember,
+                        secondMember
+                    ) => {
+                        const firstExitTime =
+                            toDate(
+                                firstMember.removedAt ||
+                                firstMember.leftAt
+                            )?.getTime() ??
+                            0;
+
+                        const secondExitTime =
+                            toDate(
+                                secondMember.removedAt ||
+                                secondMember.leftAt
+                            )?.getTime() ??
+                            0;
+
+                        return (
+                            secondExitTime -
+                            firstExitTime
+                        );
+                    }
+                );
+        }, [members]);
+
+    const currentMembership =
+        useMemo(() => {
+            return activeMembers.find(
+                (member) =>
+                    member.id ===
+                    currentUserId
+            );
+        }, [
+            activeMembers,
+            currentUserId,
+        ]);
+
+    const isAdmin =
+        userIsAdmin ||
+        groupData?.adminId ===
+        currentUserId ||
+        currentMembership?.role ===
+        "admin";
+
+    const handleCopyInviteCode =
+        async () => {
+            const invitationCode =
+                groupData?.invitationCode;
+
+            if (!invitationCode) {
+                return;
+            }
+
+            try {
+                await navigator.clipboard.writeText(
+                    invitationCode
+                );
+
+                toast({
+                    title: "Copied!",
+                    description:
+                        "Invite code copied to clipboard.",
+                });
+            } catch (error) {
+                console.error(
+                    "Copy invite code error:",
+                    error
+                );
+
+                toast({
+                    variant:
+                        "destructive",
+                    title:
+                        "Copy Failed",
+                    description:
+                        "Could not copy the invitation code.",
+                });
+            }
+        };
+
+    if (
+        isGroupDataLoading ||
+        areMembersLoading
+    ) {
+        return (
+            <AdminPageSkeleton />
+        );
+    }
+
+    if (
+        groupDataError ||
+        membersError
+    ) {
+        return (
+            <Alert variant="destructive">
+                <AlertTitle>
+                    Group details could not be loaded
+                </AlertTitle>
+
+                <AlertDescription>
+                    {getErrorMessage(
+                        groupDataError ||
+                        membersError
+                    )}
+                </AlertDescription>
+            </Alert>
+        );
     }
 
     if (!groupData) {
         return (
-            <div className="text-center py-16">
-                <h1 className="text-2xl font-bold">Group Not Found</h1>
-                <p className="text-muted-foreground">The group details could not be loaded.</p>
+            <div className="py-16 text-center">
+                <h1 className="text-2xl font-bold">
+                    Group Not Found
+                </h1>
+
+                <p className="mt-2 text-muted-foreground">
+                    The group details could not be loaded.
+                </p>
             </div>
         );
     }
 
     return (
         <div className="space-y-8">
-            <div>
-                <h1 className="text-2xl md:text-3xl font-bold font-headline text-header-yellow flex items-center gap-3">
-                    <Users className="h-8 w-8" />
-                    Group Details
-                </h1>
-                <p className="text-sm md:text-base text-muted-foreground">Information about your current group.</p>
+            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+                <div>
+                    <h1 className="flex items-center gap-3 font-headline text-2xl font-bold text-header-yellow md:text-3xl">
+                        <Users className="h-8 w-8" />
+                        Group Details
+                    </h1>
+
+                    <p className="text-sm text-muted-foreground md:text-base">
+                        Information about your current group.
+                    </p>
+                </div>
+
+                {isAdmin && (
+                    <Button
+                        type="button"
+                        variant="outline"
+                        className="gap-2"
+                        onClick={() => {
+                            router.push(
+                                "/admin-profile"
+                            );
+                        }}
+                    >
+                        <Shield className="h-4 w-4" />
+                        Manage Members
+                    </Button>
+                )}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                 <Card>
                     <CardHeader>
-                        <CardTitle className="text-lg">Group Name</CardTitle>
+                        <CardTitle className="text-lg">
+                            Group Name
+                        </CardTitle>
                     </CardHeader>
+
                     <CardContent>
-                        <p className="text-2xl font-semibold">{groupData.groupName}</p>
+                        <p className="break-words text-2xl font-semibold">
+                            {groupData.groupName ||
+                                "Unnamed Group"}
+                        </p>
                     </CardContent>
                 </Card>
+
                 <Card>
                     <CardHeader>
-                        <CardTitle className="text-lg">Active Members</CardTitle>
+                        <CardTitle className="text-lg">
+                            Active Members
+                        </CardTitle>
                     </CardHeader>
+
                     <CardContent>
-                         <p className="text-2xl font-semibold">{activeMembers?.length || 0}</p>
+                        <p className="text-2xl font-semibold">
+                            {activeMembers.length}
+                        </p>
                     </CardContent>
                 </Card>
+
                 <Card>
                     <CardHeader>
-                        <CardTitle className="text-lg">Invite Code</CardTitle>
+                        <CardTitle className="text-lg">
+                            Invite Code
+                        </CardTitle>
                     </CardHeader>
+
                     <CardContent className="flex items-center gap-2">
-                        <Input value={groupData.invitationCode} readOnly className="font-mono"/>
-                        <Button variant="outline" size="icon" onClick={handleCopyInviteCode}>
-                            <Copy className="h-4 w-4"/>
+                        <Input
+                            value={
+                                groupData.invitationCode ||
+                                ""
+                            }
+                            readOnly
+                            className="font-mono uppercase tracking-widest"
+                        />
+
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            onClick={() => {
+                                void handleCopyInviteCode();
+                            }}
+                            disabled={
+                                !groupData.invitationCode
+                            }
+                        >
+                            <Copy className="h-4 w-4" />
+
+                            <span className="sr-only">
+                                Copy invitation code
+                            </span>
                         </Button>
                     </CardContent>
                 </Card>
@@ -357,83 +1419,206 @@ function GroupDetailsPanel({ groupId }: { groupId: string }) {
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Active Members</CardTitle>
+                    <CardTitle>
+                        Active Members
+                    </CardTitle>
+
+                    <CardDescription>
+                        Members who currently have access to this group.
+                    </CardDescription>
                 </CardHeader>
+
                 <CardContent>
-                     <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Name</TableHead>
-                                <TableHead>Email</TableHead>
-                                <TableHead>Role</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {activeMembers?.map(member => (
-                               <MemberRow key={member.id} member={member} />
-                            ))}
-                        </TableBody>
-                    </Table>
+                    {activeMembers.length >
+                        0 ? (
+                        <div className="overflow-x-auto">
+                            <Table className="min-w-[620px]">
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>
+                                            Name
+                                        </TableHead>
+
+                                        <TableHead>
+                                            Email
+                                        </TableHead>
+
+                                        <TableHead>
+                                            Role
+                                        </TableHead>
+                                    </TableRow>
+                                </TableHeader>
+
+                                <TableBody>
+                                    {activeMembers.map(
+                                        (member) => (
+                                            <ActiveMemberRow
+                                                key={
+                                                    member.id
+                                                }
+                                                member={
+                                                    member
+                                                }
+                                                groupOwnerId={
+                                                    groupData.adminId
+                                                }
+                                            />
+                                        )
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    ) : (
+                        <p className="py-10 text-center text-sm text-muted-foreground">
+                            No active members were found.
+                        </p>
+                    )}
                 </CardContent>
             </Card>
 
-            {pastMembers && pastMembers.length > 0 && (
-                 <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><History /> Past Members</CardTitle>
-                        <CardDescription>Members who have previously left the group.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                       <Table>
-                           <TableHeader>
-                               <TableRow>
-                                   <TableHead>Name</TableHead>
-                                   <TableHead>Email</TableHead>
-                                   <TableHead>Status</TableHead>
-                               </TableRow>
-                           </TableHeader>
-                           <TableBody>
-                               {pastMembers.map(member => (
-                                   <MemberRow key={member.id} member={member} />
-                               ))}
-                           </TableBody>
-                       </Table>
-                    </CardContent>
-                </Card>
-            )}
+            {pastMembers.length >
+                0 && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <History className="h-5 w-5" />
+                                Past Members
+                            </CardTitle>
+
+                            <CardDescription>
+                                Members who left or were removed. Their previous records remain preserved.
+                            </CardDescription>
+                        </CardHeader>
+
+                        <CardContent>
+                            <div className="overflow-x-auto">
+                                <Table className="min-w-[720px]">
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>
+                                                Member
+                                            </TableHead>
+
+                                            <TableHead>
+                                                Exit Type
+                                            </TableHead>
+
+                                            <TableHead>
+                                                Exit Date
+                                            </TableHead>
+
+                                            <TableHead>
+                                                Reason
+                                            </TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+
+                                    <TableBody>
+                                        {pastMembers.map(
+                                            (member) => (
+                                                <PastMemberRow
+                                                    key={
+                                                        member.id
+                                                    }
+                                                    member={
+                                                        member
+                                                    }
+                                                />
+                                            )
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
         </div>
     );
 }
 
 export default function AdminPage() {
-    const { user, isUserLoading } = useUser();
+    const {
+        user,
+        isUserLoading,
+    } = useUser();
 
-    const userDocRef = useMemo(() => {
-        if (!user) return null;
-        return doc(firestore, 'users', user.uid);
-    }, [user]);
-    
-    const { data: userData, isLoading: isUserDataLoading } = useDoc(userDocRef);
+    const userDocRef =
+        useMemo(() => {
+            if (!user) {
+                return null;
+            }
 
-    const isLoading = isUserLoading || isUserDataLoading;
+            return doc(
+                firestore,
+                "users",
+                user.uid
+            );
+        }, [user]);
+
+    const {
+        data: userData,
+        isLoading:
+        isUserDataLoading,
+        error:
+        userDataError,
+    } =
+        useDoc<UserProfileRecord>(
+            userDocRef
+        );
+
+    const isLoading =
+        isUserLoading ||
+        isUserDataLoading;
 
     return (
-        <div className="flex flex-col min-h-screen">
+        <div className="flex min-h-screen flex-col">
             <AppHeader />
-            <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+            <main className="container mx-auto flex-grow px-4 py-8 sm:px-6 lg:px-8">
                 {isLoading ? (
                     <AdminPageSkeleton />
+                ) : userDataError ? (
+                    <Alert variant="destructive">
+                        <AlertTitle>
+                            User profile could not be loaded
+                        </AlertTitle>
+
+                        <AlertDescription>
+                            {getErrorMessage(
+                                userDataError
+                            )}
+                        </AlertDescription>
+                    </Alert>
                 ) : !user ? (
-                    <div className="text-center py-16">
-                       <h1 className="text-2xl font-bold">Authentication Error</h1>
-                       <p className="text-muted-foreground">Please log in to access this page.</p>
-                   </div>
+                    <div className="py-16 text-center">
+                        <h1 className="text-2xl font-bold">
+                            Authentication Error
+                        </h1>
+
+                        <p className="mt-2 text-muted-foreground">
+                            Please log in to access this page.
+                        </p>
+                    </div>
                 ) : userData?.groupId ? (
-                    <GroupDetailsPanel groupId={userData.groupId} />
+                    <GroupDetailsPanel
+                        groupId={
+                            userData.groupId
+                        }
+                        currentUserId={
+                            user.uid
+                        }
+                        userIsAdmin={
+                            Boolean(
+                                userData.isAdmin
+                            )
+                        }
+                    />
                 ) : (
-                    <NewUserAdminPanel user={user} />
+                    <NewUserAdminPanel
+                        user={user}
+                    />
                 )}
             </main>
         </div>
-    )
+    );
 }

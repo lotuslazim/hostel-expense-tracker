@@ -157,6 +157,21 @@
         "userName": { "type": "string" }
       },
       "required": ["id", "groupId", "itemId", "itemName", "quantity", "cost", "unitPrice", "date", "userId", "userName"]
+    },
+    "Notice": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Notice",
+      "type": "object",
+      "description": "Represents information pinned to a group's Notice Board.",
+      "properties": {
+        "id": { "type": "string" },
+        "groupId": { "type": "string" },
+        "createdBy": { "type": "string" },
+        "createdByName": { "type": "string" },
+        "messageText": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "groupId", "createdBy", "createdByName", "messageText", "createdAt"]
     }
   },
   "auth": { "providers": ["password", "google", "phone"] },
@@ -285,10 +300,22 @@
           },
           "description": "Stores individual purchase records. Accessible by active members. Users can only create/edit their own purchases. Email verification required."
         }
+      },
+      {
+        "path": "/groups/{groupId}/notices/{noticeId}",
+        "definition": {
+          "entityName": "Notice", "schema": { "$ref": "#/entities/Notice" },
+          "rules": {
+            "list, get": "isGroupMember(groupId)",
+            "create": "isGroupMember(groupId) && request.resource.data.createdBy == request.auth.uid",
+            "update": "false",
+            "delete": "isGroupMember(groupId) && (resource.data.createdBy == request.auth.uid || isGroupAdmin(groupId))"
+          },
+          "description": "Stores persistent Notice Board pins. Group members can read and create pins. A pin can be deleted by its creator or the group admin."
+        }
       }
     ],
     "reasoning": "This structure is updated to enforce an 'active' status check for all group-related data access. Instead of checking for simple existence with exists(), the rules now use get().data.status == 'active'. This closes a security hole where inactive members could still access group data. It also solves the data inconsistency problem by ensuring that the security rules and application logic are aligned. This is a more secure and robust pattern for managing group membership. The user read rule was changed to allow any authenticated user to read user profiles to support fetching user data for reports. The meal log read rule was restricted so users can only see their own meals, improving privacy."
   }
 }
 
-    
