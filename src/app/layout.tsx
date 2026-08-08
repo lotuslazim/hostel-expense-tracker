@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import {
   Playfair_Display,
   Poppins,
@@ -28,6 +28,39 @@ export const metadata: Metadata = {
   title: "BachelorBite",
   description:
     "Simplified meal and expense tracking for shared living.",
+
+  applicationName: "BachelorBite",
+  manifest: "/manifest.webmanifest",
+
+  icons: {
+    icon: [
+      {
+        url: "/logo1.png",
+        type: "image/png",
+        sizes: "2048x2048",
+      },
+    ],
+    apple: [
+      {
+        url: "/logo1.png",
+        type: "image/png",
+        sizes: "2048x2048",
+      },
+    ],
+  },
+
+  appleWebApp: {
+    capable: true,
+    title: "BachelorBite",
+    statusBarStyle: "default",
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#f4b43c",
 };
 
 export default function RootLayout({
