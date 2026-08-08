@@ -1,0 +1,20 @@
+{
+  "id": "/",
+  "name": "BachelorBite",
+  "short_name": "BachelorBite",
+  "description": "Meal and expense tracking for shared living.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#f4b43c",
+  "icons": [
+    {
+      "src": "/logo1.png",
+      "sizes": "2048x2048",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
