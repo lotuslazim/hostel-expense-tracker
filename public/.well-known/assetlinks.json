@@ -1,14 +1,9 @@
-[
-  {
-    "relation": [
-      "delegate_permission/common.handle_all_urls"
-    ],
-    "target": {
-      "namespace": "android_app",
-      "package_name": "com.bachelorbite.app",
-      "sha256_cert_fingerprints": [
-        "আপনার APK-এর আসল fingerprint"
-      ]
-    }
-  }
-]
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "app.vercel.bachelorbite.twa",
+        "sha256_cert_fingerprints": ["64:FD:1B:DD:65:5D:5D:20:9F:71:66:23:D7:6A:1E:6A:0F:DC:6F:1D:04:42:CC:2C:5E:E6:EA:BD:7C:6E:3F:8C"]
+      }
+    }]
+
