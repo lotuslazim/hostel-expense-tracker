@@ -53,6 +53,9 @@ import {
 import {
   UserManualReminder,
 } from "@/components/dashboard/UserManualReminder";
+import {
+  AwayToggleCard,
+} from "@/components/dashboard/AwayToggleCard";
 
 import {
   AppHeader,
@@ -346,6 +349,8 @@ function DashboardContent({
               setSelectedDate
             }
           />
+
+          <AwayToggleCard groupId={groupId} />
 
           <LogMealCard
             selectedDate={
