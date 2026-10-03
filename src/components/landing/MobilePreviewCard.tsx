@@ -21,7 +21,7 @@ export function MobilePreviewCard() {
                         src="/mobile-preview.jpeg"
                         alt="BachelorBite mobile app preview"
                         fill
-                        sizes="290px"
+                        sizes="250px"
                         priority
                         className="object-cover"
                     />
@@ -57,12 +57,12 @@ export function MobilePreviewCard() {
                 }
 
                 .phone {
-                    --w: 300px;
+                    --w: 255px;
                     position: relative;
                     width: var(--w);
                     aspect-ratio: 1162 / 2576;
                     padding: 9px;
-                    border-radius: 42px;
+                    border-radius: 36px;
                     background: linear-gradient(
                         115deg,
                         #4b4f57 0%,
@@ -90,7 +90,7 @@ export function MobilePreviewCard() {
                     position: relative;
                     width: 100%;
                     height: 100%;
-                    border-radius: 34px;
+                    border-radius: 29px;
                     overflow: hidden;
                     background: #0e2a1f;
                     box-shadow: 0 0 0 2px #000;
@@ -158,17 +158,17 @@ export function MobilePreviewCard() {
                 }
 
                 .btn-vol {
-                    top: 110px;
-                    height: 64px;
+                    top: 94px;
+                    height: 54px;
                 }
 
                 .btn-power {
-                    top: 190px;
-                    height: 38px;
+                    top: 162px;
+                    height: 32px;
                 }
 
                 .floor-shadow {
-                    width: 240px;
+                    width: 205px;
                     height: 22px;
                     margin-top: 18px;
                     border-radius: 50%;
