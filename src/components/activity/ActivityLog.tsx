@@ -20,6 +20,7 @@ import {
   Pencil,
   Receipt,
   RotateCcw,
+  Trash2,
   ShieldCheck,
   Utensils,
 } from "lucide-react";
@@ -27,7 +28,7 @@ import {
 import { useCollection, useDoc, useUser } from "@/firebase";
 import { firestore } from "@/firebase/config";
 import { useToast } from "@/hooks/use-toast";
-import type { MealLog } from "@/lib/types";
+import type { Expense, MealLog } from "@/lib/types";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -74,9 +75,20 @@ type GroupRecord = {
 
 type ActivityFilter = "all" | "meal" | "expense" | "admin";
 
+const ADMIN_ACTIVITY_TYPES = [
+  "meal_adjustment",
+  "meal_delete",
+  "expense_adjustment",
+  "expense_delete",
+];
+
 const getActivityKind = (type?: string): Exclude<ActivityFilter, "all"> => {
+  if (type && ADMIN_ACTIVITY_TYPES.includes(type)) {
+    return "admin";
+  }
+
   if (type?.includes("meal")) {
-    return type === "meal_adjustment" ? "admin" : "meal";
+    return "meal";
   }
 
   if (type?.includes("expense")) {
@@ -91,7 +103,11 @@ const getActivityIcon = (type?: string) => {
     return RotateCcw;
   }
 
-  if (type === "meal_adjustment") {
+  if (type === "meal_delete" || type === "expense_delete") {
+    return Trash2;
+  }
+
+  if (type && ADMIN_ACTIVITY_TYPES.includes(type)) {
     return ShieldCheck;
   }
 
@@ -109,6 +125,13 @@ const getActivityIcon = (type?: string) => {
 const getMealDate = (meal: MealLog) =>
   meal.date instanceof Timestamp ? meal.date.toDate() : meal.date;
 
+const getRecordDate = (value: Date | Timestamp) =>
+  value instanceof Timestamp ? value.toDate() : value;
+
+type DeleteTarget =
+  | { kind: "meal"; record: MealLog }
+  | { kind: "expense"; record: Expense };
+
 export function ActivityLog() {
   const { user: currentUser } = useUser();
   const { toast } = useToast();
@@ -118,6 +141,10 @@ export function ActivityLog() {
   const [itemName, setItemName] = useState("");
   const [reason, setReason] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
+  const [expenseAmount, setExpenseAmount] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
+  const [adminTab, setAdminTab] = useState<"meals" | "expenses">("meals");
 
   const currentUserRef = useMemo(
     () => (currentUser ? doc(firestore, "users", currentUser.uid) : null),
@@ -157,6 +184,20 @@ export function ActivityLog() {
       orderBy("date", "desc")
     );
   }, [groupId, isAdmin]);
+
+  const expensesQuery = useMemo(() => {
+    if (!groupId || !isAdmin) {
+      return null;
+    }
+
+    return query(
+      collection(firestore, `groups/${groupId}/expenses`),
+      orderBy("date", "desc")
+    );
+  }, [groupId, isAdmin]);
+
+  const { data: expenses, isLoading: areExpensesLoading } =
+    useCollection<Expense>(expensesQuery);
 
   const {
     data: activities,
@@ -202,11 +243,11 @@ export function ActivityLog() {
     const nextMealCount = Number(mealCount);
     const correctionReason = reason.trim();
 
-    if (!Number.isFinite(nextMealCount) || nextMealCount <= 0) {
+    if (!Number.isFinite(nextMealCount) || nextMealCount < 0 || nextMealCount > 100) {
       toast({
         variant: "destructive",
         title: "Invalid meal count",
-        description: "Meal count must be greater than zero.",
+        description: "Meal count must be between 0 and 100.",
       });
       return;
     }
@@ -297,6 +338,203 @@ export function ActivityLog() {
         variant: "destructive",
         title: "Correction failed",
         description: "The meal was not changed. Check your admin permission and try again.",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const getActorName = () =>
+    currentUserData?.displayName ||
+    currentUser?.displayName ||
+    currentUser?.email?.split("@")[0] ||
+    "Admin";
+
+  const validateReason = () => {
+    const correctionReason = reason.trim();
+
+    if (correctionReason.length < 5 || correctionReason.length > 200) {
+      toast({
+        variant: "destructive",
+        title: "Reason required",
+        description: "Write a clear reason between 5 and 200 characters.",
+      });
+      return null;
+    }
+
+    return correctionReason;
+  };
+
+  const openExpenseEditor = (expense: Expense) => {
+    setEditingExpense(expense);
+    setExpenseAmount(String(expense.amount));
+    setReason("");
+  };
+
+  const closeExpenseEditor = () => {
+    if (isSaving) {
+      return;
+    }
+
+    setEditingExpense(null);
+    setExpenseAmount("");
+    setReason("");
+  };
+
+  const saveExpenseCorrection = async () => {
+    if (!currentUser || !groupId || !isAdmin || !editingExpense) {
+      return;
+    }
+
+    const nextAmount = Number(expenseAmount);
+
+    if (!Number.isFinite(nextAmount) || nextAmount < 0) {
+      toast({
+        variant: "destructive",
+        title: "Invalid amount",
+        description: "Amount must be 0 or more.",
+      });
+      return;
+    }
+
+    const correctionReason = validateReason();
+    if (!correctionReason) {
+      return;
+    }
+
+    if (nextAmount === editingExpense.amount) {
+      toast({
+        title: "Nothing changed",
+        description: "Change the amount before saving.",
+      });
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      const actorName = getActorName();
+      const batch = writeBatch(firestore);
+      const expenseRef = doc(firestore, `groups/${groupId}/expenses`, editingExpense.id);
+      const activityRef = doc(collection(firestore, `groups/${groupId}/notifications`));
+
+      batch.update(expenseRef, {
+        amount: nextAmount,
+        updatedAt: serverTimestamp(),
+        lastEditedBy: currentUser.uid,
+        lastEditedByName: actorName,
+        lastEditedAt: serverTimestamp(),
+        editReason: correctionReason,
+        lastActivityId: activityRef.id,
+      });
+
+      batch.set(activityRef, {
+        groupId,
+        recordId: editingExpense.id,
+        senderId: currentUser.uid,
+        senderName: actorName,
+        targetUserId: editingExpense.userId,
+        messageText: `corrected ${editingExpense.userName || "Member"}'s expense "${editingExpense.expenseItem}" on ${format(getRecordDate(editingExpense.date), "MMM d, yyyy")}: ৳${editingExpense.amount} → ৳${nextAmount}. Reason: ${correctionReason}`,
+        type: "expense_adjustment",
+        reason: correctionReason,
+        createdAt: serverTimestamp(),
+        readBy: [currentUser.uid],
+      });
+
+      await batch.commit();
+
+      toast({
+        title: "Expense corrected",
+        description: "The correction and its reason are now visible in Activity Log.",
+      });
+      setEditingExpense(null);
+      setExpenseAmount("");
+      setReason("");
+    } catch (error) {
+      console.error("Expense correction failed:", error);
+      toast({
+        variant: "destructive",
+        title: "Correction failed",
+        description: "The expense was not changed. Check your admin permission and try again.",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const openDeleteDialog = (target: DeleteTarget) => {
+    setDeleteTarget(target);
+    setReason("");
+  };
+
+  const closeDeleteDialog = () => {
+    if (isSaving) {
+      return;
+    }
+
+    setDeleteTarget(null);
+    setReason("");
+  };
+
+  const confirmDelete = async () => {
+    if (!currentUser || !groupId || !isAdmin || !deleteTarget) {
+      return;
+    }
+
+    const correctionReason = validateReason();
+    if (!correctionReason) {
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      const actorName = getActorName();
+      const { kind, record } = deleteTarget;
+      const collectionName = kind === "meal" ? "meals" : "expenses";
+      const batch = writeBatch(firestore);
+
+      // Fixed ID so Firestore Rules can verify that every admin delete is logged.
+      const activityRef = doc(
+        firestore,
+        `groups/${groupId}/notifications`,
+        `admin_delete_${record.id}`
+      );
+
+      const label =
+        kind === "meal"
+          ? `${(record as MealLog).mealType} x${(record as MealLog).mealNumber}`
+          : `expense "${(record as Expense).expenseItem}" (৳${(record as Expense).amount})`;
+
+      batch.set(activityRef, {
+        groupId,
+        recordId: record.id,
+        senderId: currentUser.uid,
+        senderName: actorName,
+        targetUserId: record.userId,
+        messageText: `deleted ${record.userName || "Member"}'s ${label} on ${format(getRecordDate(record.date), "MMM d, yyyy")}. Reason: ${correctionReason}`,
+        type: kind === "meal" ? "meal_delete" : "expense_delete",
+        reason: correctionReason,
+        createdAt: serverTimestamp(),
+        readBy: [currentUser.uid],
+      });
+
+      batch.delete(doc(firestore, `groups/${groupId}/${collectionName}`, record.id));
+
+      await batch.commit();
+
+      toast({
+        title: kind === "meal" ? "Meal deleted" : "Expense deleted",
+        description: "The deletion and its reason are now visible in Activity Log.",
+      });
+      setDeleteTarget(null);
+      setReason("");
+    } catch (error) {
+      console.error("Admin delete failed:", error);
+      toast({
+        variant: "destructive",
+        title: "Delete failed",
+        description: "Nothing was deleted. Check your admin permission and try again.",
       });
     } finally {
       setIsSaving(false);
@@ -427,48 +665,127 @@ export function ActivityLog() {
 
       {isAdmin && (
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BadgeCheck className="h-5 w-5" />
-              Admin meal corrections
-            </CardTitle>
-            <CardDescription>
-              Correct a member&apos;s count or item. A reason is mandatory and becomes visible to everyone.
-            </CardDescription>
+          <CardHeader className="gap-4">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <BadgeCheck className="h-5 w-5" />
+                Admin corrections
+              </CardTitle>
+              <CardDescription>
+                Correct or delete any member&apos;s meal or expense. A reason is mandatory and becomes visible to everyone.
+              </CardDescription>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {(["meals", "expenses"] as const).map((tab) => (
+                <Button
+                  key={tab}
+                  type="button"
+                  size="sm"
+                  variant={adminTab === tab ? "default" : "outline"}
+                  onClick={() => setAdminTab(tab)}
+                  className="capitalize"
+                >
+                  {tab}
+                </Button>
+              ))}
+            </div>
           </CardHeader>
           <CardContent>
-            {areMealsLoading ? (
+            {adminTab === "meals" ? (
+              areMealsLoading ? (
+                <div className="space-y-2">
+                  {Array.from({ length: 5 }).map((_, index) => (
+                    <Skeleton key={index} className="h-16 w-full rounded-lg" />
+                  ))}
+                </div>
+              ) : meals && meals.length > 0 ? (
+                <ScrollArea className="h-[min(60vh,36rem)] pr-3">
+                  <div className="space-y-2">
+                    {meals.map((meal) => (
+                      <div
+                        key={meal.id}
+                        className="flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center sm:justify-between"
+                      >
+                        <div>
+                          <p className="font-semibold">
+                            {meal.userName || "Member"} · <span className="capitalize">{meal.mealType}</span> x{meal.mealNumber}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {format(getMealDate(meal), "MMM d, yyyy")}
+                            {meal.itemName ? ` · ${meal.itemName}` : ""}
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button type="button" variant="outline" size="sm" onClick={() => openMealEditor(meal)}>
+                            <Pencil className="mr-2 h-4 w-4" />
+                            Correct
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => openDeleteDialog({ kind: "meal", record: meal })}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              ) : (
+                <p className="py-8 text-center text-sm text-muted-foreground">
+                  No meal records are available to correct.
+                </p>
+              )
+            ) : areExpensesLoading ? (
               <div className="space-y-2">
                 {Array.from({ length: 5 }).map((_, index) => (
                   <Skeleton key={index} className="h-16 w-full rounded-lg" />
                 ))}
               </div>
-            ) : meals && meals.length > 0 ? (
-              <div className="space-y-2">
-                {meals.map((meal) => (
-                  <div
-                    key={meal.id}
-                    className="flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center sm:justify-between"
-                  >
-                    <div>
-                      <p className="font-semibold">
-                        {meal.userName || "Member"} · <span className="capitalize">{meal.mealType}</span> x{meal.mealNumber}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {format(getMealDate(meal), "MMM d, yyyy")}
-                        {meal.itemName ? ` · ${meal.itemName}` : ""}
-                      </p>
+            ) : expenses && expenses.length > 0 ? (
+              <ScrollArea className="h-[min(60vh,36rem)] pr-3">
+                <div className="space-y-2">
+                  {expenses.map((expense) => (
+                    <div
+                      key={expense.id}
+                      className="flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <div>
+                        <p className="font-semibold">
+                          {expense.userName || "Member"} · {expense.expenseItem} · ৳{expense.amount}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {format(getRecordDate(expense.date), "MMM d, yyyy")} · {expense.category}
+                          {expense.editReason ? " · edited" : ""}
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button type="button" variant="outline" size="sm" onClick={() => openExpenseEditor(expense)}>
+                          <Pencil className="mr-2 h-4 w-4" />
+                          Correct
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => openDeleteDialog({ kind: "expense", record: expense })}
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete
+                        </Button>
+                      </div>
                     </div>
-                    <Button type="button" variant="outline" size="sm" onClick={() => openMealEditor(meal)}>
-                      <Pencil className="mr-2 h-4 w-4" />
-                      Correct
-                    </Button>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              </ScrollArea>
             ) : (
               <p className="py-8 text-center text-sm text-muted-foreground">
-                No meal records are available to correct.
+                No expense records are available to correct.
               </p>
             )}
           </CardContent>
@@ -490,7 +807,7 @@ export function ActivityLog() {
               <Input
                 id="meal-count"
                 type="number"
-                min="0.25"
+                min="0"
                 step="0.25"
                 value={mealCount}
                 onChange={(event) => setMealCount(event.target.value)}
@@ -526,6 +843,90 @@ export function ActivityLog() {
             <Button type="button" onClick={() => void saveMealCorrection()} disabled={isSaving}>
               {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Save correction
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={Boolean(editingExpense)} onOpenChange={(open) => !open && closeExpenseEditor()}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Correct expense</DialogTitle>
+            <DialogDescription>
+              {editingExpense
+                ? `${editingExpense.userName || "Member"} · ${editingExpense.expenseItem} · currently ৳${editingExpense.amount}`
+                : ""}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="expense-amount">New amount (৳)</Label>
+              <Input
+                id="expense-amount"
+                type="number"
+                min="0"
+                step="1"
+                value={expenseAmount}
+                onChange={(event) => setExpenseAmount(event.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">Set 0 to cancel the cost without deleting the record.</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="expense-reason">Reason for correction</Label>
+              <Textarea
+                id="expense-reason"
+                value={reason}
+                onChange={(event) => setReason(event.target.value)}
+                placeholder="Example: Wrong amount entered, actual bill was ৳250"
+                maxLength={200}
+              />
+              <p className="text-xs text-muted-foreground">Required · 5–200 characters</p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={closeExpenseEditor} disabled={isSaving}>
+              Cancel
+            </Button>
+            <Button type="button" onClick={() => void saveExpenseCorrection()} disabled={isSaving}>
+              {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Save correction
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={Boolean(deleteTarget)} onOpenChange={(open) => !open && closeDeleteDialog()}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              Delete {deleteTarget?.kind === "meal" ? "meal" : "expense"} record?
+            </DialogTitle>
+            <DialogDescription>
+              This cannot be undone. The deletion and your reason will appear in the shared Activity Log.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-2">
+            <Label htmlFor="delete-reason">Reason for deleting</Label>
+            <Textarea
+              id="delete-reason"
+              value={reason}
+              onChange={(event) => setReason(event.target.value)}
+              placeholder="Example: Duplicate entry"
+              maxLength={200}
+            />
+            <p className="text-xs text-muted-foreground">Required · 5–200 characters</p>
+          </div>
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={closeDeleteDialog} disabled={isSaving}>
+              Cancel
+            </Button>
+            <Button type="button" variant="destructive" onClick={() => void confirmDelete()} disabled={isSaving}>
+              {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Delete
             </Button>
           </DialogFooter>
         </DialogContent>
