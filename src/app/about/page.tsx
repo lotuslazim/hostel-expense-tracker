@@ -1,54 +1,80 @@
-
 "use client";
 
-import React, { useEffect, useRef } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
-import './about.css';
-import { LandingHeader } from '@/components/app/landing-header';
-import { CheckCircle, Users, ArrowRight, HeartHandshake, Bot, ShieldCheck } from 'lucide-react';
-import { MobilePreviewCard } from '@/components/landing/MobilePreviewCard';
+import React, { useEffect, useRef } from "react";
+import Link from "next/link";
+import "./about.css";
+import { LandingHeader } from "@/components/app/landing-header";
+import {
+    ArrowRight,
+    HeartHandshake,
+    Bot,
+    ShieldCheck,
+    UtensilsCrossed,
+    Wallet,
+    Scale,
+    ShoppingCart,
+    Megaphone,
+    BarChart3,
+} from "lucide-react";
+import { MobilePreviewCard } from "@/components/landing/MobilePreviewCard";
 
 const features = [
     {
-        id: 'planner',
-        title: 'Effortless Meal & Expense Logging',
-        description: 'Log daily meals and shared expenses in just a few taps. We handle the math, so you don’t have to.',
-        image: PlaceHolderImages.find(p => p.id === 'app-dashboard'),
+        icon: UtensilsCrossed,
+        kicker: "Meals",
+        title: "Log a meal in one tap.",
+        description: "Breakfast, lunch, dinner — tap and done. No more counting on the wall calendar.",
     },
     {
-        id: 'tracker',
-        title: 'Automated Monthly Settlements',
-        description: 'Receive a clear, automated report at the end of each month. See who owes what and who gets paid back instantly.',
-        image: PlaceHolderImages.find(p => p.id === 'app-report'),
+        icon: Wallet,
+        kicker: "Expenses",
+        title: "Every taka, on record.",
+        description: "Bazar, gas, utility — add it once and everyone sees who paid what.",
     },
     {
-        id: 'inventory',
-        title: 'Shared Inventory Tracking',
-        description: 'Groceries and food items are automatically added to a shared inventory, so everyone knows what’s in stock.',
-        image: PlaceHolderImages.find(p => p.id === 'app-inventory'),
+        icon: Scale,
+        kicker: "Settlement",
+        title: "Month ends. Math's done.",
+        description: "Meal rate, shares and balances are calculated for you. Who owes, who gets back — instantly.",
+    },
+    {
+        icon: ShoppingCart,
+        kicker: "Shopping & Stock",
+        title: "Know what's left before you buy.",
+        description: "A shared shopping list and inventory, so nobody brings home the third bottle of oil.",
+    },
+    {
+        icon: Megaphone,
+        kicker: "Notice & Chat",
+        title: "One place for the whole mess.",
+        description: "Announcements and group chat built in — no more lost messages in random group chats.",
+    },
+    {
+        icon: BarChart3,
+        kicker: "Reports",
+        title: "See the month at a glance.",
+        description: "Clear meal and expense reports with a smart monthly summary. No spreadsheet required.",
     },
 ];
 
 const howItWorksSteps = [
     {
         step: 1,
-        title: 'Create or Join a Group',
-        description: 'Start a group with your roommates or join an existing one with a unique invite code.',
-        letter: 'C',
+        title: "Create or Join a Group",
+        description: "Start a group with your roommates or join an existing one with a unique invite code.",
+        letter: "C",
     },
     {
         step: 2,
-        title: 'Log Daily Activity',
-        description: 'Simply log your meals and any shared expenses as they happen throughout the month.',
-        letter: 'L',
+        title: "Log Daily Activity",
+        description: "Simply log your meals and any shared expenses as they happen throughout the month.",
+        letter: "L",
     },
     {
         step: 3,
-        title: 'Settle Up Automatically',
-        description: 'At the end of the month, view the auto-generated report and settle balances in a single click.',
-        letter: 'S',
+        title: "Settle Up Automatically",
+        description: "At the end of the month, view the auto-generated report and settle balances in a single click.",
+        letter: "S",
     },
 ];
 
@@ -56,18 +82,18 @@ const values = [
     {
         icon: HeartHandshake,
         title: "Community First",
-        description: "We believe technology should bring people together, not create distance. BachelorBite is designed to foster harmony and reduce friction in shared living spaces."
+        description: "We believe technology should bring people together, not create distance. BachelorBite is designed to foster harmony and reduce friction in shared living spaces.",
     },
     {
         icon: Bot,
         title: "Smart Automation",
-        description: "From calculating meal rates to settling monthly balances, we automate the tedious tasks so you can focus on what matters—enjoying your time with your flatmates."
+        description: "From calculating meal rates to settling monthly balances, we automate the tedious tasks so you can focus on what matters—enjoying your time with your flatmates.",
     },
     {
         icon: ShieldCheck,
         title: "Trust & Privacy",
-        description: "Your data is yours. We are committed to ensuring your financial and personal information is secure, private, and never shared."
-    }
+        description: "Your data is yours. We are committed to ensuring your financial and personal information is secure, private, and never shared.",
+    },
 ];
 
 export default function AboutPage() {
@@ -78,7 +104,7 @@ export default function AboutPage() {
             (entries) => {
                 entries.forEach((entry) => {
                     if (entry.isIntersecting) {
-                        entry.target.classList.add('is-visible');
+                        entry.target.classList.add("is-visible");
                         observer.unobserve(entry.target);
                     }
                 });
@@ -87,9 +113,7 @@ export default function AboutPage() {
         );
 
         sectionsRef.current.forEach((section) => {
-            if (section) {
-                observer.observe(section);
-            }
+            if (section) observer.observe(section);
         });
 
         return () => observer.disconnect();
@@ -111,20 +135,15 @@ export default function AboutPage() {
                 >
                     <div className="hero-box">
                         <div className="hero-text-left">
-                            <h1 className="about-hero-headline">Our Story</h1>
+                            <h1 className="about-hero-headline">
+                                Our <span>Story</span>
+                            </h1>
                         </div>
                         <div className="hero-phone-container">
-                            <div className="iphone-mockup">
-                                <div className="iphone-frame">
-                                    <div className="iphone-screen">
-                                        <MobilePreviewCard />
-                                    </div>
-                                    <div className="iphone-notch"></div>
-                                </div>
-                            </div>
+                            <MobilePreviewCard />
                         </div>
                         <div className="hero-text-right">
-                             <p className="about-hero-subheading">
+                            <p className="about-hero-subheading">
                                 BachelorBite was born from the chaos of shared living. We got tired of messy spreadsheets and endless group chat debates about who bought the milk.
                             </p>
                         </div>
@@ -140,23 +159,14 @@ export default function AboutPage() {
                 >
                     <h2 className="section-title">Everything You Need, Nothing You Don’t</h2>
                     <div className="features-grid">
-                        {features.map(feature => (
-                            <div key={feature.id} className="feature-card">
-                                {feature.image && (
-                                    <div className="feature-card-image">
-                                        <Image
-                                            src={feature.image.imageUrl}
-                                            alt={feature.title}
-                                            fill
-                                            sizes="(max-width: 768px) 100vw, 33vw"
-                                            className="object-cover"
-                                        />
-                                    </div>
-                                )}
-                                <div className="feature-card-content">
-                                    <h3 className="feature-card-title">{feature.title}</h3>
-                                    <p className="feature-card-description">{feature.description}</p>
+                        {features.map((feature) => (
+                            <div key={feature.kicker} className="feature-card">
+                                <div className="feature-card-top">
+                                    <feature.icon className="feature-card-icon" />
+                                    <span className="feature-card-kicker">{feature.kicker}</span>
                                 </div>
+                                <h3 className="feature-card-title">{feature.title}</h3>
+                                <p className="feature-card-description">{feature.description}</p>
                             </div>
                         ))}
                     </div>
@@ -175,7 +185,7 @@ export default function AboutPage() {
                     <h2 className="section-title">How does it work?</h2>
                     <div className="how-it-works-grid">
                         {howItWorksSteps.map((step, index) => (
-                            <div key={step.step} className={`how-it-works-card ${index === 1 ? 'is-light' : ''}`}>
+                            <div key={step.step} className={`how-it-works-card ${index === 1 ? "is-light" : ""}`}>
                                 <div className="how-it-works-visual">
                                     <div className="step-row">
                                         <span className="step-letter">{step.letter}</span>
@@ -201,11 +211,11 @@ export default function AboutPage() {
                 >
                     <h2 className="section-title">Our Core Values</h2>
                     <div className="values-grid">
-                        {values.map(value => (
+                        {values.map((value) => (
                             <div key={value.title} className="value-item">
-                                <value.icon className="value-icon"/>
-                                <h3 className="feature-card-title">{value.title}</h3>
-                                <p className="feature-card-description">{value.description}</p>
+                                <value.icon className="value-icon" />
+                                <h3 className="value-title">{value.title}</h3>
+                                <p className="value-description">{value.description}</p>
                             </div>
                         ))}
                     </div>
