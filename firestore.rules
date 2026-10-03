@@ -503,7 +503,7 @@ service cloud.firestore {
           ])
           && changedFields.hasAny(["mealNumber", "itemName"])
           && request.resource.data.mealNumber is number
-          && request.resource.data.mealNumber > 0
+          && request.resource.data.mealNumber >= 0
           && request.resource.data.mealNumber <= 100
           && (
             nextItemName == null
@@ -536,6 +536,51 @@ service cloud.firestore {
           && getAfter(
             /databases/$(database)/documents/groups/$(groupId)/notifications/$(activityId)
           ).data.reason == request.resource.data.editReason;
+      }
+
+      // Admin delete: the same batch must create notifications/admin_delete_<recordId>
+      function hasLoggedAdminDelete(recordId, activityType) {
+        let activityId = "admin_delete_" + recordId;
+        let activityPath = /databases/$(database)/documents/groups/$(groupId)/notifications/$(activityId);
+        return isGroupAdmin(groupId)
+          && existsAfter(activityPath)
+          && getAfter(activityPath).data.type == activityType
+          && getAfter(activityPath).data.recordId == recordId
+          && getAfter(activityPath).data.senderId == request.auth.uid;
+      }
+
+      // Admin expense correction (amount can be reduced, increased or set to 0)
+      function hasValidAdminExpenseCorrection(expenseId) {
+        let changedFields = request.resource.data.diff(resource.data).affectedKeys();
+        let activityId = request.resource.data.lastActivityId;
+        let activityPath = /databases/$(database)/documents/groups/$(groupId)/notifications/$(activityId);
+        return isGroupAdmin(groupId)
+          && changedFields.hasOnly([
+            "amount",
+            "updatedAt",
+            "lastEditedBy",
+            "lastEditedByName",
+            "lastEditedAt",
+            "editReason",
+            "lastActivityId"
+          ])
+          && changedFields.hasAny(["amount"])
+          && request.resource.data.amount is number
+          && request.resource.data.amount >= 0
+          && request.resource.data.updatedAt == request.time
+          && request.resource.data.lastEditedBy == request.auth.uid
+          && request.resource.data.lastEditedByName is string
+          && request.resource.data.lastEditedByName.size() > 0
+          && request.resource.data.lastEditedByName.size() <= 80
+          && request.resource.data.lastEditedAt == request.time
+          && request.resource.data.editReason is string
+          && request.resource.data.editReason.size() >= 5
+          && request.resource.data.editReason.size() <= 200
+          && activityId is string
+          && existsAfter(activityPath)
+          && getAfter(activityPath).data.type == "expense_adjustment"
+          && getAfter(activityPath).data.recordId == expenseId
+          && getAfter(activityPath).data.reason == request.resource.data.editReason;
       }
 
       function hasLinkedMealUndo(mealId) {
@@ -852,7 +897,10 @@ service cloud.firestore {
           && hasValidAdminMealCorrection(mealId);
 
         allow delete: if isGroupMember(groupId)
-          && hasLinkedMealUndo(mealId);
+          && (
+            hasLinkedMealUndo(mealId)
+            || hasLoggedAdminDelete(mealId, "meal_delete")
+          );
       }
 
       // ------------------------------------------------
@@ -865,10 +913,14 @@ service cloud.firestore {
         allow create: if isGroupMember(groupId)
           && hasValidNewExpense(expenseId);
 
-        allow update: if false;
+        allow update: if isGroupMember(groupId)
+          && hasValidAdminExpenseCorrection(expenseId);
 
         allow delete: if isGroupMember(groupId)
-          && hasLinkedExpenseUndo(expenseId);
+          && (
+            hasLinkedExpenseUndo(expenseId)
+            || hasLoggedAdminDelete(expenseId, "expense_delete")
+          );
       }
 
       // ------------------------------------------------
