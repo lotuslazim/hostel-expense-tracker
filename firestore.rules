@@ -1001,6 +1001,27 @@ service cloud.firestore {
       // Settlements
       // ------------------------------------------------
 
+      // ------------------------------------------------
+      // Leaves (away toggle for electricity split)
+      // ------------------------------------------------
+
+      match /leaves/{leaveId} {
+        allow get, list: if isGroupMember(groupId);
+
+        allow create: if isGroupMember(groupId)
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.startDate is timestamp
+          && request.resource.data.endDate == null;
+
+        allow update: if isGroupMember(groupId)
+          && (resource.data.userId == request.auth.uid || isGroupAdmin(groupId))
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(["endDate", "updatedAt"])
+          && request.resource.data.endDate is timestamp;
+
+        allow delete: if isGroupAdmin(groupId);
+      }
+
       match /settlements/{settlementId} {
         allow get, list: if isGroupMember(groupId);
 
