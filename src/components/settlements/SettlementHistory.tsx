@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
@@ -6,6 +5,7 @@ import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
 import { doc, collection, query, where, Timestamp, setDoc, serverTimestamp, getDocs, orderBy, limit } from "firebase/firestore";
 import { format, getMonth, getYear, startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns";
 import type { MealLog, Expense, Settlement, Member } from "@/lib/types";
+import { computeElectricityShares, type LeaveRecord } from "@/lib/electricity-split";
 import { WelcomeCard } from "@/components/app/welcome-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -170,6 +170,14 @@ export function SettlementHistory() {
         const groupCreationSnapshot = await getDocs(groupCreationQuery);
         const firstJoinDate = groupCreationSnapshot.docs[0]?.data().joinedAt.toDate() || new Date();
         
+        let leavesData: LeaveRecord[] = [];
+        try {
+            const leavesSnapshot = await getDocs(collection(firestore, `groups/${groupId}/leaves`));
+            leavesData = leavesSnapshot.docs.map(d => ({ id: d.id, ...d.data() } as LeaveRecord));
+        } catch (error) {
+            console.error("Could not load leave records:", error);
+        }
+
         let loopMonth = startOfMonth(new Date());
 
         while (loopMonth >= startOfMonth(firstJoinDate)) {
@@ -186,7 +194,7 @@ export function SettlementHistory() {
                 getDocs(mealsQuery),
                 getDocs(expensesQuery),
                 getDocs(membersQuery),
-                getDocs(usersQuery),
+                getDocs(membersQuery),
                 getDocs(settlementsQuery)
             ]);
 
@@ -221,6 +229,8 @@ export function SettlementHistory() {
             const mealRate = totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
             const perMemberUtilityShare = totalUtilityExpenses / memberCount;
             const perMemberOtherShare = totalGroupOtherExpenses / memberCount;
+            const gasTotal = expensesData.filter(e => e.category === 'Gas').reduce((sum, e) => sum + e.amount, 0);
+            const electricityShares = computeElectricityShares(expensesData, activeMembersInMonth, leavesData, monthEnd);
 
             const processedMembers = activeMembersInMonth.map(member => {
                 const userDetails = userMap[member.id];
@@ -231,7 +241,8 @@ export function SettlementHistory() {
                 const memberExpenses = expensesByUser[member.id] || [];
                 const totalPaid = memberExpenses.reduce((sum, e) => sum + e.amount, 0);
                 
-                const totalShare = totalMealCost + perMemberUtilityShare + perMemberOtherShare;
+                const utilityShare = gasTotal / memberCount + (electricityShares[member.id] || 0);
+                const totalShare = totalMealCost + utilityShare + perMemberOtherShare;
                 const balance = totalPaid - totalShare;
 
                 return {
