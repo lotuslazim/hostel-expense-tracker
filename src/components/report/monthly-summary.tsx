@@ -5,8 +5,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { cn } from "@/lib/utils";
 import { Flame, Zap, Utensils, Scale, Users, FileText, ArrowRight, ChevronDown, AlertTriangle, Package, Receipt, BadgeCheck, CheckCircle } from "lucide-react";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
-import { doc, collection, query, where, Timestamp, setDoc, serverTimestamp } from "firebase/firestore";
-import { useMemo, useState, lazy, Suspense } from "react";
+import { doc, collection, query, where, Timestamp, setDoc, serverTimestamp, getDoc } from "firebase/firestore";
+import { useMemo, useState, useEffect, lazy, Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from 'date-fns/format';
 import { getMonth } from 'date-fns/getMonth';
@@ -381,8 +381,48 @@ export function MonthlySummary() {
   const { data: mealsData, isLoading: areMealsLoading, error: mealsError } = useCollection<MealLog>(mealsQuery);
   const { data: expensesData, isLoading: areExpensesLoading, error: expensesError } = useCollection<Expense>(expensesQuery);
   const { data: settlementsData, isLoading: areSettlementsLoading, error: settlementsError } = useCollection<SettlementRecord>(settlementsQuery);
-  // Names/photos come from the group's member docs (listing all users is blocked by Rules).
-  const usersData = membersData;
+  // Names/photos: read each member's own user doc (listing all users is blocked by Rules).
+  const [memberProfiles, setMemberProfiles] = useState<Record<string, { displayName?: string; photoURL?: string; email?: string }>>({});
+
+  useEffect(() => {
+    if (!membersData) return;
+    let cancelled = false;
+
+    Promise.all(
+      membersData.map(async (member: any) => {
+        try {
+          const snap = await getDoc(doc(firestore, "users", member.id));
+          return snap.exists() ? { id: member.id, ...(snap.data() as any) } : null;
+        } catch {
+          return null;
+        }
+      })
+    ).then((profiles) => {
+      if (cancelled) return;
+      const map: Record<string, { displayName?: string; photoURL?: string; email?: string }> = {};
+      profiles.forEach((profile) => {
+        if (profile) map[profile.id] = profile;
+      });
+      setMemberProfiles(map);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [membersData, firestore]);
+
+  const usersData = useMemo(() => {
+    if (!membersData) return null;
+    return membersData.map((member: any) => {
+      const profile = memberProfiles[member.id];
+      return {
+        id: member.id,
+        displayName: profile?.displayName || member.displayName || member.userName,
+        photoURL: profile?.photoURL || member.photoURL,
+        email: profile?.email || member.email,
+      };
+    });
+  }, [membersData, memberProfiles]);
   const areUsersLoading = false;
   const usersError = null;
 
@@ -437,7 +477,7 @@ export function MonthlySummary() {
 
       return {
         id: member.id,
-        name: userDetails?.displayName || userDetails?.email?.split('@')[0] || 'Unnamed Member',
+        name: userDetails?.displayName || userDetails?.email?.split('@')[0] || memberMeals[0]?.userName || memberExpenses[0]?.userName || 'Unnamed Member',
         photoURL: userDetails?.photoURL,
         meals: totalMeals,
         memberMeals,
