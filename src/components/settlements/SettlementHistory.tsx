@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useEffect } from "react";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
-import { doc, collection, query, where, Timestamp, setDoc, serverTimestamp, getDocs, orderBy, limit } from "firebase/firestore";
+import { doc, collection, query, where, Timestamp, setDoc, serverTimestamp, getDocs, getDoc, orderBy, limit } from "firebase/firestore";
 import { format, getMonth, getYear, startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns";
 import type { MealLog, Expense, Settlement, Member } from "@/lib/types";
 import { computeElectricityShares, type LeaveRecord } from "@/lib/electricity-split";
@@ -178,6 +178,30 @@ export function SettlementHistory() {
             console.error("Could not load leave records:", error);
         }
 
+        // Names/photos: read each member's own user doc (listing all users is blocked by Rules).
+        const profileMap: Record<string, any> = {};
+        try {
+            const allMembersSnapshot = await getDocs(collection(firestore, `groups/${groupId}/members`));
+            await Promise.all(allMembersSnapshot.docs.map(async (memberDoc) => {
+                const memberData = memberDoc.data() as any;
+                let profile: any = null;
+                try {
+                    const snap = await getDoc(doc(firestore, "users", memberDoc.id));
+                    profile = snap.exists() ? snap.data() : null;
+                } catch {
+                    profile = null;
+                }
+                profileMap[memberDoc.id] = {
+                    id: memberDoc.id,
+                    displayName: profile?.displayName || memberData.displayName || memberData.userName,
+                    photoURL: profile?.photoURL || memberData.photoURL,
+                    email: profile?.email || memberData.email,
+                };
+            }));
+        } catch (error) {
+            console.error("Could not load member profiles:", error);
+        }
+
         let loopMonth = startOfMonth(new Date());
 
         while (loopMonth >= startOfMonth(firstJoinDate)) {
@@ -208,6 +232,9 @@ export function SettlementHistory() {
               acc[userDoc.id] = userDoc;
               return acc;
             }, {} as Record<string, any>);
+            Object.entries(profileMap).forEach(([id, profile]) => {
+              userMap[id] = profile;
+            });
 
             // Filter members who were active during the loopMonth
             const activeMembersInMonth = membersData.filter(m => {
@@ -247,7 +274,7 @@ export function SettlementHistory() {
 
                 return {
                     id: member.id,
-                    name: userDetails?.displayName || 'Unnamed Member',
+                    name: userDetails?.displayName || userDetails?.email?.split('@')[0] || memberMeals[0]?.userName || memberExpenses[0]?.userName || 'Unnamed Member',
                     photoURL: userDetails?.photoURL,
                     totalPaid,
                     totalShare,
