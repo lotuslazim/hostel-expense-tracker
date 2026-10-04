@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -18,6 +16,7 @@ import { endOfMonth } from 'date-fns/endOfMonth';
 import { addMonths } from 'date-fns/addMonths';
 import { subMonths } from 'date-fns/subMonths';
 import type { MealLog, Expense } from "@/lib/types";
+import { computeElectricityShares, type LeaveRecord } from "@/lib/electricity-split";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -77,6 +76,7 @@ interface ProcessedData {
   totalGroupExpenses: number;
   totalUtilityExpenses: number;
   otherExpensesList: Expense[];
+  utilityShareByMember: Record<string, number>;
 }
 
 // Reusable utility functions
@@ -371,13 +371,22 @@ export function MonthlySummary() {
     [firestore]
   );
 
+  const leavesQuery = useMemo(() =>
+    (groupId ? collection(firestore, `groups/${groupId}/leaves`) : null),
+    [firestore, groupId]
+  );
+  const { data: leavesData, isLoading: areLeavesLoading } = useCollection<LeaveRecord>(leavesQuery);
+
   const { data: membersData, isLoading: areMembersLoading, error: membersError } = useCollection(membersQuery);
   const { data: mealsData, isLoading: areMealsLoading, error: mealsError } = useCollection<MealLog>(mealsQuery);
   const { data: expensesData, isLoading: areExpensesLoading, error: expensesError } = useCollection<Expense>(expensesQuery);
   const { data: settlementsData, isLoading: areSettlementsLoading, error: settlementsError } = useCollection<SettlementRecord>(settlementsQuery);
-  const { data: usersData, isLoading: areUsersLoading, error: usersError } = useCollection(usersQuery);
+  // Names/photos come from the group's member docs (listing all users is blocked by Rules).
+  const usersData = membersData;
+  const areUsersLoading = false;
+  const usersError = null;
 
-  const isAnyLoading = isCurrentUserLoading || isCurrentUserDataLoading || (!!groupId && (areMembersLoading || areMealsLoading || areExpensesLoading || areUsersLoading || areSettlementsLoading));
+  const isAnyLoading = isCurrentUserLoading || isCurrentUserDataLoading || (!!groupId && (areMembersLoading || areMealsLoading || areExpensesLoading || areUsersLoading || areSettlementsLoading || areLeavesLoading));
   const hasAnyErrors = currentUserDataError || membersError || mealsError || expensesError || usersError || settlementsError;
 
   const handleMonthChange = (direction: "next" | "prev") => {
@@ -451,6 +460,19 @@ export function MonthlySummary() {
     const totalGroupExpenses = expensesData.reduce((sum, e) => sum + (e.amount || 0), 0);
     const otherExpensesList = expensesData.filter(e => e.category === 'Other').sort(sortByDateDesc);
 
+    // Gas: equal split. Electricity: split by days each member was at home.
+    const gasTotal = expensesData.filter(e => e.category === 'Gas').reduce((sum, e) => sum + (e.amount || 0), 0);
+    const electricityShares = computeElectricityShares(
+      expensesData,
+      membersData.filter((m: any) => processedMembers.some(p => p.id === m.id)),
+      leavesData ?? [],
+      monthDateRange.end
+    );
+    const utilityShareByMember = processedMembers.reduce((acc, member) => {
+      acc[member.id] = gasTotal / memberCount + (electricityShares[member.id] || 0);
+      return acc;
+    }, {} as Record<string, number>);
+
     return {
       processedMembers,
       totalGroupFoodExpenses,
@@ -460,9 +482,10 @@ export function MonthlySummary() {
       mealRate: mealRate || 0,
       totalGroupExpenses: totalGroupExpenses || 0,
       totalUtilityExpenses: totalUtilityExpenses || 0,
-      otherExpensesList
+      otherExpensesList,
+      utilityShareByMember
     };
-  }, [membersData, mealsData, expensesData, usersData, settlementsData]);
+  }, [membersData, mealsData, expensesData, usersData, settlementsData, leavesData, monthDateRange]);
 
   if (isAnyLoading) {
     return <SummarySkeleton />;
@@ -485,7 +508,8 @@ export function MonthlySummary() {
       mealRate,
       totalGroupExpenses,
       totalUtilityExpenses,
-      otherExpensesList
+      otherExpensesList,
+      utilityShareByMember
   } = processedData;
 
   const perMemberUtilityShare = totalUtilityExpenses / (memberCount || 1);
@@ -647,7 +671,7 @@ export function MonthlySummary() {
         <CardContent className="space-y-3 p-3 pt-2">
           {processedMembers.map((member) => {
             const totalMealCost = member.meals * mealRate;
-            const memberShare = totalMealCost + perMemberUtilityShare + perMemberOtherShare;
+            const memberShare = totalMealCost + (utilityShareByMember[member.id] ?? perMemberUtilityShare) + perMemberOtherShare;
             const balance = member.totalPaid - memberShare;
             const hasCredit = balance >= 0;
 
@@ -814,4 +838,3 @@ export function MonthlySummary() {
     </div>
   );
 }
-
