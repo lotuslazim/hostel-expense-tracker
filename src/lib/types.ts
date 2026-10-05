@@ -52,6 +52,7 @@ export type ExpenseCategory =
   | "Food & Groceries"
   | "Electricity"
   | "Gas"
+  | "Wi-Fi"
   | "Other";
 
 export interface PurchasedItem {
@@ -268,3 +269,5 @@ export interface Reminder {
   updatedAt?: Timestamp | null;
   isPinned?: boolean;
 }
+
+
