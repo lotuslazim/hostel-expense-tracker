@@ -1,24 +1,27 @@
 /*
- * One shared month calculation used by the Admin table, Monthly Summary
+ * One shared month calculation used by the Admin sheet, Monthly Summary
  * and Settlement History, so every page shows the same numbers.
  *
  * Columns: Meals, Bazar, Utilities (Electricity + Gas), Wi-Fi, ETC, Total.
  *
- * - Bazar     = meal rate x member's meals
- *               (meal rate = Food & Groceries total / all meals)
- * - Bills     = split among members. For bill types where the leave rule
- *               is on, each member pays by the number of days they were
- *               at home this month; otherwise split equally.
- * - Admin adjustments (+/-) are added to that member's column only.
- *   They raise/lower the member's Total and the group's total; nobody
- *   else's share changes.
+ * - Bazar  = meal rate x member's meals (+ admin bazar change)
+ *            meal rate = Food & Groceries total / all meals
+ * - Bills  = split only among the members chosen for that bill
+ *            (default: everyone). If the leave rule is on for that bill,
+ *            each chosen member pays by the days they were at home.
+ * - Admin changes (+/-) go only to that member's column. They raise or
+ *   lower that member's Total and the group total; nobody else changes.
  */
 import type { Expense, MealLog } from "./types";
 import { isMemberHomeOnDay, type LeaveRecord, type MemberPresenceInfo } from "./electricity-split";
 
-export type AdjustField = "meals" | "utilities" | "wifi" | "etc";
+export type AdjustField = "meals" | "bazar" | "utilities" | "wifi" | "etc";
+export const ADJUST_FIELDS: AdjustField[] = ["meals", "bazar", "utilities", "wifi", "etc"];
 
-export const ADJUST_FIELDS: AdjustField[] = ["meals", "utilities", "wifi", "etc"];
+/* Bill types that can be split / get the leave rule. "Other" = ETC column. */
+export const BILL_TYPES = ["Electricity", "Gas", "Wi-Fi", "Other"] as const;
+export type BillType = (typeof BILL_TYPES)[number];
+export const LEAVE_BILL_TYPES = ["Electricity", "Gas", "Wi-Fi"] as const;
 
 export interface MonthAdjustment {
   id?: string;
@@ -29,6 +32,18 @@ export interface MonthAdjustment {
   reason?: string;
   createdByName?: string;
   createdAt?: unknown;
+}
+
+/* groups/{groupId}/sheetSettings/default */
+export interface SheetSettings {
+  leaveCategories?: string[];
+}
+
+/* groups/{groupId}/monthSettings/{monthKey} */
+export interface MonthSettings {
+  locked?: boolean;
+  /* null / missing = All members */
+  splitMembers?: Partial<Record<BillType, string[] | null>>;
 }
 
 export interface MemberMonthResult {
@@ -51,7 +66,6 @@ export interface MonthResult {
   adjustmentMoneyNet: number;
 }
 
-/* Bill types where the leave rule applies (Phase 2 makes this a setting). */
 export const DEFAULT_LEAVE_CATEGORIES = ["Electricity"];
 
 export const monthKeyOf = (date: Date) =>
@@ -60,9 +74,7 @@ export const monthKeyOf = (date: Date) =>
 const dayStart = (date: Date) =>
   new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
-const UTILITY = ["Electricity", "Gas"];
-const WIFI = ["Wi-Fi"];
-const NOT_ETC = ["Food & Groceries", ...UTILITY, ...WIFI];
+const NOT_ETC = ["Food & Groceries", "Electricity", "Gas", "Wi-Fi"];
 
 export function computeMonth(params: {
   members: MemberPresenceInfo[];
@@ -73,6 +85,7 @@ export function computeMonth(params: {
   monthStart: Date;
   monthEnd: Date;
   leaveCategories?: string[];
+  splitMembers?: MonthSettings["splitMembers"];
 }): MonthResult {
   const {
     members,
@@ -83,15 +96,16 @@ export function computeMonth(params: {
     monthStart,
     monthEnd,
     leaveCategories = DEFAULT_LEAVE_CATEGORIES,
+    splitMembers = {},
   } = params;
 
   const ids = members.map((m) => m.id);
-  const count = ids.length || 1;
+  const zero = () => Object.fromEntries(ids.map((id) => [id, 0])) as Record<string, number>;
 
-  /* ---- adjustments per member ---- */
+  /* ---- admin changes ---- */
   const adj: Record<string, Record<AdjustField, number>> = {};
   ids.forEach((id) => {
-    adj[id] = { meals: 0, utilities: 0, wifi: 0, etc: 0 };
+    adj[id] = { meals: 0, bazar: 0, utilities: 0, wifi: 0, etc: 0 };
   });
   let adjustmentMoneyNet = 0;
   adjustments.forEach((a) => {
@@ -101,66 +115,61 @@ export function computeMonth(params: {
     if (a.field !== "meals") adjustmentMoneyNet += delta;
   });
 
-  /* ---- days at home this month ---- */
+  /* ---- days at home ---- */
   const leavesByUser = leaves.reduce((acc, l) => {
     (acc[l.userId] = acc[l.userId] || []).push(l);
     return acc;
   }, {} as Record<string, LeaveRecord[]>);
 
-  const daysHome: Record<string, number> = {};
-  ids.forEach((id) => (daysHome[id] = 0));
+  const daysHome = zero();
   const last = dayStart(monthEnd);
   for (let d = dayStart(monthStart); d <= last; d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1)) {
     members.forEach((m) => {
       if (isMemberHomeOnDay(m, leavesByUser[m.id] || [], d)) daysHome[m.id] += 1;
     });
   }
-  const totalDaysHome = ids.reduce((s, id) => s + daysHome[id], 0);
 
-  /* ---- split a bill total among members ---- */
-  const split = (total: number, useLeave: boolean) => {
-    const out: Record<string, number> = {};
-    ids.forEach((id) => {
-      out[id] =
-        useLeave && totalDaysHome > 0
-          ? (total * daysHome[id]) / totalDaysHome
-          : total / count;
+  /* ---- split one bill type among its chosen members ---- */
+  const sumOf = (filter: (category: string) => boolean) =>
+    expenses.filter((e) => filter(e.category)).reduce((s, e) => s + (Number(e.amount) || 0), 0);
+
+  const split = (billType: BillType, total: number) => {
+    const out = zero();
+    if (!total) return out;
+    const chosen = splitMembers?.[billType];
+    let sharers = Array.isArray(chosen) && chosen.length > 0 ? ids.filter((id) => chosen.includes(id)) : ids;
+    if (sharers.length === 0) sharers = ids;
+    if (sharers.length === 0) return out;
+
+    const useLeave = billType !== "Other" && leaveCategories.includes(billType);
+    const totalDays = sharers.reduce((s, id) => s + daysHome[id], 0);
+    sharers.forEach((id) => {
+      out[id] = useLeave && totalDays > 0 ? (total * daysHome[id]) / totalDays : total / sharers.length;
     });
     return out;
   };
 
-  const sumOf = (cats: string[] | null, exclude?: string[]) =>
-    expenses
-      .filter((e) => (cats ? cats.includes(e.category) : !exclude!.includes(e.category)))
-      .reduce((s, e) => s + (Number(e.amount) || 0), 0);
-
-  const utilShares: Record<string, number> = {};
-  ids.forEach((id) => (utilShares[id] = 0));
-  UTILITY.forEach((cat) => {
-    const part = split(sumOf([cat]), leaveCategories.includes(cat));
-    ids.forEach((id) => (utilShares[id] += part[id]));
-  });
-  const wifiShares = split(sumOf(WIFI), leaveCategories.includes("Wi-Fi"));
-  const etcShares = split(sumOf(null, NOT_ETC), false);
+  const elec = split("Electricity", sumOf((c) => c === "Electricity"));
+  const gas = split("Gas", sumOf((c) => c === "Gas"));
+  const wifiShares = split("Wi-Fi", sumOf((c) => c === "Wi-Fi"));
+  const etcShares = split("Other", sumOf((c) => !NOT_ETC.includes(c)));
 
   /* ---- meals & bazar ---- */
-  const logged: Record<string, number> = {};
-  ids.forEach((id) => (logged[id] = 0));
+  const logged = zero();
   meals.forEach((meal) => {
     if (logged[meal.userId] === undefined) return;
     logged[meal.userId] += Number(meal.mealNumber ?? 1) || 0;
   });
-
-  const mealCount: Record<string, number> = {};
+  const mealCount = zero();
   ids.forEach((id) => (mealCount[id] = Math.max(0, logged[id] + adj[id].meals)));
   const totalMeals = ids.reduce((s, id) => s + mealCount[id], 0);
-  const foodTotal = sumOf(["Food & Groceries"]);
+  const foodTotal = sumOf((c) => c === "Food & Groceries");
   const mealRate = totalMeals > 0 ? foodTotal / totalMeals : 0;
 
   const byMember: Record<string, MemberMonthResult> = {};
   ids.forEach((id) => {
-    const bazar = mealRate * mealCount[id];
-    const utilities = utilShares[id] + adj[id].utilities;
+    const bazar = mealRate * mealCount[id] + adj[id].bazar;
+    const utilities = elec[id] + gas[id] + adj[id].utilities;
     const wifi = wifiShares[id] + adj[id].wifi;
     const etc = etcShares[id] + adj[id].etc;
     byMember[id] = {
