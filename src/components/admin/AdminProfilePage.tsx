@@ -46,6 +46,7 @@ import {
     firestore,
 } from "@/firebase/config";
 import { AppHeader } from "@/components/app/header";
+import { AdminMonthTable } from "@/components/admin/AdminMonthTable";
 import { useToast } from "@/hooks/use-toast";
 
 import {
@@ -1997,6 +1998,8 @@ export default function AdminProfilePage() {
                                 }
                             />
                         </div>
+
+                        <AdminMonthTable groupId={groupId} />
 
                         <Card>
                             <CardHeader>
