@@ -6,7 +6,7 @@ import { doc, collection, query, where, Timestamp, setDoc, serverTimestamp, getD
 import { format, getMonth, getYear, startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns";
 import type { MealLog, Expense, Settlement, Member } from "@/lib/types";
 import type { LeaveRecord } from "@/lib/electricity-split";
-import { computeMonth, monthKeyOf, type MonthAdjustment } from "@/lib/month-calc";
+import { computeMonth, monthKeyOf, type MonthAdjustment, type MonthSettings, type SheetSettings } from "@/lib/month-calc";
 import { WelcomeCard } from "@/components/app/welcome-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -211,6 +211,17 @@ export function SettlementHistory() {
             console.error("Could not load adjustments:", error);
         }
 
+        let sheetSettings: SheetSettings | null = null;
+        const monthSettingsMap: Record<string, MonthSettings> = {};
+        try {
+            const sheetSnap = await getDoc(doc(firestore, `groups/${groupId}/sheetSettings`, "default"));
+            sheetSettings = sheetSnap.exists() ? (sheetSnap.data() as SheetSettings) : null;
+            const monthSettingsSnap = await getDocs(collection(firestore, `groups/${groupId}/monthSettings`));
+            monthSettingsSnap.docs.forEach(d => { monthSettingsMap[d.id] = d.data() as MonthSettings; });
+        } catch (error) {
+            console.error("Could not load sheet settings:", error);
+        }
+
         let loopMonth = startOfMonth(new Date());
 
         while (loopMonth >= startOfMonth(firstJoinDate)) {
@@ -273,6 +284,8 @@ export function SettlementHistory() {
                 adjustments: allAdjustments.filter(a => a.monthKey === monthKeyOf(monthStart)),
                 monthStart,
                 monthEnd,
+                leaveCategories: sheetSettings?.leaveCategories,
+                splitMembers: monthSettingsMap[monthKeyOf(monthStart)]?.splitMembers,
             });
 
             const processedMembers = activeMembersInMonth.map(member => {
