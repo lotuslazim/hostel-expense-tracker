@@ -1,16 +1,20 @@
 /*
  * One shared month calculation used by the Admin sheet, Monthly Summary
- * and Settlement History, so every page shows the same numbers.
+ * and Settlement History, so every page uses the same numbers.
  *
- * Columns: Meals, Bazar, Utilities (Electricity + Gas), Wi-Fi, ETC, Total.
+ * Sheet columns:
+ * - Bazar     = Food & Groceries the member added (+ admin change)
+ * - Utilities = member's share of Electricity + Gas (+ admin change)
+ * - Wi-Fi     = member's share of Wi-Fi (+ admin change)
+ * - ETC       = extra ("Other") costs the member added (+ admin change).
+ *               Stays with that member unless the admin chooses members
+ *               to share ETC for the month.
+ * - Total     = Bazar + Utilities + Wi-Fi + ETC
  *
- * - Bazar  = meal rate x member's meals (+ admin bazar change)
- *            meal rate = Food & Groceries total / all meals
- * - Bills  = split only among the members chosen for that bill
- *            (default: everyone). If the leave rule is on for that bill,
- *            each chosen member pays by the days they were at home.
- * - Admin changes (+/-) go only to that member's column. They raise or
- *   lower that member's Total and the group total; nobody else changes.
+ * Settlement (who owes whom):
+ * - meal rate = all Bazar / all meals; meal cost = meal rate x meals
+ * - share     = meal cost + Utilities + Wi-Fi + ETC
+ * - paid      = everything the member added (+ admin Bazar change)
  */
 import type { Expense, MealLog } from "./types";
 import { isMemberHomeOnDay, type LeaveRecord, type MemberPresenceInfo } from "./electricity-split";
@@ -54,6 +58,9 @@ export interface MemberMonthResult {
   wifi: number;
   etc: number;
   total: number;
+  mealCost: number;
+  settlementShare: number;
+  paidAdjustment: number;
   daysHome: number;
   adjustments: Record<AdjustField, number>;
 }
@@ -137,6 +144,7 @@ export function computeMonth(params: {
     const out = zero();
     if (!total) return out;
     const chosen = splitMembers?.[billType];
+    if (billType === "Other" && !(Array.isArray(chosen) && chosen.length > 0)) return out;
     let sharers = Array.isArray(chosen) && chosen.length > 0 ? ids.filter((id) => chosen.includes(id)) : ids;
     if (sharers.length === 0) sharers = ids;
     if (sharers.length === 0) return out;
@@ -152,7 +160,18 @@ export function computeMonth(params: {
   const elec = split("Electricity", sumOf((c) => c === "Electricity"));
   const gas = split("Gas", sumOf((c) => c === "Gas"));
   const wifiShares = split("Wi-Fi", sumOf((c) => c === "Wi-Fi"));
-  const etcShares = split("Other", sumOf((c) => !NOT_ETC.includes(c)));
+  /* what each member added themselves */
+  const ownSum = (filter: (category: string) => boolean) => {
+    const out = zero();
+    expenses.forEach((e) => {
+      if (out[e.userId] !== undefined && filter(e.category)) out[e.userId] += Number(e.amount) || 0;
+    });
+    return out;
+  };
+  const ownFood = ownSum((c) => c === "Food & Groceries");
+  const ownEtc = ownSum((c) => !NOT_ETC.includes(c));
+  const etcSplitOn = Array.isArray(splitMembers?.Other) && splitMembers!.Other!.length > 0;
+  const etcShares = etcSplitOn ? split("Other", sumOf((c) => !NOT_ETC.includes(c))) : ownEtc;
 
   /* ---- meals & bazar ---- */
   const logged = zero();
@@ -163,12 +182,14 @@ export function computeMonth(params: {
   const mealCount = zero();
   ids.forEach((id) => (mealCount[id] = Math.max(0, logged[id] + adj[id].meals)));
   const totalMeals = ids.reduce((s, id) => s + mealCount[id], 0);
-  const foodTotal = sumOf((c) => c === "Food & Groceries");
+  const bazarOf = (id: string) => ownFood[id] + adj[id].bazar;
+  const foodTotal = ids.reduce((s, id) => s + bazarOf(id), 0);
   const mealRate = totalMeals > 0 ? foodTotal / totalMeals : 0;
 
   const byMember: Record<string, MemberMonthResult> = {};
   ids.forEach((id) => {
-    const bazar = mealRate * mealCount[id] + adj[id].bazar;
+    const bazar = bazarOf(id);
+    const mealCost = mealRate * mealCount[id];
     const utilities = elec[id] + gas[id] + adj[id].utilities;
     const wifi = wifiShares[id] + adj[id].wifi;
     const etc = etcShares[id] + adj[id].etc;
@@ -180,6 +201,9 @@ export function computeMonth(params: {
       wifi,
       etc,
       total: bazar + utilities + wifi + etc,
+      mealCost,
+      settlementShare: mealCost + utilities + wifi + etc,
+      paidAdjustment: adj[id].bazar,
       daysHome: daysHome[id],
       adjustments: adj[id],
     };
