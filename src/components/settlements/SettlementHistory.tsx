@@ -5,7 +5,8 @@ import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
 import { doc, collection, query, where, Timestamp, setDoc, serverTimestamp, getDocs, getDoc, orderBy, limit } from "firebase/firestore";
 import { format, getMonth, getYear, startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns";
 import type { MealLog, Expense, Settlement, Member } from "@/lib/types";
-import { computeElectricityShares, type LeaveRecord } from "@/lib/electricity-split";
+import type { LeaveRecord } from "@/lib/electricity-split";
+import { computeMonth, monthKeyOf, type MonthAdjustment } from "@/lib/month-calc";
 import { WelcomeCard } from "@/components/app/welcome-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -202,6 +203,14 @@ export function SettlementHistory() {
             console.error("Could not load member profiles:", error);
         }
 
+        let allAdjustments: MonthAdjustment[] = [];
+        try {
+            const adjSnapshot = await getDocs(collection(firestore, `groups/${groupId}/adjustments`));
+            allAdjustments = adjSnapshot.docs.map(d => ({ id: d.id, ...d.data() } as MonthAdjustment));
+        } catch (error) {
+            console.error("Could not load adjustments:", error);
+        }
+
         let loopMonth = startOfMonth(new Date());
 
         while (loopMonth >= startOfMonth(firstJoinDate)) {
@@ -256,8 +265,15 @@ export function SettlementHistory() {
             const mealRate = totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
             const perMemberUtilityShare = totalUtilityExpenses / memberCount;
             const perMemberOtherShare = totalGroupOtherExpenses / memberCount;
-            const gasTotal = expensesData.filter(e => e.category === 'Gas').reduce((sum, e) => sum + e.amount, 0);
-            const electricityShares = computeElectricityShares(expensesData, activeMembersInMonth, leavesData, monthEnd);
+            const monthCalc = computeMonth({
+                members: activeMembersInMonth,
+                meals: mealsData,
+                expenses: expensesData,
+                leaves: leavesData,
+                adjustments: allAdjustments.filter(a => a.monthKey === monthKeyOf(monthStart)),
+                monthStart,
+                monthEnd,
+            });
 
             const processedMembers = activeMembersInMonth.map(member => {
                 const userDetails = userMap[member.id];
@@ -268,8 +284,7 @@ export function SettlementHistory() {
                 const memberExpenses = expensesByUser[member.id] || [];
                 const totalPaid = memberExpenses.reduce((sum, e) => sum + e.amount, 0);
                 
-                const utilityShare = gasTotal / memberCount + (electricityShares[member.id] || 0);
-                const totalShare = totalMealCost + utilityShare + perMemberOtherShare;
+                const totalShare = monthCalc.byMember[member.id]?.total ?? (totalMealCost + perMemberUtilityShare + perMemberOtherShare);
                 const balance = totalPaid - totalShare;
 
                 return {
