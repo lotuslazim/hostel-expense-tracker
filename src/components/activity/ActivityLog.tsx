@@ -80,6 +80,8 @@ const ADMIN_ACTIVITY_TYPES = [
   "meal_delete",
   "expense_adjustment",
   "expense_delete",
+  "admin_adjustment",
+  "admin_leave",
 ];
 
 const getActivityKind = (type?: string): Exclude<ActivityFilter, "all"> => {
