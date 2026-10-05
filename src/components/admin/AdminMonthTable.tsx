@@ -98,7 +98,7 @@ const toDate = (v: unknown): Date | null =>
       : null;
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
-const money = (n: number) => `৳${round2(n).toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
+const money = (n: number) => `৳${Math.round(n).toLocaleString("en-US")}`;
 const num = (n: number) => String(round2(n));
 const toInput = (d: Date | null) => (d ? format(d, "yyyy-MM-dd") : "");
 const fromInput = (value: string) => {
@@ -443,7 +443,7 @@ export function AdminMonthTable({ groupId }: { groupId: string }) {
         toast({ variant: "destructive", title: `Choose at least one member for ${BILL_LABEL[b]}` });
         return;
       }
-      cleanSplit[b] = chosen && chosen.length < members.length ? chosen : null;
+      cleanSplit[b] = chosen && (b === "Other" || chosen.length < members.length) ? chosen : null;
     }
     if (locked) {
       toast({ variant: "destructive", title: "This month is locked", description: "Unlock it to change who shares the bills." });
@@ -455,7 +455,7 @@ export function AdminMonthTable({ groupId }: { groupId: string }) {
       await setDoc(monthSettingsRef, { splitMembers: cleanSplit, updatedBy: user.uid, updatedAt: serverTimestamp() }, { merge: true });
 
       const splitText = BILL_TYPES.map((b) =>
-        `${BILL_LABEL[b]}: ${cleanSplit[b] ? cleanSplit[b]!.map((id) => names[id] || "Member").join(", ") : "All"}`
+        `${BILL_LABEL[b]}: ${cleanSplit[b] ? cleanSplit[b]!.map((id) => names[id] || "Member").join(", ") : b === "Other" ? "own" : "All"}`
       ).join("; ");
       await logActivity(
         "admin_settings",
@@ -546,7 +546,7 @@ export function AdminMonthTable({ groupId }: { groupId: string }) {
               )}
             </CardTitle>
             <CardDescription>
-              Click any number to edit it. Every change is shown in Activity Log. A dot means an admin changed that cell.
+              Bazar and ETC show what each member added. Utilities and Wi-Fi show each member's share. Click a number to edit; every change goes to Activity Log.
             </CardDescription>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -812,7 +812,7 @@ export function AdminMonthTable({ groupId }: { groupId: string }) {
             <div className="space-y-3">
               <div>
                 <p className="font-semibold">Who shares each bill</p>
-                <p className="text-sm text-muted-foreground">Default is All. Untick All to choose specific members.</p>
+                <p className="text-sm text-muted-foreground">Bills default to All. ETC stays with the person who added it, unless you choose members to share it.</p>
               </div>
               {BILL_TYPES.map((b) => {
                 const chosen = draftSplit[b];
@@ -826,7 +826,7 @@ export function AdminMonthTable({ groupId }: { groupId: string }) {
                           checked={isAll}
                           onCheckedChange={(v) => setDraftSplit((s) => ({ ...s, [b]: v ? null : members.map((m) => m.id) }))}
                         />
-                        All
+                        {b === "Other" ? "Only the person who added it" : "All"}
                       </label>
                     </div>
                     {!isAll && (
