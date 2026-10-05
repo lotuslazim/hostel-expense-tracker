@@ -82,6 +82,8 @@ const ADMIN_ACTIVITY_TYPES = [
   "expense_delete",
   "admin_adjustment",
   "admin_leave",
+  "admin_settings",
+  "admin_lock",
 ];
 
 const getActivityKind = (type?: string): Exclude<ActivityFilter, "all"> => {
