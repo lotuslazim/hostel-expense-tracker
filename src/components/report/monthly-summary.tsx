@@ -535,7 +535,9 @@ export function MonthlySummary() {
       const r = monthCalc.byMember[member.id];
       if (r) {
         member.meals = r.meals;
-        utilityShareByMember[member.id] = r.total;
+        member.totalPaid = member.totalPaid + r.paidAdjustment;
+        member.foodExpenses = r.bazar;
+        utilityShareByMember[member.id] = r.settlementShare;
       }
     });
 
