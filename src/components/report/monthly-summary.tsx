@@ -17,7 +17,7 @@ import { addMonths } from 'date-fns/addMonths';
 import { subMonths } from 'date-fns/subMonths';
 import type { MealLog, Expense } from "@/lib/types";
 import type { LeaveRecord } from "@/lib/electricity-split";
-import { computeMonth, monthKeyOf, type MonthAdjustment } from "@/lib/month-calc";
+import { computeMonth, monthKeyOf, type MonthAdjustment, type MonthSettings, type SheetSettings } from "@/lib/month-calc";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -384,6 +384,17 @@ export function MonthlySummary() {
   );
   const { data: adjustmentsData } = useCollection<MonthAdjustment>(adjustmentsQuery);
 
+  const sheetSettingsRef = useMemo(() =>
+    (groupId ? doc(firestore, `groups/${groupId}/sheetSettings`, "default") : null),
+    [firestore, groupId]
+  );
+  const monthSettingsRef = useMemo(() =>
+    (groupId ? doc(firestore, `groups/${groupId}/monthSettings`, monthKeyOf(monthDateRange.start)) : null),
+    [firestore, groupId, monthDateRange]
+  );
+  const { data: sheetSettingsData } = useDoc<SheetSettings>(sheetSettingsRef);
+  const { data: monthSettingsData } = useDoc<MonthSettings>(monthSettingsRef);
+
   const { data: membersData, isLoading: areMembersLoading, error: membersError } = useCollection(membersQuery);
   const { data: mealsData, isLoading: areMealsLoading, error: mealsError } = useCollection<MealLog>(mealsQuery);
   const { data: expensesData, isLoading: areExpensesLoading, error: expensesError } = useCollection<Expense>(expensesQuery);
@@ -516,6 +527,8 @@ export function MonthlySummary() {
       adjustments: adjustmentsData ?? [],
       monthStart: monthDateRange.start,
       monthEnd: monthDateRange.end,
+      leaveCategories: sheetSettingsData?.leaveCategories,
+      splitMembers: monthSettingsData?.splitMembers,
     });
     const utilityShareByMember: Record<string, number> = {};
     processedMembers.forEach((member) => {
@@ -538,7 +551,7 @@ export function MonthlySummary() {
       otherExpensesList,
       utilityShareByMember
     };
-  }, [membersData, mealsData, expensesData, usersData, settlementsData, leavesData, adjustmentsData, monthDateRange]);
+  }, [membersData, mealsData, expensesData, usersData, settlementsData, leavesData, adjustmentsData, sheetSettingsData, monthSettingsData, monthDateRange]);
 
   if (isAnyLoading) {
     return <SummarySkeleton />;
