@@ -347,6 +347,7 @@ export function AddExpenseCard({
             "Food & Groceries",
             "Electricity",
             "Gas",
+            "Wi-Fi",
             "Other",
           ],
           {
@@ -640,6 +641,13 @@ export function AddExpenseCard({
       form.setValue(
         "expenseItem",
         "Gas Bill"
+      );
+    } else if (
+      categoryValue === "Wi-Fi"
+    ) {
+      form.setValue(
+        "expenseItem",
+        "Wi-Fi Bill"
       );
     } else if (
       !isFoodCategory &&
@@ -1774,6 +1782,10 @@ export function AddExpenseCard({
 
                         <SelectItem value="Gas">
                           Gas
+                        </SelectItem>
+
+                        <SelectItem value="Wi-Fi">
+                          Wi-Fi
                         </SelectItem>
 
                         <SelectItem value="Other">
