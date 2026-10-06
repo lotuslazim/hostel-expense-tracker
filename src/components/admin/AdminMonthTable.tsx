@@ -40,6 +40,7 @@ import {
   DEFAULT_LEAVE_CATEGORIES,
   LEAVE_BILL_TYPES,
   monthKeyOf,
+  fieldOfCategory,
   type AdjustField,
   type BillType,
   type MonthAdjustment,
@@ -236,7 +237,6 @@ export function AdminMonthTable({ groupId }: { groupId: string }) {
   const fmtField = (field: AdjustField, n: number) => (field === "meals" ? num(n) : money(n));
 
   const openEdit = (userId: string, field: AdjustField) => {
-    if (guardLocked()) return;
     setEdit({ userId, field });
     setMode("change");
     setValue("");
@@ -281,12 +281,146 @@ export function AdminMonthTable({ groupId }: { groupId: string }) {
       });
       await batch.commit();
       toast({ title: "Saved", description: "The change is visible in Activity Log." });
-      setEdit(null);
+      setValue("");
     } catch (error) {
       console.error("Adjustment failed:", error);
       toast({ variant: "destructive", title: "Could not save", description: "Check that the new Firestore Rules are published." });
     } finally {
       setSaving(false);
+    }
+  };
+
+  /* ================= entries (what the member entered) ================= */
+  const [rowValues, setRowValues] = useState<Record<string, string>>({});
+  const [rowBusy, setRowBusy] = useState<string | null>(null);
+
+  const entriesFor = (userId: string, field: AdjustField) => {
+    const byDate = (a: { date: unknown }, b: { date: unknown }) =>
+      (toDate(a.date)?.getTime() ?? 0) - (toDate(b.date)?.getTime() ?? 0);
+    if (field === "meals") return (meals ?? []).filter((m) => m.userId === userId).sort(byDate);
+    return (expenses ?? []).filter((e) => e.userId === userId && fieldOfCategory(e.category) === field).sort(byDate);
+  };
+
+  useEffect(() => {
+    if (!edit) return;
+    const list = entriesFor(edit.userId, edit.field) as Array<MealLog | Expense>;
+    setRowValues(
+      Object.fromEntries(
+        list.map((r) => [r.id, String(edit.field === "meals" ? (r as MealLog).mealNumber ?? 1 : (r as Expense).amount)])
+      )
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [edit]);
+
+  const saveEntry = async (record: MealLog | Expense) => {
+    if (!edit || !user || guardLocked()) return;
+    const next = Number(rowValues[record.id]);
+    const isMeal = edit.field === "meals";
+    const before = isMeal ? Number((record as MealLog).mealNumber ?? 1) : Number((record as Expense).amount);
+    if (!Number.isFinite(next) || next < 0 || (isMeal && next > 100)) {
+      toast({ variant: "destructive", title: isMeal ? "Meals must be 0–100" : "Amount must be 0 or more" });
+      return;
+    }
+    if (next === before) {
+      toast({ title: "Nothing changed" });
+      return;
+    }
+    setRowBusy(record.id);
+    try {
+      const cleanReason = reason.trim();
+      const who = names[edit.userId] || "Member";
+      const when = toDate(record.date) ? format(toDate(record.date)!, "MMM d") : "";
+      const batch = writeBatch(firestore);
+      const actRef = doc(collection(firestore, `groups/${groupId}/notifications`));
+      const audit = {
+        updatedAt: serverTimestamp(),
+        lastEditedBy: user.uid,
+        lastEditedByName: actorName(),
+        lastEditedAt: serverTimestamp(),
+        editReason: cleanReason,
+        lastActivityId: actRef.id,
+      };
+      if (isMeal) {
+        const meal = record as MealLog;
+        batch.update(doc(firestore, `groups/${groupId}/meals`, meal.id), {
+          mealNumber: next,
+          itemName: meal.itemName ?? null,
+          description: `${next} ${meal.mealType}(s) logged.${meal.itemName ? ` Item: ${meal.itemName}` : ""}`.slice(0, 500),
+          ...audit,
+        });
+        batch.set(actRef, {
+          groupId,
+          recordId: meal.id,
+          senderId: user.uid,
+          senderName: actorName(),
+          targetUserId: meal.userId,
+          messageText: `corrected ${who}'s ${meal.mealType} on ${when}: ${before} → ${next}${cleanReason ? `. Reason: ${cleanReason}` : ""}`.slice(0, 500),
+          type: "meal_adjustment",
+          reason: cleanReason,
+          beforeMealNumber: before,
+          afterMealNumber: next,
+          createdAt: serverTimestamp(),
+          readBy: [user.uid],
+        });
+      } else {
+        const exp = record as Expense;
+        batch.update(doc(firestore, `groups/${groupId}/expenses`, exp.id), { amount: next, ...audit });
+        batch.set(actRef, {
+          groupId,
+          recordId: exp.id,
+          senderId: user.uid,
+          senderName: actorName(),
+          targetUserId: exp.userId,
+          messageText: `corrected ${who}'s "${exp.expenseItem}" (${exp.category}) on ${when}: ৳${before} → ৳${next}${cleanReason ? `. Reason: ${cleanReason}` : ""}`.slice(0, 500),
+          type: "expense_adjustment",
+          reason: cleanReason,
+          createdAt: serverTimestamp(),
+          readBy: [user.uid],
+        });
+      }
+      await batch.commit();
+      toast({ title: "Entry updated", description: "The change is visible in Activity Log." });
+    } catch (error) {
+      console.error("Entry update failed:", error);
+      toast({ variant: "destructive", title: "Could not update", description: "Check that the new Firestore Rules are published." });
+    } finally {
+      setRowBusy(null);
+    }
+  };
+
+  const deleteEntry = async (record: MealLog | Expense) => {
+    if (!edit || !user || guardLocked()) return;
+    const isMeal = edit.field === "meals";
+    const label = isMeal
+      ? `${(record as MealLog).mealType} x${(record as MealLog).mealNumber}`
+      : `"${(record as Expense).expenseItem}" (৳${(record as Expense).amount})`;
+    if (!window.confirm(`Delete ${label}? This cannot be undone.`)) return;
+    setRowBusy(record.id);
+    try {
+      const cleanReason = reason.trim();
+      const who = names[edit.userId] || "Member";
+      const when = toDate(record.date) ? format(toDate(record.date)!, "MMM d, yyyy") : "";
+      const batch = writeBatch(firestore);
+      batch.set(doc(firestore, `groups/${groupId}/notifications`, `admin_delete_${record.id}`), {
+        groupId,
+        recordId: record.id,
+        senderId: user.uid,
+        senderName: actorName(),
+        targetUserId: record.userId,
+        messageText: `deleted ${who}'s ${label} on ${when}${cleanReason ? `. Reason: ${cleanReason}` : ""}`.slice(0, 500),
+        type: isMeal ? "meal_delete" : "expense_delete",
+        reason: cleanReason,
+        createdAt: serverTimestamp(),
+        readBy: [user.uid],
+      });
+      batch.delete(doc(firestore, `groups/${groupId}/${isMeal ? "meals" : "expenses"}`, record.id));
+      await batch.commit();
+      toast({ title: "Entry deleted", description: "The deletion is visible in Activity Log." });
+    } catch (error) {
+      console.error("Entry delete failed:", error);
+      toast({ variant: "destructive", title: "Could not delete", description: "Check that the new Firestore Rules are published." });
+    } finally {
+      setRowBusy(null);
     }
   };
 
@@ -515,16 +649,19 @@ export function AdminMonthTable({ groupId }: { groupId: string }) {
     const r = result.byMember[userId];
     const v = r?.[field] ?? 0;
     const change = r?.adjustments[field] ?? 0;
+    const times = r?.entryCount[field] ?? 0;
     return (
       <td className={`${cell} p-0`}>
         <button
           type="button"
           onClick={() => openEdit(userId, field)}
-          disabled={locked}
           title={change ? `Admin change: ${change > 0 ? "+" : ""}${num(change)}` : locked ? "Month is locked" : "Click to edit"}
           className="relative flex h-full min-h-[56px] w-full items-center justify-end px-4 text-base tabular-nums transition-colors hover:bg-primary/10 disabled:cursor-not-allowed disabled:hover:bg-transparent"
         >
-          {fmtField(field, v)}
+          <span className="flex flex-col items-end leading-tight">
+            <span>{fmtField(field, v)}</span>
+            {times > 0 && <span className="text-[11px] text-muted-foreground">{times}×</span>}
+          </span>
           {change !== 0 && <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-primary" />}
         </button>
       </td>
@@ -546,7 +683,7 @@ export function AdminMonthTable({ groupId }: { groupId: string }) {
               )}
             </CardTitle>
             <CardDescription>
-              Bazar and ETC show what each member added. Utilities and Wi-Fi show each member's share. Click a number to edit; every change goes to Activity Log.
+              Each cell shows what that member entered (× = number of entries). Click a cell to see, edit or delete the entries. Every change goes to Activity Log.
             </CardDescription>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -641,49 +778,110 @@ export function AdminMonthTable({ groupId }: { groupId: string }) {
               </table>
             </div>
             <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted-foreground">
-              <span>Meal rate: {money(result.mealRate)}</span>
-              <span>Leave discount on: {leaveCategories.length ? leaveCategories.join(", ") : "none"}</span>
-              {result.adjustmentMoneyNet !== 0 && (
-                <span>
-                  Admin changes this month: {result.adjustmentMoneyNet > 0 ? "+" : "−"}
-                  {money(Math.abs(result.adjustmentMoneyNet))}
-                </span>
-              )}
+              <span>Meal rate: ৳{num(result.mealRate)}</span>
+              <span>Leave discount (Settlement): {leaveCategories.length ? leaveCategories.join(", ") : "none"}</span>
+              <span>This sheet shows what each member entered. Who owes whom is worked out in Settlement.</span>
             </div>
           </>
         )}
       </CardContent>
 
-      {/* ---------- edit dialog ---------- */}
-      <Dialog open={Boolean(edit)} onOpenChange={(o) => !o && !saving && setEdit(null)}>
-        <DialogContent>
+      {/* ---------- entries dialog ---------- */}
+      <Dialog open={Boolean(edit)} onOpenChange={(o) => !o && !saving && !rowBusy && setEdit(null)}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
           <DialogHeader>
             <DialogTitle>{edit ? `${names[edit.userId] || "Member"} · ${FIELD_LABEL[edit.field]}` : ""}</DialogTitle>
-            <DialogDescription>Current: {edit ? fmtField(edit.field, currentValue) : ""}</DialogDescription>
+            <DialogDescription>
+              Total: {edit ? fmtField(edit.field, currentValue) : ""} · {format(month, "MMMM yyyy")}
+            </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-2">
-              <Button type="button" variant={mode === "change" ? "default" : "outline"} onClick={() => setMode("change")}>
-                Add / Subtract
-              </Button>
-              <Button type="button" variant={mode === "set" ? "default" : "outline"} onClick={() => setMode("set")}>
-                Set new value
-              </Button>
-            </div>
+
+          <div className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="adj-value">{mode === "change" ? "Amount (use − to subtract, e.g. -500)" : "New value"}</Label>
-              <Input
-                id="adj-value"
-                type="number"
-                step={edit?.field === "meals" ? "0.5" : "1"}
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                className="h-12 text-lg"
-                autoFocus
-              />
+              <Label htmlFor="adj-reason">Reason (optional, used for any change below)</Label>
+              <Textarea id="adj-reason" value={reason} onChange={(e) => setReason(e.target.value)} maxLength={200} placeholder="Example: Entered twice by mistake" />
+            </div>
+
+            <div className="space-y-2">
+              <p className="font-semibold">Entries</p>
+              {edit && entriesFor(edit.userId, edit.field).length === 0 && (
+                <p className="text-sm text-muted-foreground">No entries this month.</p>
+              )}
+              {edit &&
+                (entriesFor(edit.userId, edit.field) as Array<MealLog | Expense>).map((r) => {
+                  const d = toDate(r.date);
+                  const isMeal = edit.field === "meals";
+                  return (
+                    <div key={r.id} className="flex flex-wrap items-center gap-3 rounded-lg border p-3">
+                      <div className="min-w-[8rem] flex-1">
+                        <p className="font-medium">
+                          {isMeal ? <span className="capitalize">{(r as MealLog).mealType}</span> : (r as Expense).expenseItem}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {d ? format(d, "MMM d, yyyy · h:mm a") : ""}
+                          {!isMeal && ` · ${(r as Expense).category}`}
+                        </p>
+                      </div>
+                      <Input
+                        type="number"
+                        min="0"
+                        step={isMeal ? "0.5" : "1"}
+                        value={rowValues[r.id] ?? ""}
+                        onChange={(e) => setRowValues((v) => ({ ...v, [r.id]: e.target.value }))}
+                        className="h-10 w-28 text-right"
+                        disabled={locked}
+                      />
+                      <div className="flex gap-1">
+                        <Button type="button" size="sm" disabled={locked || rowBusy === r.id} onClick={() => void saveEntry(r)}>
+                          {rowBusy === r.id ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
+                        </Button>
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="ghost"
+                          className="text-destructive"
+                          disabled={locked || rowBusy === r.id}
+                          onClick={() => void deleteEntry(r)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+
+            <div className="space-y-3 rounded-lg border border-dashed p-3">
+              <div>
+                <p className="font-semibold">Extra change (without an entry)</p>
+                <p className="text-xs text-muted-foreground">Add or subtract on top of the entries, e.g. +500 or -200.</p>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Button type="button" size="sm" variant={mode === "change" ? "default" : "outline"} onClick={() => setMode("change")}>
+                  Add / Subtract
+                </Button>
+                <Button type="button" size="sm" variant={mode === "set" ? "default" : "outline"} onClick={() => setMode("set")}>
+                  Set new total
+                </Button>
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  step={edit?.field === "meals" ? "0.5" : "1"}
+                  value={value}
+                  onChange={(e) => setValue(e.target.value)}
+                  placeholder={mode === "change" ? "-500" : "New total"}
+                  className="h-10"
+                  disabled={locked}
+                />
+                <Button type="button" onClick={() => void saveEdit()} disabled={locked || saving || delta === 0}>
+                  {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Apply
+                </Button>
+              </div>
               {delta !== 0 && edit && (
                 <p className="text-sm">
-                  New value: <span className="font-semibold">{fmtField(edit.field, newValue)}</span>{" "}
+                  New total: <span className="font-semibold">{fmtField(edit.field, newValue)}</span>{" "}
                   <span className={delta > 0 ? "text-emerald-500" : "text-red-500"}>
                     ({delta > 0 ? "+" : "−"}
                     {fmtField(edit.field, Math.abs(delta))})
@@ -691,18 +889,11 @@ export function AdminMonthTable({ groupId }: { groupId: string }) {
                 </p>
               )}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="adj-reason">Reason (optional)</Label>
-              <Textarea id="adj-reason" value={reason} onChange={(e) => setReason(e.target.value)} maxLength={200} placeholder="Example: Forgot to turn off meal" />
-            </div>
           </div>
+
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setEdit(null)} disabled={saving}>
-              Cancel
-            </Button>
-            <Button type="button" onClick={() => void saveEdit()} disabled={saving || delta === 0}>
-              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save
+            <Button type="button" variant="outline" onClick={() => setEdit(null)} disabled={saving || Boolean(rowBusy)}>
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>
