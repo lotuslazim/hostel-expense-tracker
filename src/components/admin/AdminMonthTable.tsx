@@ -436,9 +436,17 @@ export function AdminMonthTable({ groupId }: { groupId: string }) {
       .filter((l) => l.userId === userId)
       .sort((a, b) => (toDate(b.startDate)?.getTime() ?? 0) - (toDate(a.startDate)?.getTime() ?? 0));
 
+  /* leaves that touch the shown month (end = return day) */
+  const leavesInMonth = (userId: string) =>
+    leavesOf(userId).filter((l) => {
+      const s = toDate(l.startDate);
+      const e = toDate(l.endDate);
+      return s && s <= monthEnd && (!e || e > monthStart);
+    });
+
   /* days away inside the shown month */
   const daysAwayInMonth = (userId: string) => {
-    const mine = leavesOf(userId);
+    const mine = leavesInMonth(userId);
     if (mine.length === 0) return 0;
     let count = 0;
     const last = new Date(monthEnd.getFullYear(), monthEnd.getMonth(), monthEnd.getDate());
@@ -463,7 +471,7 @@ export function AdminMonthTable({ groupId }: { groupId: string }) {
     setNewTo("");
     setDrafts(
       Object.fromEntries(
-        leavesOf(userId).map((l) => [
+        leavesInMonth(userId).map((l) => [
           l.id!,
           { from: toInput(toDate(l.startDate)), to: toDate(l.endDate) ? toInput(subDays(toDate(l.endDate)!, 1)) : "" },
         ])
@@ -732,7 +740,7 @@ export function AdminMonthTable({ groupId }: { groupId: string }) {
                   {members.map((m) => {
                     const r = result.byMember[m.id];
                     const away = daysAwayInMonth(m.id);
-                    const count = leavesOf(m.id).length;
+                    const count = leavesInMonth(m.id).length;
                     return (
                       <tr key={m.id}>
                         <td className={`${sticky} ${cell} whitespace-nowrap px-4 text-base font-medium`}>{names[m.id] || "…"}</td>
@@ -905,17 +913,20 @@ export function AdminMonthTable({ groupId }: { groupId: string }) {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <CalendarOff className="h-5 w-5" />
-              Leave · {leaveFor ? names[leaveFor] || "Member" : ""}
+              Leave · {leaveFor ? names[leaveFor] || "Member" : ""} · {format(month, "MMMM yyyy")}
             </DialogTitle>
             <DialogDescription>
-              All leave for this member, including leave they turned on themselves. Change the dates and press Save.
+              {leaveFor ? `${daysAwayInMonth(leaveFor)} day(s) on leave in ${format(month, "MMMM")}. ` : ""}
+              Shows leave in this month only, including leave the member turned on themselves.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3">
-            {leaveFor && leavesOf(leaveFor).length === 0 && <p className="text-sm text-muted-foreground">No leave recorded.</p>}
+            {leaveFor && leavesInMonth(leaveFor).length === 0 && (
+              <p className="text-sm text-muted-foreground">No leave in {format(month, "MMMM yyyy")}.</p>
+            )}
             {leaveFor &&
-              leavesOf(leaveFor).map((l) => {
+              leavesInMonth(leaveFor).map((l) => {
                 const draft = drafts[l.id!] ?? { from: "", to: "" };
                 return (
                   <div key={l.id} className="space-y-3 rounded-lg border p-3">
@@ -946,15 +957,15 @@ export function AdminMonthTable({ groupId }: { groupId: string }) {
               })}
 
             <div className="space-y-3 rounded-lg border border-dashed p-3">
-              <p className="font-medium">Add new leave</p>
+              <p className="font-medium">Add leave in {format(month, "MMMM")}</p>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label htmlFor="new-from">From (first day away)</Label>
-                  <Input id="new-from" type="date" value={newFrom} onChange={(e) => setNewFrom(e.target.value)} />
+                  <Input id="new-from" type="date" min={toInput(monthStart)} max={toInput(monthEnd)} value={newFrom} onChange={(e) => setNewFrom(e.target.value)} />
                 </div>
                 <div className="space-y-1">
                   <Label htmlFor="new-to">To (last day away)</Label>
-                  <Input id="new-to" type="date" value={newTo} onChange={(e) => setNewTo(e.target.value)} />
+                  <Input id="new-to" type="date" min={newFrom || toInput(monthStart)} value={newTo} onChange={(e) => setNewTo(e.target.value)} />
                 </div>
               </div>
               <div className="flex justify-end">
