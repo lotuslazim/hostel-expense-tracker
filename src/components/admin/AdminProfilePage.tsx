@@ -1,6 +1,7 @@
 "use client";
 
 import {
+    useEffect,
     useMemo,
     useState,
 } from "react";
@@ -47,6 +48,8 @@ import {
 } from "@/firebase/config";
 import { AppHeader } from "@/components/app/header";
 import { AdminMonthTable } from "@/components/admin/AdminMonthTable";
+import { BillAccountsCard } from "@/components/payments/BillAccountsCard";
+import type { GroupBillAccounts } from "@/lib/payments";
 import { useToast } from "@/hooks/use-toast";
 
 import {
@@ -120,6 +123,7 @@ type GroupRecord = {
     invitationCode?: string;
     adminId?: string;
     settings?: GroupSettingsRecord;
+    billAccounts?: GroupBillAccounts | null;
 };
 
 type GroupMemberRecord = {
@@ -723,6 +727,18 @@ function AdminActionsCard({
             ?.isMealItemNameRequired ??
         false
     );
+
+    /*
+     * Fix: useState-এর initial value শুধু প্রথম render-এ নেওয়া হয়।
+     * groupData পরে লোড হলে switch পুরনো মান দেখাত; এখন sync থাকবে।
+     */
+    useEffect(() => {
+        setIsMealItemNameRequired(
+            groupData?.settings
+                ?.isMealItemNameRequired ??
+            false
+        );
+    }, [groupData?.settings?.isMealItemNameRequired]);
 
     const handleMealItemNameRequiredToggle =
         async (
@@ -1998,6 +2014,12 @@ export default function AdminProfilePage() {
                                 }
                             />
                         </div>
+
+                        <BillAccountsCard
+                            groupDocRef={groupDocRef}
+                            billAccounts={groupData.billAccounts}
+                            adminId={user?.uid || ""}
+                        />
 
                         <AdminMonthTable groupId={groupId} />
 
