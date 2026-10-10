@@ -23,6 +23,7 @@ import {
     AlertCircle,
     Eye,
     Flame,
+    Wifi,
     List,
     PackageOpen,
     ReceiptText,
@@ -76,6 +77,7 @@ type ReportExpenseCategory =
     | "Food & Groceries"
     | "Electricity"
     | "Gas"
+    | "Wi-Fi"
     | "Other";
 
 type UserProfile = {
@@ -125,6 +127,10 @@ const categoryIcons: Record<
         <Flame className="h-3.5 w-3.5" />
     ),
 
+    "Wi-Fi": (
+        <Wifi className="h-3.5 w-3.5" />
+    ),
+
     Other: (
         <List className="h-3.5 w-3.5" />
     ),
@@ -137,6 +143,7 @@ const normalizeCategory = (
         case "Food & Groceries":
         case "Electricity":
         case "Gas":
+        case "Wi-Fi":
         case "Other":
             return category;
 
