@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useEffect } from "react";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
-import { doc, collection, query, where, Timestamp, setDoc, serverTimestamp, getDocs, getDoc, orderBy, limit } from "firebase/firestore";
+import { doc, collection, query, where, getDocs, getDoc, orderBy, limit } from "firebase/firestore";
 import { format, getMonth, getYear, startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns";
 import type { MealLog, Expense, Settlement, Member } from "@/lib/types";
 import type { LeaveRecord } from "@/lib/electricity-split";
@@ -13,13 +13,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ChevronDown, Scale, CheckCircle, AlertTriangle, Loader2 } from "lucide-react";
+import { ChevronDown, Scale, CheckCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose, DialogTrigger } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { SettleUpDialog } from "@/components/settlements/SettleUpDialog";
 
 interface ProcessedMember {
   id: string;
@@ -53,99 +51,6 @@ function HistorySkeleton() {
   );
 }
 
-function SettleUpDialog({ member, month, year, groupId, currentUserId, members, currentUserIsAdmin }: { member: ProcessedMember; month: number; year: number; groupId: string, currentUserId: string, members: ProcessedMember[], currentUserIsAdmin: boolean }) {
-    const { firestore } = useFirebase();
-    const { toast } = useToast();
-    const [settlementMethod, setSettlementMethod] = useState("");
-    const [settledTo, setSettledTo] = useState("");
-    const [isSaving, setIsSaving] = useState(false);
-    const [open, setOpen] = useState(false);
-
-    const membersToPay = members.filter(m => m.id !== member.id);
-
-    const handleSettleUp = async () => {
-        if (!settlementMethod || !settledTo) {
-            toast({ variant: 'destructive', title: 'Please fill all fields.' });
-            return;
-        }
-
-        setIsSaving(true);
-        const settlementId = `${member.id}-${month}-${year}`;
-        const settlementRef = doc(firestore, `groups/${groupId}/settlements/${settlementId}`);
-        
-        try {
-            await setDoc(settlementRef, {
-                groupId,
-                userId: member.id,
-                month,
-                year,
-                settledAt: serverTimestamp(),
-                settlementMethod,
-                settledTo,
-            });
-            toast({ title: "Balance Settled!", description: `Settlement for ${member.name} has been recorded.` });
-            setOpen(false);
-        } catch (error) {
-            console.error("Error settling up:", error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Could not save settlement.' });
-        } finally {
-            setIsSaving(false);
-        }
-    };
-    
-    const canSettle = currentUserIsAdmin || currentUserId === member.id;
-
-    return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <Button size="sm" disabled={!canSettle}>Settle Up</Button>
-            </DialogTrigger>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>Settle Balance for {member.name}</DialogTitle>
-                    <DialogDescription>
-                        Confirm how this member paid their balance for the month.
-                    </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                     <div className="space-y-2">
-                        <label htmlFor="settledTo">Who was paid?</label>
-                         <select
-                            id="settledTo"
-                            value={settledTo}
-                            onChange={(e) => setSettledTo(e.target.value)}
-                            className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                            <option value="" disabled>Select a member</option>
-                            {membersToPay.map(m => (
-                                <option key={m.id} value={m.name}>{m.name}</option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="space-y-2">
-                        <label htmlFor="paymentMethod">How was it paid?</label>
-                        <Textarea
-                            id="paymentMethod"
-                            placeholder="e.g., Paid in cash, Sent via bKash"
-                            value={settlementMethod}
-                            onChange={(e) => setSettlementMethod(e.target.value)}
-                        />
-                    </div>
-                </div>
-                <DialogFooter>
-                    <DialogClose asChild>
-                        <Button variant="outline">Cancel</Button>
-                    </DialogClose>
-                    <Button onClick={handleSettleUp} disabled={isSaving}>
-                        {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Confirm Settlement
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-    );
-}
-
 export function SettlementHistory() {
   const { firestore } = useFirebase();
   const { user: currentUser, isUserLoading } = useUser();
@@ -156,6 +61,7 @@ export function SettlementHistory() {
   const { data: currentUserData, isLoading: isCurrentUserDataLoading } = useDoc(currentUserRef);
   const groupId = currentUserData?.groupId;
   const currentUserIsAdmin = currentUserData?.isAdmin ?? false;
+  const currentUserName = currentUserData?.displayName || currentUser?.displayName || currentUser?.email?.split("@")[0] || "Member";
 
   useEffect(() => {
     if (!groupId) {
@@ -231,13 +137,12 @@ export function SettlementHistory() {
             const mealsQuery = query(collection(firestore, `groups/${groupId}/meals`), where("date", ">=", monthStart), where("date", "<=", monthEnd));
             const expensesQuery = query(collection(firestore, `groups/${groupId}/expenses`), where("date", ">=", monthStart), where("date", "<=", monthEnd));
             const membersQuery = query(collection(firestore, `groups/${groupId}/members`));
-            const usersQuery = query(collection(firestore, 'users'));
             const settlementsQuery = query(collection(firestore, `groups/${groupId}/settlements`), where("month", "==", getMonth(loopMonth) + 1), where("year", "==", getYear(loopMonth)));
             
-            const [mealsSnapshot, expensesSnapshot, membersSnapshot, usersSnapshot, settlementsSnapshot] = await Promise.all([
+            // Fix: আগে members query দুবার পড়া হতো (usersSnapshot নামে)। নাম/ছবি profileMap থেকেই আসে।
+            const [mealsSnapshot, expensesSnapshot, membersSnapshot, settlementsSnapshot] = await Promise.all([
                 getDocs(mealsQuery),
                 getDocs(expensesQuery),
-                getDocs(membersQuery),
                 getDocs(membersQuery),
                 getDocs(settlementsQuery)
             ]);
@@ -245,16 +150,9 @@ export function SettlementHistory() {
             const mealsData = mealsSnapshot.docs.map(d => d.data() as MealLog);
             const expensesData = expensesSnapshot.docs.map(d => d.data() as Expense);
             const membersData = membersSnapshot.docs.map(d => ({ id: d.id, ...d.data() } as Member));
-            const usersData = usersSnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
             const settlementsData = settlementsSnapshot.docs.map(d => d.data() as Settlement);
             
-            const userMap = usersData.reduce((acc, userDoc) => {
-              acc[userDoc.id] = userDoc;
-              return acc;
-            }, {} as Record<string, any>);
-            Object.entries(profileMap).forEach(([id, profile]) => {
-              userMap[id] = profile;
-            });
+            const userMap: Record<string, any> = { ...profileMap };
 
             // Filter members who were active during the loopMonth
             const activeMembersInMonth = membersData.filter(m => {
@@ -271,7 +169,7 @@ export function SettlementHistory() {
 
             const totalGroupFoodExpenses = expensesData.filter(e => e.category === 'Food & Groceries').reduce((sum, e) => sum + e.amount, 0);
             const totalGroupOtherExpenses = expensesData.filter(e => e.category === 'Other').reduce((sum, e) => sum + e.amount, 0);
-            const totalUtilityExpenses = expensesData.filter(e => ['Electricity', 'Gas'].includes(e.category)).reduce((sum, e) => sum + e.amount, 0);
+            const totalUtilityExpenses = expensesData.filter(e => ['Electricity', 'Gas', 'Wi-Fi'].includes(e.category)).reduce((sum, e) => sum + e.amount, 0);
             const totalGroupMeals = mealsData.reduce((sum, meal) => sum + meal.mealNumber, 0);
             const mealRate = totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
             const perMemberUtilityShare = totalUtilityExpenses / memberCount;
@@ -398,7 +296,17 @@ export function SettlementHistory() {
                                     </AlertDescription>
                                 </Alert>
                             ) : (
-                               <SettleUpDialog member={member} month={monthForSettlement} year={yearForSettlement} groupId={groupId} currentUserId={currentUser!.uid} members={processedMembers} currentUserIsAdmin={currentUserIsAdmin} />
+                               <SettleUpDialog
+                                 member={{ id: member.id, name: member.name, balance: member.balance }}
+                                 amountDue={-member.balance}
+                                 month={monthForSettlement}
+                                 year={yearForSettlement}
+                                 groupId={groupId}
+                                 currentUserId={currentUser!.uid}
+                                 currentUserName={currentUserName}
+                                 members={processedMembers.map((m) => ({ id: m.id, name: m.name, balance: m.balance }))}
+                                 currentUserIsAdmin={currentUserIsAdmin}
+                               />
                             )}
                            </div>
                          </div>
