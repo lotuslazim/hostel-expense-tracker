@@ -75,8 +75,15 @@ export interface MonthResult {
 
 export const DEFAULT_LEAVE_CATEGORIES = ["Electricity"];
 
-export const monthKeyOf = (date: Date) =>
-  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+/*
+ * Fix: কিছু জায়গা থেকে Date-এর বদলে Firestore Timestamp আসত।
+ * Timestamp-এ getFullYear() নেই, তাই Report পেজ crash করত
+ * ("e.getFullYear is not a function")। এখন দুটোই চলবে।
+ */
+export const monthKeyOf = (input: Date | { toDate: () => Date }) => {
+  const date = input instanceof Date ? input : input.toDate();
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+};
 
 /* Which sheet column an expense category belongs to. */
 export const fieldOfCategory = (category: string): MoneyField => {
@@ -105,11 +112,15 @@ export function computeMonth(params: {
     expenses,
     leaves = [],
     adjustments = [],
-    monthStart,
-    monthEnd,
     leaveCategories = DEFAULT_LEAVE_CATEGORIES,
     splitMembers = {},
   } = params;
+
+  // Fix: Timestamp এলেও Date-এ রূপান্তর, যাতে crash না করে।
+  const asDate = (value: unknown): Date =>
+    value instanceof Date ? value : (value as { toDate: () => Date }).toDate();
+  const monthStart = asDate(params.monthStart);
+  const monthEnd = asDate(params.monthEnd);
 
   const ids = members.map((m) => m.id);
   const zero = () => Object.fromEntries(ids.map((id) => [id, 0])) as Record<string, number>;
