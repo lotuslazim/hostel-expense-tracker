@@ -1,4 +1,3 @@
-
 "use client";
 
 import { memo } from "react";
@@ -9,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import type { Expense, ExpenseCategory } from "@/lib/types";
-import { ShoppingCart, Zap, Flame, List } from "lucide-react";
+import { PAYMENT_METHODS } from "@/lib/payments";
+import { ShoppingCart, Zap, Flame, List, Wifi } from "lucide-react";
 
 interface ExpenseDetailsDialogProps {
   item: Expense;
@@ -19,6 +19,7 @@ const categoryIcons: Record<ExpenseCategory, React.ReactNode> = {
     "Food & Groceries": <ShoppingCart className="h-3 w-3" />,
     "Electricity": <Zap className="h-3 w-3" />,
     "Gas": <Flame className="h-3 w-3" />,
+    "Wi-Fi": <Wifi className="h-3 w-3" />,
     "Other": <List className="h-3 w-3" />,
 };
 
@@ -82,6 +83,15 @@ export const ExpenseDetailsDialog = memo(({ item }: ExpenseDetailsDialogProps) =
                                 <span className="text-muted-foreground">Amount</span>
                                 <span className="font-bold text-lg">৳{item.amount.toFixed(2)}</span>
                             </div>
+                            {item.trxId && item.paymentMethod && (
+                                <div className="flex justify-between items-center gap-3">
+                                    <span className="text-muted-foreground">Paid online</span>
+                                    <span className="text-right text-sm font-medium">
+                                        {PAYMENT_METHODS[item.paymentMethod]?.label ?? item.paymentMethod} ·{" "}
+                                        <span className="font-mono">{item.trxId}</span>
+                                    </span>
+                                </div>
+                            )}
                             {item.receiptPhotoUrl && (
                                 <div className="flex justify-between items-center">
                                     <span className="text-muted-foreground">Receipt</span>

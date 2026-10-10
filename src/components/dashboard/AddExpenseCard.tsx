@@ -18,6 +18,7 @@ import * as z from "zod";
 import {
   collection,
   doc,
+  getDoc,
   getDocs,
   onSnapshot,
   query,
@@ -91,6 +92,21 @@ import { useInventory } from "@/contexts/InventoryContext";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import { sanitizeFirestoreData } from "@/lib/utils";
 import type { ShoppingItem } from "@/lib/types";
+import {
+  defaultOnlineBillPayment,
+  onlineBillPaymentError,
+  PayBillPanel,
+  type OnlineBillPayment,
+} from "@/components/payments/PayBillPanel";
+import {
+  billAccountSummary,
+  billKeyOf,
+  buildClaimId,
+  type GroupBillAccounts,
+  maskNumber,
+  normalizeTrxId,
+  PAYMENT_METHODS,
+} from "@/lib/payments";
 
 const COMMON_UNITS = [
   "kg",
@@ -316,6 +332,24 @@ export function AddExpenseCard({
     isLoading: isGroupDataLoading,
   } = useDoc(groupRef);
 
+  const billAccounts =
+    (groupData?.billAccounts ??
+      null) as GroupBillAccounts | null;
+
+  const isCurrentUserAdmin =
+    Boolean(
+      currentUser &&
+      groupData?.adminId ===
+      currentUser.uid
+    );
+
+  const [
+    onlinePayment,
+    setOnlinePayment,
+  ] = useState<OnlineBillPayment>(
+    defaultOnlineBillPayment()
+  );
+
   const isUtilityReceiptRequired =
     useMemo(() => {
       return (
@@ -448,9 +482,23 @@ export function AddExpenseCard({
     categoryValue ===
     "Food & Groceries";
 
+  /*
+   * Fix: আগে Wi-Fi এখানে ছিল না, তাই Wi-Fi বিলে রিসিট
+   * আপলোডের অপশন দেখা যেত না।
+   */
   const isUtilityCategory =
     categoryValue === "Electricity" ||
-    categoryValue === "Gas";
+    categoryValue === "Gas" ||
+    categoryValue === "Wi-Fi";
+
+  /* শুধু Electricity আর Wi-Fi-তে অনলাইন পে প্যানেল। */
+  const billKey =
+    billKeyOf(categoryValue);
+
+  const amountValue = useWatch({
+    control: form.control,
+    name: "amount",
+  });
 
   const groceryItemsTotal =
     useMemo(() => {
@@ -668,6 +716,22 @@ export function AddExpenseCard({
     form,
     isFoodCategory,
   ]);
+
+  /*
+   * Category বদলালে অনলাইন পে-এর তথ্য রিসেট; অ্যাডমিন যদি
+   * "pay to" মাধ্যম ঠিক করে রাখে, সেটাই ডিফল্ট।
+   */
+  useEffect(() => {
+    setOnlinePayment(
+      defaultOnlineBillPayment(
+        billKey
+          ? billAccounts?.[billKey]
+          : null
+      )
+    );
+    // billAccounts বদলালে ইউজারের লেখা TrxID মুছবে না।
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [billKey]);
 
   /*
    * Food category select করলে
@@ -1034,7 +1098,8 @@ export function AddExpenseCard({
     expenseLabel = "expense",
     loggedAt = 0,
     shoppingUndoStates:
-      ShoppingUndoState[] = []
+      ShoppingUndoState[] = [],
+    paymentClaimId: string | null = null
   ) => {
     if (!groupId || !currentUser) {
       return;
@@ -1071,6 +1136,22 @@ export function AddExpenseCard({
         );
       }
     );
+
+    /*
+     * অনলাইন পে-এর claim-ও মুছে যাবে, যাতে একই TrxID
+     * দিয়ে আবার সঠিকভাবে যোগ করা যায়।
+     */
+    if (paymentClaimId) {
+      batch.delete(
+        doc(
+          firestore,
+          "groups",
+          groupId,
+          "paymentClaims",
+          paymentClaimId
+        )
+      );
+    }
 
     const undoActivityRef = doc(
       firestore,
@@ -1207,7 +1288,75 @@ export function AddExpenseCard({
       return;
     }
 
+    const isOnlineBillPayment =
+      Boolean(
+        billKeyOf(values.category) &&
+        onlinePayment.enabled
+      );
+
+    if (isOnlineBillPayment) {
+      const paymentError =
+        onlineBillPaymentError(
+          onlinePayment
+        );
+
+      if (paymentError) {
+        toast({
+          variant: "destructive",
+          title: "Transaction ID needed",
+          description: paymentError,
+        });
+
+        return;
+      }
+    }
+
+    const paymentTrxId =
+      isOnlineBillPayment
+        ? normalizeTrxId(
+          onlinePayment.trxId
+        )
+        : null;
+
+    const paymentClaimId =
+      isOnlineBillPayment &&
+        paymentTrxId
+        ? buildClaimId(
+          onlinePayment.method,
+          paymentTrxId,
+          currentUser.uid
+        )
+        : null;
+
     try {
+      /*
+       * একই TrxID আগে জমা পড়েছে কিনা দেখে নিই, যাতে
+       * পরিষ্কার মেসেজ দেখানো যায়। (Firestore rule-ও এটা আটকায়।)
+       */
+      if (paymentClaimId) {
+        const existingClaim =
+          await getDoc(
+            doc(
+              firestore,
+              "groups",
+              groupId,
+              "paymentClaims",
+              paymentClaimId
+            )
+          );
+
+        if (existingClaim.exists()) {
+          toast({
+            variant: "destructive",
+            title: "Transaction ID already used",
+            description:
+              "This Transaction ID was already submitted in your group.",
+          });
+
+          return;
+        }
+      }
+
       let receiptUrl:
         | string
         | null = null;
@@ -1221,6 +1370,25 @@ export function AddExpenseCard({
             process.env
               .NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
           );
+
+        /*
+         * Fix: আপলোড ব্যর্থ হলে uploadToCloudinary চুপচাপ null দেয়।
+         * রিসিট বাধ্যতামূলক হলে রিসিট ছাড়া expense সেভ হতে দেব না।
+         */
+        if (
+          !receiptUrl &&
+          isUtilityCategory &&
+          isUtilityReceiptRequired
+        ) {
+          toast({
+            variant: "destructive",
+            title: "Receipt upload failed",
+            description:
+              "Check your internet connection and try again.",
+          });
+
+          return;
+        }
       }
 
       const finalExpenseItem =
@@ -1313,8 +1481,96 @@ export function AddExpenseCard({
 
           purchasedItems:
             storedPurchasedItems,
+
+          paymentMethod:
+            isOnlineBillPayment
+              ? onlinePayment.method
+              : undefined,
+
+          trxId:
+            paymentTrxId ??
+            undefined,
+
+          paymentClaimId:
+            paymentClaimId ??
+            undefined,
         })
       );
+
+      if (
+        paymentClaimId &&
+        paymentTrxId &&
+        isOnlineBillPayment
+      ) {
+        const billKeyForClaim =
+          billKeyOf(
+            values.category
+          );
+
+        const accountForClaim =
+          billKeyForClaim
+            ? billAccounts?.[
+            billKeyForClaim
+            ]
+            : null;
+
+        const paidToLabel =
+          accountForClaim?.payToNumber
+            ? `${PAYMENT_METHODS[
+              accountForClaim.payToMethod ??
+              onlinePayment.method
+            ].label} ${maskNumber(
+              accountForClaim.payToNumber
+            )}`
+            : billAccountSummary(
+              accountForClaim
+            ) || null;
+
+        batch.set(
+          doc(
+            firestore,
+            "groups",
+            groupId,
+            "paymentClaims",
+            paymentClaimId
+          ),
+          {
+            groupId,
+            kind: "bill",
+            method:
+              onlinePayment.method,
+            trxId:
+              paymentTrxId,
+            amount:
+              values.amount,
+            payerId:
+              currentUser.uid,
+            payerName:
+              currentUserName.slice(0, 80),
+            payeeId: null,
+            payeeName: null,
+            billType:
+              values.category,
+            expenseId:
+              expenseRef.id,
+            paidToLabel:
+              paidToLabel
+                ? paidToLabel.slice(0, 120)
+                : null,
+            month:
+              selectedDate.getMonth() +
+              1,
+            year:
+              selectedDate.getFullYear(),
+            screenshotUrl:
+              receiptUrl,
+            note: null,
+            status: "pending",
+            createdAt:
+              serverTimestamp(),
+          }
+        );
+      }
 
       const purchaseIds: string[] =
         [];
@@ -1640,7 +1896,8 @@ export function AddExpenseCard({
                 undoActivityRef.id,
                 finalExpenseItem,
                 loggedAt,
-                shoppingUndoStates
+                shoppingUndoStates,
+                paymentClaimId
               );
             }}
           >
@@ -1670,6 +1927,9 @@ export function AddExpenseCard({
 
       setShoppingPromptHandled(false);
       setIsShoppingDialogOpen(false);
+      setOnlinePayment(
+        defaultOnlineBillPayment()
+      );
 
       clearImage();
     } catch (error) {
@@ -2243,10 +2503,43 @@ export function AddExpenseCard({
                 </div>
               )}
 
+              {billKey && (
+                <PayBillPanel
+                  billKey={billKey}
+                  account={
+                    billAccounts?.[
+                    billKey
+                    ]
+                  }
+                  amount={
+                    typeof amountValue ===
+                      "number"
+                      ? amountValue
+                      : null
+                  }
+                  value={
+                    onlinePayment
+                  }
+                  onChange={
+                    setOnlinePayment
+                  }
+                  isAdmin={
+                    isCurrentUserAdmin
+                  }
+                  disabled={
+                    form.formState
+                      .isSubmitting
+                  }
+                />
+              )}
+
               {isUtilityCategory && (
                 <FormItem>
                   <FormLabel>
-                    Receipt{" "}
+                    {onlinePayment.enabled &&
+                      billKey
+                      ? "Payment screenshot "
+                      : "Receipt "}
                     {isUtilityReceiptRequired
                       ? ""
                       : "(Optional)"}

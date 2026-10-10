@@ -8,6 +8,7 @@ import dynamic from "next/dynamic";
 import { format } from "date-fns/format";
 import {
     Flame,
+    Wifi,
     List,
     Receipt,
     ShoppingCart,
@@ -59,6 +60,7 @@ const categoryIcons: Record<
     "Food & Groceries": <ShoppingCart className="h-3 w-3" />,
     Electricity: <Zap className="h-3 w-3" />,
     Gas: <Flame className="h-3 w-3" />,
+    "Wi-Fi": <Wifi className="h-3 w-3" />,
     Other: <List className="h-3 w-3" />,
 };
 
