@@ -112,6 +112,13 @@ export interface Expense {
    */
   linkedShoppingItemId?: string | null;
 
+  /*
+   * Electricity / Wi-Fi বিল অনলাইনে দিলে (Assisted Payment)।
+   */
+  paymentMethod?: import("./payments").PaymentMethodType | null;
+  trxId?: string | null;
+  paymentClaimId?: string | null;
+
   createdAt?: Timestamp;
   updatedAt?: Timestamp;
 
@@ -241,7 +248,28 @@ export interface Settlement {
   settledTo: string;
   settlementMethod: string;
   settledAt?: Date | Timestamp | null;
+
+  /*
+   * Assisted Payment থেকে আসা সেটেলমেন্টে থাকবে।
+   * পুরনো ডেটায় না থাকলেও সমস্যা নেই।
+   */
+  settledToId?: string | null;
+  claimId?: string | null;
+  amount?: number | null;
+  trxId?: string | null;
+  confirmedBy?: string | null;
+  recordedBy?: string | null;
 }
+
+export type {
+  BillAccount,
+  GroupBillAccounts,
+  PaymentClaim,
+  PaymentClaimStatus,
+  PaymentMethodType,
+  ReceiveMethod,
+  ReceiveMethodsDoc,
+} from "./payments";
 
 /* ======================================================
    Messages and reminders
@@ -269,5 +297,3 @@ export interface Reminder {
   updatedAt?: Timestamp | null;
   isPinned?: boolean;
 }
-
-
