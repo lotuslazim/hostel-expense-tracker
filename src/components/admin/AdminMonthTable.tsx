@@ -39,6 +39,10 @@ import {
   computeMonth,
   DEFAULT_LEAVE_CATEGORIES,
   LEAVE_BILL_TYPES,
+  leaveCounts,
+  leaveLengthDays,
+  MAX_MIN_LEAVE_DAYS,
+  normalizeMinLeaveDays,
   monthKeyOf,
   fieldOfCategory,
   type AdjustField,
@@ -151,6 +155,7 @@ export function AdminMonthTable({ groupId }: { groupId: string }) {
 
   const leaves = useMemo(() => (leavesRaw ?? []).filter(isRealLeave), [leavesRaw]);
   const leaveCategories = sheetSettings?.leaveCategories ?? DEFAULT_LEAVE_CATEGORIES;
+  const minLeaveDays = normalizeMinLeaveDays(sheetSettings?.minLeaveDays);
   const splitMembers = monthSettings?.splitMembers ?? {};
   const locked = Boolean(monthSettings?.locked);
 
@@ -197,8 +202,9 @@ export function AdminMonthTable({ groupId }: { groupId: string }) {
         monthEnd,
         leaveCategories,
         splitMembers,
+        minLeaveDays,
       }),
-    [members, meals, expenses, leaves, adjustments, monthStart, monthEnd, leaveCategories, splitMembers]
+    [members, meals, expenses, leaves, adjustments, monthStart, monthEnd, leaveCategories, splitMembers, minLeaveDays]
   );
 
   const logActivity = async (type: string, text: string, extra: Record<string, unknown> = {}) => {
@@ -446,7 +452,8 @@ export function AdminMonthTable({ groupId }: { groupId: string }) {
 
   /* days away inside the shown month */
   const daysAwayInMonth = (userId: string) => {
-    const mine = leavesInMonth(userId);
+    /* শুধু অ্যাডমিনের নিয়ম মানা ছুটিগুলো গোনা হয়। */
+    const mine = leavesInMonth(userId).filter((l) => leaveCounts(l, minLeaveDays));
     if (mine.length === 0) return 0;
     let count = 0;
     const last = new Date(monthEnd.getFullYear(), monthEnd.getMonth(), monthEnd.getDate());
@@ -564,11 +571,13 @@ export function AdminMonthTable({ groupId }: { groupId: string }) {
   /* ================= settings ================= */
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [draftLeaveCats, setDraftLeaveCats] = useState<string[]>([]);
+  const [draftMinLeave, setDraftMinLeave] = useState<string>(String(minLeaveDays));
   const [draftSplit, setDraftSplit] = useState<Record<string, string[] | null>>({});
   const [settingsBusy, setSettingsBusy] = useState(false);
 
   const openSettings = () => {
     setDraftLeaveCats([...leaveCategories]);
+    setDraftMinLeave(String(minLeaveDays));
     setDraftSplit(Object.fromEntries(BILL_TYPES.map((b) => [b, splitMembers[b] ?? null])));
     setSettingsOpen(true);
   };
@@ -593,7 +602,13 @@ export function AdminMonthTable({ groupId }: { groupId: string }) {
     }
     setSettingsBusy(true);
     try {
-      await setDoc(sheetSettingsRef, { leaveCategories: draftLeaveCats, updatedBy: user.uid, updatedAt: serverTimestamp() });
+      const nextMinLeave = normalizeMinLeaveDays(draftMinLeave);
+      await setDoc(sheetSettingsRef, {
+        leaveCategories: draftLeaveCats,
+        minLeaveDays: nextMinLeave,
+        updatedBy: user.uid,
+        updatedAt: serverTimestamp(),
+      });
       await setDoc(monthSettingsRef, { splitMembers: cleanSplit, updatedBy: user.uid, updatedAt: serverTimestamp() }, { merge: true });
 
       const splitText = BILL_TYPES.map((b) =>
@@ -601,7 +616,7 @@ export function AdminMonthTable({ groupId }: { groupId: string }) {
       ).join("; ");
       await logActivity(
         "admin_settings",
-        `updated sheet settings for ${format(month, "MMMM yyyy")}. Leave discount: ${draftLeaveCats.length ? draftLeaveCats.join(", ") : "none"}. ${splitText}`
+        `updated sheet settings for ${format(month, "MMMM yyyy")}. Leave discount: ${draftLeaveCats.length ? draftLeaveCats.join(", ") : "none"} (leave counts from ${normalizeMinLeaveDays(draftMinLeave)} day(s)). ${splitText}`
       );
       toast({ title: "Settings saved" });
       setSettingsOpen(false);
@@ -788,6 +803,7 @@ export function AdminMonthTable({ groupId }: { groupId: string }) {
             <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted-foreground">
               <span>Meal rate: ৳{num(result.mealRate)}</span>
               <span>Leave discount (Settlement): {leaveCategories.length ? leaveCategories.join(", ") : "none"}</span>
+              <span>Leave counts from: {minLeaveDays} day{minLeaveDays === 1 ? "" : "s"}</span>
               <span>This sheet shows what each member entered. Who owes whom is worked out in Settlement.</span>
             </div>
           </>
@@ -916,8 +932,9 @@ export function AdminMonthTable({ groupId }: { groupId: string }) {
               Leave · {leaveFor ? names[leaveFor] || "Member" : ""} · {format(month, "MMMM yyyy")}
             </DialogTitle>
             <DialogDescription>
-              {leaveFor ? `${daysAwayInMonth(leaveFor)} day(s) on leave in ${format(month, "MMMM")}. ` : ""}
+              {leaveFor ? `${daysAwayInMonth(leaveFor)} counted day(s) on leave in ${format(month, "MMMM")}. ` : ""}
               Shows leave in this month only, including leave the member turned on themselves.
+              {minLeaveDays > 1 ? ` Leave shorter than ${minLeaveDays} days is not counted for the bill discount.` : ""}
             </DialogDescription>
           </DialogHeader>
 
@@ -931,8 +948,20 @@ export function AdminMonthTable({ groupId }: { groupId: string }) {
                 return (
                   <div key={l.id} className="space-y-3 rounded-lg border p-3">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-medium">{leaveLabel(l)}</span>
-                      <Badge variant="outline">{l.addedByAdmin ? "Added by admin" : "Added by member"}</Badge>
+                      <span className="font-medium">
+                        {leaveLabel(l)}
+                        <span className="ml-2 text-xs font-normal text-muted-foreground">
+                          {leaveLengthDays(l)} day{leaveLengthDays(l) === 1 ? "" : "s"}
+                        </span>
+                      </span>
+                      <div className="flex flex-wrap justify-end gap-1">
+                        {!leaveCounts(l, minLeaveDays) && (
+                          <Badge variant="secondary" title={`Admin rule: leave must be at least ${minLeaveDays} days`}>
+                            Not counted · under {minLeaveDays} days
+                          </Badge>
+                        )}
+                        <Badge variant="outline">{l.addedByAdmin ? "Added by admin" : "Added by member"}</Badge>
+                      </div>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1">
@@ -968,12 +997,21 @@ export function AdminMonthTable({ groupId }: { groupId: string }) {
                   <Input id="new-to" type="date" min={newFrom || toInput(monthStart)} value={newTo} onChange={(e) => setNewTo(e.target.value)} />
                 </div>
               </div>
-              <div className="flex justify-end">
+              <div className="flex flex-wrap items-center justify-end gap-3">
+                <p className="text-xs text-muted-foreground">
+                  Saved instantly — no separate Save needed.
+                </p>
                 <Button type="button" size="sm" onClick={() => void addLeave()} disabled={leaveBusy || locked}>
                   {leaveBusy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
                   Add leave
                 </Button>
               </div>
+              {minLeaveDays > 1 && newFrom && newTo && fromInput(newTo) >= fromInput(newFrom) &&
+                Math.round((fromInput(newTo).getTime() - fromInput(newFrom).getTime()) / 86_400_000) + 1 < minLeaveDays && (
+                  <p className="text-xs text-amber-600 dark:text-amber-400">
+                    This leave is shorter than {minLeaveDays} days, so it will be saved but not counted for the bill discount.
+                  </p>
+                )}
             </div>
           </div>
 
@@ -1008,6 +1046,25 @@ export function AdminMonthTable({ groupId }: { groupId: string }) {
                     {b}
                   </label>
                 ))}
+              </div>
+              <div className="flex flex-wrap items-center gap-2 rounded-lg border p-3">
+                <Label htmlFor="min-leave-days" className="text-sm font-normal">
+                  Count a leave only if it lasts at least
+                </Label>
+                <Input
+                  id="min-leave-days"
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  max={MAX_MIN_LEAVE_DAYS}
+                  className="h-9 w-20"
+                  value={draftMinLeave}
+                  onChange={(e) => setDraftMinLeave(e.target.value.replace(/\D/g, ""))}
+                />
+                <span className="text-sm">day(s)</span>
+                <p className="w-full text-xs text-muted-foreground">
+                  Shorter leave is ignored for the discount (the member pays as if at home). Set 1 to count every leave. Applies to every month, including past ones.
+                </p>
               </div>
             </div>
 
