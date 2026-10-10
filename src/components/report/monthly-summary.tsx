@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { cn } from "@/lib/utils";
 import { Flame, Zap, Utensils, Scale, Users, FileText, ArrowRight, ChevronDown, AlertTriangle, Package, Receipt, BadgeCheck, CheckCircle } from "lucide-react";
 import { useFirebase, useUser, useDoc, useCollection } from "@/firebase";
-import { doc, collection, query, where, Timestamp, setDoc, serverTimestamp, getDoc } from "firebase/firestore";
+import { doc, collection, query, where, Timestamp, getDoc } from "firebase/firestore";
 import { useMemo, useState, useEffect, lazy, Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from 'date-fns/format';
@@ -26,17 +26,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MonthSwitcher } from "./month-switcher";
 import dynamic from 'next/dynamic';
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { SettleUpDialog } from "@/components/settlements/SettleUpDialog";
 
 const Dialog = dynamic(() => import('../ui/dialog').then(module => module.Dialog), { ssr: false });
 const DialogContent = dynamic(() => import('../ui/dialog').then(module => module.DialogContent), { ssr: false });
 const DialogHeader = dynamic(() => import('../ui/dialog').then(module => module.DialogHeader), { ssr: false });
 const DialogTitle = dynamic(() => import('../ui/dialog').then(module => module.DialogTitle), { ssr: false });
-const DialogDescription = dynamic(() => import('../ui/dialog').then(module => module.DialogDescription), { ssr: false });
-const DialogFooter = dynamic(() => import('../ui/dialog').then(module => module.DialogFooter), { ssr: false });
-const DialogClose = dynamic(() => import('../ui/dialog').then(module => module.DialogClose), { ssr: false });
 const DialogTrigger = dynamic(() => import('../ui/dialog').then(module => module.DialogTrigger), { ssr: false });
 
 
@@ -215,106 +210,6 @@ function CollapsibleUtilityItem({
   );
 }
 
-function SettleUpDialog({ member, month, year, groupId, currentUserId, members, currentUserIsAdmin }: { member: ProcessedMember; month: number; year: number; groupId: string, currentUserId: string, members: ProcessedMember[], currentUserIsAdmin: boolean }) {
-    const { firestore } = useFirebase();
-    const { toast } = useToast();
-    const [settlementMethod, setSettlementMethod] = useState("");
-    const [settledTo, setSettledTo] = useState("");
-    const [isSaving, setIsSaving] = useState(false);
-    const [open, setOpen] = useState(false);
-
-    const membersToPay = members.filter(m => m.id !== member.id);
-
-    const handleSettleUp = async () => {
-        if (!settlementMethod || !settledTo) {
-            toast({ variant: 'destructive', title: 'Please fill all fields.' });
-            return;
-        }
-
-        setIsSaving(true);
-        const settlementId = `${member.id}-${month}-${year}`;
-        const settlementRef = doc(firestore, `groups/${groupId}/settlements/${settlementId}`);
-        
-        try {
-            await setDoc(settlementRef, {
-                groupId,
-                userId: member.id,
-                month,
-                year,
-                settledAt: serverTimestamp(),
-                settlementMethod,
-                settledTo,
-            });
-            toast({ title: "Balance Settled!", description: `Settlement for ${member.name} has been recorded.` });
-            setOpen(false);
-        } catch (error) {
-            console.error("Error settling up:", error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Could not save settlement.' });
-        } finally {
-            setIsSaving(false);
-        }
-    };
-    
-    // The button is only enabled if the current user is an admin OR they are settling their own balance.
-    const canSettle = currentUserIsAdmin || currentUserId === member.id;
-
-    return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <Button
-                    size="sm"
-                    disabled={!canSettle}
-                    className="h-9 rounded-lg bg-[#f4c84a] px-4 text-[12px] font-semibold text-[#13251e] shadow-none hover:bg-[#ffda64]"
-                >
-                    Settle Up
-                </Button>
-            </DialogTrigger>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>Settle Balance for {member.name}</DialogTitle>
-                    <DialogDescription>
-                        Confirm how this member paid their balance for the month.
-                    </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                     <div className="space-y-2">
-                        <label htmlFor="settledTo">Who was paid?</label>
-                         <select
-                            id="settledTo"
-                            value={settledTo}
-                            onChange={(e) => setSettledTo(e.target.value)}
-                            className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                            <option value="" disabled>Select a member</option>
-                            {membersToPay.map(m => (
-                                <option key={m.id} value={m.name}>{m.name}</option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="space-y-2">
-                        <label htmlFor="paymentMethod">How was it paid?</label>
-                        <Textarea
-                            id="paymentMethod"
-                            placeholder="e.g., Paid in cash, Sent via bKash"
-                            value={settlementMethod}
-                            onChange={(e) => setSettlementMethod(e.target.value)}
-                        />
-                    </div>
-                </div>
-                <DialogFooter>
-                    <DialogClose asChild>
-                        <Button variant="outline">Cancel</Button>
-                    </DialogClose>
-                    <Button onClick={handleSettleUp} disabled={isSaving}>
-                        {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Confirm Settlement
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-    );
-}
-
 export function MonthlySummary() {
   const { firestore } = useFirebase();
   const { user: currentUser, isUserLoading: isCurrentUserLoading } = useUser();
@@ -325,6 +220,7 @@ export function MonthlySummary() {
 
   const groupId = currentUserData?.groupId;
   const currentUserIsAdmin = currentUserData?.isAdmin ?? false;
+  const currentUserName = currentUserData?.displayName || currentUser?.displayName || currentUser?.email?.split("@")[0] || "Member";
 
 
   const monthDateRange = useMemo(() => {
@@ -379,7 +275,7 @@ export function MonthlySummary() {
   const { data: leavesData, isLoading: areLeavesLoading } = useCollection<LeaveRecord>(leavesQuery);
 
   const adjustmentsQuery = useMemo(() =>
-    (groupId ? query(collection(firestore, `groups/${groupId}/adjustments`), where("monthKey", "==", monthKeyOf(monthDateRange.start))) : null),
+    (groupId ? query(collection(firestore, `groups/${groupId}/adjustments`), where("monthKey", "==", monthKeyOf(monthDateRange.start.toDate()))) : null),
     [firestore, groupId, monthDateRange]
   );
   const { data: adjustmentsData } = useCollection<MonthAdjustment>(adjustmentsQuery);
@@ -389,7 +285,7 @@ export function MonthlySummary() {
     [firestore, groupId]
   );
   const monthSettingsRef = useMemo(() =>
-    (groupId ? doc(firestore, `groups/${groupId}/monthSettings`, monthKeyOf(monthDateRange.start)) : null),
+    (groupId ? doc(firestore, `groups/${groupId}/monthSettings`, monthKeyOf(monthDateRange.start.toDate())) : null),
     [firestore, groupId, monthDateRange]
   );
   const { data: sheetSettingsData } = useDoc<SheetSettings>(sheetSettingsRef);
@@ -488,7 +384,7 @@ export function MonthlySummary() {
       const totalMeals = memberMeals.reduce((sum, meal) => sum + (meal.mealNumber ?? 1), 0);
       const foodExpenses = memberExpenses.filter(e => e.category === 'Food & Groceries').reduce((sum, e) => sum + (e.amount || 0), 0);
       const otherExpenses = memberExpenses.filter(e => e.category === 'Other').reduce((sum, e) => sum + (e.amount || 0), 0);
-      const memberUtilityExpenses = memberExpenses.filter(e => e.category === 'Electricity' || e.category === 'Gas').sort(sortByDateDesc);
+      const memberUtilityExpenses = memberExpenses.filter(e => e.category === 'Electricity' || e.category === 'Gas' || e.category === 'Wi-Fi').sort(sortByDateDesc);
       const utilityExpensesPaid = memberUtilityExpenses.reduce((sum, e) => sum + (e.amount || 0), 0);
       const totalPaid = memberExpenses.reduce((sum, e) => sum + (e.amount || 0), 0);
       const settlement = settlementsByUser[member.id];
@@ -514,7 +410,7 @@ export function MonthlySummary() {
     const totalGroupMeals = processedMembers.reduce((acc, member) => acc + (member.meals || 0), 0);
     const memberCount = processedMembers.length > 0 ? processedMembers.length : 1;
     const mealRate = totalGroupMeals > 0 ? totalGroupFoodExpenses / totalGroupMeals : 0;
-    const totalUtilityExpenses = expensesData.filter(e => e.category === 'Electricity' || e.category === 'Gas').reduce((sum, e) => sum + (e.amount || 0), 0);
+    const totalUtilityExpenses = expensesData.filter(e => e.category === 'Electricity' || e.category === 'Gas' || e.category === 'Wi-Fi').reduce((sum, e) => sum + (e.amount || 0), 0);
     const totalGroupExpenses = expensesData.reduce((sum, e) => sum + (e.amount || 0), 0);
     const otherExpensesList = expensesData.filter(e => e.category === 'Other').sort(sortByDateDesc);
 
@@ -525,9 +421,11 @@ export function MonthlySummary() {
       expenses: expensesData,
       leaves: leavesData ?? [],
       adjustments: adjustmentsData ?? [],
-      monthStart: monthDateRange.start,
-      monthEnd: monthDateRange.end,
+      // Fix: computeMonth Date চায়; Timestamp দিলে getFullYear() নেই বলে crash করত।
+      monthStart: monthDateRange.start.toDate(),
+      monthEnd: monthDateRange.end.toDate(),
       leaveCategories: sheetSettingsData?.leaveCategories,
+      minLeaveDays: sheetSettingsData?.minLeaveDays,
       splitMembers: monthSettingsData?.splitMembers,
     });
     const utilityShareByMember: Record<string, number> = {};
@@ -583,6 +481,12 @@ export function MonthlySummary() {
   const perMemberUtilityShare = totalUtilityExpenses / (memberCount || 1);
   const perMemberOtherShare = totalGroupOtherExpenses / (memberCount || 1);
   
+  const balanceOf = (member: ProcessedMember) => {
+    const share = utilityShareByMember[member.id] ?? (member.meals * mealRate + perMemberUtilityShare + perMemberOtherShare);
+    return member.totalPaid - share;
+  };
+  const settleMembers = processedMembers.map((m) => ({ id: m.id, name: m.name, balance: balanceOf(m) }));
+
   const monthForSettlement = getMonth(currentMonth) + 1;
   const yearForSettlement = getYear(currentMonth);
 
@@ -801,12 +705,14 @@ export function MonthlySummary() {
                   <div className="mt-3 flex items-center gap-2">
                     {!member.isSettled && (
                       <SettleUpDialog
-                        member={member}
+                        member={{ id: member.id, name: member.name, balance }}
+                        amountDue={-balance}
                         month={monthForSettlement}
                         year={yearForSettlement}
                         groupId={groupId!}
                         currentUserId={currentUser!.uid}
-                        members={processedMembers}
+                        currentUserName={currentUserName}
+                        members={settleMembers}
                         currentUserIsAdmin={currentUserIsAdmin}
                       />
                     )}
