@@ -183,6 +183,7 @@ export function SettlementHistory() {
                 monthStart,
                 monthEnd,
                 leaveCategories: sheetSettings?.leaveCategories,
+      minLeaveDays: sheetSettings?.minLeaveDays,
                 splitMembers: monthSettingsMap[monthKeyOf(monthStart)]?.splitMembers,
             });
 
